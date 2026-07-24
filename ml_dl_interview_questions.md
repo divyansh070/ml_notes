@@ -299,6 +299,44 @@ This question bank is structured by algorithm/topic, and within each topic, ques
 
 ---
 
+
+
+---
+
+## Topic 14: Advanced Ensemble Methods (XGBoost & Boosting)
+
+### Level 1: Basics
+97. What is the fundamental difference between Bagging (Bootstrap Aggregating) and Boosting? How do they differently address the bias-variance tradeoff?
+
+### Level 2: Intermediate
+98. Explain how AdaBoost works compared to Gradient Boosting. (Focus on how they handle errors of previous trees).
+99. What are the key differences between XGBoost and LightGBM in terms of how they grow trees and handle continuous features?
+
+### Level 3: Advanced ("Make You Think")
+100. XGBoost is often considered the "king of tabular data". Mathematically and computationally, what makes XGBoost superior to standard Gradient Boosting? (Discuss the Taylor expansion/second-order derivative, regularization, and sparsity awareness).
+
+### Level 4: "By Hand" Mathematical Calculations
+101. **AdaBoost Weight Update:** You are training an AdaBoost model. In the first round, a data point was misclassified. The error rate of the stump was $e = 0.2$. Calculate the "Amount of Say" (or weight) $\alpha$ for this stump, and calculate the new unnormalized sample weight for the misclassified point. (Initial weight was $w = 0.1$). Formula: $\alpha = \frac{1}{2} \ln(\frac{1-e}{e})$, New Weight = $w \times e^\alpha$.
+
+---
+
+## Topic 15: The Transformer Architecture Deep Dive
+
+### Level 1: Basics
+102. What is Positional Encoding in Transformers, and why is it absolutely necessary?
+
+### Level 2: Intermediate
+103. Explain the concept of Multi-Head Attention. Why do Transformers use multiple attention heads instead of one single large attention head?
+104. What is the purpose of Layer Normalization and Residual (Skip) Connections in the Transformer block?
+
+### Level 3: Advanced ("Make You Think")
+105. During inference (text generation) in a Decoder-only Transformer like GPT, what is "KV Caching"? Why is it essential for production performance, and what are its memory drawbacks?
+
+### Level 4: "By Hand" Mathematical Calculations
+106. **Self-Attention Score Calculation:** You are computing the attention scores for a single word. Its Query vector is $Q = [1, 0, 2]$. The Key vectors for the two words in the sequence are $K_1 = [1, 1, 0]$ and $K_2 = [0, 2, 1]$.
+    Calculate the unnormalized attention scores (the dot product) between the Query and both Keys. Which word does the Query attend to more strongly?
+
+
 ## Bonus Section: Extra "By Hand" Mathematical Challenges
 
 If you really want to test your mathematical intuition, here are 5 more deep-dive manual calculations covering core concepts across different ML topics.

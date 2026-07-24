@@ -542,6 +542,75 @@
 
 ---
 
+
+
+---
+
+## Topic 14: Advanced Ensemble Methods (XGBoost & Boosting)
+
+### Level 1: Basics
+**97. Bagging vs. Boosting**
+*   **Bagging (Random Forest):** Trains multiple independent models in parallel on random subsets of data and features. It averages the predictions to reduce **Variance** (overfitting).
+*   **Boosting (Gradient Boosting):** Trains multiple models sequentially. Each new model attempts to correct the errors (residuals) made by the previous models. It primarily reduces **Bias** (underfitting).
+
+### Level 2: Intermediate
+**98. AdaBoost vs. Gradient Boosting**
+*   **AdaBoost:** After each tree is trained, it increases the *weight* of misclassified data points, forcing the next tree to focus harder on the difficult cases.
+*   **Gradient Boosting:** Instead of changing weights, it trains the next tree directly on the *residual errors* (the difference between actual and predicted) of the previous tree.
+
+**99. XGBoost vs. LightGBM**
+*   **Tree Growth:** XGBoost grows trees level-wise (depth-first), while LightGBM grows trees leaf-wise (best-first), which is usually faster and can achieve lower loss, but is more prone to overfitting on small data.
+*   **Binning:** LightGBM heavily utilizes histogram-based binning for continuous features to speed up split finding, a technique XGBoost also later adopted but LightGBM popularized for extreme speed.
+
+### Level 3: Advanced
+**100. Why XGBoost is Superior**
+*   **Second-Order Derivative:** Standard GBM uses only the first derivative (gradient) of the loss function. XGBoost uses a second-order Taylor expansion (incorporating the Hessian), allowing it to converge much faster and more accurately.
+*   **Regularized Objective:** XGBoost explicitly adds L1 and L2 penalty terms to the loss function based on the number of leaves and leaf weights, preventing overfitting at a mathematical level.
+*   **Sparsity Awareness:** It automatically learns the best default direction for missing values during training, avoiding the need for manual imputation.
+
+### Level 4: "By Hand" Mathematical Calculations
+**101. AdaBoost Weight Update**
+*   **Error:** $e = 0.2$
+*   **Amount of Say ($\alpha$):** $\frac{1}{2} \ln(\frac{1-0.2}{0.2}) = \frac{1}{2} \ln(4) = \frac{1}{2} (1.386) = \textbf{0.693}$
+*   **New Weight:** Initial $w = 0.1$.
+    Since it was *misclassified*, we increase the weight: $New \ Weight = w \times e^\alpha$
+    $New \ Weight = 0.1 \times e^{0.693} \approx 0.1 \times 2.0 = \textbf{0.2}$
+*   The weight of this difficult point doubled for the next round of training.
+
+---
+
+## Topic 15: The Transformer Architecture Deep Dive
+
+### Level 1: Basics
+**102. Positional Encoding**
+*   Unlike RNNs, which process data sequentially, Transformers process all words in a sentence simultaneously (in parallel). Without positional encoding, the model has no idea about the order of words (e.g., "The dog bit the man" vs "The man bit the dog"). Positional encoding injects a mathematical signal into the word embeddings to represent their absolute and relative positions.
+
+### Level 2: Intermediate
+**103. Multi-Head Attention**
+*   Instead of performing a single attention function, the model projects the Queries, Keys, and Values $h$ times in parallel.
+*   **Why:** Different heads can learn to attend to different types of relationships simultaneously. For example, Head 1 might focus on subject-verb relationships, Head 2 might focus on adjectives, and Head 3 might track pronoun references.
+
+**104. Layer Normalization & Residuals**
+*   **Residual (Skip) Connections:** Add the input of a sub-layer directly to its output ($x + Sublayer(x)$). This allows gradients to flow directly through the massive network without vanishing, enabling deep architectures.
+*   **Layer Normalization:** Normalizes the activations across the features for each sequence element independently. It stabilizes the training process and allows for higher learning rates.
+
+### Level 3: Advanced
+**105. KV Caching in Transformers**
+*   **What it is:** During autoregressive generation (generating one word at a time), the model must compute attention across all previously generated tokens. Instead of recomputing the Key (K) and Value (V) vectors for all past tokens at every single step, we cache them in memory.
+*   **Why:** It changes generation from an $O(N^2)$ operation to an $O(N)$ operation per step, massively speeding up inference.
+*   **Drawback:** The KV cache consumes an enormous amount of VRAM (GPU memory), which becomes the primary bottleneck for serving large contexts or multiple concurrent users.
+
+### Level 4: "By Hand" Mathematical Calculations
+**106. Self-Attention Score Calculation**
+*   **Query:** $Q = [1, 0, 2]$
+*   **Key 1:** $K_1 = [1, 1, 0]$
+*   **Key 2:** $K_2 = [0, 2, 1]$
+*   **Score for Word 1:** Dot product of $Q$ and $K_1$:
+    $(1 \times 1) + (0 \times 1) + (2 \times 0) = 1 + 0 + 0 = \textbf{1}$
+*   **Score for Word 2:** Dot product of $Q$ and $K_2$:
+    $(1 \times 0) + (0 \times 2) + (2 \times 1) = 0 + 0 + 2 = \textbf{2}$
+*   **Conclusion:** The Query attends more strongly to **Word 2** (Score of 2 vs 1).
+
 ## Bonus Section: Extra "By Hand" Mathematical Challenges
 
 ### Answers
