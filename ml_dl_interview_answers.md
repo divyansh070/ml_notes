@@ -538,3 +538,64 @@
     *   Cost from False Negatives: $5 \times \$500 = \$2,500$
     *   Total ML Cost = $\$200 + \$2,500 = \textbf{\$2,700}$
 *   **Decision:** The ML model costs $2,700 in errors. The dumb rule-based system costs $3,000. **Yes, you should deploy the ML model**, as it saves the business $300 per 100 transactions compared to the current baseline, despite making some expensive False Negative errors.
+
+
+---
+
+## Bonus Section: Extra "By Hand" Mathematical Challenges
+
+### Answers
+
+**92. Logistic Regression Probability**
+*   **1. Calculate the Logit (Z):**
+    $Z = (w_1 \times x_1) + (w_2 \times x_2) + b$
+    $Z = (0.5 \times 2) + (-1.0 \times 1) + 0.2$
+    $Z = 1.0 - 1.0 + 0.2 = \textbf{0.2}$
+*   **2. Apply Sigmoid Function:**
+    $\sigma(Z) = \frac{1}{1 + e^{-Z}}$
+    $\sigma(0.2) = \frac{1}{1 + e^{-0.2}}$
+    Using $e^{-0.2} \approx 0.818$:
+    $\sigma(0.2) = \frac{1}{1 + 0.818} = \frac{1}{1.818} \approx \textbf{0.55 (or 55%)}$
+*   The model predicts a 55% chance of the positive class.
+
+**93. Information Theory (Entropy)**
+*   **Formula:** $H = - \sum p_i \log_2(p_i)$
+*   **Probabilities:** $p(+) = 3/4 = 0.75$, $p(-) = 1/4 = 0.25$.
+*   **Calculation:**
+    $H = - [ (0.75 \times \log_2(0.75)) + (0.25 \times \log_2(0.25)) ]$
+    $H = - [ (0.75 \times -0.415) + (0.25 \times -2) ]$
+    $H = - [ -0.31125 + -0.5 ]$
+    $H = - [ -0.81125 ] = \textbf{0.81125}$
+*   The entropy is roughly 0.81 bits.
+
+**94. Gradient Descent Optimization**
+*   **1. Find the Gradient (Derivative):**
+    $L(w) = w^2 - 4w + 4$
+    $\frac{dL}{dw} = 2w - 4$
+*   **2. Evaluate Gradient at current weight ($w_0 = 5$):**
+    Gradient at $w=5$ is $2(5) - 4 = 10 - 4 = \textbf{6}$. (The slope is steep and positive).
+*   **3. Apply Update Rule:**
+    $w_{new} = w_{old} - (\alpha \times \text{Gradient})$
+    $w_{new} = 5 - (0.1 \times 6)$
+    $w_{new} = 5 - 0.6 = \textbf{4.4}$
+*   The new weight is 4.4, moving closer to the global minimum (which is at $w=2$).
+
+**95. K-Nearest Neighbors (Euclidean Distance)**
+*   **Query Point:** $P(2, 2)$
+*   **Distance to A(0,0):** $\sqrt{(2-0)^2 + (2-0)^2} = \sqrt{4 + 4} = \sqrt{8} \approx \textbf{2.83}$
+*   **Distance to B(2,0):** $\sqrt{(2-2)^2 + (2-0)^2} = \sqrt{0 + 4} = \sqrt{4} = \textbf{2.00}$
+*   **Distance to C(3,2):** $\sqrt{(3-2)^2 + (2-2)^2} = \sqrt{1 + 0} = \sqrt{1} = \textbf{1.00}$
+*   **Predictions:**
+    *   **If K=1:** The closest point is C (distance 1.0). Class of C is **1**. Prediction = **Class 1**.
+    *   **If K=3:** We look at all 3 points (A, B, C). Their classes are 0, 1, and 1. The majority vote is 1. Prediction = **Class 1**.
+
+**96. Deep Learning (Softmax)**
+*   **Formula:** $P(y_i) = \frac{e^{z_i}}{\sum e^{z_j}}$
+*   **1. Calculate Exponentials:**
+    $e^{2.0} \approx 7.39$
+    $e^{1.0} \approx 2.72$
+    $e^{0.1} \approx 1.11$
+*   **2. Calculate the Sum (Denominator):**
+    Sum $= 7.39 + 2.72 + 1.11 = \textbf{11.22}$
+*   **3. Calculate Probability for Class 0:**
+    $P(\text{Class } 0) = \frac{7.39}{11.22} \approx \textbf{0.658 (or 65.8%)}$

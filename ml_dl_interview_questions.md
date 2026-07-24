@@ -295,3 +295,21 @@ This question bank is structured by algorithm/topic, and within each topic, ques
     Your model's Confusion Matrix on a test set of 100 transactions is:
     TP: 10, FP: 20, FN: 5, TN: 65.
     Calculate the total expected cost of this model's errors. If a "dumb" rule-based system currently costs $3,000 on the same 100 transactions, should you deploy your ML model?
+
+
+---
+
+## Bonus Section: Extra "By Hand" Mathematical Challenges
+
+If you really want to test your mathematical intuition, here are 5 more deep-dive manual calculations covering core concepts across different ML topics.
+
+### The Challenges
+92. **Logistic Regression Probability:** A logistic regression model has weights $w_1 = 0.5$, $w_2 = -1.0$, and a bias $b = 0.2$. For an input instance where $x_1 = 2$ and $x_2 = 1$, calculate the log-odds (logit) and the final predicted probability of the positive class. (Use $e^{-0.2} \approx 0.818$).
+93. **Information Theory (Entropy):** You have a dataset node containing 4 samples: 3 Positive and 1 Negative. Calculate the exact Shannon Entropy of this node. (Use $\log_2(0.75) \approx -0.415$ and $\log_2(0.25) = -2$).
+94. **Gradient Descent Optimization:** You are optimizing a weight $w$ for a loss function defined as $L(w) = w^2 - 4w + 4$. Your current weight is $w_0 = 5$. If you use a learning rate of $\alpha = 0.1$, calculate the exact value of the weight after one single step of gradient descent ($w_1$).
+95. **K-Nearest Neighbors (Euclidean Distance):** You want to classify a new point $P_{new}$ located at $(2, 2)$. You have three training points:
+    *   Point A: $(0, 0)$, Class = 0
+    *   Point B: $(2, 0)$, Class = 1
+    *   Point C: $(3, 2)$, Class = 1
+    Calculate the Euclidean distance from $P_{new}$ to A, B, and C. What is the predicted class if $K=3$? What if $K=1$?
+96. **Deep Learning (Softmax):** The final layer of a neural network outputs the following raw logit scores for 3 classes: $[2.0, 1.0, 0.1]$. Calculate the exact Softmax probability for the first class (Class 0). (Use $e^{2} \approx 7.39$, $e^{1} \approx 2.72$, $e^{0.1} \approx 1.11$).
