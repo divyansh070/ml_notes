@@ -987,17 +987,56 @@ GROUP BY stock_name;
 
 ---
 
-## PART 3: Top 10 SQL Interview Pitfalls & Quick Checklist
+## PART 3: The FAANG "Red Flag" Cheat Sheet
 
-Before submitting any SQL query in an interview, scan this 60-second checklist:
+In a FAANG SQL interview, it's not just about getting the right output—it's about avoiding performance traps and logical errors that signal a lack of experience. Here are the **Top 10 Easiest Traps to Fall Into** based on the LeetCode 50, with 1-line examples of what NOT to do.
 
-- [ ] **Did you check for `NULL` values?** Remember that `col != 'value'` excludes `NULL` rows. Add `OR col IS NULL` if needed.
-- [ ] **Did you use `WHERE` vs `HAVING` correctly?** `WHERE` filters individual rows *before* grouping; `HAVING` filters *after* grouping.
-- [ ] **Did you avoid integer division?** In some dialects, `COUNT(x) / COUNT(y)` rounds down to zero. Multiply by `100.0` or cast to float.
-- [ ] **Did you handle zero counts when calculating averages?** Wrap aggregations in `COALESCE(AVG(...), 0)` or use `LEFT JOIN` so non-matching rows aren't dropped.
-- [ ] **Did you use `DENSE_RANK()` vs `RANK()` correctly?** Use `DENSE_RANK()` when finding the Nth highest value so ties don't skip numbers.
-- [ ] **Did you use `COUNT(DISTINCT col)` when duplicates are possible?** Look for wording like "unique users" or "distinct products".
-- [ ] **Did you verify inclusive vs. exclusive dates?** When checking ranges, use `BETWEEN` or explicit `>=` and `<=`.
-- [ ] **Did you order subquery columns consistently in tuples?** When using `WHERE (col1, col2) IN (SELECT col1, col2 ...)`, the column order in the subquery must match exactly.
-- [ ] **Did you wrap fallback queries in `(SELECT ...)`?** When an interview asks to "return NULL if no such row exists" (like Second Highest Salary), wrapping the subquery in `SELECT (...) AS col` handles empty sets automatically.
-- [ ] **Did you use `UNION ALL` instead of `UNION` when duplicates are desired?** `UNION ALL` is significantly faster because it avoids sorting and deduplication.
+### 1. The `NOT IN` NULL Trap
+If a subquery returns even a single `NULL` value, `NOT IN` returns an empty set for the entire query.
+- 🚩 **WRONG:** `WHERE department_id NOT IN (SELECT department_id FROM Departments)`
+- ✅ **RIGHT:** `WHERE NOT EXISTS (SELECT 1 FROM Departments d WHERE d.id = e.department_id)`
+
+### 2. Accidental Cartesian Explosions (Bad Joins)
+Joining on non-unique columns without grouping can cause your row count to multiply exponentially, crashing the query.
+- 🚩 **WRONG:** `SELECT * FROM Orders o JOIN Users u ON o.city = u.city` (Many-to-Many on city)
+- ✅ **RIGHT:** `SELECT * FROM Orders o JOIN Users u ON o.user_id = u.user_id` (Join on Primary/Foreign Keys)
+
+### 3. `WHERE` vs `HAVING` Misplacement
+Filtering aggregate results in a `WHERE` clause will throw a syntax error. `WHERE` filters rows *before* grouping; `HAVING` filters *after*.
+- 🚩 **WRONG:** `WHERE COUNT(user_id) > 5`
+- ✅ **RIGHT:** `HAVING COUNT(user_id) > 5`
+
+### 4. Integer Division Zeroing
+In SQL Server and PostgreSQL, dividing two integers truncates the decimal. `1 / 2` becomes `0`.
+- 🚩 **WRONG:** `SELECT accepted_requests / total_requests AS rate`
+- ✅ **RIGHT:** `SELECT CAST(accepted_requests AS FLOAT) / total_requests AS rate` *(Or multiply by 100.0)*
+
+### 5. `COUNT(*)` vs `COUNT(column)`
+`COUNT(*)` counts rows. `COUNT(column)` counts *non-null* values in that column. Mixing them up causes subtle reporting bugs.
+- 🚩 **WRONG:** `SELECT COUNT(*) FROM Employees` *(When asked for number of employees with a known birthdate)*
+- ✅ **RIGHT:** `SELECT COUNT(birthdate) FROM Employees`
+
+### 6. The `NULL` Inequality Blindspot
+Comparing a value to `NULL` using `=` or `!=` yields `UNKNOWN`, dropping the row entirely.
+- 🚩 **WRONG:** `WHERE bonus != 1000` *(Drops people with NO bonus / NULL)*
+- ✅ **RIGHT:** `WHERE bonus != 1000 OR bonus IS NULL` *(Or `IFNULL(bonus, 0) != 1000`)*
+
+### 7. Non-Sargable `WHERE` Clauses
+Applying functions to columns in the `WHERE` clause blinds the optimizer to indexes, causing full table scans.
+- 🚩 **WRONG:** `WHERE YEAR(order_date) = 2023`
+- ✅ **RIGHT:** `WHERE order_date >= '2023-01-01' AND order_date < '2024-01-01'`
+
+### 8. `UNION` vs `UNION ALL` Performance
+`UNION` performs a costly sorting and deduplication step. If you know the sets are disjoint (or you want duplicates), always use `UNION ALL`.
+- 🚩 **WRONG:** `SELECT id FROM TableA UNION SELECT id FROM TableB`
+- ✅ **RIGHT:** `SELECT id FROM TableA UNION ALL SELECT id FROM TableB`
+
+### 9. `RANK()` vs `DENSE_RANK()` Gaps
+`RANK()` skips numbers after a tie (1, 1, 3). `DENSE_RANK()` does not (1, 1, 2). Using `RANK()` for "Top N" queries usually breaks.
+- 🚩 **WRONG:** `WHERE RANK() OVER(ORDER BY salary DESC) <= 3` *(Might only return 2 unique salaries if there's a tie)*
+- ✅ **RIGHT:** `WHERE DENSE_RANK() OVER(ORDER BY salary DESC) <= 3`
+
+### 10. Forgetting to Handle Empty Sets
+If a query asks for the "Nth highest", returning nothing when the table is small is often considered a failure. You must explicitly return `NULL`.
+- 🚩 **WRONG:** `SELECT salary FROM Employee ORDER BY salary DESC LIMIT 1 OFFSET 1`
+- ✅ **RIGHT:** `SELECT (SELECT salary FROM Employee ORDER BY salary DESC LIMIT 1 OFFSET 1) AS SecondHighest`
