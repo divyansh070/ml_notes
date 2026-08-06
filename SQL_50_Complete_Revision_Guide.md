@@ -114,7 +114,11 @@ In SQL, any comparison with `NULL` returns `UNKNOWN` (neither `TRUE` nor `FALSE`
 ### Module 1: Basic Select
 
 #### 1. Recyclable and Low Fat Products (1757)
-- **Concept:** Simple `WHERE` clause combining conditions with `AND`.
+- **The 'Why':** We use the `AND` operator to strictly filter rows that satisfy both conditions simultaneously.
+- **Execution Order:** `FROM` (loads the Products table) ➔ `WHERE` (filters rows row-by-row) ➔ `SELECT` (projects the `product_id` column).
+- **Edge Cases:** Empty table returns an empty set. If a product has a `NULL` value for `low_fats` or `recyclable`, the `='Y'` comparison evaluates to `UNKNOWN` (not `TRUE`), and the row is safely ignored.
+- **Performance:** Requires a sequential scan by default. To optimize for read-heavy systems, a composite index on `(low_fats, recyclable, product_id)` allows an **Index-Only Scan**.
+- **Interviewer Follow-up:** *"If we stored these flags as `BOOLEAN` (1 and 0) instead of `VARCHAR` ('Y' and 'N'), how would that impact storage size and index performance at a scale of 10 billion rows?"*
 ```sql
 SELECT product_id 
 FROM Products 
@@ -122,7 +126,11 @@ WHERE low_fats = 'Y' AND recyclable = 'Y';
 ```
 
 #### 2. Find Customer Referee (584)
-- **Concept:** Three-valued logic. `!= 2` excludes `NULL`, so explicit `IS NULL` check is mandatory.
+- **The 'Why':** Tests understanding of **Three-Valued Logic**. `NULL` means "unknown," so `NULL != 2` evaluates to `UNKNOWN`, dropping the row. We *must* explicitly use `OR referee_id IS NULL`.
+- **Execution Order:** `FROM` ➔ `WHERE` (evaluates `!= 2` first, then `IS NULL`) ➔ `SELECT`.
+- **Edge Cases:** If the entire `referee_id` column is populated only with `NULL`s, the query simply returns every customer name.
+- **Performance:** The `OR` operator, particularly combined with `IS NULL`, often prevents the query optimizer from using B-Tree indexes effectively, leading to a full table scan.
+- **Interviewer Follow-up:** *"If this table had 500 million rows, this `OR` clause might cause a full table scan. How could you rewrite this query to ensure the database can utilize indexes optimally?" (Hint: `UNION ALL`)*.
 ```sql
 SELECT name 
 FROM Customer 
@@ -130,7 +138,11 @@ WHERE referee_id != 2 OR referee_id IS NULL;
 ```
 
 #### 3. Big Countries (595)
-- **Concept:** Filtering with `OR` condition across multiple metrics.
+- **The 'Why':** We evaluate two distinct criteria using the `OR` operator. If a row satisfies *at least one* condition, it gets returned.
+- **Execution Order:** `FROM` ➔ `WHERE` ➔ `SELECT`.
+- **Edge Cases:** If a country has a `NULL` population but an area of `4000000`, it will still be returned because `UNKNOWN OR TRUE` evaluates to `TRUE`.
+- **Performance:** Using `OR` across two different columns is a performance killer. Even with separate indexes on `area` and `population`, the optimizer might still choose a full table scan.
+- **Interviewer Follow-up:** *"Write a mathematically equivalent query using `UNION` instead of `OR`, and explain why `UNION` might execute faster if we have individual indexes on both columns."*
 ```sql
 SELECT name, population, area 
 FROM World 
@@ -138,7 +150,11 @@ WHERE area >= 3000000 OR population >= 25000000;
 ```
 
 #### 4. Article Views I (1148)
-- **Concept:** Self-referencing IDs (`author_id = viewer_id`) + `DISTINCT` to remove duplicate read events.
+- **The 'Why':** Self-column comparison (`author_id = viewer_id`) finds authors viewing their own work. `DISTINCT` ensures an author's ID is only listed once even if they view their article multiple times.
+- **Execution Order:** `FROM` ➔ `WHERE` (author = viewer) ➔ `SELECT` (aliases author_id to id) ➔ `DISTINCT` (deduplicates) ➔ `ORDER BY` (sorts the final list).
+- **Edge Cases:** If `author_id` or `viewer_id` is `NULL`, `NULL = NULL` evaluates to `UNKNOWN` and the row is excluded (correct behavior).
+- **Performance:** `DISTINCT` is a heavy operation requiring hashing or sorting. Using `GROUP BY author_id` behaves the exact same way but sometimes maps better to aggregate indexes depending on the engine.
+- **Interviewer Follow-up:** *"Explain the time and space complexity difference between how a database processes `DISTINCT` using a Hash set versus sorting."*
 ```sql
 SELECT DISTINCT author_id AS id 
 FROM Views 
@@ -147,7 +163,11 @@ ORDER BY id ASC;
 ```
 
 #### 5. Invalid Tweets (1683)
-- **Concept:** String length validation. Use `CHAR_LENGTH()` (characters) instead of `LENGTH()` (bytes).
+- **The 'Why':** Tests string functions. We use `CHAR_LENGTH()` (counts characters) instead of `LENGTH()` (counts bytes) to avoid false positives with emojis or multi-byte characters.
+- **Execution Order:** `FROM` ➔ `WHERE` (computes character length dynamically) ➔ `SELECT`.
+- **Edge Cases:** If `content` is `NULL`, `CHAR_LENGTH()` returns `NULL`, the condition `> 15` becomes `UNKNOWN`, and the row is skipped. Empty strings `''` return `0`.
+- **Performance:** Applying a function directly to a column in the `WHERE` clause violates **Sargability**, blinding the database to indexes and guaranteeing a full table scan.
+- **Interviewer Follow-up:** *"Since we cannot use indexes when applying functions to columns, how would you redesign the schema so we can instantly look up invalid tweets without doing a full table scan every time?"*
 ```sql
 SELECT tweet_id 
 FROM Tweets 
