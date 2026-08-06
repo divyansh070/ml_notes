@@ -73,23 +73,37 @@ In SQL, any comparison with `NULL` returns `UNKNOWN` (neither `TRUE` nor `FALSE`
 
 #### Date & Time (MySQL)
 - `DATEDIFF(date1, date2)`: Returns difference in days (`date1 - date2`).
-- `DATE_ADD(date1, INTERVAL 1 DAY)` / `DATE_SUB(date1, INTERVAL 1 DAY)`: Add or subtract time intervals.
-- `DATE_FORMAT(date_col, '%Y-%m')`: Formats date as string (e.g., `'2020-02'`).
+  * **Example:** `DATEDIFF('2023-10-15', '2023-10-10')` ➔ `5` (useful for finding consecutive days).
+- `DATE_ADD(date1, INTERVAL 1 DAY)` / `DATE_SUB(...)`: Add or subtract time intervals.
+  * **Example:** `DATE_ADD('2023-10-10', INTERVAL 1 MONTH)` ➔ `'2023-11-10'`.
+- `DATE_FORMAT(date_col, '%Y-%m')`: Formats date as string.
+  * **Example:** `DATE_FORMAT('2020-02-15', '%Y-%m')` ➔ `'2020-02'` (great for grouping by month).
 - `YEAR(date_col)`, `MONTH(date_col)`: Extracts numeric year or month.
+  * **Example:** `YEAR('2020-02-15')` ➔ `2020`.
 
 #### String Manipulation
 - `CONCAT(str1, str2, ...)`: Join strings together.
+  * **Example:** `CONCAT('Leet', 'Code')` ➔ `'LeetCode'`.
 - `SUBSTRING(str, start_idx, length)`: Extract substring (**1-indexed** in SQL!).
+  * **Example:** `SUBSTRING('SQL is fun', 1, 3)` ➔ `'SQL'`.
 - `UPPER(str)` / `LOWER(str)`: Case conversion.
+  * **Example:** `UPPER('john')` ➔ `'JOHN'`.
 - `CHAR_LENGTH(str)`: Number of characters in a string.
+  * **Example:** `CHAR_LENGTH('Tweet')` ➔ `5`.
 - `GROUP_CONCAT(col ORDER BY col SEPARATOR ',')`: Combines multiple rows of text into a single comma-separated string.
+  * **Example:** `GROUP_CONCAT(product_name SEPARATOR ', ')` ➔ `'Apple, Banana, Orange'`.
 
 #### Window Functions
-- `ROW_NUMBER() OVER (PARTITION BY col ORDER BY col2)`: `1, 2, 3, 4` (no duplicates).
-- `RANK() OVER (PARTITION BY col ORDER BY col2)`: `1, 2, 2, 4` (leaves gaps on ties).
-- `DENSE_RANK() OVER (PARTITION BY col ORDER BY col2)`: `1, 2, 2, 3` (no gaps on ties).
-- `LEAD(col, 1) OVER (...)` / `LAG(col, 1) OVER (...)`: Look ahead / look behind 1 row.
+- `ROW_NUMBER() OVER (PARTITION BY col ORDER BY col2)`: Assigns a unique integer `1, 2, 3, 4` (no duplicates).
+  * **Example:** `ROW_NUMBER() OVER(ORDER BY salary DESC)` ➔ `1, 2, 3, 4`.
+- `RANK() OVER (...)`: Same as `ROW_NUMBER` but leaves gaps on ties (`1, 2, 2, 4`).
+  * **Example:** `RANK() OVER(ORDER BY salary DESC)` ➔ If two people are 2nd highest, the next is 4th.
+- `DENSE_RANK() OVER (...)`: Same as `RANK` but no gaps on ties (`1, 2, 2, 3`).
+  * **Example:** `DENSE_RANK() OVER(ORDER BY salary DESC)` ➔ If two people are 2nd highest, the next is 3rd (often used for "Nth Highest Salary" problems).
+- `LEAD(col, 1) OVER (...)` / `LAG(...)`: Look ahead / look behind 1 row.
+  * **Example:** `LEAD(num, 1) OVER()` ➔ Gets the value of `num` from the next row (useful for consecutive numbers).
 - `SUM(col) OVER (ORDER BY col ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)`: Rolling 7-day sum.
+  * **Example:** Computes a running total for the last 7 rows including the current one.
 
 ---
 
