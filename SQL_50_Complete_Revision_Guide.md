@@ -640,7 +640,18 @@ SELECT 'High Salary', SUM(salary > 50000) FROM Accounts;
 ### Module 6: Subqueries
 
 #### 36. Employees Whose Manager Left the Company (1978)
-- **Concept:** `NOT IN` subquery checking active employee IDs for managers that no longer exist.
+- **The 'Why':** We use a `NOT IN` subquery to filter out employees whose manager still exists in the `Employees` table.
+- **Execution Order:** Subquery (`FROM` ➔ `SELECT`) ➔ Outer Query (`FROM` ➔ `WHERE` checks salary and NOT IN ➔ `ORDER BY`).
+- **Edge Cases:** If `manager_id` contains a `NULL`, `NOT IN` behaves dangerously (it will return empty if there is a NULL in the subquery result). It is safer to use `NOT EXISTS`.
+- **Performance:** `NOT IN` can be slow if the subquery returns many rows and is not optimized. A `LEFT JOIN` where the right side is `NULL` is generally safer and faster.
+- **Interviewer Follow-up:** *"Why is `NOT IN` dangerous when the subquery might return a `NULL` value? How would you rewrite this using `NOT EXISTS`?"*
+
+**Visual Breakdown:**
+| employee_id | salary | manager_id | (Subquery: Active Managers) | Result (Salary < 30k & Manager NOT IN Active) |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | 25000 | 3 | [1, 2, 4] | Manager 3 is gone. Row Kept! |
+| 2 | 20000 | 1 | [1, 2, 4] | Manager 1 exists. Row Dropped. |
+
 ```sql
 SELECT employee_id
 FROM Employees
@@ -650,7 +661,19 @@ ORDER BY employee_id;
 ```
 
 #### 37. Exchange Seats (626)
-- **Concept:** Mathematical seat-swapping inside a `CASE` expression (odd IDs +1, even IDs -1, last odd ID stays same).
+- **The 'Why':** We mathematically swap seats inside a `CASE` expression. Odd IDs become Even (+1), Even IDs become Odd (-1). The subquery `SELECT MAX(id)` protects the last student if the total count is odd.
+- **Execution Order:** Subquery (`SELECT MAX`) ➔ Main Query (`FROM` ➔ `SELECT` evaluates CASE ➔ `ORDER BY` new id).
+- **Edge Cases:** If there's only 1 student, they match `MAX(id)` and keep their seat.
+- **Performance:** Calculating `MAX(id)` inline for every row could be slow, though optimizers usually execute scalar subqueries once and cache them.
+- **Interviewer Follow-up:** *"Rewrite this without mathematical swapping. How could you use the `LEAD()` and `LAG()` window functions instead?"*
+
+**Visual Breakdown (Intermediate `CASE` evaluation):**
+| Original id | student | `id % 2 != 0` | is `MAX(id)`? | New `id` |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | Abbot | TRUE (Odd) | FALSE | 1 + 1 = **2** |
+| 2 | Doris | FALSE (Even)| FALSE | 2 - 1 = **1** |
+| 3 | Emerson| TRUE (Odd) | TRUE | Stays **3** |
+
 ```sql
 SELECT 
     CASE 
@@ -664,7 +687,17 @@ ORDER BY id;
 ```
 
 #### 38. Movie Rating (1341)
-- **Concept:** `UNION ALL` combining top user by rating count and top movie by average rating in February 2020.
+- **The 'Why':** We need two completely different aggregations (top user vs top movie) returned in a single column. `UNION ALL` concatenates the separate queries.
+- **Execution Order:** Query 1 (Top User) executes ➔ Query 2 (Top Movie in Feb) executes ➔ `UNION ALL` merges them sequentially.
+- **Edge Cases:** Ties are broken lexicographically (`ORDER BY name ASC`). If there's an exact tie in counts/ratings AND names, `LIMIT 1` deterministically picks the first.
+- **Performance:** `UNION ALL` is faster than `UNION` because it skips the deduplication phase.
+- **Interviewer Follow-up:** *"If we used `UNION` instead of `UNION ALL`, in what extremely rare scenario would the result only contain 1 row instead of 2?" (Answer: If a user's name is identical to a movie's title).*
+
+**Visual Breakdown (Before UNION ALL):**
+| Query 1 Result (Top User) | Query 2 Result (Top Movie in Feb) |
+| :--- | :--- |
+| 'Daniel' (Most ratings) | 'Frozen 2' (Highest AVG rating) |
+
 ```sql
 (SELECT u.name AS results
  FROM MovieRating mr JOIN Users u ON mr.user_id = u.user_id
@@ -679,7 +712,19 @@ UNION ALL
 ```
 
 #### 39. Restaurant Growth (1321)
-- **Concept:** **7-Day Rolling Window** using `ROWS BETWEEN 6 PRECEDING AND CURRENT ROW`.
+- **The 'Why':** A **7-Day Rolling Window** uses `SUM(...) OVER(ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)` to calculate weekly metrics seamlessly without self-joining 7 times.
+- **Execution Order:** Subquery (`FROM` ➔ `GROUP BY` ➔ `SELECT` applies Window sums) ➔ Outer Query (`FROM` ➔ `WHERE` filters out the first 6 days ➔ `SELECT`).
+- **Edge Cases:** We use `count_days = 7` to strictly filter out the first 6 days of the dataset, which don't have a full 7-day history to average.
+- **Performance:** Window functions are highly optimized for moving averages. The `GROUP BY visited_on` in the subquery first flattens multiple orders per day.
+- **Interviewer Follow-up:** *"Why must we `GROUP BY visited_on` inside the subquery first before applying the Window function?" (Answer: Multiple customers can visit on the same day).*
+
+**Visual Breakdown (Intermediate Window Function in `t`):**
+| visited_on | amount (Daily) | Rolling SUM (7 days) | Rolling COUNT (Days) |
+| :--- | :--- | :--- | :--- |
+| 2019-01-01 | 100 | 100 | 1 (Filtered out) |
+| ... | ... | ... | ... |
+| 2019-01-07 | 150 | 850 | **7 (Kept!)** |
+
 ```sql
 SELECT visited_on, amount, ROUND(amount/7, 2) AS average_amount
 FROM (
@@ -693,7 +738,21 @@ WHERE count_days = 7;
 ```
 
 #### 40. Friend Requests II: Who Has the Most Friends (602)
-- **Concept:** Unpivoting two columns (`requester_id` and `accepter_id`) into a single list using `UNION ALL`.
+- **The 'Why':** Friendships are bidirectional but stored in two columns (`requester` and `accepter`). We use `UNION ALL` to **unpivot** them into a single column, letting us safely `GROUP BY` and count total connections per ID.
+- **Execution Order:** Subquery (`UNION ALL` stacks the columns) ➔ Main Query (`GROUP BY` ➔ `SELECT` counts ➔ `ORDER BY` DESC ➔ `LIMIT 1`).
+- **Edge Cases:** If a user requests a friend but is never accepted, they won't appear in the `RequestAccepted` table.
+- **Performance:** Unpivoting via `UNION ALL` requires reading the table twice, but it is standard for edge-list graph tables.
+- **Interviewer Follow-up:** *"What if two users have the exact same maximum number of friends? Does `LIMIT 1` guarantee returning both?" (Answer: No, you would need `RANK() = 1` or `HAVING COUNT = MAX(...)`).*
+
+**Visual Breakdown (Unpivoting via UNION ALL):**
+| requester_id | accepter_id | ➔ | Stacked `id` (UNION ALL) |
+| :--- | :--- | :--- | :--- |
+| 1 | 2 | ➔ | 1 |
+| 1 | 3 | ➔ | 1 |
+| 1 | 2 | ➔ | 2 |
+| 1 | 3 | ➔ | 3 |
+*(User 1 now appears twice in the stacked list, meaning 2 friends).*
+
 ```sql
 SELECT id, COUNT(*) AS num
 FROM (
@@ -707,7 +766,18 @@ LIMIT 1;
 ```
 
 #### 41. Investments in 2016 (585)
-- **Concept:** Multi-column window counts (`COUNT(*) OVER(PARTITION BY tiv_2015)` and `COUNT(*) OVER(PARTITION BY lat, lon)`) to check uniqueness conditions.
+- **The 'Why':** We use `COUNT(*) OVER(PARTITION BY ...)` to flag rows that meet the criteria (duplicate `tiv_2015` and unique `lat, lon`) without collapsing the rows using `GROUP BY`.
+- **Execution Order:** Subquery (`FROM` ➔ `SELECT` calculates window counts) ➔ Outer Query (`WHERE` applies uniqueness rules ➔ `SELECT` sums the values).
+- **Edge Cases:** If no policy shares a `tiv_2015` value, the result is `NULL`.
+- **Performance:** Window functions execute sequentially over the partitions. A self-join approach would be much slower on large datasets.
+- **Interviewer Follow-up:** *"How would you write this using a `JOIN` to a `GROUP BY` subquery instead of Window Functions?"*
+
+**Visual Breakdown (Intermediate Window Function in `t`):**
+| PID | tiv_2015 | tiv_2016 | lat, lon | `tiv_2015_cnt` (Same value?) | `loc_cnt` (Same city?) | Action |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 1 | 10 | 5 | 10, 10 | 2 (>1, Good) | 1 (Unique, Good)| Keep & Sum |
+| 2 | 10 | 10 | 20, 20 | 2 (>1, Good) | 2 (Not unique!)| Drop |
+
 ```sql
 SELECT ROUND(SUM(tiv_2016), 2) AS tiv_2016
 FROM (
@@ -720,7 +790,21 @@ WHERE tiv_2015_cnt > 1 AND loc_cnt = 1;
 ```
 
 #### 42. Department Top Three Salaries (185)
-- **Concept:** **`DENSE_RANK()`** partitioned by department. Ensures ties share ranks and next salary rank is continuous (`rnk <= 3`).
+- **The 'Why':** **`DENSE_RANK()`** assigns continuous ranks to ordered rows partitioned by department. If two people tie for highest salary, they both get Rank 1, and the next person gets Rank 2.
+- **Execution Order:** Subquery (`FROM` ➔ `JOIN` ➔ `SELECT` calculates DENSE_RANK) ➔ Outer Query (`WHERE rnk <= 3`).
+- **Edge Cases:** If a department has only 2 employees, they are both returned (ranks 1 and 2 are `<= 3`).
+- **Performance:** Partitioning and sorting a massive employee table is expensive. Ensure an index on `(departmentId, salary DESC)` exists.
+- **Interviewer Follow-up:** *"What would happen to the output if you used `RANK()` instead of `DENSE_RANK()` and there was a 3-way tie for the highest salary?" (Answer: The ranks would be 1, 1, 1, 4. The `<= 3` filter would completely drop the next highest salary).*
+
+**Visual Breakdown (Intermediate `DENSE_RANK`):**
+| Dept | Employee | Salary | `DENSE_RANK()` (Ties share, no gaps) |
+| :--- | :--- | :--- | :--- |
+| IT | Max | 90000 | **1** |
+| IT | Joe | 85000 | **2** |
+| IT | Randy | 85000 | **2** (Tie!) |
+| IT | Will | 70000 | **3** (No gap!) |
+*(All four employees are returned since their rank is `<= 3`).*
+
 ```sql
 SELECT Department, Employee, Salary
 FROM (
