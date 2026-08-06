@@ -821,7 +821,18 @@ WHERE rnk <= 3;
 ### Module 7: Advanced String Functions / Regex / Clause
 
 #### 43. Fix Names in a Table (1667)
-- **Concept:** Capitalizing first letter (`UPPER(SUBSTRING(name, 1, 1))`) and lowercasing the rest (`LOWER(SUBSTRING(name, 2))`).
+- **The 'Why':** We use `SUBSTRING` to isolate the first letter (to uppercase it) and the rest of the name (to lowercase it), then combine them using `CONCAT`.
+- **Execution Order:** `FROM` ➔ `SELECT` (evaluates string functions row by row) ➔ `ORDER BY`.
+- **Edge Cases:** If a name is only 1 character long, `SUBSTRING(name, 2)` safely returns an empty string instead of crashing.
+- **Performance:** String manipulation functions are generally fast, but cannot be optimized via index. The `ORDER BY user_id` is the main performance driver here.
+- **Interviewer Follow-up:** *"Can you write this using `LEFT()` and `RIGHT()` or `LENGTH()` instead of `SUBSTRING()`?"*
+
+**Visual Breakdown (String Manipulation):**
+| Original `name` | `UPPER(SUBSTR(name, 1, 1))` | `LOWER(SUBSTR(name, 2))` | `CONCAT` Result |
+| :--- | :--- | :--- | :--- |
+| aLice | A | lice | **Alice** |
+| bOB | B | ob | **Bob** |
+
 ```sql
 SELECT user_id, 
        CONCAT(UPPER(SUBSTRING(name, 1, 1)), LOWER(SUBSTRING(name, 2))) AS name
@@ -830,7 +841,19 @@ ORDER BY user_id;
 ```
 
 #### 44. Patients With a Condition (1527)
-- **Concept:** `LIKE` prefix matching for words at the beginning (`'DIAB1%'`) or after a space (`'% DIAB1%'`).
+- **The 'Why':** Conditions might be the first word (`'DIAB1%'`) or appear later in a space-separated list (`'% DIAB1%'`). We need an `OR` clause with `LIKE` to catch both safely.
+- **Execution Order:** `FROM` ➔ `WHERE` (evaluates LIKE patterns) ➔ `SELECT`.
+- **Edge Cases:** A condition like `'SADIAB100'` won't be incorrectly matched because we specifically check for a leading space (`'% DIAB1%'`).
+- **Performance:** Leading wildcards (`'% DIAB1%'`) completely disable B-Tree index seeks. The DB must do a full table scan.
+- **Interviewer Follow-up:** *"Since `LIKE '% DIAB1%'` causes a full table scan, how would you redesign the database schema to make finding conditions instantly fast?" (Answer: Normalize the `conditions` into a separate mapping table).*
+
+**Visual Breakdown (LIKE Pattern Matching):**
+| conditions | Matches `'DIAB1%'`? (Starts with) | Matches `'% DIAB1%'`? (Has space before) | Result |
+| :--- | :--- | :--- | :--- |
+| DIAB100 MYOP | **TRUE** | FALSE | **Keep** |
+| ACNE DIAB100 | FALSE | **TRUE** | **Keep** |
+| SADIAB100 | FALSE | FALSE | Drop |
+
 ```sql
 SELECT patient_id, patient_name, conditions
 FROM Patients
@@ -838,7 +861,18 @@ WHERE conditions LIKE 'DIAB1%' OR conditions LIKE '% DIAB1%';
 ```
 
 #### 45. Delete Duplicate Emails (196)
-- **Concept:** Self-referencing table delete (`DELETE p1 FROM Person p1, Person p2`) keeping lowest ID.
+- **The 'Why':** We use a **Self-Join `DELETE`**. By joining the table to itself on email and filtering for `p1.id > p2.id`, we target only the rows with the higher (newer) IDs for deletion.
+- **Execution Order:** `FROM` (Self Join) ➔ `WHERE` (Identifies duplicates with higher IDs) ➔ `DELETE` (Removes matching `p1` rows).
+- **Edge Cases:** If an email appears 3 times (IDs 1, 2, 3), both 2 and 3 will match against 1 and be deleted simultaneously.
+- **Performance:** Self-joining a massive table for a `DELETE` can lock the table and cause massive transaction logs. In production, it's often safer to insert distinct rows into a temp table, truncate, and re-insert.
+- **Interviewer Follow-up:** *"How would you rewrite this query to use a Window Function (`ROW_NUMBER()`) instead of a self-join?"*
+
+**Visual Breakdown (Self-Join Identification):**
+| `p1` (Target) | `p2` (Comparison) | Email Match? | `p1.id > p2.id`? | Action |
+| :--- | :--- | :--- | :--- | :--- |
+| ID: 2 (john@a.com) | ID: 1 (john@a.com) | YES | **YES (2 > 1)** | **DELETE `p1` (ID 2)** |
+| ID: 1 (john@a.com) | ID: 2 (john@a.com) | YES | NO (1 < 2) | Ignore |
+
 ```sql
 DELETE p1 
 FROM Person p1, Person p2
@@ -846,7 +880,18 @@ WHERE p1.email = p2.email AND p1.id > p2.id;
 ```
 
 #### 46. Second Highest Salary (176)
-- **Concept:** `LIMIT 1 OFFSET 1` wrapped in an outer `SELECT` to convert an empty result into `NULL`.
+- **The 'Why':** `LIMIT 1 OFFSET 1` skips the first row and takes the second. We wrap it in a scalar `SELECT` so that if the inner query returns empty, the outer query explicitly returns `NULL`.
+- **Execution Order:** Subquery (`FROM` ➔ `ORDER BY DESC` ➔ `LIMIT/OFFSET`) ➔ Outer Query (`SELECT` wrapper).
+- **Edge Cases:** If there's only 1 employee in the table, `OFFSET 1` finds nothing. The outer `SELECT` successfully converts that empty set to `NULL`.
+- **Performance:** `ORDER BY DESC LIMIT 2` is very fast if `salary` is indexed. `DISTINCT` adds slight overhead.
+- **Interviewer Follow-up:** *"If I asked for the Nth highest salary using a variable, why is `LIMIT 1 OFFSET N-1` better than using `MAX()` recursively?"*
+
+**Visual Breakdown (Outer SELECT acting as NULL-coalesce):**
+| Table State | Inner Query Result (`LIMIT 1 OFFSET 1`) | Outer Query Result |
+| :--- | :--- | :--- |
+| [100, 200, 300] | 200 | 200 |
+| [300] (Only 1 row) | *Empty Set* | **NULL** |
+
 ```sql
 SELECT (
     SELECT DISTINCT salary 
@@ -857,7 +902,18 @@ SELECT (
 ```
 
 #### 47. Group Sold Products By The Date (1484)
-- **Concept:** String aggregation using `GROUP_CONCAT(DISTINCT col ORDER BY col SEPARATOR ',')`.
+- **The 'Why':** `GROUP_CONCAT()` (MySQL) or `STRING_AGG()` (PostgreSQL) is used to roll up multiple row values into a single comma-separated string.
+- **Execution Order:** `FROM` ➔ `GROUP BY` ➔ `SELECT` (counts distinct, concatenates distinct strings) ➔ `ORDER BY`.
+- **Edge Cases:** If a product is sold twice on the same day, `DISTINCT` inside both `COUNT` and `GROUP_CONCAT` ensures it only appears once.
+- **Performance:** String aggregation is memory-heavy. MySQL has a default `group_concat_max_len` limit (1024 bytes) that can truncate long strings in production!
+- **Interviewer Follow-up:** *"What happens in MySQL if the concatenated string exceeds the default `group_concat_max_len` setting? How do you fix it?"*
+
+**Visual Breakdown (String Aggregation):**
+| Date | Raw Products | `DISTINCT` + `ORDER BY` | `GROUP_CONCAT` Result |
+| :--- | :--- | :--- | :--- |
+| 2020-05-30 | [Mask, Mask, Pen] | [Mask, Pen] | **'Mask,Pen'** |
+| 2020-06-01 | [Pencil, Book] | [Book, Pencil] | **'Book,Pencil'** |
+
 ```sql
 SELECT sell_date, 
        COUNT(DISTINCT product) AS num_sold, 
@@ -868,7 +924,18 @@ ORDER BY sell_date;
 ```
 
 #### 48. List the Products Ordered in a Period (1327)
-- **Concept:** Filtering order dates in February 2020 (`DATE_FORMAT = '2020-02'`) + `HAVING SUM(unit) >= 100`.
+- **The 'Why':** Standard `JOIN` with a `WHERE` filter for February 2020, followed by aggregation and a `HAVING` clause to filter out total orders < 100.
+- **Execution Order:** `FROM` ➔ `JOIN` ➔ `WHERE` (date filter) ➔ `GROUP BY` ➔ `HAVING` (sum filter) ➔ `SELECT`.
+- **Edge Cases:** If a product gets exactly 100 orders, it is included (`>= 100`).
+- **Performance:** `DATE_FORMAT(o.order_date)` prevents the use of indexes on the date column. It is significantly faster to write `WHERE o.order_date BETWEEN '2020-02-01' AND '2020-02-29'`.
+- **Interviewer Follow-up:** *"Why is `DATE_FORMAT(o.order_date) = '2020-02'` bad for performance? Rewrite the `WHERE` clause to be 'Sargable' (index-friendly)."*
+
+**Visual Breakdown (HAVING vs WHERE):**
+| Product | Orders in Feb (`WHERE`) | Total Sum | Passes `HAVING >= 100`? |
+| :--- | :--- | :--- | :--- |
+| Book | [10, 50] | 60 | **FALSE** (Dropped) |
+| Pen | [50, 60] | 110 | **TRUE** (Kept!) |
+
 ```sql
 SELECT p.product_name, SUM(o.unit) AS unit
 FROM Products p
@@ -879,7 +946,19 @@ HAVING SUM(o.unit) >= 100;
 ```
 
 #### 49. Find Users With Valid E-Mails (1517)
-- **Concept:** Regular expressions (`REGEXP`) matching domain, prefix rules, and escaped literal dot (`[.]`).
+- **The 'Why':** We use `REGEXP` to strictly enforce email validation rules: must start with letter `^[a-zA-Z]`, followed by allowed chars `[a-zA-Z0-9_.-]*`, ending strictly with `@leetcode[.]com$`.
+- **Execution Order:** `FROM` ➔ `WHERE` (Regex evaluation) ➔ `SELECT`.
+- **Edge Cases:** The dot in `.com` must be escaped as `[.]` or `\.`, otherwise Regex treats it as "any character" (so `@leetcodezcom` would accidentally match).
+- **Performance:** Regex evaluations require CPU-intensive string parsing and cannot utilize standard B-Tree indexes.
+- **Interviewer Follow-up:** *"Why did we put the period inside brackets `[.]` in the Regex string? What would happen if we just wrote `@leetcode.com$`?"*
+
+**Visual Breakdown (Regex Validation):**
+| Email String | `^[a-zA-Z]` (Starts w/ letter) | `[a-zA-Z0-9_.-]*` (Valid body) | `@leetcode[.]com$` (Valid Domain) | Result |
+| :--- | :--- | :--- | :--- | :--- |
+| `a@leetcode.com` | ✅ | ✅ | ✅ | **Valid** |
+| `1a@leetcode.com`| ❌ (Starts w/ number) | ✅ | ✅ | Invalid |
+| `a-b@leetcode.com`| ✅ | ✅ (Dash allowed) | ✅ | **Valid** |
+
 ```sql
 SELECT *
 FROM Users
@@ -887,7 +966,18 @@ WHERE mail REGEXP '^[a-zA-Z][a-zA-Z0-9_.-]*@leetcode[.]com$';
 ```
 
 #### 50. Capital Gain/Loss (1393) *(Bonus / Core 50th Problem Pattern)*
-- **Concept:** Using conditional sum inside `SUM()` to treat `'Sell'` as positive and `'Buy'` as negative cash flow.
+- **The 'Why':** We use a conditional summation trick. By mapping `'Buy'` to negative price and `'Sell'` to positive price inside a single `SUM()`, we calculate net flow in one pass.
+- **Execution Order:** `FROM` ➔ `GROUP BY` ➔ `SELECT` (evaluates CASE inside SUM).
+- **Edge Cases:** Assuming every buy has a corresponding sell, this works perfectly. If a stock is bought but not sold yet, it will accurately show a negative unrealized loss.
+- **Performance:** This is heavily optimized because it avoids self-joins or multiple subqueries. It scans the table exactly once.
+- **Interviewer Follow-up:** *"Rewrite this query using a `SUM(IF(...))` shorthand instead of `CASE WHEN`."*
+
+**Visual Breakdown (Conditional Net Flow):**
+| stock_name | operation | price | `CASE` Evaluation | Cumulative `SUM` per stock |
+| :--- | :--- | :--- | :--- | :--- |
+| Corona | Buy | 10 | **-10** | -10 |
+| Corona | Sell | 50 | **+50** | **+40** (Final Gain) |
+
 ```sql
 SELECT stock_name,
        SUM(CASE WHEN operation = 'Sell' THEN price ELSE -price END) AS capital_gain_loss
