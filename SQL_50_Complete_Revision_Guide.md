@@ -53,10 +53,10 @@ If you compare anything to an "Unknown" value, the answer is also "Unknown".
 
 | The Trap | Code | Result | Why it fails |
 | :--- | :--- | :--- | :--- |
-| **Equality Check** | `col = NULL` | ❌ `UNKNOWN` | Is "Unknown" equal to "Unknown"? Who knows! |
-| **Safe Check** | `col IS NULL` | ✅ `TRUE` | Explicitly asking if the box is empty. |
-| **Not Equal Trap** | `bonus != 1000` | ⚠️ Drops NULLs | If bonus is `NULL`, `NULL != 1000` evaluates to `UNKNOWN`, not `TRUE`. The row vanishes. |
-| **The Fix** | `bonus != 1000 OR bonus IS NULL` | ✅ Safe | Always use this if you want to keep rows with no data. |
+| **Equality Check** | `col = NULL` | **[FAIL]** `UNKNOWN` | Is "Unknown" equal to "Unknown"? Who knows! |
+| **Safe Check** | `col IS NULL` | **[PASS]** `TRUE` | Explicitly asking if the box is empty. |
+| **Not Equal Trap** | `bonus != 1000` | **[WARN]** Drops NULLs | If bonus is `NULL`, `NULL != 1000` evaluates to `UNKNOWN`, not `TRUE`. The row vanishes. |
+| **The Fix** | `bonus != 1000 OR bonus IS NULL` | **[PASS]** Safe | Always use this if you want to keep rows with no data. |
 
 **The NULL Toolkit:**
 | Function | What It Does | Example Use Case |
@@ -73,12 +73,12 @@ Think of `JOIN`s as merging two spreadsheets based on a matching column (like Us
 
 | Join Type | Mental Model | What happens to unmatched rows? |
 | :--- | :--- | :--- |
-| 🤝 **`INNER JOIN`** | Strict Match. | Dropped completely. Both sides must have the ID. |
-| ⬅️ **`LEFT JOIN`** | Keep everything on the Left spreadsheet. | Left side stays. Right side columns become `NULL`. |
-| ➡️ **`RIGHT JOIN`** | Keep everything on the Right spreadsheet. | Right side stays. Left side columns become `NULL`. |
-| ❌ **Anti-Join** | Find the losers (who *doesn't* match). | Uses `LEFT JOIN ... WHERE right_table.id IS NULL`. |
-| 🪞 **Self-Join** | Join a table to itself (`t1 JOIN t2`). | Used for hierarchies, consecutive days, or comparing pairs. |
-| 💥 **`CROSS JOIN`** | The Cartesian Explosion. | Every row in Table A multiplies with every row in Table B. |
+| **[INNER JOIN]** | Strict Match. | Dropped completely. Both sides must have the ID. |
+| **[LEFT JOIN]** | Keep everything on the Left spreadsheet. | Left side stays. Right side columns become `NULL`. |
+| **[RIGHT JOIN]** | Keep everything on the Right spreadsheet. | Right side stays. Left side columns become `NULL`. |
+| **[ANTI-JOIN]** | Find the losers (who *doesn't* match). | Uses `LEFT JOIN ... WHERE right_table.id IS NULL`. |
+| **[SELF-JOIN]** | Join a table to itself (`t1 JOIN t2`). | Used for hierarchies, consecutive days, or comparing pairs. |
+| **[CROSS JOIN]** | The Cartesian Explosion. | Every row in Table A multiplies with every row in Table B. |
 
 ---
 
@@ -86,14 +86,15 @@ Think of `JOIN`s as merging two spreadsheets based on a matching column (like Us
 
 | Function | What it does | Example / Output |
 | :--- | :--- | :--- |
-| 📅 **`DATEDIFF()`** | Difference in days (`date1 - date2`). | `DATEDIFF('2023-10-15', '2023-10-10')` ➔ `5` |
-| ⏳ **`DATE_ADD()`** | Add time intervals. | `DATE_ADD('2023-10-10', INTERVAL 1 MONTH)` ➔ `'2023-11-10'` |
-| 🗓️ **`DATE_FORMAT()`**| Formats date as a string. | `DATE_FORMAT('2020-02-15', '%Y-%m')` ➔ `'2020-02'` |
-| 🔗 **`CONCAT()`** | Join strings together. | `CONCAT('Leet', 'Code')` ➔ `'LeetCode'` |
-| ✂️ **`SUBSTRING()`** | Extract text (SQL is **1-indexed!**). | `SUBSTRING('SQL is fun', 1, 3)` ➔ `'SQL'` |
-| 🔡 **`UPPER()`** | Convert to uppercase. | `UPPER('john')` ➔ `'JOHN'` |
-| 📏 **`CHAR_LENGTH()`**| Number of characters in a string. | `CHAR_LENGTH('Tweet')` ➔ `5` |
-| 🧵 **`GROUP_CONCAT()`**| Squish multiple rows into one string. | `GROUP_CONCAT(product SEPARATOR ',')` ➔ `'Apple,Banana'` |
+| **[DATE]** `DATEDIFF()` | Difference in days (`date1 - date2`). | `DATEDIFF('2023-10-15', '2023-10-10')` ➔ `5` |
+| **[DATE]** `DATE_ADD()` | Add time intervals. | `DATE_ADD('2023-10-10', INTERVAL 1 MONTH)` ➔ `'2023-11-10'` |
+| **[DATE]** `DATE_FORMAT()`| Formats date as a string. | `DATE_FORMAT('2020-02-15', '%Y-%m')` ➔ `'2020-02'` |
+| **[STRING]** `CONCAT()` | Join strings together. | `CONCAT('Leet', 'Code')` ➔ `'LeetCode'` |
+| **[STRING]** `SUBSTRING()` | Extract text (SQL is **1-indexed!**). | `SUBSTRING('SQL is fun', 1, 3)` ➔ `'SQL'` |
+| **[STRING]** `UPPER()` | Convert to uppercase. | `UPPER('john')` ➔ `'JOHN'` |
+| **[STRING]** `CHAR_LENGTH()`| Number of characters in a string. | `CHAR_LENGTH('Tweet')` ➔ `5` |
+| **[STRING]** `GROUP_CONCAT()`| Squish multiple rows into one string. | `GROUP_CONCAT(product SEPARATOR ',')` ➔ `'Apple,Banana'` |
+
 
 #### Window Functions: The Ultimate Guide
 
