@@ -24,74 +24,76 @@
 
 ## PART 1: SQL Quick-Reference & Fundamentals
 
-### 1. Order of Execution
-Understanding the logical execution order of a SQL query is the #1 way to avoid syntax errors (e.g., using column aliases in `WHERE`).
+### 1. Order of Execution (The SQL Pipeline)
 
-```
-1. FROM / JOIN      ──> Load & merge base tables
-2. WHERE            ──> Filter individual rows (before grouping)
-3. GROUP BY         ──> Group rows by key columns
-4. HAVING           ──> Filter aggregated groups
-5. SELECT           ──> Compute output columns & expressions
-6. DISTINCT         ──> Remove duplicate rows
-7. ORDER BY         ──> Sort the final result set
-8. LIMIT / OFFSET   ──> Return a subset of rows
-```
+Understanding the logical execution order of a SQL query is the #1 way to avoid syntax errors. SQL doesn't read top-to-bottom like Python; it builds data in a pipeline.
+
+| Step | Keyword | What the Database is Thinking |
+| :--- | :--- | :--- |
+| **1** | `FROM` / `JOIN` | *"Where am I getting the data? Let me grab those tables."* |
+| **2** | `WHERE` | *"Which individual rows do I keep? (I haven't grouped anything yet)."* |
+| **3** | `GROUP BY` | *"How do I smash these rows into buckets based on a key?"* |
+| **4** | `HAVING` | *"Now that they are in buckets, which buckets do I throw away?"* |
+| **5** | `SELECT` | *"What specific columns or math do you want to see?"* |
+| **6** | `DISTINCT` | *"Let me wipe out the identical duplicate rows."* |
+| **7** | `ORDER BY` | *"How should I sort this final result?"* |
+| **8** | `LIMIT` | *"Just give me the first N rows from the top."* |
 
 > [!IMPORTANT]
-> - **Why you cannot use `SELECT` aliases in `WHERE`:** `WHERE` runs **before** `SELECT`.
-> - **`WHERE` vs `HAVING`:** Use `WHERE` for individual row filtering; use `HAVING` for filtering results of aggregates (`COUNT`, `SUM`, `AVG`).
+> **Why you cannot use `SELECT` aliases in `WHERE`:**
+> `WHERE` runs at Step 2. `SELECT` doesn't run until Step 5. 
+> The database *literally doesn't know* what your alias is when it's filtering rows!
 
 ---
 
-### 2. Three-Valued Logic & NULL Handling
-In SQL, any comparison with `NULL` returns `UNKNOWN` (neither `TRUE` nor `FALSE`).
-- `col = NULL` ❌ Always evaluates to `UNKNOWN`.
-- `col IS NULL` / `col IS NOT NULL` ✅ Correct way to test for NULL.
-- `col != 2` ⚠️ **Will drop rows where `col IS NULL`!** Always use `col != 2 OR col IS NULL` if you want to include NULLs.
+### 2. The `NULL` Danger Zone (Three-Valued Logic)
 
-| Function | What It Does | Example usage |
+In SQL, `NULL` does not mean "empty" or "zero". It means **"Unknown"**.
+If you compare anything to an "Unknown" value, the answer is also "Unknown". 
+
+| The Trap | Code | Result | Why it fails |
+| :--- | :--- | :--- | :--- |
+| **Equality Check** | `col = NULL` | ❌ `UNKNOWN` | Is "Unknown" equal to "Unknown"? Who knows! |
+| **Safe Check** | `col IS NULL` | ✅ `TRUE` | Explicitly asking if the box is empty. |
+| **Not Equal Trap** | `bonus != 1000` | ⚠️ Drops NULLs | If bonus is `NULL`, `NULL != 1000` evaluates to `UNKNOWN`, not `TRUE`. The row vanishes. |
+| **The Fix** | `bonus != 1000 OR bonus IS NULL` | ✅ Safe | Always use this if you want to keep rows with no data. |
+
+**The NULL Toolkit:**
+| Function | What It Does | Example Use Case |
 | :--- | :--- | :--- |
-| `COALESCE(val1, val2, ...)` | Returns the first non-null value | `COALESCE(bonus, 0)` |
-| `IFNULL(val, default)` | MySQL specific; replaces `NULL` with default | `IFNULL(price, 0)` |
-| `IF(cond, true_val, false_val)` | Inline conditional (like ternary `? :`) | `IF(state='approved', 1, 0)` |
-| `CASE WHEN ... THEN ... END` | Multi-branch conditional logic | `CASE WHEN age > 60 THEN 'Senior' ELSE 'Adult' END` |
+| `COALESCE(val, 0)` | Returns the first non-null value. | `SUM(COALESCE(bonus, 0))` ➔ treats no bonus as $0. |
+| `IF(cond, 1, 0)` | Inline conditional (like a ternary). | `IF(state='approved', 1, 0)` ➔ great for custom sums. |
+| `CASE WHEN` | Multi-branch logic. | `CASE WHEN age > 60 THEN 'Senior' ELSE 'Adult' END` |
 
 ---
 
 ### 3. JOIN Cheat Sheet & Visual Guide
-- **`INNER JOIN`:** Returns rows that have matching values in **both** tables.
-- **`LEFT JOIN`:** Returns **all** rows from the left table, and matched rows from the right table (`NULL` if no match).
-- **`RIGHT JOIN`:** Returns **all** rows from the right table, and matched rows from the left table.
-- **`CROSS JOIN`:** Cartesian product (every row of Table A paired with every row of Table B).
-- **Self-Join:** Joining a table to itself (useful for hierarchy, consecutive days, comparing pairs).
-- **Anti-Join:** Finding unmatched rows using `LEFT JOIN ... WHERE right_table.id IS NULL`.
+
+Think of `JOIN`s as merging two spreadsheets based on a matching column (like User ID).
+
+| Join Type | Mental Model | What happens to unmatched rows? |
+| :--- | :--- | :--- |
+| 🤝 **`INNER JOIN`** | Strict Match. | Dropped completely. Both sides must have the ID. |
+| ⬅️ **`LEFT JOIN`** | Keep everything on the Left spreadsheet. | Left side stays. Right side columns become `NULL`. |
+| ➡️ **`RIGHT JOIN`** | Keep everything on the Right spreadsheet. | Right side stays. Left side columns become `NULL`. |
+| ❌ **Anti-Join** | Find the losers (who *doesn't* match). | Uses `LEFT JOIN ... WHERE right_table.id IS NULL`. |
+| 🪞 **Self-Join** | Join a table to itself (`t1 JOIN t2`). | Used for hierarchies, consecutive days, or comparing pairs. |
+| 💥 **`CROSS JOIN`** | The Cartesian Explosion. | Every row in Table A multiplies with every row in Table B. |
 
 ---
 
 ### 4. Essential SQL Functions Toolkit
 
-#### Date & Time (MySQL)
-- `DATEDIFF(date1, date2)`: Returns difference in days (`date1 - date2`).
-  * **Example:** `DATEDIFF('2023-10-15', '2023-10-10')` ➔ `5` (useful for finding consecutive days).
-- `DATE_ADD(date1, INTERVAL 1 DAY)` / `DATE_SUB(...)`: Add or subtract time intervals.
-  * **Example:** `DATE_ADD('2023-10-10', INTERVAL 1 MONTH)` ➔ `'2023-11-10'`.
-- `DATE_FORMAT(date_col, '%Y-%m')`: Formats date as string.
-  * **Example:** `DATE_FORMAT('2020-02-15', '%Y-%m')` ➔ `'2020-02'` (great for grouping by month).
-- `YEAR(date_col)`, `MONTH(date_col)`: Extracts numeric year or month.
-  * **Example:** `YEAR('2020-02-15')` ➔ `2020`.
-
-#### String Manipulation
-- `CONCAT(str1, str2, ...)`: Join strings together.
-  * **Example:** `CONCAT('Leet', 'Code')` ➔ `'LeetCode'`.
-- `SUBSTRING(str, start_idx, length)`: Extract substring (**1-indexed** in SQL!).
-  * **Example:** `SUBSTRING('SQL is fun', 1, 3)` ➔ `'SQL'`.
-- `UPPER(str)` / `LOWER(str)`: Case conversion.
-  * **Example:** `UPPER('john')` ➔ `'JOHN'`.
-- `CHAR_LENGTH(str)`: Number of characters in a string.
-  * **Example:** `CHAR_LENGTH('Tweet')` ➔ `5`.
-- `GROUP_CONCAT(col ORDER BY col SEPARATOR ',')`: Combines multiple rows of text into a single comma-separated string.
-  * **Example:** `GROUP_CONCAT(product_name SEPARATOR ', ')` ➔ `'Apple, Banana, Orange'`.
+| Function | What it does | Example / Output |
+| :--- | :--- | :--- |
+| 📅 **`DATEDIFF()`** | Difference in days (`date1 - date2`). | `DATEDIFF('2023-10-15', '2023-10-10')` ➔ `5` |
+| ⏳ **`DATE_ADD()`** | Add time intervals. | `DATE_ADD('2023-10-10', INTERVAL 1 MONTH)` ➔ `'2023-11-10'` |
+| 🗓️ **`DATE_FORMAT()`**| Formats date as a string. | `DATE_FORMAT('2020-02-15', '%Y-%m')` ➔ `'2020-02'` |
+| 🔗 **`CONCAT()`** | Join strings together. | `CONCAT('Leet', 'Code')` ➔ `'LeetCode'` |
+| ✂️ **`SUBSTRING()`** | Extract text (SQL is **1-indexed!**). | `SUBSTRING('SQL is fun', 1, 3)` ➔ `'SQL'` |
+| 🔡 **`UPPER()`** | Convert to uppercase. | `UPPER('john')` ➔ `'JOHN'` |
+| 📏 **`CHAR_LENGTH()`**| Number of characters in a string. | `CHAR_LENGTH('Tweet')` ➔ `5` |
+| 🧵 **`GROUP_CONCAT()`**| Squish multiple rows into one string. | `GROUP_CONCAT(product SEPARATOR ',')` ➔ `'Apple,Banana'` |
 
 #### Window Functions: The Ultimate Guide
 
