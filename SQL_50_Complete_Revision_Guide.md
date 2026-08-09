@@ -93,76 +93,325 @@ In SQL, any comparison with `NULL` returns `UNKNOWN` (neither `TRUE` nor `FALSE`
 - `GROUP_CONCAT(col ORDER BY col SEPARATOR ',')`: Combines multiple rows of text into a single comma-separated string.
   * **Example:** `GROUP_CONCAT(product_name SEPARATOR ', ')` ➔ `'Apple, Banana, Orange'`.
 
-#### Window Functions
+#### Window Functions: The Ultimate Guide
 
-The most critical analytical tools in SQL. They perform calculations across a set of table rows that are related to the current row, without collapsing them into a single output row (unlike `GROUP BY`).
+Since you’re doing LeetCode/SQL problems, the most useful way to understand window functions is to compare them with `GROUP BY`.
 
-| Function | What it does | Example Use Case |
+##### 1. What is a window function?
+
+A window function performs a calculation across a set of related rows without collapsing those rows into one row.
+
+Think:
+- **`GROUP BY`** ➔ combines rows
+- **Window function** ➔ keeps rows and adds information to them
+
+Suppose we have an `Employee` table:
+| employee | department | salary |
 | :--- | :--- | :--- |
-| 🔢 **`ROW_NUMBER()`** | Gives every row a unique sequential integer. | `ROW_NUMBER() OVER(ORDER BY salary DESC)` ➔ `1, 2, 3, 4` |
-| 🥈 **`RANK()`** | Ranks rows, leaving **gaps** after ties. | `RANK() OVER(ORDER BY salary DESC)` ➔ `1, 2, 2, 4` |
-| 🥇 **`DENSE_RANK()`** | Ranks rows, leaving **no gaps** after ties. | `DENSE_RANK() OVER(ORDER BY salary DESC)` ➔ `1, 2, 2, 3` |
-| ⏪ **`LAG()`** | Looks at the **previous** row's value. | Finding the difference in sales from yesterday to today. |
-| ⏩ **`LEAD()`** | Looks at the **next** row's value. | Checking if the next login date is exactly 1 day after the current one. |
-| 📈 **`SUM()`** | Calculates a **running/cumulative sum**. | `SUM(revenue) OVER(ORDER BY date)` ➔ YTD Revenue. |
-| 📊 **`AVG()`** | Calculates a **moving/partition average**. | `AVG(price) OVER(ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)` ➔ 7-day moving average. |
-| 🧮 **`COUNT()`** | **Counts** within a specific window. | Counting the number of transactions per user without dropping row-level details. |
-| 🔼 **`MAX()`** | Finds the **maximum** within a window. | Finding the highest ever score for a player up to their current game. |
-| 🔽 **`MIN()`** | Finds the **minimum** within a window. | Finding the absolute first order date for a customer (`MIN(date) OVER(PARTITION BY user)`). |
-### 💡 The Ultimate Window Function Mental Model
+| A | IT | 100 |
+| B | IT | 200 |
+| C | HR | 150 |
+| D | HR | 300 |
+
+If you do a **GROUP BY**:
+```sql
+SELECT department, AVG(salary)
+FROM Employee
+GROUP BY department;
+```
+You get:
+| department | avg |
+| :--- | :--- |
+| IT | 150 |
+| HR | 225 |
+*(The individual employees disappear).*
+
+But with a **Window function**:
+```sql
+SELECT
+    employee,
+    department,
+    salary,
+    AVG(salary) OVER (PARTITION BY department) AS dept_avg
+FROM Employee;
+```
+You get:
+| employee | department | salary | dept_avg |
+| :--- | :--- | :--- | :--- |
+| A | IT | 100 | 150 |
+| B | IT | 200 | 150 |
+| C | HR | 150 | 225 |
+| D | HR | 300 | 225 |
+*(Rows remain. That’s the key idea).*
+
+---
+
+##### 2. The General Syntax
+
+Most window functions look like:
+```sql
+FUNCTION(...) OVER (
+    PARTITION BY ...
+    ORDER BY ...
+)
+```
+
+There are two extremely important pieces:
+
+**`PARTITION BY`**
+Defines which rows belong together.
+`PARTITION BY department` means: Calculate separately for each department.
+It’s basically like creating groups, but without collapsing them.
+
+**`ORDER BY`**
+Defines the order of rows inside the window.
+`ORDER BY employee_id` inside `LAG(salary) OVER(...)` means: Look at the previous employee according to employee_id. This is why `LAG()` and `LEAD()` are window functions.
+
+---
+
+##### 3. The Major Window Functions You Should Know
+
+For LeetCode, learn these first:
+
+| Function | Purpose |
+| :--- | :--- |
+| 🔢 **`ROW_NUMBER()`** | Give every row a unique number |
+| 🥈 **`RANK()`** | Rank rows, leaving gaps after ties |
+| 🥇 **`DENSE_RANK()`** | Rank rows, no gaps after ties |
+| ⏪ **`LAG()`** | Look at previous row |
+| ⏩ **`LEAD()`** | Look at next row |
+| 📈 **`SUM()`** | Running/cumulative sum |
+| 📊 **`AVG()`** | Moving/partition average |
+| 🧮 **`COUNT()`** | Count within a window |
+| 🔼 **`MAX()`** | Maximum within a window |
+| 🔽 **`MIN()`** | Minimum within a window |
+
+---
+
+##### 4. `ROW_NUMBER()`
+
+Suppose:
+| employee | salary |
+| :--- | :--- |
+| A | 500 |
+| B | 700 |
+| C | 600 |
+
+```sql
+SELECT
+    employee,
+    salary,
+    ROW_NUMBER() OVER (ORDER BY salary DESC) AS rn
+FROM Employee;
+```
+Result:
+| employee | salary | rn |
+| :--- | :--- | :--- |
+| B | 700 | 1 |
+| C | 600 | 2 |
+| A | 500 | 3 |
+
+This is incredibly useful for finding things like **the highest-paid employee in each department**:
+```sql
+SELECT *
+FROM (
+    SELECT
+        employee,
+        department,
+        salary,
+        ROW_NUMBER() OVER (
+            PARTITION BY department
+            ORDER BY salary DESC
+        ) AS rn
+    FROM Employee
+) t
+WHERE rn = 1;
+```
+Notice the combination: `PARTITION BY department ORDER BY salary DESC` means: *For each department, sort employees by salary from highest to lowest and number them.*
+
+---
+
+##### 5. `RANK()` vs `DENSE_RANK()`
+
+Suppose:
+| employee | salary |
+| :--- | :--- |
+| A | 1000 |
+| B | 900 |
+| C | 900 |
+| D | 800 |
+
+**`RANK()`**
+```sql
+RANK() OVER (ORDER BY salary DESC)
+```
+gives:
+| employee | salary | rank |
+| :--- | :--- | :--- |
+| A | 1000 | 1 |
+| B | 900 | 2 |
+| C | 900 | 2 |
+| D | 800 | 4 |
+*(There is a gap: 3 is skipped).*
+
+**`DENSE_RANK()`**
+```sql
+DENSE_RANK() OVER (ORDER BY salary DESC)
+```
+gives:
+| employee | salary | rank |
+| :--- | :--- | :--- |
+| A | 1000 | 1 |
+| B | 900 | 2 |
+| C | 900 | 2 |
+| D | 800 | 3 |
+*(No gap).*
+
+> [!TIP]
+> **Easy memory trick:**
+> - `ROW_NUMBER` ➔ everyone gets a unique number
+> - `RANK` ➔ ties share rank, **gaps appear**
+> - `DENSE_RANK` ➔ ties share rank, **no gaps**
+
+---
+
+##### 6. `LAG()` and `LEAD()`
+
+- `LAG(value) OVER (ORDER BY date)` means: *Give me the value from the previous row.*
+- `LEAD(value) OVER (ORDER BY date)` means: *Give me the value from the next row.*
+
+Example:
+```sql
+SELECT
+    date,
+    temperature,
+    LAG(temperature) OVER (ORDER BY date) AS yesterday_temp
+FROM Weather;
+```
+Now you can do: `temperature > yesterday_temp`. This is extremely common in LeetCode.
+
+---
+
+##### 7. Window functions with `SUM()`
+
+This is another very important pattern for creating a **running total**.
+
+Suppose:
+| date | amount |
+| :--- | :--- |
+| Jan 1 | 100 |
+| Jan 2 | 200 |
+| Jan 3 | 300 |
+| Jan 4 | 400 |
+
+```sql
+SELECT
+    date,
+    amount,
+    SUM(amount) OVER (
+        ORDER BY date
+    ) AS running_total
+FROM Sales;
+```
+Result:
+| date | amount | running_total |
+| :--- | :--- | :--- |
+| Jan 1 | 100 | 100 |
+| Jan 2 | 200 | 300 |
+| Jan 3 | 300 | 600 |
+| Jan 4 | 400 | 1000 |
+
+The window keeps expanding:
+- Jan 1 ➔ 100
+- Jan 1 + Jan 2 ➔ 300
+- Jan 1 + Jan 2 + Jan 3 ➔ 600
+
+---
+
+##### 8. `PARTITION BY` + `ORDER BY` together
+
+This is where window functions become really powerful.
+
+Suppose:
+| employee | department | salary |
+| :--- | :--- | :--- |
+| A | IT | 500 |
+| B | IT | 700 |
+| C | HR | 400 |
+| D | HR | 900 |
+
+```sql
+SELECT
+    employee,
+    department,
+    salary,
+    RANK() OVER (
+        PARTITION BY department
+        ORDER BY salary DESC
+    ) AS rnk
+FROM Employee;
+```
+Result:
+| employee | department | salary | rnk |
+| :--- | :--- | :--- | :--- |
+| B | IT | 700 | 1 |
+| A | IT | 500 | 2 |
+| D | HR | 900 | 1 |
+| C | HR | 400 | 2 |
+
+Think of it as:
+1. `PARTITION BY department` (IT group, HR group)
+2. Sort salary
+3. Rank them
+
+---
+
+##### 9. Window function vs `GROUP BY` summary
+
+That’s probably the single most important thing to understand.
+**GROUP BY** = Employees are gone.
+**Window function** = Rows remain.
+
+---
+
+##### 10. A Very Useful Mental Model
 
 Whenever you see: `XXX(...) OVER (...)`
-Read it aloud as: *"For this row, calculate `XXX` using this specific window of rows."*
+Read it as: *"For this row, calculate XXX using this window of rows."*
 
 - `AVG(salary) OVER (PARTITION BY department)` ➔ *"For this employee, calculate the average salary of everyone in their department."*
 - `LAG(salary) OVER (ORDER BY id)` ➔ *"For this employee, give me the salary of the previous employee."*
 - `RANK() OVER (PARTITION BY department ORDER BY salary DESC)` ➔ *"For this employee, tell me their salary rank within their department."*
 
-#### Window Function vs GROUP BY (The Most Important Distinction)
+---
 
-**`GROUP BY` collapses rows.**
+##### The 5 Patterns I’d Memorize for LeetCode
+
 ```sql
-SELECT department, MAX(salary) FROM Employee GROUP BY department;
-```
-Result: The individual employees vanish. You just get `IT ➔ 700`, `HR ➔ 900`.
+-- 1. Number rows
+ROW_NUMBER() OVER (ORDER BY x)
 
-**Window Functions keep rows intact.**
-```sql
-SELECT employee, department, salary, MAX(salary) OVER (PARTITION BY department) AS max_dept_salary FROM Employee;
-```
-Result: The rows remain! You get `A, IT, 500, (700)` and `B, IT, 700, (700)`. It simply *adds* aggregate information to the existing rows.
+-- 2. Rank rows
+RANK() OVER (ORDER BY x DESC)
 
-#### The Anatomy of `OVER()`
+-- 3. Previous row
+LAG(x) OVER (ORDER BY date)
 
-The `OVER()` clause is where the magic happens. It has two main sub-clauses:
+-- 4. Next row
+LEAD(x) OVER (ORDER BY date)
 
-1. **`PARTITION BY` (The Grouping Mechanism)**
-   - Defines which rows belong together. It's like `GROUP BY`, but without collapsing them.
-   - Example: `PARTITION BY department` means "calculate this metric separately for each department."
-
-2. **`ORDER BY` (The Sorting Mechanism)**
-   - Defines the order of rows *inside* that window.
-   - Essential for functions that depend on sequence, like `LAG()`, `LEAD()`, or running totals (`SUM()`).
-   - Example: `ORDER BY date` means "look at the previous row according to the timeline."
-
-#### Essential Memory Tricks & Patterns
-
-**1. The Ranking Trio:**
-- `ROW_NUMBER` ➔ Everyone gets a unique number (1, 2, 3, 4).
-- `RANK` ➔ Ties share rank, **gaps appear** (1, 2, 2, 4).
-- `DENSE_RANK` ➔ Ties share rank, **no gaps** (1, 2, 2, 3).
-
-**2. The Running Total Pattern:**
-```sql
--- The window keeps expanding: Jan 1 (100) -> Jan 1+2 (300) -> Jan 1+2+3 (600)
-SUM(amount) OVER (ORDER BY date) AS running_total
+-- 5. Calculate within a group while keeping rows
+AVG(x) OVER (PARTITION BY group_col)
 ```
 
-**3. The "Top N per Category" Pattern (Crucial for LeetCode):**
+Then start combining them:
 ```sql
--- Combine PARTITION BY + ORDER BY to rank items within categories
-RANK() OVER (PARTITION BY department ORDER BY salary DESC)
+ROW_NUMBER() OVER (
+    PARTITION BY department
+    ORDER BY salary DESC
+)
 ```
+That combination of `PARTITION BY` + `ORDER BY` + window functions is probably the most important window-function skill for the SQL problems you’re currently doing.
 ---
 
 ## PART 2: LeetCode SQL 50 — All Modules & Problems
