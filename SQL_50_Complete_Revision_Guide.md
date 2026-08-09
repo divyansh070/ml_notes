@@ -109,7 +109,60 @@ The most critical analytical tools in SQL. They perform calculations across a se
 | 🧮 **`COUNT()`** | **Counts** within a specific window. | Counting the number of transactions per user without dropping row-level details. |
 | 🔼 **`MAX()`** | Finds the **maximum** within a window. | Finding the highest ever score for a player up to their current game. |
 | 🔽 **`MIN()`** | Finds the **minimum** within a window. | Finding the absolute first order date for a customer (`MIN(date) OVER(PARTITION BY user)`). |
+### 💡 The Ultimate Window Function Mental Model
 
+Whenever you see: `XXX(...) OVER (...)`
+Read it aloud as: *"For this row, calculate `XXX` using this specific window of rows."*
+
+- `AVG(salary) OVER (PARTITION BY department)` ➔ *"For this employee, calculate the average salary of everyone in their department."*
+- `LAG(salary) OVER (ORDER BY id)` ➔ *"For this employee, give me the salary of the previous employee."*
+- `RANK() OVER (PARTITION BY department ORDER BY salary DESC)` ➔ *"For this employee, tell me their salary rank within their department."*
+
+#### Window Function vs GROUP BY (The Most Important Distinction)
+
+**`GROUP BY` collapses rows.**
+```sql
+SELECT department, MAX(salary) FROM Employee GROUP BY department;
+```
+Result: The individual employees vanish. You just get `IT ➔ 700`, `HR ➔ 900`.
+
+**Window Functions keep rows intact.**
+```sql
+SELECT employee, department, salary, MAX(salary) OVER (PARTITION BY department) AS max_dept_salary FROM Employee;
+```
+Result: The rows remain! You get `A, IT, 500, (700)` and `B, IT, 700, (700)`. It simply *adds* aggregate information to the existing rows.
+
+#### The Anatomy of `OVER()`
+
+The `OVER()` clause is where the magic happens. It has two main sub-clauses:
+
+1. **`PARTITION BY` (The Grouping Mechanism)**
+   - Defines which rows belong together. It's like `GROUP BY`, but without collapsing them.
+   - Example: `PARTITION BY department` means "calculate this metric separately for each department."
+
+2. **`ORDER BY` (The Sorting Mechanism)**
+   - Defines the order of rows *inside* that window.
+   - Essential for functions that depend on sequence, like `LAG()`, `LEAD()`, or running totals (`SUM()`).
+   - Example: `ORDER BY date` means "look at the previous row according to the timeline."
+
+#### Essential Memory Tricks & Patterns
+
+**1. The Ranking Trio:**
+- `ROW_NUMBER` ➔ Everyone gets a unique number (1, 2, 3, 4).
+- `RANK` ➔ Ties share rank, **gaps appear** (1, 2, 2, 4).
+- `DENSE_RANK` ➔ Ties share rank, **no gaps** (1, 2, 2, 3).
+
+**2. The Running Total Pattern:**
+```sql
+-- The window keeps expanding: Jan 1 (100) -> Jan 1+2 (300) -> Jan 1+2+3 (600)
+SUM(amount) OVER (ORDER BY date) AS running_total
+```
+
+**3. The "Top N per Category" Pattern (Crucial for LeetCode):**
+```sql
+-- Combine PARTITION BY + ORDER BY to rank items within categories
+RANK() OVER (PARTITION BY department ORDER BY salary DESC)
+```
 ---
 
 ## PART 2: LeetCode SQL 50 — All Modules & Problems
