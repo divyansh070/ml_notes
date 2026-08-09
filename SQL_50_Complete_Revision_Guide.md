@@ -94,16 +94,21 @@ In SQL, any comparison with `NULL` returns `UNKNOWN` (neither `TRUE` nor `FALSE`
   * **Example:** `GROUP_CONCAT(product_name SEPARATOR ', ')` ➔ `'Apple, Banana, Orange'`.
 
 #### Window Functions
-- `ROW_NUMBER() OVER (PARTITION BY col ORDER BY col2)`: Assigns a unique integer `1, 2, 3, 4` (no duplicates).
-  * **Example:** `ROW_NUMBER() OVER(ORDER BY salary DESC)` ➔ `1, 2, 3, 4`.
-- `RANK() OVER (...)`: Same as `ROW_NUMBER` but leaves gaps on ties (`1, 2, 2, 4`).
-  * **Example:** `RANK() OVER(ORDER BY salary DESC)` ➔ If two people are 2nd highest, the next is 4th.
-- `DENSE_RANK() OVER (...)`: Same as `RANK` but no gaps on ties (`1, 2, 2, 3`).
-  * **Example:** `DENSE_RANK() OVER(ORDER BY salary DESC)` ➔ If two people are 2nd highest, the next is 3rd (often used for "Nth Highest Salary" problems).
-- `LEAD(col, 1) OVER (...)` / `LAG(...)`: Look ahead / look behind 1 row.
-  * **Example:** `LEAD(num, 1) OVER()` ➔ Gets the value of `num` from the next row (useful for consecutive numbers).
-- `SUM(col) OVER (ORDER BY col ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)`: Rolling 7-day sum.
-  * **Example:** Computes a running total for the last 7 rows including the current one.
+
+The most critical analytical tools in SQL. They perform calculations across a set of table rows that are related to the current row, without collapsing them into a single output row (unlike `GROUP BY`).
+
+| Function | What it does | Example Use Case |
+| :--- | :--- | :--- |
+| 🔢 **`ROW_NUMBER()`** | Gives every row a unique sequential integer. | `ROW_NUMBER() OVER(ORDER BY salary DESC)` ➔ `1, 2, 3, 4` |
+| 🥈 **`RANK()`** | Ranks rows, leaving **gaps** after ties. | `RANK() OVER(ORDER BY salary DESC)` ➔ `1, 2, 2, 4` |
+| 🥇 **`DENSE_RANK()`** | Ranks rows, leaving **no gaps** after ties. | `DENSE_RANK() OVER(ORDER BY salary DESC)` ➔ `1, 2, 2, 3` |
+| ⏪ **`LAG()`** | Looks at the **previous** row's value. | Finding the difference in sales from yesterday to today. |
+| ⏩ **`LEAD()`** | Looks at the **next** row's value. | Checking if the next login date is exactly 1 day after the current one. |
+| 📈 **`SUM()`** | Calculates a **running/cumulative sum**. | `SUM(revenue) OVER(ORDER BY date)` ➔ YTD Revenue. |
+| 📊 **`AVG()`** | Calculates a **moving/partition average**. | `AVG(price) OVER(ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)` ➔ 7-day moving average. |
+| 🧮 **`COUNT()`** | **Counts** within a specific window. | Counting the number of transactions per user without dropping row-level details. |
+| 🔼 **`MAX()`** | Finds the **maximum** within a window. | Finding the highest ever score for a player up to their current game. |
+| 🔽 **`MIN()`** | Finds the **minimum** within a window. | Finding the absolute first order date for a customer (`MIN(date) OVER(PARTITION BY user)`). |
 
 ---
 
