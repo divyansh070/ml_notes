@@ -1521,3 +1521,55 @@ Interviewers will always test if you know when *not* to use K-Means.
 
 **Q4: Is feature scaling required for K-Means? Why or why not?**
 *   **Answer:** Yes, it is absolutely required. K-Means calculates the Euclidean distance between points. If one feature ranges from 0 to 100,000 and another ranges from 0 to 1, the algorithm will mathematically treat the larger feature as exponentially more important, completely ignoring the structural variance of the smaller feature.
+
+
+### 2. DBSCAN (Density-Based Spatial Clustering)
+
+K-Means is great, but it has a fatal flaw: it assumes clusters are perfectly spherical. If you have "nested" clusters (like a crescent moon wrapping around another cluster), K-Means will draw a straight line right through them, failing completely. 
+
+**DBSCAN** (Density-Based Spatial Clustering of Applications with Noise) solves this by clustering data based on continuous regions of high density. It doesn't care about shapes, and it doesn't force every point into a cluster.
+
+#### 1. The Two Hyperparameters
+To measure "density," DBSCAN relies on two user-defined parameters:
+1.  **`eps` (Epsilon):** The radius of the circle drawn around a data point to look for neighbors. 
+2.  **`min_samples`:** The minimum number of data points that must fall inside that circle for the region to be considered "dense."
+
+#### 2. The Three Types of Points
+Before grouping anything, DBSCAN looks at every single data point and categorizes it into one of three buckets:
+*   **Core Point:** A point that has at least `min_samples` points within its `eps` radius. (These are the dense anchors of the clusters).
+*   **Border Point (Non-Core):** A point that has *fewer* than `min_samples` in its radius, BUT it is close enough to overlap with a Core Point's radius.
+*   **Noise Point (Outlier):** A point that is entirely isolated. It is not a Core Point, and it is not within the radius of any Core Point.
+
+#### 3. The Algorithm (Step-by-Step)
+Once every point is categorized, the clustering is basically a chain reaction:
+1.  **Start a Cluster:** The algorithm picks a random, unassigned **Core Point** and assigns it to Cluster 1.
+2.  **Extend the Core:** It looks at all the Core Points within the starting point's radius and adds them to Cluster 1. Then, it looks at the radii of *those* new Core Points, and adds any Core Points they touch. This chain reaction continues until no more Core Points can be reached.
+3.  **Add the Borders:** Once the core of the cluster is completely built, the algorithm assigns any neighboring **Border Points** to the cluster. *Crucial rule: Border points can join a cluster, but they cannot extend it further.*
+4.  **Repeat:** The algorithm picks the next unassigned Core Point and starts Cluster 2.
+5.  **Identify Noise:** Once all Core Points are assigned, any remaining, unattached points are officially labeled as **Noise (Outliers)**.
+
+#### 4. Pros and Cons of DBSCAN
+**Pros:**
+*   You do **not** need to specify the number of clusters ($k$) beforehand!
+*   It can find arbitrarily shaped clusters (moons, circles, S-shapes).
+*   It is robust to outliers (it actively identifies and ignores them, whereas K-Means gets pulled off-center by them).
+
+**Cons:**
+*   **Varying Densities:** If your dataset has one cluster that is extremely dense and another cluster that is very sparse, DBSCAN will fail. You can only pick one `eps` radius. If you make it too small, the sparse cluster becomes "noise." If you make it too big, the dense clusters merge together.
+*   **High Dimensions:** Because it relies on Euclidean distance to draw its `eps` circles, DBSCAN suffers heavily from the Curse of Dimensionality.
+
+---
+
+#### 5. Placement Prep: DBSCAN Flashcards
+
+**Q1: In an interview, how would you explain the difference between a Core Point, a Border Point, and a Noise Point in DBSCAN?**
+*   **Answer:** A Core Point is in a dense region, meaning it has at least `min_samples` neighbors within a radius of `eps`. A Border Point is in a sparse region (fewer than `min_samples`), but it sits just inside the radius of a Core Point. A Noise Point is completely isolated; it is neither a Core Point nor close to one.
+
+**Q2: What is the single biggest advantage DBSCAN has over K-Means?**
+*   **Answer:** DBSCAN can identify clusters of arbitrary, non-linear shapes (like nested rings or crescent moons) because it links points based on continuous local density. K-Means assumes clusters are convex and spherical, causing it to fail on complex geometries. Additionally, DBSCAN naturally identifies and isolates outliers, whereas K-Means forces every outlier into a cluster, skewing the centroids.
+
+**Q3: A dataset contains two distinct clusters, but one cluster is extremely tightly packed, and the other is very spread out. Why will standard DBSCAN struggle with this?**
+*   **Answer:** DBSCAN applies a single, global density threshold (`eps` and `min_samples`) across the entire dataset. If you set `eps` small enough to properly define the tight cluster, the spread-out cluster will be incorrectly classified as Noise. If you set `eps` large enough to capture the spread-out cluster, the tight cluster might merge with surrounding noise or other clusters. *(Note: An algorithm called OPTICS was created to solve this specific flaw).*
+
+**Q4: A Border point sits exactly halfway between a Core Point in Cluster A and a Core Point in Cluster B. Which cluster does the Border point join?**
+*   **Answer:** DBSCAN builds clusters sequentially. The Border point will be assigned to whichever cluster the algorithm happens to build *first*. Once a point is assigned to a cluster, it cannot be reassigned.
