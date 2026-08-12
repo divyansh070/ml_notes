@@ -412,14 +412,22 @@ The RBF kernel uses the exponential function ($e^{- \gamma \cdot \text{distance}
 
 ### 5. Support Vector Regression (SVR): Flipping the Goal
 
+**How to Explain SVR in an Interview (The Garden Hose Analogy):**
+Imagine laying down a thick, transparent garden hose over a scatter plot of data points on the floor. Your goal is to cover as many data points as possible with the hose. 
+*   The thickness of the hose is **$\epsilon$**. 
+*   You don't care exactly where the points sit *inside* the hose; as long as they are covered, their error is completely ignored (it is precisely $0$). 
+*   You only penalize the points that stick out *outside* of the hose. SVR's mathematical goal is to lay the hose down in a way that minimizes the total distance of those outside points.
+
 **The Core Intuition:**
-SVM Classification tries to fit the widest possible empty street between two classes while keeping margin violations out. **SVM Regression (SVR) does the exact mathematical opposite:** it tries to fit as many training instances as possible *on* the street while limiting margin violations (points that fall *off* the street).
+SVM Classification tries to fit the widest possible empty street between two classes while keeping margin violations out. **SVM Regression (SVR) does the exact mathematical opposite:** it tries to fit as many training instances as possible *inside* the street while limiting margin violations (points that fall *outside* the street).
 
 **The $\epsilon$ (Epsilon) Tube:**
 Instead of a margin, SVR creates an $\epsilon$-insensitive tube around the regression line. 
 *   The width of this tube is controlled by the hyperparameter **$\epsilon$**.
 *   A **higher $\epsilon$** creates a wider tube (fitting more points inside, creating a simpler/flatter model).
 *   A **lower $\epsilon$** creates a narrower tube (forcing the model to bend more tightly to the data, risking overfitting).
+![Linear SVR Epsilon Tubes](./assets/svr_linear.png)
+*(In the image above, the pink highlighted points are the Support Vectors! Notice how the wider street on the left captures almost all points easily, while the narrower street on the right has many points spilling out).*
 
 **The $\epsilon$-Insensitive Property (Core Interview Fact):**
 Any data point that falls *inside* the $\epsilon$-tube is considered "correct" and incurs zero loss. Because of this, adding more training points inside the margin does **not affect the model's predictions at all**. The model is completely insensitive to them!
@@ -432,6 +440,8 @@ What happens to the points that fall *outside* the tube?
 
 **Non-Linear Regression:**
 Just like classification, SVR can use the **Kernel Trick** (Polynomial or RBF kernels) to map data into higher dimensions. This allows SVR to draw incredibly complex, curved $\epsilon$-tubes to fit non-linear data effortlessly!
+![Polynomial SVR Kernels](./assets/svr_poly.png)
+*(In the image above, the model on the left has $C=100$, meaning it strictly penalizes points outside the tube, forcing the curve to wiggle and overfit. The model on the right has $C=0.01$, meaning it is very relaxed, resulting in a smoother, more generalized curve).*
 
 ---
 
