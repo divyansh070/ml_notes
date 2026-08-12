@@ -410,7 +410,32 @@ The RBF kernel uses the exponential function ($e^{- \gamma \cdot \text{distance}
 
 ---
 
-### 5. Placement Prep: SVMs in the Real World
+### 5. Support Vector Regression (SVR): Flipping the Goal
+
+**The Core Intuition:**
+SVM Classification tries to fit the widest possible empty street between two classes while keeping margin violations out. **SVM Regression (SVR) does the exact mathematical opposite:** it tries to fit as many training instances as possible *on* the street while limiting margin violations (points that fall *off* the street).
+
+**The $\epsilon$ (Epsilon) Tube:**
+Instead of a margin, SVR creates an $\epsilon$-insensitive tube around the regression line. 
+*   The width of this tube is controlled by the hyperparameter **$\epsilon$**.
+*   A **higher $\epsilon$** creates a wider tube (fitting more points inside, creating a simpler/flatter model).
+*   A **lower $\epsilon$** creates a narrower tube (forcing the model to bend more tightly to the data, risking overfitting).
+
+**The $\epsilon$-Insensitive Property (Core Interview Fact):**
+Any data point that falls *inside* the $\epsilon$-tube is considered "correct" and incurs zero loss. Because of this, adding more training points inside the margin does **not affect the model's predictions at all**. The model is completely insensitive to them!
+
+**Slack Variables & Support Vectors in SVR:**
+What happens to the points that fall *outside* the tube? 
+*   We use **Slack Variables ($\xi$)** to measure how far outside the tube these errors are. 
+*   The $C$ parameter dictates how heavily we penalize these slack variables (High $C$ = strict penalty for points outside the tube).
+*   *Mind-Bending Fact:* In SVR, the points that fall **outside or on the edge** of the tube are the actual **Support Vectors**! They are the only points that dictate the shape of the regression line. 
+
+**Non-Linear Regression:**
+Just like classification, SVR can use the **Kernel Trick** (Polynomial or RBF kernels) to map data into higher dimensions. This allows SVR to draw incredibly complex, curved $\epsilon$-tubes to fit non-linear data effortlessly!
+
+---
+
+### 6. Placement Prep: SVMs in the Real World
 
 #### A: The Visual Guide to the $C$ Parameter
 The $C$ parameter dictates how strictly the model avoids misclassifications. It physically alters both the margin width and the number of Support Vectors.
