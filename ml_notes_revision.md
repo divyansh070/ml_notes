@@ -795,3 +795,101 @@ Every branch now terminates in a pure leaf node ($G = 0$). Training is complete.
                [Leaf: Go Walk]    [Leaf: Stay Home]
                (Gini=0, Recs=1)   (Gini=0, Recs=2)
 ```
+
+
+
+### 7. Decision Tree Regression
+
+Decision Trees can also be used for **regression tasks** (predicting continuous target values instead of discrete classes). While Classification Trees predict a class based on majority vote, Regression Trees predict a continuous number ($\hat{y}$).
+
+#### 1. The Core Intuition: The Step Function
+Instead of drawing a curved line through the data (like Polynomial Regression), a Decision Tree Regressor slices the input space into rectangular regions and predicts a **constant value** for each region.
+
+*   **Prediction Value ($\hat{y}_{\text{node}}$):** The predicted value for any instance falling into a leaf node is simply the **average (mean) target value ($y$)** of all training instances in that node.
+*   **The Curve Shape:** Geometrically, this creates a **piecewise constant step function**. 
+    *   `max_depth = 2`: Slices the data into 4 coarse steps.
+    *   `max_depth = 3`: Slices the data into 8 finer steps, fitting the curve much closely.
+    *   *Warning:* If `max_depth` is too high, the tree creates hundreds of tiny steps around noise points, causing severe overfitting.
+
+![Predictions of two Decision Tree regression models](./assets/decision_tree_regression_predictions.png)
+
+---
+
+#### 2. The CART Algorithm Cost Function for Regression
+The CART algorithm works mostly the same way as in classification, except that instead of trying to split the training set to minimize Gini Impurity, **it tries to split the training set to minimize Mean Squared Error (MSE)**.
+
+To evaluate a split using feature $k$ and threshold $t_k$, CART minimizes the weighted cost function $J(k, t_k)$:
+
+$$ J(k, t_k) = \frac{m_{\text{left}}}{m} \text{MSE}_{\text{left}} + \frac{m_{\text{right}}}{m} \text{MSE}_{\text{right}} $$
+
+Where:
+1.  **Node Prediction ($\hat{y}_{\text{node}}$):** The mean target value of instances in the node.
+    $$ \hat{y}_{\text{node}} = \frac{1}{m_{\text{node}}} \sum_{i \in \text{node}} y^{(i)} $$
+
+2.  **Node Squared Error ($\text{MSE}_{\text{node}}$):** The total error/variance of instances relative to that node's mean prediction.
+    $$ \text{MSE}_{\text{node}} = \sum_{i \in \text{node}} \left( \hat{y}_{\text{node}} - y^{(i)} \right)^2 $$
+
+---
+
+#### 3. Classification vs. Regression Trees (Quick Summary)
+
+| Feature | Classification Tree | Regression Tree |
+| :--- | :--- | :--- |
+| **Target Variable ($y$)** | Categorical (e.g., Cat vs. Dog) | Continuous (e.g., Price, Temperature) |
+| **Node Prediction ($\hat{y}$)** | Majority class in the leaf | Mean value of instances in the leaf |
+| **Split Criterion** | Minimizes Gini Impurity / Entropy | Minimizes Weighted MSE |
+| **Output Shape** | Axis-aligned boundary boxes | Piecewise constant step function |
+| **Scaling Required?** | **No** | **No** |
+
+---
+
+#### 4. Visualizing Decision Tree Regression in Python
+
+You can run the following standalone script to recreate the exact side-by-side plots above. It generates a noisy quadratic dataset and trains two models to clearly demonstrate how depth affects the number of steps in the piecewise function.
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeRegressor
+
+plt.style.use('seaborn-v0_8-whitegrid')
+
+# 1. Generate noisy quadratic dataset
+np.random.seed(42)
+m = 200
+X = np.random.rand(m, 1) * 2 - 1 # range [-1, 1]
+# y = 0.5 X^2 + X + noise
+y = 0.5 * X**2 + X + 0.1 * np.random.randn(m, 1)
+
+# 2. Train two DecisionTreeRegressors
+tree_reg1 = DecisionTreeRegressor(max_depth=2, random_state=42)
+tree_reg2 = DecisionTreeRegressor(max_depth=3, random_state=42)
+tree_reg1.fit(X, y)
+tree_reg2.fit(X, y)
+
+# 3. Plotting function
+def plot_regression_predictions(tree_reg, X, y, axes=[-1, 1, -1.2, 1.8], ylabel="$y$"):
+    x1 = np.linspace(axes[0], axes[1], 500).reshape(-1, 1)
+    y_pred = tree_reg.predict(x1)
+    plt.axis(axes)
+    plt.xlabel("$X$", fontsize=18)
+    if ylabel:
+        plt.ylabel(ylabel, fontsize=18, rotation=0)
+    plt.plot(X, y, "b.")
+    plt.plot(x1, y_pred, "r-", linewidth=3, label=r"$\hat{y}$")
+
+# 4. Generate side-by-side plots
+plt.figure(figsize=(12, 5))
+
+plt.subplot(121)
+plot_regression_predictions(tree_reg1, X, y)
+plt.title("max_depth=2 (4 Steps)", fontsize=16)
+plt.legend(loc="upper left", fontsize=14)
+
+plt.subplot(122)
+plot_regression_predictions(tree_reg2, X, y, ylabel=None)
+plt.title("max_depth=3 (8 Steps)", fontsize=16)
+
+plt.tight_layout()
+plt.savefig("decision_tree_regression_predictions.png", dpi=300)
+```
