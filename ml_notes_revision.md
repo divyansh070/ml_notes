@@ -917,3 +917,57 @@ By setting `oob_score=True` when training the Bagging Classifier, scikit-learn a
 *   **Actual Test Set Accuracy:** `0.9120` (91.20%)
 
 This proves that the OOB evaluation is a remarkably close estimate of true generalization accuracy, and we got it without sacrificing any training data to a validation set!
+
+### 6. Placement Prep: Voting Classifiers & Bagging (Flashcards)
+
+**Q1: What is the exact difference between Hard Voting and Soft Voting?**
+*   **Answer:** Hard Voting aggregates the predicted class *labels* and outputs the strict majority vote. Soft Voting averages the predicted class *probabilities* across all models and outputs the class with the highest average probability. Soft voting generally yields higher accuracy but requires all base models to support `predict_proba()`.
+
+**Q2: Why is it crucial to use diverse base models in a Voting Classifier?**
+*   **Answer:** Ensemble learning relies on the "Wisdom of the Crowd" and the Law of Large Numbers. If all models are mathematically similar and trained on the same data, they will make the exact same highly correlated errors. Combining completely different algorithms (e.g., SVM, Logistic Regression, Trees) ensures their errors are uncorrelated, allowing the majority vote to correct individual mistakes.
+
+**Q3: Explain the difference between Bagging and Pasting.**
+*   **Answer:** Both techniques train the exact same algorithm on random subsets of the training data. **Bagging** (Bootstrap Aggregating) samples instances *with replacement* (instances can be picked multiple times). **Pasting** samples *without replacement*. Bagging is generally preferred because it introduces more diversity, resulting in better generalization.
+
+**Q4: How does Bagging affect the Bias and Variance of an algorithm like a Decision Tree?**
+*   **Answer:** A single unconstrained Decision Tree has low bias but very high variance (severe overfitting). Bagging averages hundreds of these trees together. The resulting ensemble maintains a **similar low bias** but achieves a drastically **lower variance**, effectively smoothing out the overfitted decision boundaries.
+
+**Q5: What is Out-of-Bag (OOB) Evaluation and what mathematical constant drives it?**
+*   **Answer:** When sampling *with replacement* (Bagging), mathematically, only about 63% of the training instances are sampled for any given predictor. The remaining **37%** are "Out-of-Bag" (OOB). This ratio is derived from the limit $(1 - 1/m)^m \approx 1/e$. 
+
+**Q6: Why is the OOB score so valuable in Machine Learning pipelines?**
+*   **Answer:** Because an individual predictor never saw its specific 37% OOB instances during training, those instances act as a dynamically generated, "free" validation set. You can get a highly accurate generalization score (`oob_score_`) without sacrificing any rows of data to a traditional 80/20 train/test split.
+
+**Q7: Why is it a catastrophic error to perform feature selection on your entire dataset before using a Bagging classifier with `oob_score=True`?**
+*   **Answer:** This causes **Data Leakage**. If you run feature selection on the entire dataset first, the algorithm has indirectly "peeked" at the patterns in the OOB instances. The OOB instances are no longer mathematically isolated, making the `oob_score_` artificially inflated and completely untrustworthy for real-world generalization.
+
+
+
+### 7. Random Forests
+
+A **Random Forest** is simply an ensemble of Decision Trees, generally trained via the Bagging method. However, it introduces one crucial algorithmic tweak to make the individual trees even more mathematically diverse, which dramatically lowers the overall variance of the model.
+
+#### 1. The Magic of Random Subspaces (Feature Sampling)
+When a standard Decision Tree grows, it scans **every single feature** at every node to find the absolute best split. 
+
+If you have a dataset where one specific feature (e.g., "Account Balance") is massively more predictive than the others, almost every single tree in a standard Bagging ensemble will use that exact same feature as its root node. The trees become highly correlated, meaning they all make the same mistakes, defeating the purpose of the ensemble.
+
+**The Random Forest Fix:**
+When you train a Random Forest, the algorithm is forced to pick the best split from a **random subset of features** at each node (controlled by the `max_features` hyperparameter), rather than looking at all features. This restricts dominant features from taking over, forces the trees to explore alternative paths, and trades a slight increase in bias for a massive drop in variance.
+
+#### 2. Extremely Randomized Trees (Extra-Trees)
+If you want to push this randomness even further to prevent overfitting and speed up training, you can use an **Extra-Trees** ensemble (`ExtraTreesClassifier`). 
+
+*   **The Speedup:** Finding the mathematically perfect split threshold is the most computationally expensive part of training a tree because it requires sorting the data. Extra-Trees skip this step. They pick completely **random thresholds** for the features being evaluated.
+*   **The Result:** Because they do not sort and search, Extra-Trees train blazingly fast. This extreme randomness makes them even more resilient to overfitting than standard Random Forests.
+
+#### 3. Feature Importance (The White-Box Superpower)
+Because Random Forests force hundreds of trees to evaluate completely different combinations of features, they are the ultimate tool for measuring **Feature Importance**. 
+
+A Random Forest calculates a feature's importance mathematically:
+*   It looks at every single node across all trees where a specific feature was used to make a split.
+*   It measures exactly how much the **Gini Impurity** dropped after that split.
+*   It weights that impurity drop by the number of training samples that passed through that node.
+*   It averages that weighted impurity reduction across the entire forest. Features that consistently create the purest child nodes get the highest scores.
+
+---
