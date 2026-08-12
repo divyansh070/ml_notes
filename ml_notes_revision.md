@@ -853,67 +853,6 @@ To truly see the power of "The Wisdom of the Crowd," you can run the following P
 2.  **Hard Voting Ensemble** (500 Decision Trees voting by majority rule)
 3.  **Soft Voting Ensemble** (500 Decision Trees voting by probability averaging)
 
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.datasets import make_moons
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import BaggingClassifier
-
-plt.style.use('seaborn-v0_8-whitegrid')
-
-# 1. Generate Toy 2D Dataset (Slightly noisy moons)
-X, y = make_moons(n_samples=500, noise=0.30, random_state=42)
-
-# 2. Train Models
-# Model 1: Single Unconstrained Decision Tree
-tree_clf = DecisionTreeClassifier(random_state=42)
-tree_clf.fit(X, y)
-
-# We use BaggingClassifier to train 500 different trees on random subsets of data.
-# By default, scikit-learn's BaggingClassifier uses Soft Voting if predict_proba is available.
-bag_clf = BaggingClassifier(
-    DecisionTreeClassifier(random_state=42), n_estimators=500,
-    bootstrap=True, n_jobs=-1, random_state=42
-)
-bag_clf.fit(X, y)
-
-def hard_voting_predict(X_new):
-    # Extract hard votes from all 500 trees and take the majority vote
-    preds = np.array([tree.predict(X_new) for tree in bag_clf.estimators_])
-    return np.round(np.mean(preds, axis=0))
-
-# 3. Plotting Boundaries
-def plot_boundaries(X, y, pred_func, ax, title):
-    x0s = np.linspace(X[:, 0].min() - 0.5, X[:, 0].max() + 0.5, 100)
-    x1s = np.linspace(X[:, 1].min() - 0.5, X[:, 1].max() + 0.5, 100)
-    x0, x1 = np.meshgrid(x0s, x1s)
-    X_new = np.c_[x0.ravel(), x1.ravel()]
-    
-    y_pred = pred_func(X_new).reshape(x0.shape)
-    
-    ax.contourf(x0, x1, y_pred, alpha=0.3, cmap=plt.cm.brg)
-    ax.plot(X[:, 0][y==0], X[:, 1][y==0], "bs", alpha=0.6)
-    ax.plot(X[:, 0][y==1], X[:, 1][y==1], "g^", alpha=0.6)
-    ax.set_title(title, fontsize=16)
-    ax.set_xlabel(r"$x_1$", fontsize=14)
-    ax.set_ylabel(r"$x_2$", fontsize=14, rotation=0)
-
-fig, axes = plt.subplots(1, 3, figsize=(18, 5), sharey=True)
-
-# Plot 1: Single Decision Tree
-plot_boundaries(X, y, tree_clf.predict, axes[0], "Single Decision Tree\n(Severe Overfitting)")
-
-# Plot 2: Hard Voting (500 Trees)
-plot_boundaries(X, y, hard_voting_predict, axes[1], "Hard Voting (500 Trees)\n(Smoother, but some rigid edges)")
-
-# Plot 3: Soft Voting (500 Trees)
-plot_boundaries(X, y, bag_clf.predict, axes[2], "Soft Voting (500 Trees)\n(Highly Generalized, smooth curves)")
-
-plt.tight_layout()
-plt.savefig("Voting_Boundaries_Comparison.png", dpi=300)
-```
-
 **Output: Boundary Smoothing**
 Notice how the single tree severely overfits to the noise, drawing jagged and erratic boundaries. The Hard Voting ensemble smooths out the boundaries significantly by majority rule, but still has a few rigid edges. The Soft Voting ensemble achieves the smoothest, most generalized boundary by weighing the confidence of each tree!
 ![Voting Boundaries Comparison](./assets/Voting_Boundaries_Comparison.png)
@@ -931,3 +870,50 @@ Similarly, if you combine 1,000 independent classifiers that are each individual
 
 **The Diversity Rule:**
 The math only works if the errors the models make are completely **uncorrelated**. Combining 500 identical Decision Trees trained on the exact same data won't help because they will all make the exact same mistakes. Ensemble methods require **diversity**, which is achieved by either using completely different mathematical algorithms (e.g., SVM + Logistic Regression + Trees) or by training the same algorithm on completely different random subsets of the data.
+
+
+### 4. Bagging and Pasting
+To get a diverse set of predictors, one approach is to use completely different training algorithms (like we did with Voting Classifiers). Another approach is to use the exact same training algorithm for every predictor, but train them on different random subsets of the training set.
+
+#### A. The Core Concepts: Bagging vs. Pasting
+*   **Bagging (Bootstrap Aggregating):** Sampling is performed *with replacement*. This means the same training instance can be sampled multiple times for the same predictor.
+*   **Pasting:** Sampling is performed *without replacement*. Once an instance is picked for a predictor, it cannot be picked again for that same predictor.
+
+**How Aggregation Works:**
+Once all predictors are trained, the ensemble makes a prediction for a new instance by simply aggregating the predictions of all predictors:
+*   **Classification:** The statistical mode (i.e., the most frequent prediction, just like hard voting).
+*   **Regression:** The average of all the predictions.
+
+#### B. Why Bagging Reduces Overfitting (Variance)
+Individual predictors trained on subsets of data have higher bias than if they were trained on the entire original dataset. However, aggregation reduces both bias and variance.
+
+The net result is that the ensemble has a similar bias but a significantly lower variance than a single predictor trained on the original dataset. Geometrically, bagging completely smooths out the jagged, overfitted decision boundaries of single Decision Trees. Because bagging allows training instances to be sampled multiple times, it is generally preferred over pasting as it results in slightly better models.
+
+#### C. Out-of-Bag (OOB) Evaluation (The "Free" Validation Set)
+This is a massive advantage of Bagging and a concept interviewers absolutely love to ask about.
+
+When you sample with replacement (Bagging), some instances may be sampled several times for any given predictor, while others may not be sampled at all. Mathematically, as the dataset grows large, a predictor samples only about **63%** of the training instances on average.
+
+The remaining **37%** of the training instances that are not sampled are called **Out-of-Bag (OOB)** instances. Note that they are not the same 37% for all predictors.
+
+**The Magic Trick:**
+Because the predictor never saw the OOB instances during training, it can be evaluated on these instances without the need for a separate validation set or cross-validation. You can evaluate the overall ensemble itself by averaging out the OOB evaluations of each individual predictor. This gives you a highly accurate generalization score for "free" while preserving your actual training data.
+
+---
+
+### 5. Visualizing Bagging & OOB Evaluation in Python
+
+To see how Bagging dramatically improves generalization over a single Decision Tree, we simulated a Bagging Ensemble of 500 trees on a noisy `make_moons` dataset.
+
+**1. Decision Boundary Smoothing**
+Notice how the single, unconstrained tree severely overfits by creating highly jagged slivers to memorize the training data. The Bagged Ensemble, however, completely smooths out the boundaries and isolates the noise perfectly!
+
+![Bagging Boundaries Comparison](./assets/Bagging_Boundaries_Comparison.png)
+
+**2. The Power of the OOB Score**
+By setting `oob_score=True` when training the Bagging Classifier, scikit-learn automatically evaluated the ensemble using the 37% "Out-of-Bag" data points that each tree never saw. We then compared this "free" OOB score to the accuracy on an actual, unseen Test set:
+
+*   **Bagging OOB Score (Free Validation):** `0.8960` (89.60%)
+*   **Actual Test Set Accuracy:** `0.9120` (91.20%)
+
+This proves that the OOB evaluation is a remarkably close estimate of true generalization accuracy, and we got it without sacrificing any training data to a validation set!
