@@ -6,6 +6,10 @@
 3. [Part 2: Logistic Regression (Classification Baseline)](#part-2-logistic-regression-classification-baseline)
 4. [Part 3: Classification Evaluation Metrics](#part-3-classification-evaluation-metrics)
 5. [Part 4: Support Vector Machines (SVM)](#part-4-support-vector-machines-svm)
+6. [Part 5: Decision Trees (Classification)](#part-5-decision-trees-classification)
+7. [Part 6: Ensemble Learning](#part-6-ensemble-learning)
+8. [Part 7: Principal Component Analysis (PCA)](#part-7-principal-component-analysis-pca)
+9. [Part 8: Unsupervised Learning — Clustering](#part-8-unsupervised-learning--clustering)
 
 ---
 
@@ -1564,7 +1568,7 @@ Once every point is categorized, the clustering is basically a chain reaction:
 
 Here is a step-by-step visualization of how DBSCAN separates nested clusters that K-Means fails to handle. Notice how it actively categorizes points and builds clusters by linking dense Core Points together:
 
-![DBSCAN Step-by-Step Algorithm](./assets/dbscan_step_by_step.png)
+![DBSCAN Step-by-Step Algorithm](./assets/dbscan_step_by_step_annotated.png)
 
 ---
 
