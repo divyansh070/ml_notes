@@ -1585,3 +1585,51 @@ Here is a step-by-step visualization of how DBSCAN separates nested clusters tha
 
 **Q4: A Border point sits exactly halfway between a Core Point in Cluster A and a Core Point in Cluster B. Which cluster does the Border point join?**
 *   **Answer:** DBSCAN builds clusters sequentially. The Border point will be assigned to whichever cluster the algorithm happens to build *first*. Once a point is assigned to a cluster, it cannot be reassigned.
+
+
+
+
+## Part 1: Multi-Layer Perceptrons (MLPs) & Non-Linearity
+
+A standard Linear Regression or Logistic Regression model is essentially a single neuron. It takes inputs, multiplies them by weights, adds a bias, and draws a straight line. If your data is highly complex (like a circle inside a circle, or an image of a dog), a single straight line is useless.
+
+A **Multi-Layer Perceptron (MLP)** solves this by stacking hundreds or thousands of neurons together in a specific architecture. 
+
+### 1. The Architecture of an MLP
+An MLP is a **Feedforward Neural Network**, meaning data flows strictly in one direction (from left to right) with no loops. It consists of three types of layers:
+1.  **Input Layer:** The raw data entering the network. (If your dataset has 10 features, you have 10 input neurons).
+2.  **Hidden Layers:** The layers sandwiched in the middle. This is where the network does the actual "thinking" and feature extraction. A network is considered "Deep" Learning if it has two or more hidden layers.
+3.  **Output Layer:** The final prediction. (For binary classification, this is a single neuron outputting a probability between 0 and 1).
+
+**Fully Connected (Dense):** In a standard MLP, every single neuron in one layer is physically connected to every single neuron in the next layer. Each connection has its own specific **weight**, and every receiving neuron has its own **bias**.
+
+### 2. The Secret Sauce: Activation Functions
+If you build a massive neural network with 10 hidden layers and 1,000 neurons, but you do *not* use an activation function, the entire network will mathematically collapse back into a single linear regression model. 
+
+*Linear + Linear + Linear = Linear.*
+
+To solve complex problems, we must inject **non-linearity** into the network. We do this by passing the output of every neuron through an Activation Function before sending it to the next layer.
+
+#### The Big Three Activation Functions:
+1.  **ReLU (Rectified Linear Unit):** The undisputed default for Hidden Layers. It simply outputs the input directly if it is positive; otherwise, it outputs zero. It is computationally incredibly fast and solves major mathematical issues during training.
+    $$ \text{ReLU}(x) = \max(0, x) $$
+2.  **Sigmoid:** Squashes any number into a range between 0 and 1. It is almost exclusively used in the **Output Layer** for binary classification (e.g., Is this spam? 0.99 = Yes). It is rarely used in hidden layers today because it causes the network to stop learning (the Vanishing Gradient problem).
+    $$ \sigma(x) = \frac{1}{1 + e^{-x}} $$
+3.  **Softmax:** Used exclusively in the **Output Layer** for Multi-Class Classification (e.g., Is this a cat, dog, or bird?). It takes a vector of raw scores and turns them into a list of probabilities that perfectly sum to 1.
+
+---
+
+![MLP Decision Boundary over 500 Epochs](./assets/mlp_decision_boundary.png)
+
+---
+
+### 3. Placement Prep: MLP Flashcards
+
+**Q1: Why is an activation function required in the hidden layers of a Neural Network?**
+*   **Answer:** Without non-linear activation functions, the entire neural network is just applying a series of matrix multiplications. Because the product of multiple linear transformations is just another linear transformation, the deep network would be mathematically equivalent to a single-layer linear regression model, entirely unable to learn complex, non-linear patterns.
+
+**Q2: What happens if you initialize all the weights in a Multi-Layer Perceptron to exactly zero before training?**
+*   **Answer:** The network will fail to learn. This is called the "Symmetry Problem." If all weights are zero, every neuron in a hidden layer will receive the exact same signal, calculate the exact same gradient during backpropagation, and update by the exact same amount. The network will act as if it only has one neuron per layer, completely destroying its capacity to learn. Weights must be initialized randomly.
+
+**Q3: Why has ReLU replaced Sigmoid as the standard activation function for hidden layers?**
+*   **Answer:** The Sigmoid function flattens out (saturates) when inputs are very high or very low, causing its derivative to become almost zero. During backpropagation, these tiny gradients multiply together, completely halting the learning process in deep networks (the Vanishing Gradient Problem). ReLU has a constant derivative of 1 for all positive values, allowing gradients to flow freely backward through the network without vanishing, drastically speeding up convergence.
