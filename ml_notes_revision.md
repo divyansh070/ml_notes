@@ -5,7 +5,7 @@
 2. [Part 1.5: Data Transformations & Feature Scaling](#part-15-data-transformations--feature-scaling)
 3. [Part 2: Logistic Regression (Classification Baseline)](#part-2-logistic-regression-classification-baseline)
 4. [Part 3: Classification Evaluation Metrics](#part-3-classification-evaluation-metrics)
-5. [Part 4: Next Models (To Be Added)](#part-4-next-models-to-be-added)
+5. [Part 4: Support Vector Machines (SVM)](#part-4-support-vector-machines-svm)
 
 ---
 
@@ -304,5 +304,152 @@ For a binary classification problem (e.g., 1 = Positive/Defect, 0 = Negative/Nor
 
 ---
 
-## Part 4: Next Models (To Be Added)
-*(Space reserved for SVM, Decision Trees, Random Forests, etc.)*
+## Part 4: Support Vector Machines (SVM)
+
+*These notes are heavily inspired by Josh Starmer's StatQuest series, blending his brilliant analogies (Mice & Drug Dosages) with interview-ready mathematical explanations.*
+
+### 1. The Geometry & Math of the Margin
+
+Before looking at data analogies, we must understand how SVM mathematically draws its boundaries. Unlike Logistic Regression, which draws any line to separate classes, SVM wants to build the **widest possible street** between the classes.
+![SVM Hyperplane Candidates](./assets/svm_candidates.png)
+
+**The Equations of the Street:**
+*   **The Hyperplane:** The median of the street. Its equation is $w^T x + b = 0$.
+*   **The Positive Gutter:** The right guardrail touching the closest positive data point. Its equation is $w^T x + b = 1$.
+*   **The Negative Gutter:** The left guardrail touching the closest negative data point. Its equation is $w^T x + b = -1$.
+*   **Support Vectors:** The specific data points that physically touch these guardrails. If you delete all other data points in the dataset, the model does not change.
+
+**The Margin Math (Core Interview Question):**
+The total width of this street (from the left guardrail to the right guardrail) is mathematically defined as:
+$$ \text{Margin Width} = \frac{2}{||w||} $$
+
+Because SVM's primary goal is to make this street as wide as possible (maximize the margin), the optimization algorithm must do the exact mathematical opposite to the denominator. Therefore, the core optimization goal of SVM is to **minimize**:
+$$ \frac{1}{2} ||w||^2 $$
+
+**Hard Margin vs. Soft Margin (The $C$ Parameter):**
+*   **Hard Margin (The Flawed Ideal):** A strict margin that allows absolutely zero data points inside the street or on the wrong side. If there is a single extreme outlier, a Hard Margin will severely contort the street to avoid it, leading to massive **Overfitting**.
+*   **Soft Margin (The Realistic Fix):** We allow some data points to violate the margin. We control this using the **$C$ Parameter (Cost of Misclassification)**.
+    *   **High $C$ (Strict):** The model severely penalizes mistakes. It draws a very **narrow margin** to get almost every training point correct. (Low Bias, High Variance $\rightarrow$ Overfitting).
+    *   **Low $C$ (Relaxed):** The model doesn't mind a few mistakes. It prefers to keep the **margin as wide as possible**, ignoring extreme outliers. (High Bias, Low Variance $\rightarrow$ Underfitting).
+
+---
+
+### 2. The Main Idea: Maximal Margin & Soft Margins (The Mice Analogy)
+
+**The Problem with Simple Thresholds:**
+Imagine we are classifying mice based on their mass into **Not Obese (Red)** and **Obese (Green)**. 
+If we just draw a line halfway between the closest Red and Green mouse, we create a **Maximal Margin Classifier**. 
+*   **The Margin:** The shortest distance between the threshold and the closest observations.
+*   **The Flaw:** It is super sensitive to outliers. If one skinny mouse randomly has a high mass, the threshold shifts drastically, and we suddenly misclassify lots of normal mice.
+
+**The Solution: Support Vector Classifiers (Soft Margin)**
+To solve the outlier problem, we must allow **misclassifications**. 
+*   We use **Cross-Validation** to determine exactly how many misclassifications we should allow to get the best results on unseen data.
+*   This introduces the **Bias-Variance Tradeoff**: By allowing a few mistakes on the training data (higher bias), the model becomes much more robust to new data (lower variance).
+*   **Support Vectors:** The specific observations that sit on the edge of, or inside, this new "Soft Margin". 
+![Soft Margin SVM](./assets/svm_soft_margin.png)
+
+---
+
+### 3. The Polynomial Kernel (The Drug Dosage Analogy)
+
+**When 1D Lines Fail:**
+Imagine testing a drug dosage. 
+*   Dosage too low = Not Cured (Red)
+*   Dosage just right = Cured (Green)
+*   Dosage too high = Not Cured (Red)
+
+In a 1D number line, the Green dots are trapped between the Red dots. **No single point (threshold) can separate them.**
+
+**Projecting to 2D:**
+To fix this, we move the data into a higher dimension. We create a Y-axis by taking the **Dosage Squared ($X^2$)**.
+*   Now, the low dosages have a small Y value.
+*   The high dosages have a massive Y value.
+*   The "just right" dosages have a medium Y value.
+Suddenly, we can draw a straight 2D line (a Support Vector Classifier) right underneath the high/low Red dots and above the medium Green dots!
+![Polynomial Kernel Projection](./assets/svm_polynomial_kernel.png)
+
+**The Kernel Trick:**
+Transforming data into higher dimensions is computationally expensive. 
+*   The **Polynomial Kernel** calculates the high-dimensional relationships (the dot product) between every pair of points *as if* they were in a higher dimension, without actually transforming the data! 
+
+---
+
+### 4. The Radial Basis Function (RBF) Kernel
+
+If the Polynomial Kernel moves data to 2D or 3D, the **RBF Kernel finds Support Vector Classifiers in Infinite Dimensions.**
+
+**How it Works (Weighted Nearest Neighbor):**
+Because we can't draw infinite dimensions, we visualize RBF as a **Weighted Nearest Neighbor** model. 
+*   The influence one observation has on another is a function of the **Squared Distance** between them. 
+*   The closer two points are, the more influence they have on each other's classification.
+
+**The Gamma ($\gamma$) Parameter:**
+Gamma scales the squared distance, controlling the influence:
+*   **High Gamma:** Influence drops off very quickly. Points only care about their immediate neighbors. (Very strict, can lead to overfitting).
+*   **Low Gamma:** Influence drops off slowly. Points care about neighbors far away. (Very relaxed, leads to smoother boundaries).
+![RBF Gamma Parameter](./assets/svm_rbf_gamma.png)
+
+**The Math of Infinity:**
+How does it calculate infinite dimensions? 
+The RBF kernel uses the exponential function ($e^{- \gamma \cdot \text{distance}^2}$). Using a **Taylor Series Expansion**, the function $e^x$ can be expanded into an infinite sum of polynomial terms ($1 + x + x^2/2! + x^3/3! ...$). Because it uses this infinite sum, it mathematically evaluates the dot product in infinite dimensions!
+
+---
+
+### 5. Placement Prep: SVMs in the Real World
+
+#### A: The Visual Guide to the $C$ Parameter
+The $C$ parameter dictates how strictly the model avoids misclassifications. It physically alters both the margin width and the number of Support Vectors.
+
+| Parameter State | Margin Width | Number of Support Vectors | Impact on Bias/Variance |
+| :--- | :--- | :--- | :--- |
+| **Low $C$ (Relaxed)** | **Wide Margin** | **MORE Support Vectors** | High Bias, Low Variance (Underfitting risk) |
+| **High $C$ (Strict)** | **Narrow Margin** | **FEWER Support Vectors** | Low Bias, High Variance (Overfitting risk) |
+
+*Counter-intuitive fact:* A wider margin physically covers more space, meaning more data points will fall inside of it. Therefore, a lower $C$ results in **MORE** Support Vectors!
+
+#### B: Solving an SVM "By Hand" (The Geometric Toy Example)
+Let's solve a 2D SVM geometrically.
+![SVM Geometric Solution](./assets/svm_by_hand.png)
+
+**The Dataset:**
+*   **Negative Class (-1):** Point $A$ at $(1, 1)$
+*   **Positive Class (+1):** Point $B$ at $(3, 3)$
+
+**Step 1: Place the Hyperplane**
+The best decision boundary separates the classes perfectly in the middle. 
+*   The midpoint between $(1,1)$ and $(3,3)$ is **$(2,2)$**.
+*   The boundary must be perpendicular to the line connecting $A$ and $B$. Since the line $A \rightarrow B$ has a slope of $1$, the boundary must have a slope of $-1$. 
+*   Equation of the boundary: $y - 2 = -1(x - 2) \implies x + y = 4 \implies **x + y - 4 = 0**$.
+
+**Step 2: Calculate the Margin**
+The margin distance is the perpendicular distance from the midpoint $(2,2)$ to either point. 
+*   Distance from $(2,2)$ to $(3,3)$: $\sqrt{(3-2)^2 + (3-2)^2} = \sqrt{1^2 + 1^2} = **\sqrt{2}**$.
+*   Both Point A and Point B lie exactly on the margin boundaries, meaning **both A and B are Support Vectors**.
+
+**Step 3: Finding Weights ($w$) and Bias ($b$)**
+Our SVM equations are $w^Tx + b = \pm 1$.
+*   Since the normal vector to $x + y = 4$ is $(1, 1)$, $w$ must be some scalar multiple: $w = c(1, 1)$.
+*   We know Margin Width $= \frac{2}{||w||}$.
+*   The distance from the center to one margin is $\sqrt{2}$, so the total width is $2\sqrt{2}$.
+*   $\frac{2}{||w||} = 2\sqrt{2} \implies ||w|| = \frac{1}{\sqrt{2}}$.
+*   Since $w = c(1, 1)$, its magnitude is $\sqrt{c^2 + c^2} = c\sqrt{2}$. 
+*   $c\sqrt{2} = \frac{1}{\sqrt{2}} \implies c = \frac{1}{2}$.
+*   Therefore, **$w = [\frac{1}{2}, \frac{1}{2}]$**. 
+
+To find $b$, plug $w$ and Point B $(3,3)$ into the positive margin equation:
+*   $w^T x_B + b = 1 \implies (\frac{1}{2} \cdot 3) + (\frac{1}{2} \cdot 3) + b = 1 \implies 3 + b = 1 \implies **b = -2**$.
+
+*Final SVM Equation:* $0.5x_1 + 0.5x_2 - 2 = 0$.
+
+#### C: Top 5 OA & Interview Questions
+1.  **Q: Why do we need to scale features before applying SVM?**
+    *   **A:** Because SVM relies on physical distances (margins and dot products) to draw boundaries. Unscaled features will drastically distort the geometry and ruin the margin calculation.
+2.  **Q: How does SVM handle outliers?**
+    *   **A:** Via the Soft Margin $C$ parameter. A low $C$ tells the model to ignore outliers and prioritize a wider, more generalized margin.
+3.  **Q: What is the time complexity of training an SVM?**
+    *   **A:** Roughly $O(N^2)$ to $O(N^3)$, depending on the kernel and implementation. This makes standard SVMs very bad for massive datasets.
+4.  **Q: What happens if you delete a non-support vector from the dataset and retrain?**
+    *   **A:** Nothing. The decision boundary is entirely defined by the Support Vectors. Deleting any other point has zero effect on the model.
+5.  **Q: Why is the RBF kernel said to map to infinite dimensions?**
+    *   **A:** Because the RBF kernel utilizes the exponential function ($e^x$). By the Taylor Series expansion, the exponential function expands into an infinite sum of polynomial terms, effectively computing the dot product in infinite dimensional space.
