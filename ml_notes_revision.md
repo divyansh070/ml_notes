@@ -971,3 +971,262 @@ A Random Forest calculates a feature's importance mathematically:
 *   It averages that weighted impurity reduction across the entire forest. Features that consistently create the purest child nodes get the highest scores.
 
 ---
+
+### 8. AdaBoost (Adaptive Boosting)
+
+If Bagging is about building a massive committee of independent trees that vote simultaneously, **Boosting** is about building a highly focused relay team. Models are trained **sequentially**. Each new model pays close attention to the specific data points that the previous model got wrong, actively tweaking its weights to correct its predecessor's mistakes.
+
+AdaBoost typically uses **Decision Stumps** (a Decision Tree with `max_depth=1`) as its base estimators.
+
+#### 1. The Core Intuition: Weighting the Mistakes
+1.  **Initialize Weights:** Every instance in the training dataset starts with an equal weight ($w^{(i)} = 1/m$).
+2.  **Train & Evaluate:** The first Decision Stump makes its predictions.
+3.  **Punish the Mistakes:** AdaBoost increases the weights of the instances that were misclassified.
+4.  **Train the Next Model:** The second Stump is trained. Because the misclassified points now have heavier weights, the algorithm is forced to focus intensely on getting those specific points right.
+5.  **Repeat:** This process repeats until a perfect predictor is found or the maximum number of estimators is reached.
+
+---
+
+#### 2. The Math of AdaBoost (Step-by-Step)
+
+To truly understand AdaBoost for high-level interviews, you need to know how it updates these weights mathematically.
+
+**Step 1: Calculate the Weighted Error Rate ($r_j$)**
+For the $j^{th}$ predictor, we calculate its error rate by summing the weights of all the instances it got wrong, divided by the total sum of all weights.
+
+$$ r_j = \frac{\sum_{\substack{i=1 \\ \hat{y}_j^{(i)} \ne y^{(i)}}}^{m} w^{(i)}}{\sum_{i=1}^{m} w^{(i)}} $$
+*(Where $\hat{y}_j^{(i)}$ is the $j^{th}$ predictor's prediction for the $i^{th}$ instance).*
+
+**Step 2: Calculate the Predictor's Voting Weight ($\alpha_j$)**
+Based on its error rate, we determine how much "say" this predictor gets in the final vote. 
+
+$$ \alpha_j = \eta \log \frac{1 - r_j}{r_j} $$
+*(Where $\eta$ is the learning rate hyperparameter. If a predictor is highly accurate, its error rate $r_j$ is close to 0, making its weight $\alpha_j$ very high. If it is just guessing randomly, its weight will be close to 0).*
+
+**Step 3: The Weight Update Rule ($w^{(i)}$)**
+Now, we update the weights of the individual training instances for the *next* predictor to use.
+
+$$ w^{(i)} \leftarrow \begin{cases} w^{(i)} & \text{if } \hat{y}_j^{(i)} = y^{(i)} \\ w^{(i)} \exp(\alpha_j) & \text{if } \hat{y}_j^{(i)} \ne y^{(i)} \end{cases} $$
+*(If the predictor got the instance right, the weight stays the same. If it got it wrong, the weight is multiplied by $e^{\alpha_j}$, making it heavier for the next round). Then, all instance weights are normalized (divided by $\sum_{i=1}^{m} w^{(i)}$).*
+
+**Step 4: Making the Final Prediction ($\hat{y}(\mathbf{x})$)**
+To make a prediction on new data, AdaBoost computes the predictions of all $N$ predictors and weighs them by their predictor weight ($\alpha_j$). The predicted class is the one that receives the majority of the weighted votes.
+
+$$ \hat{y}(\mathbf{x}) = \underset{k}{\text{argmax}} \sum_{\substack{j=1 \\ \hat{y}_j(\mathbf{x}) = k}}^{N} \alpha_j $$
+
+---
+
+#### 3. The One Major Trade-off: No Parallelization
+Because AdaBoost relies strictly on sequential learning—Model 2 mathematically cannot be trained until Model 1 finishes calculating its errors and updating the instance weights—**it cannot be parallelized**. Unlike a Random Forest, you cannot distribute the training of an AdaBoost ensemble across multiple CPU cores. It will always take significantly longer to train on massive datasets.
+
+---
+
+#### 4. Placement Prep: AdaBoost (Flashcards)
+
+**Q1: What base estimator does AdaBoost typically use?**
+*   **Answer:** A Decision Stump (a Decision Tree with a `max_depth` of 1, meaning it only makes a single split before predicting).
+
+**Q2: How does AdaBoost force subsequent models to focus on difficult instances?**
+*   **Answer:** After a predictor evaluates the data, the algorithm increases the relative weights of the misclassified training instances. The next predictor is trained on this updated dataset, forcing its cost function to prioritize the heavily weighted (previously misclassified) points.
+
+**Q3: In a Random Forest, every tree gets an equal vote. Is this true for AdaBoost?**
+*   **Answer:** No. AdaBoost uses a weighted majority vote. A predictor's voting power ($\alpha_j$) is calculated based on its accuracy during training. Highly accurate predictors have a massive influence on the final prediction, while poor predictors have almost none.
+
+**Q4: Why might you choose a Random Forest over AdaBoost if you are under a strict time constraint with a massive dataset?**
+*   **Answer:** Random Forests are "embarrassingly parallel," meaning hundreds of trees can be trained simultaneously across multiple CPU cores. AdaBoost is strictly sequential; the next tree cannot be trained until the previous one finishes updating the weights, making it much slower to train.
+
+
+
+
+### 9. Solving AdaBoost "By Hand" (Step-by-Step Example)
+
+To truly cement how AdaBoost forces models to learn from past mistakes, let's freeze the algorithm and calculate the first two rounds of boosting by hand.
+
+#### The Setup
+
+Imagine a tiny dataset with $m = 5$ instances. We are classifying whether an email is **Spam (Class 1)** or **Not Spam (Class 0)**. We will set the learning rate hyperparameter ($\eta$) to 1 to keep the math simple.
+
+Initially, every instance is given the exact same weight: $w^{(i)} = \frac{1}{m}$.
+
+* **Initial Weights:** `0.2, 0.2, 0.2, 0.2, 0.2`
+
+| Instance ($i$) | True Label ($y$) | Initial Weight ($w^{(i)}$) |
+| --- | --- | --- |
+| 1 | 1 | 0.2 |
+| 2 | 1 | 0.2 |
+| 3 | 0 | 0.2 |
+| 4 | 0 | 0.2 |
+| 5 | 1 | 0.2 |
+
+---
+
+#### Round 1: Training the First Predictor ($j = 1$)
+
+We train our first weak model (a Decision Stump) on this data. It makes the following predictions:
+
+* **Predictor 1 ($\hat{y}_1$):** `[1, 1, 0, 1, 1]`
+
+Notice that it got **Instance 4** wrong (predicted 1, but the true label is 0).
+
+**Step 1: Calculate the Weighted Error Rate ($r_1$)**
+Using **Equation 7-1**, we sum the weights of all the incorrect predictions and divide by the total sum of all weights.
+
+* Sum of all weights = $1.0$
+* Incorrect instance: Instance 4 (weight = 0.2)
+
+$$r_1 = \frac{0.2}{1.0} = 0.2$$
+
+**Step 2: Calculate the Predictor Weight ($\alpha_1$)**
+Using **Equation 7-2**, we calculate how much "say" this predictor gets in the final vote. A lower error rate means a higher weight.
+
+$$\alpha_1 = 1 \cdot \log \left( \frac{1 - 0.2}{0.2} \right) = \log(4) \approx 1.386$$
+
+**Step 3: Update Instance Weights ($w^{(i)}$)**
+Using **Equation 7-3**, we increase the weight of the instance our model got wrong so the next model pays more attention to it.
+
+* **For correct instances (1, 2, 3, 5):** The weight stays the same (before normalization). $w^{(i)} = 0.2$
+* **For the incorrect instance (4):** We multiply its weight by $\exp(\alpha_1)$.
+
+$$w^{(4)} = 0.2 \times \exp(1.386) = 0.2 \times 4 = 0.8$$
+
+
+
+**Step 4: Normalize the Weights**
+The bottom of Equation 7-3 tells us to divide all weights by their total sum so they add up to 1 again.
+
+* New Sum = $0.2 + 0.2 + 0.2 + 0.8 + 0.2 = 1.6$
+* Normalized Correct Instances: $0.2 / 1.6 = 0.125$
+* Normalized Incorrect Instance: $0.8 / 1.6 = 0.5$
+
+| Instance ($i$) | True Label | Predictor 1 | New Weight ($w^{(i)}$) |
+| --- | --- | --- | --- |
+| 1 | 1 | Correct | 0.125 |
+| 2 | 1 | Correct | 0.125 |
+| 3 | 0 | Correct | 0.125 |
+| 4 | 0 | **Wrong** | **0.500** |
+| 5 | 1 | Correct | 0.125 |
+
+*Notice how Instance 4 now holds 50% of the entire dataset's weight!*
+
+---
+
+#### Round 2: Training the Second Predictor ($j = 2$)
+
+When we train Predictor 2, the algorithm is heavily penalized if it gets Instance 4 wrong again. It alters its logic to fix that specific mistake. Let's assume Predictor 2 successfully fixes Instance 4, but messes up on Instance 2:
+
+* **Predictor 2 ($\hat{y}_2$):** `[1, 0, 0, 0, 1]`
+
+**Step 1: Calculate the Error Rate ($r_2$)**
+It only got Instance 2 wrong. Look at the table above: the current weight of Instance 2 is 0.125.
+
+$$r_2 = \frac{0.125}{1.0} = 0.125$$
+
+**Step 2: Calculate the Predictor Weight ($\alpha_2$)**
+Because its weighted error rate is lower than Predictor 1, Predictor 2 gets a larger say in the final ensemble.
+
+$$\alpha_2 = 1 \cdot \log \left( \frac{1 - 0.125}{0.125} \right) = \log(7) \approx 1.946$$
+
+*(We would then update and normalize the instance weights again for a 3rd predictor, but let's stop here and see how they vote together).*
+
+---
+
+#### Making the Final Prediction (Equation 7-4)
+
+Now we have an ensemble of two predictors, and we want to evaluate our problem child: **Instance 4**.
+
+Equation 7-4 dictates that for each possible class ($k$), we sum the weights ($\alpha_j$) of the predictors that voted for that class. The class with the highest total weight wins.
+
+Let's look at how the ensemble votes on **Instance 4**:
+
+* **Predictor 1** votes for **Class 1**. Its voting power is $\alpha_1 = 1.386$.
+* **Predictor 2** votes for **Class 0**. Its voting power is $\alpha_2 = 1.946$.
+
+**Tallying the votes:**
+
+* Total votes for Class 1: 1.386
+* Total votes for Class 0: 1.946
+
+**The Result:**
+The `argmax` (the highest value) belongs to **Class 0**. Even though Predictor 1 got it wrong initially, Predictor 2 recognized the pattern and was awarded a higher voting weight because it made fewer weighted mistakes overall. The ensemble correctly predicts **Class 0**.
+
+
+
+
+### 6. Gradient Boosting (GBM)
+
+Just like AdaBoost, Gradient Boosting works sequentially by building a relay team of trees where each new tree tries to fix the mistakes of the previous one. However, **how** it fixes those mistakes is fundamentally different.
+
+*   **AdaBoost** tweaks the *weights* of the data points. 
+*   **Gradient Boosting** does not touch weights. Instead, it forces the new tree to train directly on the **residual errors** (the mathematical difference between the actual target value and the previous tree's prediction).
+
+#### 1. The Core Intuition: The Golf Analogy
+Imagine you are playing a hole of golf:
+1.  **Tree 1 (The Drive):** You hit the ball toward the hole. You get most of the way there, but there is a remaining distance (the error).
+2.  **Tree 2 (The Pitch):** You walk to where the ball landed and take a swing aimed *only* at the remaining distance to the hole. 
+3.  **Tree 3 (The Putt):** You are on the green. Your final stroke is a tiny tap to cover the last few inches.
+
+To get your final score (prediction), you simply add up the distances of all your individual shots.
+
+#### 2. The Math of Gradient Boosting (Regression Example)
+Let's assume we are predicting house prices ($y$) using input features ($X$).
+
+1.  **Step 1:** Train Tree 1 on the normal data to predict the target. 
+    *   Tree 1 predicts: $\hat{y}_1$
+2.  **Step 2:** Calculate the **Residual Error** ($r_1$). 
+    *   $r_1 = y - \hat{y}_1$
+3.  **Step 3:** Train Tree 2. **Crucially, the target label is no longer the house price.** Tree 2 is trained to predict the leftover error ($r_1$) from the previous tree.
+    *   Tree 2 predicts: $\hat{r}_1$
+4.  **Step 4:** Calculate the new Residual Error ($r_2$).
+    *   $r_2 = r_1 - \hat{r}_1$
+5.  **Step 5:** Train Tree 3 to predict $r_2$, and so on.
+
+**Making the Final Prediction:**
+When a new data point ($\mathbf{x}$) comes in, you pass it through all the trees and simply sum their predictions:
+$$ \hat{y}_{\text{final}} = \text{Tree}_1(\mathbf{x}) + \text{Tree}_2(\mathbf{x}) + \text{Tree}_3(\mathbf{x}) + \dots $$
+
+#### 3. Shrinkage (The Learning Rate)
+If we just add up the raw predictions of 100 trees, the model will quickly overfit and memorize the noise in the training data. To prevent this, Gradient Boosting uses a regularization technique called **Shrinkage** via a learning rate hyperparameter ($\eta$).
+
+Instead of adding the full prediction of a tree, we multiply it by a small learning rate (e.g., $0.1$):
+$$ \hat{y}_{\text{final}} = \text{Tree}_1(\mathbf{x}) + \eta \text{Tree}_2(\mathbf{x}) + \eta \text{Tree}_3(\mathbf{x}) + \dots $$
+
+*   **The Trade-off:** A lower learning rate means the algorithm will need more trees (`n_estimators`) to fit the training set, but the resulting model will usually generalize much better to unseen data.
+
+---
+
+#### 4. Placement Prep: Gradient Boosting (Flashcards)
+
+**Q1: What is the fundamental difference in how AdaBoost and Gradient Boosting handle the mistakes of previous models?**
+*   **Answer:** AdaBoost updates the *weights* of the misclassified training instances to force the next model to focus on them. Gradient Boosting leaves the instance weights alone and instead changes the *target label* for the next model, forcing it to predict the residual error ($y - \hat{y}$) of the previous model.
+
+**Q2: How do you make a final prediction with a Gradient Boosting Regressor?**
+*   **Answer:** You pass the input data through every single tree in the sequence and simply sum up all of their individual predictions (scaled by the learning rate).
+
+**Q3: What happens if you set the learning rate too high in Gradient Boosting?**
+*   **Answer:** The model will take steps that are too large when trying to correct the residuals, causing it to rapidly overfit the training data (and the noise within it), leading to high variance and poor generalization.
+
+**Q4: You will likely be asked about XGBoost or LightGBM in an interview. What are they?**
+*   **Answer:** They are highly optimized, extremely fast, third-party library implementations of Gradient Boosting. They introduce advanced regularizations (like $L_1$ and $L_2$ penalties on leaf weights) and hardware optimizations (like histogram-based split finding) that make them the undisputed kings of tabular data competitions.
+
+
+#### 5. Visualizing the Sequential Residuals
+To truly see how Gradient Boosting builds its relay team, we can visualize the step-by-step process:
+*   In this depiction of Gradient Boosting, the first predictor is trained normally on the actual training set.
+*   Each consecutive predictor is then trained specifically on the previous predictor's residuals.
+*   The resulting ensemble's predictions are created by summing these trees together, creating a curve that gets progressively closer to the true data distribution.
+
+![Gradient Boosting Sequential Residuals](./assets/gradient_boosting_residuals.png)
+
+#### 6. The Overfitting Trap (`n_estimators` vs. `learning_rate`)
+Finding the mathematical sweet spot for the number of trees is critical in Gradient Boosting Regression Trees (GBRT):
+*   GBRT ensembles with not enough predictors will underfit the data, looking like a blocky, inaccurate step-function.
+*   Conversely, ensembles with too many predictors will severely overfit, drawing jagged lines to memorize the exact noise of the training data. 
+
+![Gradient Boosting Overfitting](./assets/gradient_boosting_overfitting.png)
+
+#### 7. Stochastic Gradient Boosting (The Variance Fix)
+To prevent the severe overfitting shown above and speed up the sequential training, we can introduce randomness (similar to Bagging) into the Gradient Boosting algorithm:
+*   The `GradientBoostingRegressor` class supports a `subsample` hyperparameter, which specifies the fraction of training instances to be used for training each tree.
+*   For example, if `subsample=0.25`, then each tree is trained on 25% of the training instances, selected randomly.
+*   This specific technique is called Stochastic Gradient Boosting.
+*   By randomly sampling the data, this technique trades a higher bias for a lower variance, and it also speeds up training considerably.
