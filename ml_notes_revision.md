@@ -781,3 +781,53 @@ Where:
 | **Split Criterion** | Minimizes Gini Impurity / Entropy | Minimizes Weighted MSE |
 | **Output Shape** | Axis-aligned boundary boxes | Piecewise constant step function |
 | **Scaling Required?** | **No** | **No** |
+
+---
+
+### 8. Ultimate Decision Tree Interview & OA Question Bank
+
+#### A. Technical Interview & OA Questions (With In-Depth Answers)
+
+**1. Q: Why don't Decision Trees require feature scaling (normalization or standardization)?**
+*   **A:** Unlike algorithms such as Support Vector Machines, KNN, or Neural Networks that rely on calculating spatial distances (like Euclidean distance) between data points, Decision Trees rely entirely on discrete, monotonic thresholds (e.g., "Is `Salary > 50,000`?"). The algorithm simply sorts the feature values and evaluates splits; shrinking or scaling those values does not change the order or the resulting split points.
+
+**2. Q: How does a Decision Tree handle missing values during training and inference?**
+*   **A:** While scikit-learn's current CART implementation doesn't natively handle missing values (requiring imputation beforehand), advanced algorithms like XGBoost or traditional CART can handle them using **Surrogate Splits**. If a node is missing a value for a feature being evaluated, the tree looks for a "surrogate" feature that mimics the primary split as closely as possible and uses that instead.
+
+**3. Q: Explain the difference between Gini Impurity and Entropy. When would you choose one over the other?**
+*   **A:** Both measure node impurity, but they originate from different concepts. **Gini Impurity** measures the probability of misclassifying a random sample, whereas **Entropy** originates from information theory and measures the "disorder" of a node (using logarithms). 
+    *   *When to choose:* They generate nearly identical trees 98% of the time. However, Gini is slightly faster to compute (no computationally expensive $\log$ functions), making it the preferred default. Entropy sometimes creates slightly more balanced trees.
+
+**4. Q: Why are Decision Trees considered 'unstable' or high-variance models, and how do ensemble methods fix this?**
+*   **A:** Trees are incredibly unstable because they are highly sensitive to small variations in the training data. A tiny change might cause the root node to select a completely different feature to split on, which cascades and fundamentally alters the entire tree structure below it. **Ensemble methods**, like Random Forests, fix this by training hundreds of different trees on random subsets of the data (bagging) and averaging their predictions, which drastically reduces the variance.
+
+**5. Q: How does a Regression Tree decide where to split, and what value does it predict in its leaf nodes?**
+*   **A:** Instead of splitting to minimize Gini Impurity, a Regression Tree splits the data at a threshold that minimizes the **Mean Squared Error (MSE)** (the variance) between the left and right child nodes. Once the tree is built, the predicted value ($\hat{y}$) for any instance falling into a leaf node is simply the **average (mean)** of all training target values in that specific leaf.
+
+**6. Q: What is the time complexity of building (training) a Decision Tree vs. making predictions with it?**
+*   **A:** 
+    *   **Inference (Prediction):** Blazingly fast. Traversing a balanced binary tree takes $O(\log_2(m))$, where $m$ is the number of leaves. It is completely independent of the number of features.
+    *   **Training:** Slow. Finding the optimal split requires sorting every feature and evaluating the Gini/MSE for every possible threshold. The training complexity is $O(n \times m \log_2(m))$, where $n$ is features and $m$ is samples.
+
+#### B. "Questions to Remember" (Flashcard Review)
+
+1.  **Q: Are Decision Trees parametric or non-parametric?**
+    *   **A:** Non-parametric. They make no assumptions about the underlying data distribution and adapt their structure to the data.
+2.  **Q: What is the main characteristic of the CART algorithm used by scikit-learn?**
+    *   **A:** It produces strictly **binary** trees (every node splits into exactly two children, True or False).
+3.  **Q: Why is the Decision Tree algorithm considered "Greedy"?**
+    *   **A:** It searches for the locally optimum split at the current node without looking ahead to see if a suboptimal split now might lead to a better tree overall.
+4.  **Q: Finding the absolute globally optimal Decision Tree is known to be what type of problem?**
+    *   **A:** NP-Complete (computationally intractable), which is why we settle for the greedy heuristic.
+5.  **Q: What hyperparameter should you decrease to combat overfitting?**
+    *   **A:** `max_depth` (restricts how deep the tree can grow).
+6.  **Q: What hyperparameter should you increase to combat overfitting?**
+    *   **A:** `min_samples_leaf` or `min_samples_split` (forces the tree to generalize by requiring more samples per node).
+7.  **Q: How does scikit-learn calculate feature importance?**
+    *   **A:** By measuring how much a specific feature reduces Gini impurity across all nodes it is used in, weighted by the number of samples passing through those nodes.
+8.  **Q: Does a Decision Tree suffer from multicollinearity?**
+    *   **A:** No. If two features are highly correlated, the tree will just split on one and ignore the other.
+9.  **Q: What is the maximum Gini Impurity for a binary classification node?**
+    *   **A:** 0.5 (A perfect 50/50 split of classes, resembling a random coin toss).
+10. **Q: What shape do Decision Tree boundaries always take?**
+    *   **A:** Orthogonal (axis-parallel). They can only draw straight horizontal or vertical boundary lines.
