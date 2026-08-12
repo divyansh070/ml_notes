@@ -443,6 +443,53 @@ Just like classification, SVR can use the **Kernel Trick** (Polynomial or RBF ke
 ![Polynomial SVR Kernels](./assets/svr_poly.png)
 *(In the image above, the model on the left has $C=100$, meaning it strictly penalizes points outside the tube, forcing the curve to wiggle and overfit. The model on the right has $C=0.01$, meaning it is very relaxed, resulting in a smoother, more generalized curve).*
 
+#### The Mathematics of Support Vector Regression (SVR)
+
+To formalize the "Garden Hose" analogy, we must define the prediction function, the loss function, and the optimization objective.
+
+**1. The Prediction Function (The Center of the Tube)**
+Just like in linear regression, the SVR model predicts a continuous value $y$ by computing the dot product of the weights $w$ and the input features $x$, plus a bias term $b$:
+
+$$f(x) = w^T x + b$$
+
+**2. The $\epsilon$-Insensitive Loss Function (The Tube Walls)**
+The defining mathematical feature of SVR is its loss function. It states that if the absolute difference between the actual value $y$ and the predicted value $f(x)$ is less than $\epsilon$, the error is exactly zero. The model only incurs a penalty if the prediction falls outside this boundary:
+
+$$L_\epsilon(y, f(x)) = \max(0, |y - f(x)| - \epsilon)$$
+
+**3. The Optimization Objective (Soft Margin SVR)**
+In reality, it is rarely possible to fit every single data point perfectly inside the $\epsilon$-tube. We must allow some points to exist outside the tube while still trying to keep the tube as flat and robust as possible.
+
+To do this, we introduce **Slack Variables** ($\xi$ and $\xi^*$):
+
+* $\xi_i$ represents the distance of a point that falls *above* the upper boundary of the tube.
+* $\xi_i^*$ represents the distance of a point that falls *below* the lower boundary of the tube.
+
+The goal of SVR is to keep the weights as small as possible (to keep the model simple and flat) while minimizing the sum of these slack variables (the errors outside the tube).
+
+**The Core SVR Cost Function:**
+
+$$\min_{w, b, \xi, \xi^*} \frac{1}{2} ||w||^2 + C \sum_{i=1}^{m} (\xi_i + \xi_i^*)$$
+
+**Subject to the following constraints:**
+
+1. The upper boundary constraint (points cannot be too high above the tube):
+
+$$y_i - (w^T x_i + b) \leq \epsilon + \xi_i$$
+
+2. The lower boundary constraint (points cannot be too far below the tube):
+
+$$(w^T x_i + b) - y_i \leq \epsilon + \xi_i^*$$
+
+3. Slack variables must be non-negative (distance cannot be negative):
+
+$$\xi_i, \xi_i^* \geq 0$$
+
+**How the Hyperparameters fit into the Math:**
+
+* **Minimizing $\frac{1}{2} ||w||^2$:** This flattens the function, maximizing the generalized robustness of the tube.
+* **The $C$ Parameter:** This is the trade-off multiplier attached to the sum of the slack variables $\sum (\xi_i + \xi_i^*)$. If $C$ is massive, the math heavily penalizes any $\xi$ greater than 0, forcing the model to violently contort the tube to capture outliers (Overfitting). If $C$ is small, the math allows $\xi$ to grow, creating a smoother, more generalized tube (Underfitting).
+
 ---
 
 ### 6. Placement Prep: SVMs in the Real World
