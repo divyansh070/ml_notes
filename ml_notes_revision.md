@@ -664,3 +664,35 @@ Notice how the Unconstrained Tree creates jagged, unnatural slivers to capture s
 **Output 2: The Structural Map**
 Here is the actual logic that the pruned model generated to draw those boxes. Notice how the root node splits on $x_2 \le 0.177$, and how the Gini impurity drops closer to $0$ as the boxes become purer!
 ![Pruned Tree Structure](./assets/Pruned_Tree_Structure.png)
+
+---
+
+### 5. Placement Prep: Top Decision Tree Interview Questions & Must-Knows
+
+To ace a technical round on Decision Trees, you need to understand not just how they work, but their mathematical flaws and when *not* to use them.
+
+#### A. The Advantages vs. Disadvantages (The "Trade-off" Question)
+*   **Pros:** 
+    *   **Highly Interpretable:** You can literally print out the tree and show stakeholders exactly *why* a decision was made (unlike Neural Networks).
+    *   **No Scaling Required:** Because it splits on hard thresholds (`Age > 20`), it is completely immune to the scale of the features. You do not need to standardize or normalize your data.
+    *   **Handles Collinearity:** If two features are highly correlated, the tree will just pick one to split on and ignore the other. It doesn't break the math (like it does in Linear Regression).
+*   **Cons:**
+    *   **High Variance (Instability):** This is the biggest flaw. A tiny change in the training data can cause the root node to choose a different feature, completely altering the entire structure of the tree below it. 
+    *   **Orthogonal Boundaries Only:** Trees can only draw straight horizontal or vertical lines. If your true decision boundary is diagonal, the tree has to draw a jagged staircase to approximate it, which is highly inefficient.
+
+#### B. Entropy vs. Gini Impurity
+Interviewers will often ask how a tree decides to split. Scikit-learn defaults to **Gini Impurity**, but you can also use **Entropy / Information Gain**.
+*   **Gini Impurity:** Measures the probability of misclassifying a random sample. It is slightly faster to compute because it doesn't use logarithms.
+*   **Entropy:** Derived from thermodynamics and information theory, it measures the level of "disorder" or uncertainty in a node. 
+    *   $H = -\sum p_k \log_2(p_k)$
+    *   The goal of a split is to maximize **Information Gain** (the drop in Entropy from the parent node to the child nodes).
+
+#### C. Top 4 Interview Questions
+1.  **Q: Are Decision Trees parametric or non-parametric?**
+    *   **A:** They are **non-parametric**. They do not assume a predetermined structure or mathematical function (like a straight line in regression). The number of parameters (nodes) grows with the complexity of the training data.
+2.  **Q: What is the difference between a Classification Tree and a Regression Tree?**
+    *   **A:** A Classification Tree splits data to minimize **Gini Impurity** and predicts the majority class in a leaf. A Regression Tree splits data to minimize **Mean Squared Error (MSE)** and predicts the average (mean) value of the instances in a leaf.
+3.  **Q: Why do Decision Trees tend to overfit?**
+    *   **A:** Because they are "greedy" algorithms that make the locally optimal choice at every split without looking ahead. Without constraints (like `max_depth`), they will recursively split the data until every single leaf contains exactly 1 data point (perfectly memorizing the training data and noise).
+4.  **Q: Can a Decision Tree handle categorical data?**
+    *   **A:** Conceptually, yes. However, implementation matters. Scikit-learn's CART implementation currently requires categorical variables to be converted to numerical values (e.g., via One-Hot Encoding) before training.
