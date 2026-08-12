@@ -549,3 +549,118 @@ To find $b$, plug $w$ and Point B $(3,3)$ into the positive margin equation:
     *   **A:** Nothing. The decision boundary is entirely defined by the Support Vectors. Deleting any other point has zero effect on the model.
 5.  **Q: Why is the RBF kernel said to map to infinite dimensions?**
     *   **A:** Because the RBF kernel utilizes the exponential function ($e^x$). By the Taylor Series expansion, the exponential function expands into an infinite sum of polynomial terms, effectively computing the dot product in infinite dimensional space.
+
+
+
+
+## Part 5: Decision Trees (Classification)
+
+Decision Trees represent a shift from geometry to pure logic. Instead of measuring spatial distances or calculating margins, this algorithm plays a game of "20 Questions" with the data, making it highly interpretable and completely immune to the scale of your features. **You never need to apply feature scaling to a Decision Tree.**
+
+### 1. The Core Intuition: Slicing the Space
+A Decision Tree splits the dataset into smaller and smaller orthogonal (axis-parallel) boxes. 
+*   It looks at a single feature and finds a threshold (e.g., `Weight > 20`).
+*   It draws a straight horizontal or vertical line at that threshold.
+*   It repeats this process inside the newly created boxes until the boxes contain mostly a single class.
+
+### 2. The Math of the Split: Gini Impurity
+To decide *which* feature to split on and at *what* threshold, the tree uses a cost function called **Gini Impurity** to measure how "mixed" a node is. The algorithm desperately wants to minimize this impurity.
+
+$$ G_i = 1 - \sum_{k=1}^{n} p_{i,k}^2 $$
+
+*   $n$ is the total number of classes.
+*   $p_{i,k}$ is the ratio of class $k$ instances inside that specific node $i$.
+
+**Gini Extremes:**
+*   **$0$ (Perfectly Pure):** The box contains only one class. The tree stops splitting.
+*   **$0.5$ (Maximum Impurity for Binary):** The box is a perfect 50/50 coin flip. The tree must split this node again.
+
+---
+
+### 3. The Overfitting Trap & Pruning
+Because Decision Trees are **non-parametric**, they have no predefined constraints. If left alone, a tree will keep slicing the data until every single leaf has a Gini Impurity of 0. This results in a massive, hyper-complex tree that memorizes outliers (100% training accuracy) but fails miserably on new data. 
+
+To fix this, we apply **Pruning** (cutting back the branches).
+
+**Pre-Pruning (Early Stopping):**
+We set strict hyperparameters before training to force the tree to stop growing early.
+*   `max_depth`: The maximum number of levels the tree can grow.
+*   `min_samples_split`: The minimum number of instances a node must have to be allowed to split.
+*   `min_samples_leaf`: The minimum number of instances that must exist inside a final leaf node.
+
+**Post-Pruning (Cost Complexity Pruning):**
+We let the tree overfit completely, then work backwards from the leaves, snipping off specific branches that do not provide statistically significant improvements to accuracy.
+
+---
+
+### 4. Visualizing the Tree & Pruning in Python
+
+To truly understand how Decision Trees slice the feature space and to see the catastrophic effects of an unconstrained tree, you can run the following standalone Python script. It trains two trees (one unconstrained and one pruned via early stopping) on a noisy `make_moons` dataset and generates the exact decision boundary plots, as well as the structural node map of the final pruned tree!
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_moons
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+
+# 1. Generate Toy 2D Dataset (Slightly noisy moons)
+X, y = make_moons(n_samples=200, noise=0.25, random_state=42)
+
+# 2. Train Two Models
+# Unconstrained (will perfectly memorize the noise, causing severe overfitting)
+tree_clf_unconstrained = DecisionTreeClassifier(random_state=42)
+tree_clf_unconstrained.fit(X, y)
+
+# Pruned (generalized via early stopping: limits depth to 3, ensures 5 samples per leaf)
+tree_clf_pruned = DecisionTreeClassifier(min_samples_leaf=5, max_depth=3, random_state=42)
+tree_clf_pruned.fit(X, y)
+
+# 3. Generate Decision Boundary Plots
+def plot_decision_boundary(clf, X, y, axes):
+    x1s = np.linspace(axes[0], axes[1], 100)
+    x2s = np.linspace(axes[2], axes[3], 100)
+    x1, x2 = np.meshgrid(x1s, x2s)
+    X_new = np.c_[x1.ravel(), x2.ravel()]
+    y_pred = clf.predict(X_new).reshape(x1.shape)
+    
+    # Plot the background boundary colors
+    plt.contourf(x1, x2, y_pred, alpha=0.3, cmap=plt.cm.brg)
+    # Plot the raw data points
+    plt.plot(X[:, 0][y==0], X[:, 1][y==0], "bs")
+    plt.plot(X[:, 0][y==1], X[:, 1][y==1], "g^")
+    plt.axis(axes)
+    plt.xlabel(r"$x_1$", fontsize=14)
+    plt.ylabel(r"$x_2$", fontsize=14, rotation=0)
+
+plt.figure(figsize=(12, 5))
+plt.subplot(121)
+plot_decision_boundary(tree_clf_unconstrained, X, y, [-1.5, 2.5, -1, 1.5])
+plt.title("Unconstrained Tree (Overfitting)", fontsize=16)
+
+plt.subplot(122)
+plot_decision_boundary(tree_clf_pruned, X, y, [-1.5, 2.5, -1, 1.5])
+plt.title("Pruned Tree (min_samples_leaf=5, max_depth=3)", fontsize=16)
+
+plt.tight_layout()
+plt.savefig("Tree_Boundaries_Comparison.png", dpi=300)
+
+# 4. Generate Tree Structure Plot
+plt.figure(figsize=(14, 10))
+plot_tree(
+    tree_clf_pruned, 
+    filled=True, 
+    rounded=True, 
+    class_names=["Blue Square", "Green Triangle"], 
+    feature_names=["x1", "x2"]
+)
+plt.title("Pruned Tree Structure", fontsize=18)
+plt.savefig("Pruned_Tree_Structure.png", dpi=300)
+```
+
+**Output 1: Decision Boundaries**
+Notice how the Unconstrained Tree creates jagged, unnatural slivers to capture single outlier points (100% training accuracy but terrible generalization). The Pruned Tree draws clean, robust rectangular boundaries that ignore the noise!
+![Decision Boundaries Comparison](./assets/Tree_Boundaries_Comparison.png)
+
+**Output 2: The Structural Map**
+Here is the actual logic that the pruned model generated to draw those boxes. Notice how the root node splits on $x_2 \le 0.177$, and how the Gini impurity drops closer to $0$ as the boxes become purer!
+![Pruned Tree Structure](./assets/Pruned_Tree_Structure.png)
