@@ -1,6 +1,8 @@
-# Machine Learning Placement Master Notes
+# Machine Learning & Deep Learning Placement Master Notes
 
 **Table of Contents:**
+
+### 📊 Machine Learning
 1. [Part 1: Linear Regression & Regularization](#part-1-linear-regression--regularization)
 2. [Part 1.5: Data Transformations & Feature Scaling](#part-15-data-transformations--feature-scaling)
 3. [Part 2: Logistic Regression (Classification Baseline)](#part-2-logistic-regression-classification-baseline)
@@ -10,6 +12,9 @@
 7. [Part 6: Ensemble Learning](#part-6-ensemble-learning)
 8. [Part 7: Principal Component Analysis (PCA)](#part-7-principal-component-analysis-pca)
 9. [Part 8: Unsupervised Learning — Clustering](#part-8-unsupervised-learning--clustering)
+
+### 🧠 Deep Learning
+10. [Deep Learning Part 1: Multi-Layer Perceptrons (MLPs) & Non-Linearity](#deep-learning-part-1-multi-layer-perceptrons-mlps--non-linearity)
 
 ---
 
@@ -1589,7 +1594,13 @@ Here is a step-by-step visualization of how DBSCAN separates nested clusters tha
 
 
 
-## Part 1: Multi-Layer Perceptrons (MLPs) & Non-Linearity
+<br><br>
+
+# ==========================================
+# 🧠 WELCOME TO DEEP LEARNING 🧠
+# ==========================================
+
+## Deep Learning Part 1: Multi-Layer Perceptrons (MLPs) & Non-Linearity
 
 A standard Linear Regression or Logistic Regression model is essentially a single neuron. It takes inputs, multiplies them by weights, adds a bias, and draws a straight line. If your data is highly complex (like a circle inside a circle, or an image of a dog), a single straight line is useless.
 
