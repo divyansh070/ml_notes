@@ -311,13 +311,23 @@ For a binary classification problem (e.g., 1 = Positive/Defect, 0 = Negative/Nor
 ### 1. The Geometry & Math of the Margin
 
 Before looking at data analogies, we must understand how SVM mathematically draws its boundaries. Unlike Logistic Regression, which draws any line to separate classes, SVM wants to build the **widest possible street** between the classes.
-![SVM Hyperplane Candidates](./assets/svm_candidates.png)
+![SVM Training Process](./assets/svm_training_process.png)
 
 **The Equations of the Street:**
-*   **The Hyperplane:** The median of the street. Its equation is $w^T x + b = 0$.
+*   **The Hyperplane (Decision Boundary):** The median of the street. Its equation is $w^T x + b = 0$.
 *   **The Positive Gutter:** The right guardrail touching the closest positive data point. Its equation is $w^T x + b = 1$.
 *   **The Negative Gutter:** The left guardrail touching the closest negative data point. Its equation is $w^T x + b = -1$.
 *   **Support Vectors:** The specific data points that physically touch these guardrails. If you delete all other data points in the dataset, the model does not change.
+
+**Why do we use exactly 1 and -1? (Scale Invariance)**
+The actual geometric street doesn't care if the boundaries are labeled $1$ and $-1$, or $100$ and $-100$. If you multiply the weights $w$ and bias $b$ by $100$, it represents the exact same geometric street, just scaled differently. To stop the math from having infinite possible answers, we mathematically force (constrain) the closest points to equal exactly $+1$ and $-1$. This locks in a single, unique mathematical solution for $w$ and $b$.
+
+**How Inference Works (Making Predictions):**
+The $+1$ and $-1$ gutters are *only* used during training to calculate the margin width. Once the model is trained (we found the optimal $w$ and $b$), inference is incredibly simple. We take a new, unseen data point $x_{new}$ and calculate its score:
+$$ z = w^T x_{new} + b $$
+*   If $z \ge 0 \implies$ Classify as **Positive (+1)**
+*   If $z < 0 \implies$ Classify as **Negative (-1)**
+*(Notice how the $\pm 1$ margins don't matter anymore for the final prediction; inference only cares which side of the $0$ hyperplane the point lands on!)*
 
 **The Margin Math (Core Interview Question):**
 The total width of this street (from the left guardrail to the right guardrail) is mathematically defined as:
@@ -347,7 +357,7 @@ To solve the outlier problem, we must allow **misclassifications**.
 *   We use **Cross-Validation** to determine exactly how many misclassifications we should allow to get the best results on unseen data.
 *   This introduces the **Bias-Variance Tradeoff**: By allowing a few mistakes on the training data (higher bias), the model becomes much more robust to new data (lower variance).
 *   **Support Vectors:** The specific observations that sit on the edge of, or inside, this new "Soft Margin". 
-![Soft Margin SVM](./assets/svm_soft_margin.png)
+![Soft Margin SVM Training](./assets/svm_soft_training_process.png)
 
 ---
 
