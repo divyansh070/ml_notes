@@ -705,3 +705,93 @@ Scikit-learn calculates feature importance by measuring how much a specific feat
     *   **A:** Because it searches for the locally optimum split at the current node without looking ahead. Finding the globally optimal tree is NP-Complete.
 7.  **Q: What is the time complexity of a Decision Tree?**
     *   **A:** Prediction is blazingly fast at $O(\log_2(m))$, but training is slow at $O(n \times m \log_2(m))$ because it must sort and compare all features across all samples.
+
+### 6. Solving a Decision Tree Split "By Hand" (Categorical)
+
+To truly understand how CART builds a tree, we must freeze the algorithm and do the math by hand. We will use **Gini Impurity** ($G$) to measure node purity, and a **Weighted Cost Function** ($J$) to evaluate the quality of a split.
+
+#### 1. The Dataset
+We have $m = 5$ training instances predicting if we should "Go for a Walk":
+
+| Instance | Weather ($x_1$) | Weekend ($x_2$) | Go for a Walk ($y$) |
+| :--- | :--- | :--- | :--- |
+| 1 | Sunny | Yes | **Yes** |
+| 2 | Sunny | No | **Yes** |
+| 3 | Rainy | Yes | **Yes** |
+| 4 | Rainy | No | **No** |
+| 5 | Rainy | No | **No** |
+
+#### 2. The Formula for Gini Impurity
+It measures the purity of a node ($0$ means perfectly pure, meaning all instances belong to one class).
+$$G = 1 - \sum_{k=1}^{K} (p_k)^2$$
+Where $p_k$ is the ratio of instances belonging to class $k$ in that node.
+
+#### 3. Step 1: Calculate Total Impurity at the Root Node
+Before making any splits, let's look at all 5 target labels: `[Yes, Yes, Yes, No, No]`
+*   Total instances = $5$
+*   Probability of 'Yes' ($p_1$) = $3/5 = 0.6$
+*   Probability of 'No' ($p_2$) = $2/5 = 0.4$
+
+$$G_{root} = 1 - (0.6^2 + 0.4^2) = 1 - (0.36 + 0.16) = 0.48$$
+
+#### 4. Step 2: Evaluate Potential Splits
+We evaluate the cost function for both features to see which one provides the lowest weighted Gini impurity for the child nodes. The weighted cost function is:
+$$J(k, t_k) = \frac{m_{left}}{m} G_{left} + \frac{m_{right}}{m} G_{right}$$
+
+**Option A: Split by "Weather == Sunny"**
+*   **Left Node (Sunny):** Instances 1, 2 $\rightarrow$ Labels: `[Yes, Yes]`
+    *   $m_{left} = 2$
+    *   $G_{left} = 1 - ((2/2)^2 + (0/2)^2) = 1 - 1 = 0$ *(Perfect purity)*
+*   **Right Node (Rainy):** Instances 3, 4, 5 $\rightarrow$ Labels: `[Yes, No, No]`
+    *   $m_{right} = 3$
+    *   $G_{right} = 1 - ((1/3)^2 + (2/3)^2) = 1 - (1/9 + 4/9) = 1 - 5/9 = 0.444$
+*   **Weighted Gini ($J$):** $(2/5 \times 0) + (3/5 \times 0.444) = 0 + 0.266 = 0.266$
+
+**Option B: Split by "Weekend == Yes"**
+*   **Left Node (Weekend):** Instances 1, 3 $\rightarrow$ Labels: `[Yes, Yes]`
+    *   $m_{left} = 2$
+    *   $G_{left} = 1 - ((2/2)^2 + (0/2)^2) = 0$ *(Perfect purity)*
+*   **Right Node (Weekday):** Instances 2, 4, 5 $\rightarrow$ Labels: `[Yes, No, No]`
+    *   $m_{right} = 3$
+    *   $G_{right} = 1 - ((1/3)^2 + (2/3)^2) = 0.444$
+*   **Weighted Gini ($J$):** $(2/5 \times 0) + (3/5 \times 0.444) = 0.266$
+
+*Tie-breaker:* Both splits yield the exact same impurity reduction. Let's arbitrarily choose **Weather == Sunny** as our root split.
+
+#### 5. Step 3: Build the Next Level of the Tree
+Our tree currently looks like this:
+*   **Root:** Is Weather Sunny?
+    *   **True (Left):** Leaf node containing `[Yes, Yes]`. Because Gini is 0, this stops here. Prediction: **Yes**.
+    *   **False (Right):** Sub-node containing remaining Rainy instances (3, 4, 5) with labels `[Yes, No, No]`. We must split this node further.
+
+Let's look only at the remaining data in the **Right Sub-node**:
+| Instance | Weather | Weekend | Go for a Walk |
+| :--- | :--- | :--- | :--- |
+| 3 | Rainy | Yes | **Yes** |
+| 4 | Rainy | No | **No** |
+| 5 | Rainy | No | **No** |
+
+Since Weather is identical for all three, our only remaining choice is to split by **Weekend == Yes**.
+*   **Left Child (Weekend is Yes):** Instance 3 $\rightarrow$ Label: `[Yes]`
+    *   $m_{left} = 1$
+    *   $G_{left} = 1 - (1^2) = 0$
+*   **Right Child (Weekend is No):** Instances 4, 5 $\rightarrow$ Labels: `[No, No]`
+    *   $m_{right} = 2$
+    *   $G_{right} = 1 - (1^2) = 0$
+*   **Weighted Gini for this sub-split:** $(1/3 \times 0) + (2/3 \times 0) = 0$
+
+#### Final Trained Tree Structure
+Every branch now terminates in a pure leaf node ($G = 0$). Training is complete.
+
+```text
+         [Is Weather Sunny?]
+             /         \
+       (True)/         \(False)
+           /             \
+    [Leaf: Go Walk]   [Is it the Weekend?]
+    (Gini=0, Recs=2)      /           \
+                  (True)/             \(False)
+                      /                 \
+               [Leaf: Go Walk]    [Leaf: Stay Home]
+               (Gini=0, Recs=1)   (Gini=0, Recs=2)
+```
