@@ -15,6 +15,8 @@
 
 ### 🧠 Deep Learning
 10. [Deep Learning Part 1: Multi-Layer Perceptrons (MLPs) & Non-Linearity](#deep-learning-part-1-multi-layer-perceptrons-mlps--non-linearity)
+11. [Part 2: How Neural Networks Learn (Forward & Backpropagation)](#part-2-how-neural-networks-learn-forward--backpropagation)
+12. [Part 3: The Engine of Learning — Optimizers](#part-3-the-engine-of-learning--optimizers)
 
 ---
 
@@ -1726,3 +1728,74 @@ The weight has been updated from 0.5 to 0.3. The next time the network makes a g
 
 **Q4: In the context of Gradient Descent, what is a "Local Minimum" and how do modern optimizers (like Adam) avoid it?**
 *   **Answer:** The loss landscape of a deep neural network is highly non-convex (it looks like a mountain range, not a smooth bowl). A local minimum is a small valley that is not the lowest possible point (the global minimum). Modern optimizers like **Adam** introduce *Momentum*—mathematically simulating a ball rolling down a hill that builds up speed, allowing it to "roll out" of shallow local minima to find deeper, better solutions.
+
+
+
+## Part 3: The Engine of Learning — Optimizers
+
+Deep learning models usually have a strong complexity and come up with millions or even billions of trainable parameters. These models are trained using an optimization technique that adjusts parameters to minimize a particular loss function. While standard Stochastic Gradient Descent (SGD) is widely used, advanced techniques like Momentum, RMSProp, and Adam are required to improve convergence speed and stability.
+
+### 1. The Flaw of SGD: Pathological Curvature
+The most fundamental algorithm is Gradient Descent, which steps in the exact direction of the calculated gradient. However, this naive approach fails spectacularly when it enters a "ravine" (an area where the surface is much more steep in one dimension than in another).
+
+*   **The Trap:** In a ravine, gradient descent bounces along the ridges, moving a lot slower towards the local minima. Because the surface curves much more steeply in one direction, the optimizer is constantly pulled back and forth across the ravine walls rather than straight down to the minimum.
+*   If we use a slower learning rate to prevent the bouncing, the optimization may become too slow to be practical and even appear to halt altogether, creating the false impression of a local minimum.
+
+![Optimizers Navigating Pathological Curvature](./assets/optimizers_pathological_curvature.png)
+
+### 2. SGD with Momentum
+Momentum accelerates gradient descent by using a moving average of past gradients, helping reduce oscillations and speed up convergence.
+
+*   **The Intuition:** It behaves like a heavy ball rolling down a hill. The momentum term increases updates for dimensions whose gradients point in the same directions and reduces updates for dimensions whose gradients change directions.
+*   **The Math:** It uses an exponentially moving average to store trend information about a set of previous gradient values.
+    $$ v_t = \beta \cdot v_{t-1} + (1 - \beta) \cdot \nabla_\theta J(\theta) $$
+    $$ \theta_{t+1} = \theta_t - \alpha \cdot v_t $$
+    *(Where $v_t$ is the velocity/running average, $\beta$ is the momentum term typically set close to 0.9, and $\alpha$ is the learning rate).*
+
+### 3. AdaGrad (Adaptive Gradient Algorithm)
+Standard algorithms keep the learning rate constant throughout the training, which is inefficient. AdaGrad assigns a unique learning rate to each parameter.
+
+*   **The Intuition:** If a weight has been having very huge updates, the learning rate for that specific weight will decrease. Inversely, for smaller gradients, the learning rate will be bigger. This way, Adagrad deals with vanishing and exploding gradient problems.
+*   **The Math:** It achieves this by storing the sum of squared historical gradients for each parameter.
+    $$ \theta_{t+1} = \theta_t - \frac{\alpha}{\sqrt{G_{diag} + \epsilon}} \cdot \nabla_\theta J(\theta) $$
+    *(Where $G_{diag}$ is a diagonal matrix containing the sum of past squared gradients, and $\epsilon$ is a very small value to ensure division by zero does not occur).*
+*   **The Fatal Flaw:** Because it accumulates squared gradients, the denominator always grows. A limitation of AdaGrad is that it tends to overly decrease the learning rate over time. This causes the algorithm to tend to converge slowly during the last iterations where it becomes very low.
+
+### 4. RMSProp (Root Mean Square Propagation)
+RMSprop was devised by the legendary Geoffrey Hinton to specifically fix AdaGrad's diminishing learning rate problem.
+
+*   **The Intuition:** Instead of keeping a sum of all past squared gradients, RMSProp uses an exponentially weighted moving average of squared gradients. This puts more emphasis on recent gradient values rather than equally distributing importance.
+*   **The Math:**
+    $$ S_t = \beta S_{t-1} + (1 - \beta) (\nabla_\theta J)^2 $$
+    $$ \theta_{t+1} = \theta_t - \frac{\alpha}{\sqrt{S_t} + \epsilon} \cdot \nabla_\theta J $$
+    *(By prioritizing recent gradients, RMSProp automatically will decrease the size of the gradient steps towards minima when the steps are too large, making the algorithm less prone to overshooting without causing the learning rate to decay to zero).*
+
+### 5. Adam (Adaptive Moment Estimation)
+Adam is currently the most famous optimization algorithm in deep learning. Adam combines the advantages of Momentum and RMSprop techniques to adjust learning rates during training.
+
+*   **The Intuition:** It keeps track of the exponentially moving averages for computed gradients (Momentum) and squared gradients (RMSProp) respectively. It works well with large datasets and complex models because it uses memory efficiently and adapts the learning rate for each parameter automatically.
+*   **The Math:**
+    1.  **Calculate Momentum (First Moment):**
+        $$ m_t = \beta_1 m_{t-1} + (1 - \beta_1) \nabla_\theta J $$
+    2.  **Calculate RMSProp (Second Moment):**
+        $$ v_t = \beta_2 v_{t-1} + (1 - \beta_2) (\nabla_\theta J)^2 $$
+    3.  **Bias Correction:** Because $m$ and $v$ start at zero, they are heavily biased toward zero in the beginning. Adam applies bias correction to prevent instability during early training stages.
+        $$ \hat{m}_t = \frac{m_t}{1 - \beta_1^t} \quad \text{and} \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t} $$
+    4.  **Final Update:**
+        $$ \theta_{t+1} = \theta_t - \frac{\alpha \hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} $$
+
+---
+
+### 6. Placement Prep: Optimizers Flashcards
+
+**Q1: Why does standard Stochastic Gradient Descent (SGD) struggle with "Pathological Curvature"?**
+*   **Answer:** In a ravine (pathological curvature), the loss surface curves much more steeply in one dimension than the other. SGD only looks at the immediate gradient, so it ends up bouncing wildly back and forth across the steep ridges instead of moving smoothly down the center of the ravine toward the local minimum.
+
+**Q2: How does the mathematical mechanism of Momentum solve the bouncing problem of SGD?**
+*   **Answer:** Momentum uses an exponentially moving average to store trend information about previous gradient values. The momentum term reduces updates for dimensions whose gradients constantly change directions (canceling out the bouncing) and increases updates for dimensions whose gradients consistently point in the same direction, resulting in faster convergence.
+
+**Q3: What is the primary difference in how AdaGrad and RMSProp calculate their adaptive learning rates?**
+*   **Answer:** AdaGrad sums up all historical squared gradients from the very first iteration, meaning the learning rate constantly decays and eventually tends to overly decrease over time. RMSProp addresses this by using an exponentially weighted moving average of squared gradients, which puts more emphasis on recent gradient values and prevents the learning rate from prematurely dying.
+
+**Q4: Explain the architecture of the Adam Optimizer.**
+*   **Answer:** Adam (Adaptive Moment Estimation) combines the first-order momentum of SGD with the second-order momentum of RMSProp. It adapts the learning rate for each parameter individually based on both the moving average of past gradients and the moving average of squared gradients. It also applies a mathematical bias correction to prevent instability during the early stages of training when the moving averages are initialized at zero.
