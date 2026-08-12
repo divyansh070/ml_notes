@@ -1392,3 +1392,132 @@ One of the best features of standard PCA is that it is easily reversible. If you
 
 **Q3: Explain the "Pre-image error" in Kernel PCA.**
 *   **Answer:** Because kPCA uses a mathematical shortcut (the kernel trick) to skip mapping into infinite dimensions, you cannot cleanly invert the function to reconstruct the original high-dimensional data. Instead, the algorithm has to estimate the original points (the pre-image). The difference between this estimation and the true original data point is the pre-image error.
+
+
+### 5. Locally Linear Embedding (LLE)
+
+While PCA and Kernel PCA are incredibly popular, **Locally Linear Embedding (LLE)** is another powerful nonlinear dimensionality reduction (NLDR) technique. 
+
+Unlike PCA, LLE is a Manifold Learning technique that **does not rely on projections**. Instead, it is particularly excellent at unrolling twisted manifolds, especially when there is not too much noise in the dataset.
+
+It works in two distinct steps: first measuring how instances relate to their immediate neighbors, and then preserving those exact relationships in a lower-dimensional space.
+
+#### Step 1: Linearly Modeling Local Relationships
+Instead of looking at the massive, global structure of the dataset, LLE zooms in on local neighborhoods.
+
+*   For each training instance $\mathbf{x}^{(i)}$, the algorithm identifies its $k$ closest neighbors.
+*   It then attempts to reconstruct that specific instance $\mathbf{x}^{(i)}$ as a linear function of those neighbors.
+*   It does this by finding the optimal weights ($w_{i,j}$) so that the squared distance between $\mathbf{x}^{(i)}$ and its reconstructed self ($\sum_{j=1}^{m} w_{i,j} \mathbf{x}^{(j)}$) is as small as possible.
+*   **The Constraints:** If a point $\mathbf{x}^{(j)}$ is *not* one of the $k$ closest neighbors, its weight is forced to 0. Furthermore, the weights for the neighbors of each instance must be normalized (they must sum to 1).
+
+This creates our first constrained optimization problem, resulting in a weight matrix $\widehat{\mathbf{W}}$ that perfectly encodes the local linear relationships between all training instances:
+
+$$ \widehat{\mathbf{W}} = \underset{\mathbf{W}}{\text{argmin}} \sum_{i=1}^{m} \left( \mathbf{x}^{(i)} - \sum_{j=1}^{m} w_{i,j} \mathbf{x}^{(j)} \right)^2 $$
+
+#### Step 2: Reducing Dimensionality While Preserving Relationships
+Now that we have a matrix ($\widehat{\mathbf{W}}$) that perfectly describes how every point relates to its neighbors, we want to map the training instances into a new $d$-dimensional space (where $d < n$). 
+
+*   We let $\mathbf{z}^{(i)}$ represent the new image of $\mathbf{x}^{(i)}$ in this lower-dimensional space.
+*   We want the squared distance between this new point $\mathbf{z}^{(i)}$ and its reconstructed self in the new space ($\sum_{j=1}^{m} \widehat{w}_{i,j} \mathbf{z}^{(j)}$) to remain as small as possible.
+*   **The Reversal:** This looks identical to Step 1, but we flip the variables. Instead of keeping the instances fixed and searching for optimal weights, we now keep the weights fixed ($\widehat{w}_{i,j}$) and search for the optimal physical positions of the new instances ($\mathbf{Z}$) in the low-dimensional space.
+
+This leads to the final unconstrained optimization problem:
+
+$$ \widehat{\mathbf{Z}} = \underset{\mathbf{Z}}{\text{argmin}} \sum_{i=1}^{m} \left( \mathbf{z}^{(i)} - \sum_{j=1}^{m} \widehat{w}_{i,j} \mathbf{z}^{(j)} \right)^2 $$
+
+#### The Major Drawback: Computational Complexity
+While LLE is brilliant mathematically, you must be careful when using it on large datasets. `scikit-learn`'s implementation scales beautifully for finding neighbors and optimizing weights, but the final step (constructing the low-dimensional representations) has a complexity of $O(dm^2)$. 
+
+Because of that $m^2$ term (where $m$ is the number of training instances), this algorithm scales incredibly poorly to very large datasets. 
+
+---
+
+#### 5. Placement Prep: LLE Flashcards
+
+**Q1: How does LLE differ fundamentally from standard PCA in how it reduces dimensions?**
+*   **Answer:** Standard PCA relies on finding a global hyperplane and projecting the data onto it to preserve maximum variance. LLE does not use projections. Instead, it is a manifold learning technique that measures how each data point linearly relates to its $k$-nearest neighbors, and then maps the points to a lower dimension while trying to perfectly preserve those local relationships.
+
+**Q2: Describe the two-step optimization process of LLE.**
+*   **Answer:** 
+    *   **Step 1:** The algorithm keeps the original high-dimensional data points fixed and searches for the optimal *weights* to reconstruct each point from its nearest neighbors. 
+    *   **Step 2:** The algorithm keeps those discovered weights fixed and searches for the optimal *coordinates* in the new low-dimensional space that minimize the exact same reconstruction error.
+
+**Q3: Why might you avoid using LLE on a dataset with 1 million rows?**
+*   **Answer:** The final step of the LLE algorithm—constructing the low-dimensional representations—has a computational complexity of $O(dm^2)$. The squared number of instances ($m^2$) means the algorithm scales exceptionally poorly and will choke on very large datasets.
+
+
+## Part 8: Unsupervised Learning — Clustering
+
+While PCA is used for dimensionality reduction (finding the hidden axes of data), **Clustering** is used to group unlabeled data points into distinct, non-overlapping categories based on their similarities. 
+
+The most famous and widely used clustering algorithm is **K-Means**.
+
+### 1. The K-Means Algorithm (Lloyd's Algorithm)
+
+The goal of K-Means is simple: group your data into $k$ distinct clusters. But because the data has no labels, the algorithm has to figure out where the center of those clusters should be entirely on its own. 
+
+It does this through an iterative, two-step process:
+1.  **Initialization:** The algorithm randomly picks $k$ data points to act as the initial cluster centers (called **centroids**).
+2.  **Assignment Step:** It measures the Euclidean distance from every single data point to each of the $k$ centroids. It assigns each point to the centroid it is closest to.
+3.  **Update Step:** Now that the points are assigned to groups, the algorithm recalculates the actual center of each group (the mean of all points in that cluster). It moves the centroid to this new mean coordinate.
+4.  **Repeat:** It repeats the Assignment and Update steps until the centroids stop moving (convergence).
+
+### 2. The Objective Function: Inertia (WCSS)
+
+How does K-Means know if it is doing a good job? It tries to minimize a metric called **Inertia** (also known as Within-Cluster Sum of Squares, or WCSS). 
+
+Inertia calculates the squared distance between each data point and its assigned centroid, and sums them all up. A lower inertia means the points are tightly packed around their cluster centers.
+
+### 3. Finding the Optimal $k$ (Hyperparameter Tuning)
+
+The biggest challenge in K-Means is that you have to tell the algorithm how many clusters ($k$) to look for *before* it starts. If you guess wrong, the results are useless. There are two primary ways to mathematically determine the best $k$:
+
+#### Method A: The Elbow Method (Using Inertia)
+If you train K-Means with $k=1$, $k=2$, $k=3$, etc., and plot the Inertia, the line will always go down (because more clusters mean smaller distances). However, you are looking for the point where the drop in inertia sharply slows down, forming an "elbow."
+
+![K-Means Elbow Method](./assets/kmeans_elbow.png)
+
+In Figure 9-8, the inertia drops massively from $k=2$ to $k=3$ to $k=4$. But after $k=4$, the improvements become marginal. The inflection point (the elbow) is at $k=4$, suggesting that 4 is the optimal number of clusters for this dataset.
+
+#### Method B: The Silhouette Score (The Superior Metric)
+While the Elbow Method is a good quick visual, the **Silhouette Score** is mathematically superior and much more precise. It evaluates the quality of the clusters by measuring both cohesion and separation.
+
+For every single data point, it calculates:
+*   $a$: The mean distance to all other points in its *own* cluster (Cohesion).
+*   $b$: The mean distance to all points in the *next nearest* cluster (Separation).
+
+The Silhouette Score for a point is: 
+$$ s = \frac{b - a}{\max(a, b)} $$
+
+*   **Score = +1:** The point is perfectly inside its own cluster and far from others. (Excellent)
+*   **Score = 0:** The point is right on the boundary between two clusters.
+*   **Score = -1:** The point was likely assigned to the wrong cluster.
+
+To find the best $k$, you calculate the average Silhouette Score across all points for different values of $k$ and pick the $k$ that yields the highest average score (closest to +1).
+
+### 4. The Three Fatal Flaws of K-Means (Interview Gold)
+
+Interviewers will always test if you know when *not* to use K-Means.
+
+1.  **The Random Initialization Trap:** If the initial random centroids are placed poorly (e.g., two centroids right next to each other), the algorithm can get stuck in a terrible local minimum. 
+    *   *The Fix:* Use **K-Means++**. This is a smart initialization step (the default in `scikit-learn`) that ensures the initial centroids are placed as far away from each other as mathematically possible.
+2.  **Sensitivity to Scale:** Because K-Means relies entirely on calculating Euclidean distances, features with larger scales (e.g., Salary in thousands vs. Age in tens) will completely dominate the distance calculations.
+    *   *The Fix:* You **must** scale/standardize your data (using `StandardScaler`) before running K-Means.
+3.  **Assumption of Spherical Clusters:** K-Means geometrically draws straight boundaries halfway between centroids. It assumes all clusters are perfectly spherical and roughly the same size. 
+    *   *The Flaw:* If your data has elongated clusters (like a cigar shape) or concentric circles (a donut shape), K-Means will fail spectacularly. You must use density-based algorithms like DBSCAN instead.
+
+---
+
+### 5. Placement Prep: K-Means Flashcards
+
+**Q1: Explain the difference between Inertia and the Silhouette Score for evaluating clusters.**
+*   **Answer:** Inertia only measures *cohesion*—how tightly packed the points are around their centroid (lower is better, but it naturally decreases as $k$ increases). The Silhouette Score measures both *cohesion* and *separation*—it evaluates how close a point is to its own cluster compared to how far it is from the next closest cluster. It scales from -1 to 1, making it an absolute metric where a higher score is definitively better.
+
+**Q2: What is K-Means++, and why is it necessary?**
+*   **Answer:** Standard K-Means initializes centroids completely at random, which can lead the algorithm to converge on a highly suboptimal local minimum. K-Means++ introduces a probabilistic initialization step where the first centroid is chosen randomly, but subsequent centroids are explicitly chosen to be as far away from the existing centroids as possible, dramatically improving convergence quality and speed.
+
+**Q3: You are given a dataset containing the physical coordinates of customers. Some groupings look like long, winding lines along a highway, while others are dense circles in a city. Will K-Means cluster this data effectively?**
+*   **Answer:** No. K-Means heavily assumes that clusters are spherical (isotropic) and have roughly similar variance. It uses strict Euclidean distance from a central point, so it will slice those long, winding highway clusters into arbitrary pieces. A density-based algorithm like DBSCAN would be required here.
+
+**Q4: Is feature scaling required for K-Means? Why or why not?**
+*   **Answer:** Yes, it is absolutely required. K-Means calculates the Euclidean distance between points. If one feature ranges from 0 to 100,000 and another ranges from 0 to 1, the algorithm will mathematically treat the larger feature as exponentially more important, completely ignoring the structural variance of the smaller feature.
