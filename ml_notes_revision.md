@@ -831,3 +831,103 @@ Where:
     *   **A:** 0.5 (A perfect 50/50 split of classes, resembling a random coin toss).
 10. **Q: What shape do Decision Tree boundaries always take?**
     *   **A:** Orthogonal (axis-parallel). They can only draw straight horizontal or vertical boundary lines.
+
+
+
+
+## Part 6: Ensemble Learning
+
+Ensemble learning relies on a simple yet powerful mathematical principle: **"The Wisdom of the Crowd."** A group of diverse models working together will almost always outperform even the single best individual model.
+
+### 1. Voting Classifiers
+A **Voting Classifier** is the simplest form of ensemble learning. Instead of relying on a single algorithm, you train several distinct, independent models (such as Logistic Regression, SVM, and a Decision Tree) on the same dataset and aggregate their predictions to make a final decision.
+
+**Hard Voting vs. Soft Voting:**
+*   **Hard Voting (Majority Rule):** Each individual classifier casts a "vote" for a class label. The ensemble outputs the class that receives the strict majority of votes. It treats all votes equally, regardless of how confident the individual model is.
+*   **Soft Voting (Probability Average):** Instead of looking at the final class labels, the ensemble averages the predicted **class probabilities** from all models. The class with the highest average probability wins. This is generally superior to Hard Voting because it gives greater weight to highly confident predictions. *(Note: Base models must be able to estimate probabilities for this to work).*
+
+### 2. Visualizing Voting Classifiers in Python
+
+To truly see the power of "The Wisdom of the Crowd," you can run the following Python script. It trains three separate models on a noisy `make_moons` dataset:
+1.  **A Single Decision Tree** (Unconstrained)
+2.  **Hard Voting Ensemble** (500 Decision Trees voting by majority rule)
+3.  **Soft Voting Ensemble** (500 Decision Trees voting by probability averaging)
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_moons
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import BaggingClassifier
+
+plt.style.use('seaborn-v0_8-whitegrid')
+
+# 1. Generate Toy 2D Dataset (Slightly noisy moons)
+X, y = make_moons(n_samples=500, noise=0.30, random_state=42)
+
+# 2. Train Models
+# Model 1: Single Unconstrained Decision Tree
+tree_clf = DecisionTreeClassifier(random_state=42)
+tree_clf.fit(X, y)
+
+# We use BaggingClassifier to train 500 different trees on random subsets of data.
+# By default, scikit-learn's BaggingClassifier uses Soft Voting if predict_proba is available.
+bag_clf = BaggingClassifier(
+    DecisionTreeClassifier(random_state=42), n_estimators=500,
+    bootstrap=True, n_jobs=-1, random_state=42
+)
+bag_clf.fit(X, y)
+
+def hard_voting_predict(X_new):
+    # Extract hard votes from all 500 trees and take the majority vote
+    preds = np.array([tree.predict(X_new) for tree in bag_clf.estimators_])
+    return np.round(np.mean(preds, axis=0))
+
+# 3. Plotting Boundaries
+def plot_boundaries(X, y, pred_func, ax, title):
+    x0s = np.linspace(X[:, 0].min() - 0.5, X[:, 0].max() + 0.5, 100)
+    x1s = np.linspace(X[:, 1].min() - 0.5, X[:, 1].max() + 0.5, 100)
+    x0, x1 = np.meshgrid(x0s, x1s)
+    X_new = np.c_[x0.ravel(), x1.ravel()]
+    
+    y_pred = pred_func(X_new).reshape(x0.shape)
+    
+    ax.contourf(x0, x1, y_pred, alpha=0.3, cmap=plt.cm.brg)
+    ax.plot(X[:, 0][y==0], X[:, 1][y==0], "bs", alpha=0.6)
+    ax.plot(X[:, 0][y==1], X[:, 1][y==1], "g^", alpha=0.6)
+    ax.set_title(title, fontsize=16)
+    ax.set_xlabel(r"$x_1$", fontsize=14)
+    ax.set_ylabel(r"$x_2$", fontsize=14, rotation=0)
+
+fig, axes = plt.subplots(1, 3, figsize=(18, 5), sharey=True)
+
+# Plot 1: Single Decision Tree
+plot_boundaries(X, y, tree_clf.predict, axes[0], "Single Decision Tree\n(Severe Overfitting)")
+
+# Plot 2: Hard Voting (500 Trees)
+plot_boundaries(X, y, hard_voting_predict, axes[1], "Hard Voting (500 Trees)\n(Smoother, but some rigid edges)")
+
+# Plot 3: Soft Voting (500 Trees)
+plot_boundaries(X, y, bag_clf.predict, axes[2], "Soft Voting (500 Trees)\n(Highly Generalized, smooth curves)")
+
+plt.tight_layout()
+plt.savefig("Voting_Boundaries_Comparison.png", dpi=300)
+```
+
+**Output: Boundary Smoothing**
+Notice how the single tree severely overfits to the noise, drawing jagged and erratic boundaries. The Hard Voting ensemble smooths out the boundaries significantly by majority rule, but still has a few rigid edges. The Soft Voting ensemble achieves the smoothest, most generalized boundary by weighing the confidence of each tree!
+![Voting Boundaries Comparison](./assets/Voting_Boundaries_Comparison.png)
+
+---
+
+### 3. Why Ensembles Work: The Law of Large Numbers
+To understand why combining models works mathematically, consider a biased coin that lands on heads exactly **51%** of the time (representing a weak learner).
+
+*   If you flip it once, you have a 51% chance of getting heads.
+*   If you flip it 1,000 times, the chance of getting a majority of heads jumps to over **73%**.
+*   If you flip it 10,000 times, the probability rises above **99%**.
+
+Similarly, if you combine 1,000 independent classifiers that are each individually only 51% accurate, their collective majority vote can approach near-perfect accuracy. 
+
+**The Diversity Rule:**
+The math only works if the errors the models make are completely **uncorrelated**. Combining 500 identical Decision Trees trained on the exact same data won't help because they will all make the exact same mistakes. Ensemble methods require **diversity**, which is achieved by either using completely different mathematical algorithms (e.g., SVM + Logistic Regression + Trees) or by training the same algorithm on completely different random subsets of the data.
