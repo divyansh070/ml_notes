@@ -324,17 +324,21 @@ The actual geometric street doesn't care if the boundaries are labeled $1$ and $
 
 **How Inference Works (Making Predictions):**
 The $+1$ and $-1$ gutters are *only* used during training to calculate the margin width. Once the model is trained (we found the optimal $w$ and $b$), inference is incredibly simple. We take a new, unseen data point $x_{new}$ and calculate its score:
-$$ z = w^T x_{new} + b $$
+
+$$z = w^T x_{new} + b$$
+
 *   If $z \ge 0 \implies$ Classify as **Positive (+1)**
 *   If $z < 0 \implies$ Classify as **Negative (-1)**
 *(Notice how the $\pm 1$ margins don't matter anymore for the final prediction; inference only cares which side of the $0$ hyperplane the point lands on!)*
 
 **The Margin Math (Core Interview Question):**
 The total width of this street (from the left guardrail to the right guardrail) is mathematically defined as:
-$$ \text{Margin Width} = \frac{2}{||w||} $$
+
+$$\text{Margin Width} = \frac{2}{||w||}$$
 
 Because SVM's primary goal is to make this street as wide as possible (maximize the margin), the optimization algorithm must do the exact mathematical opposite to the denominator. Therefore, the core optimization goal of SVM is to **minimize**:
-$$ \frac{1}{2} ||w||^2 $$
+
+$$\frac{1}{2} ||w||^2$$
 
 **Hard Margin vs. Soft Margin (The $C$ Parameter):**
 *   **Hard Margin (The Flawed Ideal):** A strict margin that allows absolutely zero data points inside the street or on the wrong side. If there is a single extreme outlier, a Hard Margin will severely contort the street to avoid it, leading to massive **Overfitting**.
@@ -430,11 +434,11 @@ Let's solve a 2D SVM geometrically.
 The best decision boundary separates the classes perfectly in the middle. 
 *   The midpoint between $(1,1)$ and $(3,3)$ is **$(2,2)$**.
 *   The boundary must be perpendicular to the line connecting $A$ and $B$. Since the line $A \rightarrow B$ has a slope of $1$, the boundary must have a slope of $-1$. 
-*   Equation of the boundary: $y - 2 = -1(x - 2) \implies x + y = 4 \implies **x + y - 4 = 0**$.
+*   Equation of the boundary: $y - 2 = -1(x - 2) \implies x + y = 4 \implies$ **$x + y - 4 = 0$**.
 
 **Step 2: Calculate the Margin**
 The margin distance is the perpendicular distance from the midpoint $(2,2)$ to either point. 
-*   Distance from $(2,2)$ to $(3,3)$: $\sqrt{(3-2)^2 + (3-2)^2} = \sqrt{1^2 + 1^2} = **\sqrt{2}**$.
+*   Distance from $(2,2)$ to $(3,3)$: $\sqrt{(3-2)^2 + (3-2)^2} = \sqrt{1^2 + 1^2} =$ **$\sqrt{2}$**.
 *   Both Point A and Point B lie exactly on the margin boundaries, meaning **both A and B are Support Vectors**.
 
 **Step 3: Finding Weights ($w$) and Bias ($b$)**
@@ -448,7 +452,7 @@ Our SVM equations are $w^Tx + b = \pm 1$.
 *   Therefore, **$w = [\frac{1}{2}, \frac{1}{2}]$**. 
 
 To find $b$, plug $w$ and Point B $(3,3)$ into the positive margin equation:
-*   $w^T x_B + b = 1 \implies (\frac{1}{2} \cdot 3) + (\frac{1}{2} \cdot 3) + b = 1 \implies 3 + b = 1 \implies **b = -2**$.
+*   $w^T x_B + b = 1 \implies (\frac{1}{2} \cdot 3) + (\frac{1}{2} \cdot 3) + b = 1 \implies 3 + b = 1 \implies$ **$b = -2$**.
 
 *Final SVM Equation:* $0.5x_1 + 0.5x_2 - 2 = 0$.
 
