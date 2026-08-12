@@ -1560,7 +1560,15 @@ Once every point is categorized, the clustering is basically a chain reaction:
 
 ---
 
-#### 5. Placement Prep: DBSCAN Flashcards
+#### 5. Visualizing the DBSCAN Algorithm
+
+Here is a step-by-step visualization of how DBSCAN separates nested clusters that K-Means fails to handle. Notice how it actively categorizes points and builds clusters by linking dense Core Points together:
+
+![DBSCAN Step-by-Step Algorithm](./assets/dbscan_step_by_step.png)
+
+---
+
+#### 6. Placement Prep: DBSCAN Flashcards
 
 **Q1: In an interview, how would you explain the difference between a Core Point, a Border Point, and a Noise Point in DBSCAN?**
 *   **Answer:** A Core Point is in a dense region, meaning it has at least `min_samples` neighbors within a radius of `eps`. A Border Point is in a sparse region (fewer than `min_samples`), but it sits just inside the radius of a Core Point. A Noise Point is completely isolated; it is neither a Core Point nor close to one.
