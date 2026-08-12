@@ -687,7 +687,10 @@ Interviewers will often ask how a tree decides to split. Scikit-learn defaults t
     *   $H = -\sum p_k \log_2(p_k)$
     *   The goal of a split is to maximize **Information Gain** (the drop in Entropy from the parent node to the child nodes).
 
-#### C. Top 4 Interview Questions
+#### C. Feature Importance
+Scikit-learn calculates feature importance by measuring how much a specific feature reduces Gini impurity across all the nodes it is used in. This reduction is heavily weighted by the number of training samples passing through those nodes. Features that split a massive amount of data at the top of the tree (like the root node) will inherently have a much higher importance score than features used deep in the leaves.
+
+#### D. Top 7 Interview Questions
 1.  **Q: Are Decision Trees parametric or non-parametric?**
     *   **A:** They are **non-parametric**. They do not assume a predetermined structure or mathematical function (like a straight line in regression). The number of parameters (nodes) grows with the complexity of the training data.
 2.  **Q: What is the difference between a Classification Tree and a Regression Tree?**
@@ -696,3 +699,9 @@ Interviewers will often ask how a tree decides to split. Scikit-learn defaults t
     *   **A:** Because they are "greedy" algorithms that make the locally optimal choice at every split without looking ahead. Without constraints (like `max_depth`), they will recursively split the data until every single leaf contains exactly 1 data point (perfectly memorizing the training data and noise).
 4.  **Q: Can a Decision Tree handle categorical data?**
     *   **A:** Conceptually, yes. However, implementation matters. Scikit-learn's CART implementation currently requires categorical variables to be converted to numerical values (e.g., via One-Hot Encoding) before training.
+5.  **Q: What specific algorithm does scikit-learn use to build trees, and what is its main characteristic?**
+    *   **A:** It uses the CART algorithm, which produces strictly binary trees where every node has exactly two children.
+6.  **Q: Why is the Decision Tree algorithm considered 'Greedy'?**
+    *   **A:** Because it searches for the locally optimum split at the current node without looking ahead. Finding the globally optimal tree is NP-Complete.
+7.  **Q: What is the time complexity of a Decision Tree?**
+    *   **A:** Prediction is blazingly fast at $O(\log_2(m))$, but training is slow at $O(n \times m \log_2(m))$ because it must sort and compare all features across all samples.
