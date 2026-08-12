@@ -1644,3 +1644,85 @@ To solve complex problems, we must inject **non-linearity** into the network. We
 
 **Q3: Why has ReLU replaced Sigmoid as the standard activation function for hidden layers?**
 *   **Answer:** The Sigmoid function flattens out (saturates) when inputs are very high or very low, causing its derivative to become almost zero. During backpropagation, these tiny gradients multiply together, completely halting the learning process in deep networks (the Vanishing Gradient Problem). ReLU has a constant derivative of 1 for all positive values, allowing gradients to flow freely backward through the network without vanishing, drastically speeding up convergence.
+
+
+
+## Part 2: How Neural Networks Learn (Forward & Backpropagation)
+
+A Neural Network learns in a continuous loop consisting of three phases: making a guess (Forward Propagation), calculating how wrong the guess was (Loss), and adjusting its internal gears to be less wrong next time (Backpropagation and Gradient Descent).
+
+### 1. Forward Propagation (Making the Guess)
+Forward propagation is simply the process of passing data from the input layer, through the hidden layers, to the output layer to get a prediction ($\hat{y}$).
+
+For a single artificial neuron, the math is a two-step process:
+1.  **The Linear Combination:** Multiply the inputs by their weights and add the bias.
+    $$ z = (w_1 x_1 + w_2 x_2 + \dots + w_n x_n) + b $$
+    *(In linear algebra terms for a whole layer: $\mathbf{z} = \mathbf{W}\mathbf{x} + \mathbf{b}$)*
+2.  **The Activation:** Pass that result through an activation function (like ReLU) to introduce non-linearity.
+    $$ a = \text{ReLU}(z) $$
+
+This output ($a$) is then passed as the input ($x$) to the next layer. This repeats until the final prediction is made.
+
+### 2. The Loss Function (Calculating the Error)
+Once the network makes its prediction ($\hat{y}$), we compare it to the actual true label ($y$). The mathematical formula used to measure this distance is the **Loss Function** (or Cost Function).
+
+*   **For Regression:** We usually use **Mean Squared Error (MSE)**.
+    $$ L = \frac{1}{2}(y - \hat{y})^2 $$
+*   **For Classification:** We use **Cross-Entropy Loss** (Log Loss), which heavily penalizes the network if it is highly confident in the wrong answer.
+
+### 3. Backpropagation (The Engine of Learning)
+Backpropagation is short for "backward propagation of errors." It is the algorithm used to figure out exactly how much every single weight and bias in the network contributed to the final error. 
+
+It does this using the **Chain Rule of Calculus**. We want to find the partial derivative of the Loss with respect to a specific weight ($\frac{\partial L}{\partial w}$). In plain English: *"If I tweak this specific weight by a tiny amount, exactly how much will the final error change?"*
+
+By applying the Chain Rule, we step backward through the network's math:
+$$ \frac{\partial L}{\partial w} = \frac{\partial L}{\partial a} \cdot \frac{\partial a}{\partial z} \cdot \frac{\partial z}{\partial w} $$
+
+#### The Mathematical Example (Step-by-Step)
+Imagine a tiny network with 1 input, 1 neuron, and 1 output. 
+*   **Input ($x$):** 2
+*   **Target ($y$):** 0
+*   **Current Weight ($w$):** 0.5
+*   **Current Bias ($b$):** 0
+
+**Step A: Forward Pass**
+1.  $z = w \cdot x + b \implies (0.5 \cdot 2) + 0 = 1$
+2.  Pass through ReLU activation: $a = \max(0, 1) = 1$. (Our prediction $\hat{y}$ is 1).
+3.  Calculate Loss (MSE): $L = \frac{1}{2}(1 - 0)^2 = 0.5$
+
+**Step B: Backpropagation (Chain Rule)**
+We need to find $\frac{\partial L}{\partial w}$.
+1.  **Derivative of Loss w.r.t Activation:** $\frac{\partial L}{\partial a} = (a - y) = (1 - 0) = 1$
+2.  **Derivative of Activation w.r.t $z$:** The derivative of ReLU for a positive number is exactly $1$. So, $\frac{\partial a}{\partial z} = 1$
+3.  **Derivative of $z$ w.r.t Weight:** Since $z = wx + b$, the derivative with respect to $w$ is simply the input $x$. So, $\frac{\partial z}{\partial w} = 2$
+
+Multiply them together: $\frac{\partial L}{\partial w} = 1 \cdot 1 \cdot 2 = \mathbf{2}$
+*The gradient is 2. This means that if we increase the weight, the loss will go up. Therefore, we need to decrease the weight!*
+
+### 4. Gradient Descent (The Weight Update)
+Now that Backpropagation has given us the gradient (the slope of the error), we use an optimizer algorithm called **Gradient Descent** to physically update the weight.
+
+We update the old weight by subtracting the gradient, scaled by a hyperparameter called the **Learning Rate** ($\alpha$):
+$$ w_{\text{new}} = w_{\text{old}} - \alpha \left( \frac{\partial L}{\partial w} \right) $$
+
+If our learning rate $\alpha = 0.1$:
+$$ w_{\text{new}} = 0.5 - 0.1(2) = 0.3 $$
+The weight has been updated from 0.5 to 0.3. The next time the network makes a guess, its error will be smaller!
+
+![Gradient Descent 3D Surface](./assets/gradient_descent_3d.png)
+
+---
+
+### 5. Placement Prep: Forward & Backprop Flashcards
+
+**Q1: Explain the role of the Chain Rule in Backpropagation.**
+*   **Answer:** The Chain Rule is used to calculate the gradient of the Loss function with respect to every single weight in the network. Because a neural network is essentially a massive composite function (functions nested inside functions), the Chain Rule allows us to multiply the local gradients of each layer together, passing the error backwards from the output layer all the way to the input layer.
+
+**Q2: What is the Learning Rate, and what happens if it is set too high or too low?**
+*   **Answer:** The Learning Rate ($\alpha$) controls the step size the optimizer takes when updating the weights during Gradient Descent. If it is too low, the network will take tiny steps and train incredibly slowly, potentially getting stuck in local minima. If it is too high, the network will take massive steps, constantly overshooting the global minimum, causing the loss to diverge and explode instead of converging.
+
+**Q3: What is the difference between an Epoch and a Batch during training?**
+*   **Answer:** A **Batch** (or Mini-batch) is a subset of the training data passed through the network before the weights are updated via backpropagation. An **Epoch** occurs when the network has completed a full forward and backward pass over the *entire* training dataset. (e.g., If you have 1,000 images and a batch size of 100, it takes 10 batches to complete 1 Epoch).
+
+**Q4: In the context of Gradient Descent, what is a "Local Minimum" and how do modern optimizers (like Adam) avoid it?**
+*   **Answer:** The loss landscape of a deep neural network is highly non-convex (it looks like a mountain range, not a smooth bowl). A local minimum is a small valley that is not the lowest possible point (the global minimum). Modern optimizers like **Adam** introduce *Momentum*—mathematically simulating a ball rolling down a hill that builds up speed, allowing it to "roll out" of shallow local minima to find deeper, better solutions.
