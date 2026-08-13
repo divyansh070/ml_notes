@@ -2277,7 +2277,7 @@ A_1 = \begin{bmatrix} 0 & 0 \\ 2 & 1 \end{bmatrix}
 ```
 
 **Step 4: Flatten ($F$)**
-We unravel the $2 \times 2$ matrix into a $1 \times 4$ vector.
+We unravel the $2 \times 2$ matrix into a $1 \times 4$ vector. *(Imagine reading the matrix like a book, left-to-right, top-to-bottom, and writing it out as a single line).*
 ```math
 F = \begin{bmatrix} 0 & 0 & 2 & 1 \end{bmatrix}
 ```
@@ -2310,7 +2310,7 @@ To update the dense weights, we multiply the Error by the inputs to that layer (
 **Step 3: Propagate to Flatten Layer ($dF \rightarrow dA_1$)**
 We push the Error backward through the dense weights to find the gradient of the flattened vector.
 *   $dF = Error \cdot W_2 = -0.45 \cdot [0.1, 0.2, 0.3, -0.4] = \mathbf{[-0.045, -0.090, -0.135, 0.180]}$
-*   **Unflatten ($dA_1$):** We reshape this $1 \times 4$ gradient back into a $2 \times 2$ matrix:
+*   **Unflatten ($dA_1$):** We reshape this $1 \times 4$ gradient back into a $2 \times 2$ matrix. Because we "flattened" by reading left-to-right, we "unflatten" by simply putting the 4 error numbers back into their original $2 \times 2$ grid positions:
 ```math
 dA_1 = \begin{bmatrix} -0.045 & -0.090 \\ -0.135 & 0.180 \end{bmatrix}
 ```
