@@ -2337,3 +2337,88 @@ dW_1 = \begin{bmatrix} 0.045 & -0.135 \\ 0.180 & 0.045 \end{bmatrix}
 
 **Conclusion:**
 We have successfully calculated exactly how much every single weight in both the Dense Layer ($dW_2$) and the Convolutional Filter ($dW_1$) needs to change to reduce the error for this specific image!
+
+
+
+## Topic 7: Advanced Architectural Blocks (Modern CNNs)
+
+Classic CNNs simply stacked Conv $\rightarrow$ ReLU $\rightarrow$ Pool in a straight line. As networks grew to 50+ layers, this caused massive computational bottlenecks and gradients completely died during backpropagation. Modern blocks solve this through structural engineering.
+
+### 1. Residual Connections (ResNet)
+As standard networks get deeper, they suffer from the **Vanishing Gradient Problem**. By the time the error gradient propagates backward through 50 activation functions, it multiplies down to zero, and early layers stop learning entirely.
+*   **The Fix:** ResNet introduced the "Skip Connection" (or Shortcut Connection). Instead of strictly mapping an input through a convolution to get an output ($F(x)$), ResNet physically adds the original input back to the output before the final activation: 
+    $$ H(x) = F(x) + x $$
+*   **The Gradient Superhighway:** During backpropagation, the derivative of $x$ is exactly $1$. This allows the error gradient to bypass the heavy convolutions and flow straight backward through the network at full strength, allowing networks to scale to 152+ layers.
+
+### 2. Depthwise Separable Convolutions (MobileNet)
+A standard convolution mixes spatial data (edges/shapes) and channel data (depth) at the exact same time. This requires an enormous amount of parameters. MobileNet splits this into two hyper-efficient steps to run on edge devices:
+*   **Step 1: Depthwise Convolution (Spatial):** We apply a $3 \times 3$ filter to *each channel separately*. (It looks for shapes, but doesn't mix the channels).
+*   **Step 2: Pointwise Convolution (Channel):** We apply a $1 \times 1$ convolution across all the channels. (It mixes the depth, but doesn't look at spatial neighbors).
+*   **The Math Savings:** For a $3 \times 3$ filter transforming 64 channels to 128 channels:
+    *   *Standard:* $3 \times 3 \times 64 \times 128 = \mathbf{73,728}$ parameters.
+    *   *Separable:* $(3 \times 3 \times 64) + (1 \times 1 \times 64 \times 128) = 576 + 8,192 = \mathbf{8,768}$ parameters. 
+    *   We achieve nearly the same feature extraction with **almost 90% fewer parameters**!
+
+### 3. Inception Modules (GoogLeNet)
+Usually, the architect has to guess the best filter size. A $3 \times 3$ captures fine details, while a $5 \times 5$ captures global context. 
+*   **The Fix:** The Inception block applies a $1 \times 1$, a $3 \times 3$, a $5 \times 5$, and a Max Pool in parallel on the *exact same input*. 
+*   It then concatenates all their outputs together. The network gets to look at local and global features simultaneously and dynamically decides which paths are most useful. ($1 \times 1$ bottleneck convolutions are heavily used before the $3 \times 3$ and $5 \times 5$ to prevent the parameter count from exploding).
+
+---
+
+## Topic 8: Receptive Field Calculation
+
+The **Receptive Field** is the physical dimension of the original input image that a single neuron in a deep layer can actually "see".
+If you stack multiple convolutional layers, the receptive field grows linearly without needing larger, parameter-heavy filters.
+
+**The Golden Rule of $3 \times 3$ Stacking:**
+*   Layer 1: A $3 \times 3$ filter sees a $3 \times 3$ patch of the original image.
+*   Layer 2: A $3 \times 3$ filter applied to Layer 1 now sees a **$5 \times 5$** patch of the original image.
+*   Layer 3: A $3 \times 3$ filter applied to Layer 2 now sees a **$7 \times 7$** patch of the original image.
+
+**Why stack instead of using one big filter?**
+Two $3 \times 3$ filters have an identical receptive field to one $5 \times 5$ filter. 
+*   However, one $5 \times 5$ filter has $25$ parameters. 
+*   Two $3 \times 3$ filters have $9 + 9 = 18$ parameters. 
+*   Stacking reduces parameter count by **28%** and injects *two* non-linear ReLU activations instead of one, creating a much more expressive model!
+
+---
+
+## Topic 9: Spatial Batch Normalization (BatchNorm2d)
+
+Standard 1D Batch Normalization normalizes a batch of flat vectors. But images are 3D tensors (Height $\times$ Width $\times$ Channels). 
+
+**How BatchNorm2d Works:**
+Instead of calculating the mean and variance for every single spatial pixel, `BatchNorm2d` calculates the mean and variance across the **Batch, Height, and Width** simultaneously, but maintains a separate learned parameter pair ($\gamma$ and $\beta$) exclusively for **each individual Channel**. 
+*   If your feature map has 256 channels, BatchNorm maintains exactly 256 normalizers. 
+*   This treats each channel (which represents a specific feature, like an edge detector) as its own statistical distribution, scaling the *intensity* of that feature regardless of where it spatially appears in the image.
+
+---
+
+## Topic 10: CNN-Specific Regularization
+
+Images are highly localized. If a pixel is bright red, the pixel right next to it is almost certainly bright red. This creates massive correlation issues during training.
+
+### 1. Spatial Dropout
+*   **The Flaw of Standard Dropout:** If you use standard dropout on a CNN, you drop random individual pixels. Because adjacent pixels are highly correlated, the network simply uses the surviving neighboring pixels to bypass the dropout and infer the feature anyway. It completely fails to prevent overfitting.
+*   **The Fix:** **Spatial Dropout** drops *entire 2D feature maps (channels)* at random. If it drops the "dog ear" feature map for that batch, the network is physically forced to look for other features (like a tail or nose) to make its classification, forcing independent learning.
+
+![Spatial Dropout Visualization](./assets/spatial_dropout_visual.png)
+
+### 2. Modern Augmentation (Mixup & CutMix)
+Standard augmentation rotates or flips images. Modern state-of-the-art architectures use data blending to smooth the decision boundaries.
+*   **MixUp:** Mathematically blends two completely different images together (e.g., 70% Cat pixels + 30% Dog pixels), and alters the target labels to match (Target: [0.7 Cat, 0.3 Dog]). It forces the network to stop making 100% overconfident predictions.
+*   **CutMix:** Instead of blending the pixels (which makes ghost images), CutMix physically cuts a square patch out of the Dog image and pastes it directly over a chunk of the Cat image. The label is updated based on the exact percentage of the area the pasted square took up.
+
+---
+
+### Placement Prep: Elite Architecture Flashcards
+
+**Q1: Prove mathematically how a Residual (Skip) Connection prevents the Vanishing Gradient problem during backpropagation.**
+*   **Answer:** In a standard network, the gradient is strictly multiplied by the derivative of the weights ($\frac{\partial L}{\partial w}$). If these derivatives are $< 1$, the gradient multiplies down to zero (vanishes) over deep layers. A Skip connection mathematically adds the input to the output: $H(x) = F(x) + x$. During backpropagation, the derivative of addition routes the gradient through two paths. The derivative of $x$ is $1$. Therefore, even if the gradient through the convolutional block ($F(x)$) vanishes to $0$, the exact same gradient passes cleanly through the "$+ x$" path completely untouched, allowing deep layers to receive strong error signals.
+
+**Q2: What is the primary difference in parameter allocation between an Inception Module and a Depthwise Separable Convolution?**
+*   **Answer:** An Inception module runs spatial operations ($1 \times 1$, $3 \times 3$, $5 \times 5$) in parallel to capture multi-scale features, deliberately *increasing* the architectural complexity but bottlenecking parameters via $1 \times 1$ reductions. A Depthwise Separable Convolution actively splits a standard convolution into two serial steps (Spatial filtering per-channel, then $1 \times 1$ pointwise mixing across channels) explicitly to *minimize* the parameter count and FLOPs as heavily as possible for mobile deployment.
+
+**Q3: Why does standard 1D Batch Normalization fail when applied naively to Convolutional feature maps, necessitating `BatchNorm2d`?**
+*   **Answer:** Standard 1D batch norm normalizes across the batch for each individual element/pixel. In a 2D feature map, this would mean applying a separate normalizer to the pixel at coordinates (0,0), another for (0,1), etc. This destroys the fundamental CNN property of "Translation Invariance" (the network should recognize a feature regardless of its spatial location). `BatchNorm2d` calculates the statistics across the entire height and width *per channel*, ensuring that the entire feature map is scaled uniformly regardless of spatial shifts.
