@@ -17,6 +17,8 @@
 10. [Deep Learning Part 1: Multi-Layer Perceptrons (MLPs) & Non-Linearity](#deep-learning-part-1-multi-layer-perceptrons-mlps--non-linearity)
 11. [Part 2: How Neural Networks Learn (Forward & Backpropagation)](#part-2-how-neural-networks-learn-forward--backpropagation)
 12. [Part 3: The Engine of Learning — Optimizers](#part-3-the-engine-of-learning--optimizers)
+13. [Part 4: Regularization (Preventing Memorization)](#part-4-regularization-preventing-memorization)
+12. [Part 3: The Engine of Learning — Optimizers](#part-3-the-engine-of-learning--optimizers)
 
 ---
 
@@ -1799,3 +1801,70 @@ Adam is currently the most famous optimization algorithm in deep learning. Adam 
 
 **Q4: Explain the architecture of the Adam Optimizer.**
 *   **Answer:** Adam (Adaptive Moment Estimation) combines the first-order momentum of SGD with the second-order momentum of RMSProp. It adapts the learning rate for each parameter individually based on both the moving average of past gradients and the moving average of squared gradients. It also applies a mathematical bias correction to prevent instability during the early stages of training when the moving averages are initialized at zero.
+
+
+## Part 4: Regularization (Preventing Memorization)
+
+Deep neural networks contain millions of parameters. Because they are so mathematically powerful, they can easily memorize the exact noise and outliers of your training dataset, resulting in a model that performs perfectly in training but fails spectacularly in the real world. This is called Overfitting (High Variance).
+
+Regularization is a set of techniques used to artificially constrain the network, forcing it to learn the general, underlying patterns rather than memorizing the exact data points.
+
+### 1. Mathematical Weight Penalties (L1 and L2)
+The most fundamental way to constrain a network is to alter its Loss Function. We add a "penalty term" ($\Omega$) to the loss function that mathematically punishes the network for having large weights.
+$$ L_{\text{total}} = L_{\text{data}} + \Omega(w) $$
+*(Where $L_{\text{data}}$ is your standard loss like MSE or Cross-Entropy, and $\Omega(w)$ is the penalty applied to the weights).*
+
+#### L1 Regularization (Lasso / Sparsity)
+L1 adds the sum of the absolute values of the weights to the loss function.
+$$ \Omega(w) = \lambda \sum \vert{}w_i\vert{} $$
+*   **The Effect:** L1 calculates the derivative of an absolute value, which is a constant (either +1 or -1). This physically forces the weights of less important features down to exactly zero. It acts as a built-in feature selection tool, leaving a "sparse" network where only the most critical connections survive.
+
+#### L2 Regularization (Ridge / Weight Decay)
+L2 adds the sum of the squared values of the weights to the loss function.
+$$ \Omega(w) = \frac{\lambda}{2} \sum w_i^2 $$
+*   **The Effect:** Because it squares the weights, L2 heavily penalizes outlier weights that are extremely large, but the penalty approaches zero as the weight gets smaller. It smoothly shrinks all weights toward zero, but rarely pushes them to exactly zero. It forces the network to rely on all features a little bit, rather than heavily relying on just one feature.
+
+![How Regularization Constrains Neural Network Weights](./assets/regularization_weights.png)
+
+#### L1 vs. L2 Quick Comparison:
+| Feature | L1 Regularization | L2 Regularization (Weight Decay) |
+| :--- | :--- | :--- |
+| **Math Penalty** | Absolute values of weights | Squared values of weights |
+| **Effect on Weights** | Pushes unimportant weights to exactly 0 | Shrinks all weights toward 0 (rarely exact 0) |
+| **Model Complexity** | Creates sparse, simpler models | Creates dense, distributed models |
+| **Best Use Case** | When you have lots of noisy, useless features | The default choice for most neural networks |
+
+### 2. Architectural Regularization Techniques
+
+#### Dropout
+During every single training batch, Dropout randomly "turns off" a set percentage of neurons (e.g., 20% to 50%).
+*   It prevents neurons from co-adapting or relying on a single "super neuron" to make decisions.
+*   It forces the network to distribute the learned representations across all available paths.
+*   *Note: Dropout is strictly turned off during inference/testing.*
+
+#### Early Stopping
+You split your data into Training and Validation sets.
+*   During training, the training error will continuously go down.
+*   Eventually, the network will start memorizing the noise, causing the validation error to spike upward.
+*   Early Stopping monitors this and literally halts the training loop the exact moment validation loss stops improving, saving the optimal weights before overfitting occurs.
+
+#### Data Augmentation
+The best way to prevent overfitting is to get more data. If you cannot get more data, you fabricate it.
+*   If training an image classifier, you can rotate, crop, flip, or slightly blur the existing images in your training set.
+*   This artificially expands the size of your dataset and forces the network to learn the invariant features of the object (e.g., a cat is still a cat even if it is upside down), rather than memorizing the exact pixel layout.
+
+---
+
+### 3. Placement Prep: Regularization Flashcards
+
+**Q1: How does L2 Regularization mathematically prevent exploding gradients and overfitting?**
+*   **Answer:** L2 Regularization adds the sum of the squared weights to the loss function. When calculating the gradient during backpropagation, the derivative of $w^2$ is $2w$. This means that in every weight update step, the network artificially subtracts a fraction of the weight's own value from itself (known as Weight Decay). This strictly prevents any single weight from growing too large and dominating the network's output.
+
+**Q2: What is the primary architectural difference between L1 and L2 regularization?**
+*   **Answer:** L1 drives the weights of unimportant features to exactly zero, resulting in a sparse model that inherently performs feature selection. L2 shrinks all weights proportionally toward zero but rarely reaches exact zero, resulting in a dense model where all features contribute slightly.
+
+**Q3: Explain the concept of "Co-adaptation" in neural networks and how Dropout solves it.**
+*   **Answer:** Co-adaptation happens when a neuron relies too heavily on the output of specific neurons in the previous layer, failing to learn robust features on its own. Dropout randomly deactivates neurons during each training pass, forcing every single neuron to independently learn useful features, as it cannot mathematically guarantee that its "favorite" input neurons will be active during that specific batch.
+
+**Q4: You are training a very deep network. Your training loss is at 0.01, but your validation loss is at 2.50. What is happening, and how do you fix it?**
+*   **Answer:** The network is severely overfitting. It has memorized the training data but fails to generalize to unseen validation data. To fix this, you should increase regularization (increase Dropout rates or L2 penalty values), apply Data Augmentation to create a more robust training set, or implement Early Stopping to halt training before the divergence occurs.
