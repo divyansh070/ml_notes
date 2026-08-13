@@ -1914,15 +1914,31 @@ Imagine a 5x5 pixel image and a 3x3 Filter designed to detect vertical edges.
 Let's look at the exact math for the very first step of a convolution.
 
 **Input Image Patch ($3 \times 3$)**:
-$$ \begin{bmatrix} 1 & 1 & 0 \\ 1 & 1 & 0 \\ 1 & 1 & 0 \end{bmatrix} $$
+```math
+\begin{bmatrix} 
+1 & 1 & 0 \\ 
+1 & 1 & 0 \\ 
+1 & 1 & 0 
+\end{bmatrix}
+```
 
 **Vertical Edge Filter ($3 \times 3$)**:
-$$ \begin{bmatrix} 1 & 0 & -1 \\ 1 & 0 & -1 \\ 1 & 0 & -1 \end{bmatrix} $$
+```math
+\begin{bmatrix} 
+1 & 0 & -1 \\ 
+1 & 0 & -1 \\ 
+1 & 0 & -1 
+\end{bmatrix}
+```
 
 **The Operation:** We multiply each corresponding cell and sum them up.
-$$ (1 \cdot 1) + (1 \cdot 0) + (0 \cdot -1) = 1 $$
-$$ (1 \cdot 1) + (1 \cdot 0) + (0 \cdot -1) = 1 $$
-$$ (1 \cdot 1) + (1 \cdot 0) + (0 \cdot -1) = 1 $$
+```math
+\begin{aligned}
+(1 \cdot 1) + (1 \cdot 0) + (0 \cdot -1) &= 1 \\
+(1 \cdot 1) + (1 \cdot 0) + (0 \cdot -1) &= 1 \\
+(1 \cdot 1) + (1 \cdot 0) + (0 \cdot -1) &= 1
+\end{aligned}
+```
 **Sum = 3**. 
 
 The number **3** becomes the very first pixel in the top-left corner of the new Feature Map. Because the number is highly positive, the network knows it just found a strong vertical edge!
