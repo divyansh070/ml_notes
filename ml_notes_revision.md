@@ -1968,3 +1968,62 @@ The resulting Feature Map will be a $3 \times 3$ matrix.
 
 **Q3: If you pass a 32x32 image through a Convolutional Layer with a 5x5 filter (with a stride of 1 and no padding), what are the dimensions of the resulting feature map?**
 *   **Answer:** The output dimension is $28 \times 28$. The formula is $(n - f + 1)$. So, $(32 - 5 + 1) = 28$.
+
+
+
+### Topic 2: Padding & Stride (Controlling Dimensions)
+
+In a standard convolution, sliding a filter over an image causes two major problems:
+1.  **Shrinking Output:** Every time you pass an image through a convolutional layer, it shrinks. If you have a deep network with 50 layers, the image will mathematically shrink to nothing before it reaches the end.
+2.  **Loss of Edge Information:** The pixels in the dead center of the image are scanned multiple times by the sliding filter. The pixels on the very edges or corners are only scanned once. The network is essentially throwing away edge data.
+
+#### 1. Padding ($p$)
+To solve both of these problems, we use **Padding**. Before passing the filter over the image, we artificially add a border of pixels around the outside of the original image (usually filling them with zeros, known as "Zero Padding"). 
+
+*   **Valid Padding:** This means *no padding*. The image is allowed to shrink.
+*   **Same Padding:** We add just enough padding so that the Output Feature Map has the exact same dimensions as the Input Image. 
+
+![SAME Padding Visualization](./assets/padding_visual.png)
+
+By adding this artificial border of zeros, the filter is now able to slide over the true edge pixels multiple times, preserving that edge information without heavily impacting the math (because adding $0$ to the sum does not change the feature detection).
+
+#### 2. Stride ($s$)
+By default, a filter slides over by 1 pixel at a time ($s=1$). However, sometimes we *want* to aggressively shrink the image to reduce computational load. 
+
+**Stride** is the number of pixels the filter jumps when it slides. If we set the Stride to 2 ($s=2$), the filter jumps 2 pixels at a time, effectively skipping data. This cuts the spatial dimensions of the feature map roughly in half.
+
+#### 3. The Master Formula for CNN Dimensions
+This is the single most important mathematical formula to memorize for Computer Vision interviews. If you are given an Input Image of size $n \times n$, a Filter of size $f \times f$, a Padding of $p$, and a Stride of $s$, the exact spatial dimension of the output feature map is:
+
+$$ \text{Output Size} = \lfloor \frac{n + 2p - f}{s} \rfloor + 1 $$
+
+*(Note: $\lfloor \dots \rfloor$ means you round down/floor the result if it is a decimal).*
+
+**The Math Example:**
+You have a $7 \times 7$ input image. You apply a $3 \times 3$ filter. You use a Stride of 2, and add a Padding of 1. What is the output size?
+*   $n = 7$
+*   $f = 3$
+*   $p = 1$
+*   $s = 2$
+
+$$ \text{Output Size} = \lfloor \frac{7 + 2(1) - 3}{2} \rfloor + 1 $$
+$$ \text{Output Size} = \lfloor \frac{7 + 2 - 3}{2} \rfloor + 1 $$
+$$ \text{Output Size} = \lfloor \frac{6}{2} \rfloor + 1 = 3 + 1 = \mathbf{4} $$
+The output feature map will be exactly **$4 \times 4$**.
+
+---
+
+### Topic 2 Placement Prep: Padding & Stride Flashcards
+
+**Q1: What are the two primary reasons we use Zero Padding in a Convolutional Layer?**
+*   **Answer:** First, to prevent the spatial dimensions of the feature maps from rapidly shrinking as they pass through deep network layers. Second, to prevent the network from throwing away data; padding allows the filter to scan the extreme edges and corners of the image as many times as it scans the center pixels.
+
+**Q2: What is the difference between "Valid" padding and "Same" padding?**
+*   **Answer:** "Valid" padding means no padding is applied at all, allowing the output dimensions to naturally shrink via the formula $n - f + 1$. "Same" padding means we artificially add enough zero-padding to ensure the output feature map matches the exact spatial dimensions of the input image.
+
+**Q3: How does increasing the Stride affect the output of a Convolutional Layer?**
+*   **Answer:** Increasing the stride forces the filter to skip pixels as it slides across the image. A stride of 2 will roughly halve the width and height of the resulting feature map. It is primarily used as a form of spatial downsampling to reduce computational complexity and increase the receptive field of the deeper layers.
+
+**Q4: Calculate the output dimensions for a $32 \times 32$ image passing through a $5 \times 5$ filter, with a stride of 1 and a padding of 2.**
+*   **Answer:** $32 \times 32$. Using the formula $\lfloor \frac{n + 2p - f}{s} \rfloor + 1$: 
+    $\lfloor \frac{32 + 2(2) - 5}{1} \rfloor + 1 \implies (32 + 4 - 5) + 1 \implies 31 + 1 = 32$. (This is an exact mathematical example of "Same" padding).
