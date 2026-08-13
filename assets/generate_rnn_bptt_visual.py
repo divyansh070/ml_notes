@@ -1,92 +1,95 @@
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, FancyArrowPatch, Rectangle
+from matplotlib.patches import Circle, FancyArrowPatch
 
-# --- CONFIGURATION ---
 C_NODE = '#f0f0f0'
 C_WHX = '#1f77b4'
 C_WHH = '#d62728'
 C_WYH = '#2ca02c'
-C_ERR = '#e377c2'
 
-def draw_node(ax, x, y, text, radius=0.6, color=C_NODE):
+def draw_node(ax, x, y, text, radius=0.5, color=C_NODE):
     circle = Circle((x, y), radius, facecolor=color, edgecolor='black', lw=2, zorder=2)
     ax.add_patch(circle)
-    ax.text(x, y, text, ha='center', va='center', fontsize=14, fontweight='bold', zorder=3)
+    ax.text(x, y, text, ha='center', va='center', fontsize=16, fontweight='bold', zorder=3)
 
-def draw_arrow(ax, start, end, color, label='', offset=(0, 0), rad=0.0):
-    arrow = FancyArrowPatch(start, end, connectionstyle=f"arc3,rad={rad}", 
-                            color=color, arrowstyle='-|>', mutation_scale=20, lw=3,
-                            shrinkA=30, shrinkB=30, zorder=1)
+def draw_arrow(ax, start, end, color, label='', text_pos=None, text_bbox=None):
+    arrow = FancyArrowPatch(start, end, connectionstyle="arc3,rad=0", 
+                            color=color, arrowstyle='-|>', mutation_scale=25, lw=3,
+                            shrinkA=25, shrinkB=25, zorder=1)
     ax.add_patch(arrow)
-    if label:
-        lx = (start[0] + end[0]) / 2 + offset[0]
-        ly = (start[1] + end[1]) / 2 + offset[1]
-        ax.text(lx, ly, label, color=color, fontsize=12, fontweight='bold', ha='center', va='center',
-                bbox=dict(facecolor='white', edgecolor='none', alpha=0.7, pad=1))
+    if label and text_pos:
+        bbox_props = text_bbox if text_bbox else dict(facecolor='white', edgecolor='none', alpha=0.8, pad=3)
+        ax.text(text_pos[0], text_pos[1], label, color=color, fontsize=14, fontweight='bold', 
+                ha='center', va='center', bbox=bbox_props, zorder=4)
 
-# --- FORWARD PASS ---
-fig, ax = plt.subplots(figsize=(12, 6))
-ax.set_xlim(0, 10)
-ax.set_ylim(0, 6.5)
+# ==========================================
+# 1. FORWARD PASS
+# ==========================================
+fig, ax = plt.subplots(figsize=(10, 8))
+ax.set_xlim(-1, 6)
+ax.set_ylim(-1, 6)
 ax.axis('off')
 
 # Nodes
-draw_node(ax, 1, 3, "$h_0=0$")
-draw_node(ax, 4, 1, "$x_1=1$")
-draw_node(ax, 4, 3, "$h_1=2$")
-draw_node(ax, 7, 1, "$x_2=2$")
-draw_node(ax, 7, 3, "$h_2=6$")
-draw_node(ax, 7, 5.5, "$\hat{y}=6$")
+draw_node(ax, 0, 2, "$h_0=0$")
+draw_node(ax, 2, 0, "$x_1=1$")
+draw_node(ax, 2, 2, "$h_1=2$")
+draw_node(ax, 4, 0, "$x_2=2$")
+draw_node(ax, 4, 2, "$h_2=6$")
+draw_node(ax, 4, 4, "$\hat{y}=6$")
 
-# Arrows
-draw_arrow(ax, (1, 3), (4, 3), C_WHH, "$W_{hh}=1$", offset=(0, 0.3))
-draw_arrow(ax, (4, 1), (4, 3), C_WHX, "$W_{hx}=2$", offset=(-0.5, 0))
-draw_arrow(ax, (4, 3), (7, 3), C_WHH, "$W_{hh}=1$", offset=(0, 0.3))
-draw_arrow(ax, (7, 1), (7, 3), C_WHX, "$W_{hx}=2$", offset=(-0.5, 0))
-draw_arrow(ax, (7, 3), (7, 5.5), C_WYH, "$W_{yh}=1$", offset=(-0.5, 0))
+# Arrows & Labels
+draw_arrow(ax, (0, 2), (2, 2), C_WHH, "$W_{hh}=1$", text_pos=(1, 2.4))
+draw_arrow(ax, (2, 0), (2, 2), C_WHX, "$W_{hx}=2$", text_pos=(1.2, 1))
+draw_arrow(ax, (2, 2), (4, 2), C_WHH, "$W_{hh}=1$", text_pos=(3, 2.4))
+draw_arrow(ax, (4, 0), (4, 2), C_WHX, "$W_{hx}=2$", text_pos=(3.2, 1))
+draw_arrow(ax, (4, 2), (4, 4), C_WYH, "$W_{yh}=1$", text_pos=(3.2, 3))
 
 plt.suptitle("RNN Forward Pass: Unrolled Evaluation", fontsize=20, fontweight='bold', y=0.95)
 plt.savefig('assets/rnn_forward_pass.png', dpi=300, bbox_inches='tight')
 plt.close()
 
-# --- BACKWARD PASS ---
-fig, ax = plt.subplots(figsize=(12, 7))
-ax.set_xlim(0, 10)
-ax.set_ylim(-0.5, 6.5)
+# ==========================================
+# 2. BACKWARD PASS (BPTT)
+# ==========================================
+fig, ax = plt.subplots(figsize=(10, 8))
+ax.set_xlim(-1, 7)
+ax.set_ylim(-1, 6)
 ax.axis('off')
 
 # Nodes
-draw_node(ax, 1, 3, "$h_0=0$")
-draw_node(ax, 4, 1, "$x_1=1$")
-draw_node(ax, 4, 3, "$h_1=2$")
-draw_node(ax, 7, 1, "$x_2=2$")
-draw_node(ax, 7, 3, "$h_2=6$")
-draw_node(ax, 7, 5.5, "$d\hat{y}=2$\n(Error)", color='#ffb3b3') # Reddish error node
+draw_node(ax, 0, 2, "$h_0=0$")
+draw_node(ax, 2, 0, "$x_1=1$")
+draw_node(ax, 2, 2, "$h_1=2$")
+draw_node(ax, 4, 0, "$x_2=2$")
+draw_node(ax, 4, 2, "$h_2=6$")
+draw_node(ax, 4, 4, "$d\hat{y}=2$\n(Error)", color='#ffcccc') # Error node
 
-# Gradients (as text or small boxes)
-ax.text(4, 4.5, "$dh_1 = 2$", ha='center', va='center', fontsize=12, fontweight='bold', color='red', bbox=dict(facecolor='white', edgecolor='red', pad=3))
-ax.text(7, 4.5, "$dh_2 = 2$", ha='center', va='center', fontsize=12, fontweight='bold', color='red', bbox=dict(facecolor='white', edgecolor='red', pad=3))
+red_bbox = dict(facecolor='white', alpha=1.0, edgecolor='red')
 
-ax.text(2.5, 1.5, "$dW_{hx(t=1)}=2$\n$dW_{hh(t=1)}=0$", ha='center', va='center', fontsize=11, fontweight='bold', color='red', bbox=dict(facecolor='white', edgecolor='red', pad=3))
-ax.text(8.5, 1.5, "$dW_{hx(t=2)}=4$\n$dW_{hh(t=2)}=4$", ha='center', va='center', fontsize=11, fontweight='bold', color='red', bbox=dict(facecolor='white', edgecolor='red', pad=3))
+# Arrows (Flowing backwards)
+# Error -> h2
+draw_arrow(ax, (4, 4), (4, 2), 'red', "$dW_{yh}=12$", text_pos=(4.8, 3.0), text_bbox=red_bbox)
+# h2 -> h1
+draw_arrow(ax, (4, 2), (2, 2), 'red', "BPTT\n$dh_1=2$", text_pos=(3.0, 2.6), text_bbox=red_bbox)
 
+# Text Boxes explicitly placed beside nodes without drawing downward arrows
+# dh2 text
+ax.text(4.8, 2.2, "$dh_2=2$", color='red', fontsize=14, fontweight='bold', ha='center', va='center', bbox=red_bbox, zorder=4)
 
-# Backward Arrows
-draw_arrow(ax, (7, 5.5), (7, 4.8), 'red', "$dW_{yh}=12$", offset=(0.8, 0))
-draw_arrow(ax, (7, 4.2), (7, 3), 'red', "", offset=(0, 0))
-draw_arrow(ax, (7, 3), (8.5, 2.0), 'red', "", offset=(0, 0)) # To gradients t=2
+# t=2 Gradients beside x2
+ax.text(5.5, 0, "$dW_{hx(t=2)}=4$\n$dW_{hh(t=2)}=4$", color='red', fontsize=14, fontweight='bold', ha='center', va='center', bbox=red_bbox, zorder=4)
 
-draw_arrow(ax, (7, 3), (4, 3), 'red', "BPTT\n$dh_2 \cdot W_{hh}$", offset=(0, 0.4))
-draw_arrow(ax, (4, 4.2), (4, 3), 'red', "", offset=(0, 0))
-draw_arrow(ax, (4, 3), (2.5, 2.0), 'red', "", offset=(0, 0)) # To gradients t=1
+# t=1 Gradients beside x1
+ax.text(0.5, 0, "$dW_{hx(t=1)}=2$\n$dW_{hh(t=1)}=0$", color='red', fontsize=14, fontweight='bold', ha='center', va='center', bbox=red_bbox, zorder=4)
 
-# Summary Box
+# Summary Box at the bottom
 summary = "$dW_{hx} = 4\ (from\ t_2) + 2\ (from\ t_1) = \mathbf{6}$\n"
 summary += "$dW_{hh} = 4\ (from\ t_2) + 0\ (from\ t_1) = \mathbf{4}$"
-ax.text(5, -0.5, summary, ha='center', va='center', fontsize=14, fontweight='bold',
+ax.text(3, -0.8, summary, ha='center', va='center', fontsize=16, fontweight='bold',
         bbox=dict(facecolor='#f8f9fa', edgecolor='black', pad=10, lw=2))
 
 plt.suptitle("RNN Backward Pass (BPTT): Gradient Accumulation", fontsize=20, fontweight='bold', y=0.95)
 plt.savefig('assets/rnn_backward_pass.png', dpi=300, bbox_inches='tight')
 plt.close()
+
 print("Saved assets/rnn_forward_pass.png and assets/rnn_backward_pass.png")
