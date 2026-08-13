@@ -2027,3 +2027,72 @@ The output feature map will be exactly **$4 \times 4$**.
 **Q4: Calculate the output dimensions for a $32 \times 32$ image passing through a $5 \times 5$ filter, with a stride of 1 and a padding of 2.**
 *   **Answer:** $32 \times 32$. Using the formula $\lfloor \frac{n + 2p - f}{s} \rfloor + 1$: 
     $\lfloor \frac{32 + 2(2) - 5}{1} \rfloor + 1 \implies (32 + 4 - 5) + 1 \implies 31 + 1 = 32$. (This is an exact mathematical example of "Same" padding).
+
+### Topic 2 Placement Prep: Advanced Padding & Stride Flashcards
+
+**Q1: Why are filter sizes in CNNs almost exclusively odd numbers (e.g., $3 \times 3$, $5 \times 5$) when using "Same" padding?**
+*   **Answer:** Odd-sized filters have a distinct central pixel, which provides a symmetrical focal point for the convolution. Mathematically, it allows for symmetrical padding on all boundaries of the image. To keep the output size the same with a stride of 1, the padding formula is $p = \frac{f - 1}{2}$. An even-sized filter (like $4 \times 4$) would require asymmetric padding (e.g., 1 pixel on the left, 2 on the right), which artificially shifts and distorts the spatial alignment of the feature maps.
+
+**Q2: Both a Stride of 2 and a $2 \times 2$ Max Pooling layer reduce the spatial dimensions of a feature map by exactly half. Why might a modern network architecture (like a GAN or ResNet) choose a Strided Convolution instead of Max Pooling?**
+*   **Answer:** Max Pooling is a fixed, non-differentiable mathematical rule (it simply extracts the maximum value and deletes the rest). A Strided Convolution uses *trainable weights* to step over the image. By replacing pooling layers with strided convolutions, you allow the neural network to explicitly learn its own optimal downsampling technique via backpropagation, often resulting in richer representational learning without throwing data away blindly.
+
+**Q3: You are designing a CNN and want to use a massive $7 \times 7$ filter to capture wide features, keeping a Stride of 1. You must ensure the output has the exact same spatial dimensions as the input. How much padding do you need?**
+*   **Answer:** 3 pixels on all sides. To achieve exact "Same" padding when $s = 1$, you use the formula $p = \frac{f - 1}{2}$. For a $7 \times 7$ filter, $p = \frac{7 - 1}{2} = 3$. 
+
+**Q4: You decide to change the very first convolutional layer of your network from a Stride of 1 to a Stride of 2. How does this immediately impact your GPU memory usage and the network's "Receptive Field"?**
+*   **Answer:** A stride of 2 halves both the width and height of the resulting feature map. This cuts the GPU RAM required to store that layer's activation maps by a massive **75%** (it is 1/4th the total area). Furthermore, it rapidly accelerates the expansion of the **Receptive Field**—meaning neurons in the subsequent layers will "see" a much larger physical area of the original input image much earlier in the network, though at the cost of losing fine-grained, high-resolution textures.
+
+
+### Topic 2 Placement Prep: Senior-Level Padding & Stride Flashcards
+
+**Q1: During Backpropagation, how does the error gradient mathematically flow backward through a Convolutional Layer that used a Stride of 2?**
+*   **Answer:** A Stride of 2 means the forward pass actively skipped alternating pixels. Because the gradient map must match the exact dimensions of the original input, the backward pass requires creating a sparse matrix. The gradients for the pixels that were actively used in the forward pass are computed normally, but the gradients for the "skipped" pixels are strictly filled with **zeros**. The error does not flow back into pixels that did not contribute to the forward calculation.
+
+**Q2: In deep Generative Adversarial Networks (GANs) or Image-to-Image translation models, using standard "Zero Padding" at every layer often results in visible grid-like artifacts or dark halos around the edges of the generated images. Why? What is the architectural fix?**
+*   **Answer:** Repeated zero-padding injects a massive amount of artificial "dead" data at the boundaries of the feature maps. In deep networks, the model learns that these dark, artificial borders are a fundamental statistical feature of the data (known as the "border effect"). To fix this, advanced architectures use **Reflection Padding** or **Replication Padding** instead. These methods mirror the actual edge pixels of the image rather than appending absolute zeros, maintaining the continuous spatial distribution of the image edges.
+
+**Q3: You are building a dense prediction model (like U-Net for semantic segmentation) where you cannot afford to lose spatial resolution, but you desperately need to increase the "Receptive Field" to understand global context. If you cannot use Stride or Pooling, what is the solution?**
+*   **Answer:** You use **Dilated Convolutions (Atrous Convolutions)**. Instead of using a Stride to skip pixels as the filter *moves*, dilation injects empty spaces *inside the filter itself*. A $3 \times 3$ filter with a dilation rate of 2 spreads out to cover a $5 \times 5$ physical area of the image, while still only requiring 9 trainable weights. This exponentially increases the receptive field deep in the network without downsampling the spatial resolution.
+
+**Q4: If a Stride of 2 ($s=2$) downsamples an image by half, how do models like Autoencoders conceptually use "Fractional Stride" to upsample a small feature map back into a high-resolution image?**
+*   **Answer:** This is achieved using a **Transposed Convolution** (often incorrectly called a deconvolution). A fractional stride (e.g., $s=1/2$) mathematically works by physically injecting zeros *between* the pixels of the input feature map, forcing the matrix to expand. A standard convolutional filter is then passed over this padded, expanded matrix, allowing the network's weights to explicitly learn how to properly interpolate and "paint" the missing high-resolution details.
+
+
+### Topic 3: Pooling Layers (Downsampling & Invariance)
+
+While Convolutional layers extract features (edges, textures, eyes), Pooling Layers aggressively compress the spatial dimensions of those features. Pooling layers have zero trainable parameters (no weights or biases). They strictly apply a fixed mathematical rule over a sliding window.
+
+#### 1. The Core Operations
+
+*   **Max Pooling:** Slides a window (usually $2 \times 2$ with a stride of 2) over the feature map and extracts the absolute maximum value, discarding all other numbers.
+    *   *The Intuition:* A high number in a feature map means "I found the feature!" Max pooling ensures that if the feature was detected anywhere in that window, the signal is preserved and passed to the next layer.
+*   **Average Pooling:** Calculates the arithmetic mean of the window. It is rarely used in intermediate layers today because it artificially dilutes strong activations by blending them with dead (zero) pixels.
+
+![Max Pooling vs. Average Pooling](./assets/pooling_visual.png)
+
+#### 2. The Concept of "Translation Invariance"
+
+Pooling provides a critical property called **Local Translation Invariance**.
+If a picture of a cat shifts exactly one pixel to the right, the Convolutional layer's output will also shift exactly one pixel to the right (this is called Equivariance). However, because Max Pooling extracts the highest value from a $2 \times 2$ region, shifting the image slightly will likely result in the exact same maximum value being pooled. The network learns to recognize that the feature exists, while actively throwing away information about exactly where it exists.
+
+#### 3. Global Average Pooling (GAP)
+
+In older networks (like VGG16), the final 3D feature maps were physically unrolled (Flattened) into a massive 1D vector and passed through standard dense layers to make a prediction. This resulted in millions of parameters and massive overfitting.
+
+Modern architectures (like ResNet) use **Global Average Pooling (GAP)** instead. GAP takes an entire 2D feature map (e.g., a $7 \times 7$ grid) and averages all 49 pixels into a single number. If you have 512 feature maps, GAP collapses them into a simple 1D vector of length 512, completely eliminating the need for massive fully connected layers.
+
+---
+
+### Topic 3 Placement Prep: Senior-Level Pooling Flashcards
+
+**Q1: Since Pooling layers have no trainable weights, how does the error gradient physically flow through a Max Pooling layer versus an Average Pooling layer during Backpropagation?**
+*   **Answer:** During the forward pass, a $2 \times 2$ Max Pool routes only the single highest value. Therefore, during backpropagation, the gradient is routed 100% to the index of that winning pixel, and the other 3 pixels receive a gradient of exactly 0. In a $2 \times 2$ Average Pool, the gradient is distributed equally; each of the 4 pixels receives exactly $\frac{1}{4}$ of the incoming gradient.
+
+**Q2: What is the architectural advantage of replacing traditional Flattening + Dense Layers with a Global Average Pooling (GAP) layer at the end of a CNN?**
+*   **Answer:** GAP drastically reduces the total parameter count of the network (often saving tens of millions of weights), which heavily prevents overfitting. Furthermore, because standard Dense layers require a strictly fixed input size, utilizing GAP makes the neural network fully convolutional, meaning it can dynamically accept input images of any resolution (e.g., passing a 1080p image into a model trained on $224 \times 224$ images).
+
+**Q3: Geoffrey Hinton (a godfather of Deep Learning) famously criticized Max Pooling, leading him to develop Capsule Networks. What is the fundamental structural flaw of Max Pooling?**
+*   **Answer:** Max Pooling actively destroys spatial hierarchies and positional relationships in the data. It tells the network if a feature exists, but forgets where it is relative to other features. Because of this, a CNN might look at an image where a mouth is physically located above the eyes and still confidently classify it as a "Face," simply because both features triggered high activations that survived the pooling layer.
+
+**Q4: You are building a CNN to read highly fine-grained barcodes, where the exact thickness and spacing of the lines hold all the information. Should you aggressively use Max Pooling?**
+*   **Answer:** No. Max Pooling explicitly introduces translation invariance and discards exact spatial data. For highly fine-grained spatial tasks (like reading barcodes or precise medical image segmentation), throwing away spatial resolution will destroy the model's accuracy. You should minimize pooling and rely on Strided Convolutions or Dilated Convolutions to expand the receptive field without completely discarding spatial coordinates.
