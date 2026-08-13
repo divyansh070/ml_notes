@@ -2498,3 +2498,121 @@ Because of this specific structural flaw, Vanilla RNNs are virtually useless for
 
 **Q3: How do we practically fix the "Exploding Gradient" problem in Vanilla RNNs during training?**
 *   **Answer:** We use a technique called **Gradient Clipping**. Before the optimizer uses the calculated gradients to update the weights, we mathematically check if the L2 norm (magnitude) of the gradient exceeds a specific threshold. If it does, we scale the gradient vector down so its magnitude equals the threshold, while perfectly preserving its *direction*. This prevents the weights from taking a massive, destructive step during optimization.
+
+
+## Topic 4: Complete End-to-End RNN Math Walkthrough (BPTT)
+
+To truly master Recurrent Neural Networks, you must understand how the error physically flows backward through time. Because an RNN reuses the exact same weight matrices ($W_{hx}$ and $W_{hh}$) at every time step, the **Multivariate Chain Rule** dictates that the final gradient for a weight is the **sum** of the gradients from every time step it was used in.
+
+We will trace a Mini-RNN across $t=1$ and $t=2$, predicting a single value at the very end (Many-to-One Architecture).
+*   **Initial Memory:** $h_0 = 0$
+*   **Input Sequence:** $x_1 = 1$, $x_2 = 2$
+*   **Target Output:** $y = 4$
+*   **Shared Weights:** $W_{hx} = 2$, $W_{hh} = 1$, $W_{yh} = 1$ (All biases are $0$).
+*   **Activation:** ReLU (Derivative is $1$ if $z > 0$, else $0$).
+
+![RNN Forward Pass](./assets/rnn_forward_pass.png)
+
+### 1. The Forward Pass (Unrolling Through Time)
+
+**Time Step 1 ($t=1$):**
+The network looks at the first input ($x_1$) and combines it with its initial memory ($h_0$).
+$$ z_1 = (W_{hx} \cdot x_1) + (W_{hh} \cdot h_0) $$
+$$ z_1 = (2 \cdot 1) + (1 \cdot 0) = \mathbf{2} $$
+We pass $z_1$ through the ReLU activation to get our first hidden state:
+$$ h_1 = \text{ReLU}(2) = \mathbf{2} $$
+
+**Time Step 2 ($t=2$):**
+The network looks at the second input ($x_2$) and combines it with the memory of the first step ($h_1$).
+$$ z_2 = (W_{hx} \cdot x_2) + (W_{hh} \cdot h_1) $$
+$$ z_2 = (2 \cdot 2) + (1 \cdot 2) = 4 + 2 = \mathbf{6} $$
+$$ h_2 = \text{ReLU}(6) = \mathbf{6} $$
+
+**The Final Prediction (Output):**
+Using the final hidden state ($h_2$), we calculate our prediction ($\hat{y}$).
+$$ \hat{y} = W_{yh} \cdot h_2 = 1 \cdot 6 = \mathbf{6} $$
+
+---
+
+![RNN Backward Pass](./assets/rnn_backward_pass.png)
+
+### 2. Backpropagation Through Time (BPTT)
+
+The network predicted 6. The target was 4. Using Mean Squared Error $L = \frac{1}{2}(\hat{y} - y)^2$, the derivative of the loss with respect to our prediction is:
+$$ d\hat{y} = \hat{y} - y = 6 - 4 = \mathbf{2} $$
+
+**Step 1: Gradients at the Output**
+First, we find the gradient for the output weight ($dW_{yh}$) and pass the error back into the final hidden state ($dh_2$).
+$$ dW_{yh} = d\hat{y} \cdot h_2 = 2 \cdot 6 = \mathbf{12} $$
+$$ dh_2 = d\hat{y} \cdot W_{yh} = 2 \cdot 1 = \mathbf{2} $$
+
+**Step 2: Gradients at $t=2$**
+The error ($dh_2 = 2$) has entered the unrolled network. First, we pass it backward through the ReLU activation to get $dz_2$. (Since $z_2 = 6 > 0$, the derivative of ReLU is 1).
+$$ dz_2 = dh_2 \cdot 1 = \mathbf{2} $$
+Now, we calculate how much the weights contributed to the error *at this specific time step*:
+$$ dW_{hx(t=2)} = dz_2 \cdot x_2 = 2 \cdot 2 = \mathbf{4} $$
+$$ dW_{hh(t=2)} = dz_2 \cdot h_1 = 2 \cdot 2 = \mathbf{4} $$
+Finally, we pass the error **backward through time** to the previous hidden state ($dh_1$):
+$$ dh_1 = dz_2 \cdot W_{hh} = 2 \cdot 1 = \mathbf{2} $$
+
+**Step 3: Gradients at $t=1$**
+The error ($dh_1 = 2$) has successfully traveled back in time to the first step. We pass it through ReLU (since $z_1 = 2 > 0$, derivative is 1).
+$$ dz_1 = dh_1 \cdot 1 = \mathbf{2} $$
+We calculate how much the weights contributed to the error *at this earlier time step*:
+$$ dW_{hx(t=1)} = dz_1 \cdot x_1 = 2 \cdot 1 = \mathbf{2} $$
+$$ dW_{hh(t=1)} = dz_1 \cdot h_0 = 2 \cdot 0 = \mathbf{0} $$
+
+**Step 4: Gradient Accumulation (The Core Rule of RNNs)**
+Because $W_{hx}$ and $W_{hh}$ are global shared weights used at both $t=1$ and $t=2$, we must **sum** their local gradients to find the true, final gradient for the optimizer to use.
+$$ dW_{hx} = dW_{hx(t=2)} + dW_{hx(t=1)} = 4 + 2 = \mathbf{6} $$
+$$ dW_{hh} = dW_{hh(t=2)} + dW_{hh(t=1)} = 4 + 0 = \mathbf{4} $$
+*(The optimizer will now use $dW_{hx}=6$, $dW_{hh}=4$, and $dW_{yh}=12$ to update the weights!)*
+
+---
+
+### Topic 4 Placement Prep: BPTT Flashcards
+
+**Q1: Explain mathematically why Backpropagation Through Time (BPTT) dictates that we must *sum* the gradients across all time steps for $W_{hx}$ and $W_{hh}$.**
+*   **Answer:** This is required by the Multivariate Chain Rule. Because an RNN uses *Weight Sharing*, a single weight matrix ($W_{hx}$) directly influences the hidden state at $t=1$, and again at $t=2$, and again at $t=3$. Therefore, $W_{hx}$ is responsible for the error generated at *multiple independent points* in the computational graph. To find the total derivative of the loss with respect to that shared weight, you must calculate its local gradient at each time step and sum them together.
+
+**Q2: During BPTT, what would mathematically happen to the gradient flowing backwards from $t=2$ to $t=1$ if we used a ReLU activation and the forward pass hidden state at $t=2$ was negative?**
+*   **Answer:** If the forward pass at $t=2$ resulted in a negative number, the ReLU activation would have output $0$. During BPTT, the derivative of ReLU for a negative input is $0$. Therefore, $dz_2$ would be $0$, which means $dh_1 = dz_2 \cdot W_{hh} = 0$. The error gradient would be completely killed at $t=2$, and absolutely zero error would flow backward to time step 1.
+
+**Q3: If we had a sequence length of 100 time steps instead of 2, how many times would the error gradient be multiplied by $W_{hh}$ as it travels from $t=100$ back to $t=1$? What architectural problem does this cause?**
+*   **Answer:** The gradient would be multiplied by $W_{hh}$ exactly 99 times. Because we are repeatedly multiplying by the exact same matrix, if the values of $W_{hh}$ are $< 1$, the gradient will exponentially decay to zero (Vanishing Gradient). If they are $> 1$, it will exponentially grow to infinity (Exploding Gradient). This is why Vanilla RNNs physically cannot maintain long-term dependencies.
+---
+
+## Topic 5: Different Types of RNN Architectures
+
+RNNs are highly flexible because they process data step-by-step. By simply changing where we feed the inputs and where we read the outputs, we can solve vastly different problems.
+
+1.  **One-to-Many:** 
+    *   **Architecture:** We feed a single input at $t=1$, and the network generates a sequence of outputs at $t=1, t=2, t=3\dots$
+    *   **Use Case:** Image Captioning. (Input: A single image. Output: A sequence of words describing the image).
+2.  **Many-to-One:**
+    *   **Architecture:** We feed a sequence of inputs at $t=1, t=2, t=3\dots$, but we only read the output prediction at the very final time step $t_n$. (This is what we did in the math walkthrough above!)
+    *   **Use Case:** Sentiment Analysis. (Input: A sequence of words. Output: A single label, Positive or Negative).
+3.  **Many-to-Many (Synced):**
+    *   **Architecture:** We feed an input at every time step, and immediately read an output at every time step.
+    *   **Use Case:** Video Frame Classification. (Input: A sequence of video frames. Output: A label for what is happening in each specific frame).
+4.  **Many-to-Many (Encoder-Decoder / Seq2Seq):**
+    *   **Architecture:** We feed an entire input sequence into an "Encoder" RNN to generate a single context vector. Then, a "Decoder" RNN takes that context vector and generates a brand new output sequence.
+    *   **Use Case:** Machine Translation. (Input: "How are you" in English. Output: "Comment allez-vous" in French).
+
+---
+
+## Topic 6: Bidirectional RNNs (BiRNN)
+
+Standard RNNs process data purely forward in time ($t=1 \rightarrow t=2 \rightarrow t=3$). However, in natural language, the meaning of a word often depends heavily on the words that come *after* it.
+*   *Example:* "The **bank** of the river was muddy." vs "The **bank** was robbed today."
+
+A **Bidirectional RNN** solves this by running two completely separate RNNs simultaneously:
+1.  **The Forward RNN:** Reads the sequence from left-to-right (e.g., $x_1 \rightarrow x_2 \rightarrow x_3$).
+2.  **The Backward RNN:** Reads the sequence from right-to-left (e.g., $x_3 \rightarrow x_2 \rightarrow x_1$).
+
+At each time step $t$, the network takes the hidden state from the Forward RNN ($\overrightarrow{h_t}$) and concatenates it with the hidden state from the Backward RNN ($\overleftarrow{h_t}$). 
+$$ h_t = [\overrightarrow{h_t}, \overleftarrow{h_t}] $$
+
+This combined hidden state now contains complete context from both the past *and* the future, allowing the network to make a highly informed prediction ($y_t$) for that specific word.
+
+*(Note: BiRNNs can only be used when the entire sequence is available at once, like processing a whole document. They cannot be used for real-time forecasting where the future data hasn't happened yet).*
