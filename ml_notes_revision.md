@@ -66,27 +66,33 @@ Walking through the calculus step-by-step builds an incredibly strong foundation
 **The Setup:**
 * **Hypothesis (Prediction):** $h_\theta(x) = \theta^T x$
 * **Cost Function (MSE):**
-$$J(\theta) = \frac{1}{2m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)})^2$$
-
+```math
+J(\theta) = \frac{1}{2m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)})^2
+```
 *Explanation of the Cost Function:* We use $m$ to represent the total number of training examples. We add a $\frac{1}{2}$ to the formula purely as a mathematical convenience—when we take the derivative, the exponent $2$ will drop down and cancel out the $\frac{1}{2}$, making the final math cleaner without changing where the global minimum is located.
 
 **Step 1: Set up the Partial Derivative**
 Our goal is to find how a tiny change in a single specific weight, $\theta_j$, impacts the overall error. We do this by taking the partial derivative of $J(\theta)$ with respect to $\theta_j$.
-$$\frac{\partial}{\partial \theta_j} J(\theta) = \frac{\partial}{\partial \theta_j} \left[ \frac{1}{2m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)})^2 \right]$$
-
+```math
+\frac{\partial}{\partial \theta_j} J(\theta) = \frac{\partial}{\partial \theta_j} \left[ \frac{1}{2m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)})^2 \right]
+```
 **Step 2: Apply the Power Rule and Chain Rule**
 In calculus, the Power Rule tells us to bring the exponent $2$ down to the front. The Chain Rule tells us we then have to multiply the whole thing by the derivative of whatever was *inside* the parentheses.
-$$\frac{\partial}{\partial \theta_j} J(\theta) = \frac{1}{m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot \frac{\partial}{\partial \theta_j} (h_\theta(x^{(i)}) - y^{(i)})$$
+```math
+\frac{\partial}{\partial \theta_j} J(\theta) = \frac{1}{m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot \frac{\partial}{\partial \theta_j} (h_\theta(x^{(i)}) - y^{(i)})
+```
 *Explanation:* Notice how the $\frac{1}{2}$ and the $2$ canceled each other out, leaving just $\frac{1}{m}$. Now, we just need to solve that lingering derivative on the far right.
 
 **Step 3: Differentiate the Inside**
 Remember that our hypothesis $h_\theta(x)$ is just a sum of all weights multiplied by their features: $\theta_0x_0 + \theta_1x_1 + \dots + \theta_jx_j$. Because we are taking a *partial* derivative with respect to just $\theta_j$, every other weight acts like a constant (a flat number) and turns to $0$. The true label $y$ is also a constant, so it turns to $0$. The derivative of $\theta_jx_j$ with respect to $\theta_j$ is simply the feature $x_j$.
-$$\frac{\partial}{\partial \theta_j} (h_\theta(x^{(i)}) - y^{(i)}) = x_j^{(i)}$$
-
+```math
+\frac{\partial}{\partial \theta_j} (h_\theta(x^{(i)}) - y^{(i)}) = x_j^{(i)}
+```
 **Step 4: The Final Gradient**
 We substitute $x_j^{(i)}$ back into our equation from Step 2 to get the final gradient.
-$$\frac{\partial}{\partial \theta_j} J(\theta) = \frac{1}{m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) x_j^{(i)}$$
-
+```math
+\frac{\partial}{\partial \theta_j} J(\theta) = \frac{1}{m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) x_j^{(i)}
+```
 ### 3. The 5 Core Assumptions (L.I.N.E. + M)
 1.  **Linearity:** Relationship between $X$ and $y$ must be linear. *(Fix: Polynomial features or log transform).*
 2.  **Independence:** Observations must be independent (no autocorrelation).
@@ -206,40 +212,54 @@ Let's do a 1-variable hand-worked example: predicting class $y$ from feature $X$
 **The Setup:**
 * **Hypothesis:** $h_\theta(x) = \sigma(\theta^T x) = \frac{1}{1 + e^{-\theta^T x}}$
 * **Cost Function (Log-Loss):**
-$$J(\theta) = -\frac{1}{m} \sum_{i=1}^{m} \left[ y^{(i)} \log(h_\theta(x^{(i)})) + (1 - y^{(i)}) \log(1 - h_\theta(x^{(i)})) \right]$$
-
+```math
+J(\theta) = -\frac{1}{m} \sum_{i=1}^{m} \left[ y^{(i)} \log(h_\theta(x^{(i)})) + (1 - y^{(i)}) \log(1 - h_\theta(x^{(i)})) \right]
+```
 **Step 1: The Prerequisite Sigmoid Derivative**
 Because the math gets messy, we first need to know the derivative of the Sigmoid function itself. A known property of the Sigmoid function $\sigma(z)$ is that its derivative is the function multiplied by one minus the function:
-$$\frac{\partial}{\partial z} \sigma(z) = \sigma(z)(1 - \sigma(z))$$
-
+```math
+\frac{\partial}{\partial z} \sigma(z) = \sigma(z)(1 - \sigma(z))
+```
 *   **Crucial Interview Fact:** What is the maximum possible value for the gradient of the Sigmoid function? **0.25**. At $z=0$, $\sigma(0)=0.5$, so the gradient is $0.5 \times (1-0.5) = 0.25$. This tiny maximum gradient is the primary cause of the *Vanishing Gradient Problem* in deep neural networks!
 
 When we apply the Chain Rule to take the derivative of our hypothesis with respect to our specific weight $\theta_j$, we get the Sigmoid derivative multiplied by the feature $x_j$:
-$$\frac{\partial}{\partial \theta_j} h_\theta(x) = h_\theta(x)(1 - h_\theta(x)) x_j$$
-
+```math
+\frac{\partial}{\partial \theta_j} h_\theta(x) = h_\theta(x)(1 - h_\theta(x)) x_j
+```
 **Step 2: Differentiate the Log Terms**
 To make the algebra easier to see, let's ignore the summation and the $-\frac{1}{m}$ for a moment and just take the derivative of a single example's loss, which we will call $L$. In calculus, the derivative of $\log(x)$ is $\frac{1}{x}$. Applying the Chain Rule to both parts of the Log-Loss equation gives us:
-$$\frac{\partial L}{\partial \theta_j} = y \left( \frac{1}{h_\theta(x)} \right) \frac{\partial h_\theta(x)}{\partial \theta_j} + (1 - y) \left( \frac{1}{1 - h_\theta(x)} \right) (-1) \frac{\partial h_\theta(x)}{\partial \theta_j}$$
+```math
+\frac{\partial L}{\partial \theta_j} = y \left( \frac{1}{h_\theta(x)} \right) \frac{\partial h_\theta(x)}{\partial \theta_j} + (1 - y) \left( \frac{1}{1 - h_\theta(x)} \right) (-1) \frac{\partial h_\theta(x)}{\partial \theta_j}
+```
 *Explanation:* The $(-1)$ in the second term is incredibly important. It comes from applying the Chain Rule to the $(1 - h_\theta(x))$ part inside the second log.
 
 **Step 3: Factor and Find a Common Denominator**
 Let's factor out the $\frac{\partial h_\theta(x)}{\partial \theta_j}$ term that is shared by both sides, and combine the fractions by finding a common denominator of $h_\theta(x)(1 - h_\theta(x))$.
-$$\frac{\partial L}{\partial \theta_j} = \left( \frac{y(1 - h_\theta(x)) - (1 - y)h_\theta(x)}{h_\theta(x)(1 - h_\theta(x))} \right) \frac{\partial h_\theta(x)}{\partial \theta_j}$$
+```math
+\frac{\partial L}{\partial \theta_j} = \left( \frac{y(1 - h_\theta(x)) - (1 - y)h_\theta(x)}{h_\theta(x)(1 - h_\theta(x))} \right) \frac{\partial h_\theta(x)}{\partial \theta_j}
+```
 If you expand the numerator ($y - y \cdot h_\theta(x) - h_\theta(x) + y \cdot h_\theta(x)$), the $y \cdot h_\theta(x)$ terms cancel out, leaving just:
-$$\frac{\partial L}{\partial \theta_j} = \left( \frac{y - h_\theta(x)}{h_\theta(x)(1 - h_\theta(x))} \right) \frac{\partial h_\theta(x)}{\partial \theta_j}$$
-
+```math
+\frac{\partial L}{\partial \theta_j} = \left( \frac{y - h_\theta(x)}{h_\theta(x)(1 - h_\theta(x))} \right) \frac{\partial h_\theta(x)}{\partial \theta_j}
+```
 **Step 4: The Beautiful Cancellation**
 Now, substitute the Sigmoid derivative we calculated in Step 1 back into the equation.
-$$\frac{\partial L}{\partial \theta_j} = \left( \frac{y - h_\theta(x)}{h_\theta(x)(1 - h_\theta(x))} \right) \left[ h_\theta(x)(1 - h_\theta(x)) x_j \right]$$
+```math
+\frac{\partial L}{\partial \theta_j} = \left( \frac{y - h_\theta(x)}{h_\theta(x)(1 - h_\theta(x))} \right) \left[ h_\theta(x)(1 - h_\theta(x)) x_j \right]
+```
 *Explanation:* Look closely! The denominator of our fraction is perfectly identical to the first half of the Sigmoid derivative. They completely cancel each other out. This reduces the massive equation down to:
-$$\frac{\partial L}{\partial \theta_j} = (y - h_\theta(x)) x_j$$
-
+```math
+\frac{\partial L}{\partial \theta_j} = (y - h_\theta(x)) x_j
+```
 **Step 5: Final Assembly**
 Finally, we bring back the summation and the $-\frac{1}{m}$ that we temporarily dropped from the very beginning.
-$$\frac{\partial}{\partial \theta_j} J(\theta) = -\frac{1}{m} \sum_{i=1}^{m} (y^{(i)} - h_\theta(x^{(i)})) x_j^{(i)}$$
+```math
+\frac{\partial}{\partial \theta_j} J(\theta) = -\frac{1}{m} \sum_{i=1}^{m} (y^{(i)} - h_\theta(x^{(i)})) x_j^{(i)}
+```
 To make this match our Linear Regression formula perfectly, we distribute the negative sign into the parentheses, which flips the $y$ and the $h_\theta(x)$ around. This gives us the exact same gradient formula as Linear Regression:
-$$\frac{\partial}{\partial \theta_j} J(\theta) = \frac{1}{m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) x_j^{(i)}$$
-
+```math
+\frac{\partial}{\partial \theta_j} J(\theta) = \frac{1}{m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) x_j^{(i)}
+```
 ### 3. The 4 Core Assumptions
 Unlike Linear Regression's L.I.N.E., remember these for Logistic Regression:
 1.  **Binary Outcome:** The target must be binary (for standard Logistic Regression).
@@ -337,22 +357,22 @@ The actual geometric street doesn't care if the boundaries are labeled $1$ and $
 
 **How Inference Works (Making Predictions):**
 The $+1$ and $-1$ gutters are *only* used during training to calculate the margin width. Once the model is trained (we found the optimal $w$ and $b$), inference is incredibly simple. We take a new, unseen data point $x_{new}$ and calculate its score:
-
-$$z = w^T x_{new} + b$$
-
+```math
+z = w^T x_{new} + b
+```
 *   If $z \ge 0 \implies$ Classify as **Positive (+1)**
 *   If $z < 0 \implies$ Classify as **Negative (-1)**
 *(Notice how the $\pm 1$ margins don't matter anymore for the final prediction; inference only cares which side of the $0$ hyperplane the point lands on!)*
 
 **The Margin Math (Core Interview Question):**
 The total width of this street (from the left guardrail to the right guardrail) is mathematically defined as:
-
-$$\text{Margin Width} = \frac{2}{||w||}$$
-
+```math
+\text{Margin Width} = \frac{2}{||w||}
+```
 Because SVM's primary goal is to make this street as wide as possible (maximize the margin), the optimization algorithm must do the exact mathematical opposite to the denominator. Therefore, the core optimization goal of SVM is to **minimize**:
-
-$$\frac{1}{2} ||w||^2$$
-
+```math
+\frac{1}{2} ||w||^2
+```
 **Hard Margin vs. Soft Margin (The $C$ Parameter):**
 *   **Hard Margin (The Flawed Ideal):** A strict margin that allows absolutely zero data points inside the street or on the wrong side. If there is a single extreme outlier, a Hard Margin will severely contort the street to avoid it, leading to massive **Overfitting**.
 *   **Soft Margin (The Realistic Fix):** We allow some data points to violate the margin. We control this using the **$C$ Parameter (Cost of Misclassification)**.
@@ -462,14 +482,14 @@ To formalize the "Garden Hose" analogy, we must define the prediction function, 
 
 **1. The Prediction Function (The Center of the Tube)**
 Just like in linear regression, the SVR model predicts a continuous value $y$ by computing the dot product of the weights $w$ and the input features $x$, plus a bias term $b$:
-
-$$f(x) = w^T x + b$$
-
+```math
+f(x) = w^T x + b
+```
 **2. The $\epsilon$-Insensitive Loss Function (The Tube Walls)**
 The defining mathematical feature of SVR is its loss function. It states that if the absolute difference between the actual value $y$ and the predicted value $f(x)$ is less than $\epsilon$, the error is exactly zero. The model only incurs a penalty if the prediction falls outside this boundary:
-
-$$L_\epsilon(y, f(x)) = \max(0, |y - f(x)| - \epsilon)$$
-
+```math
+L_\epsilon(y, f(x)) = \max(0, |y - f(x)| - \epsilon)
+```
 **3. The Optimization Objective (Soft Margin SVR)**
 In reality, it is rarely possible to fit every single data point perfectly inside the $\epsilon$-tube. We must allow some points to exist outside the tube while still trying to keep the tube as flat and robust as possible.
 
@@ -481,23 +501,23 @@ To do this, we introduce **Slack Variables** ($\xi$ and $\xi^*$):
 The goal of SVR is to keep the weights as small as possible (to keep the model simple and flat) while minimizing the sum of these slack variables (the errors outside the tube).
 
 **The Core SVR Cost Function:**
-
-$$\min_{w, b, \xi, \xi^*} \frac{1}{2} ||w||^2 + C \sum_{i=1}^{m} (\xi_i + \xi_i^*)$$
-
+```math
+\min_{w, b, \xi, \xi^*} \frac{1}{2} ||w||^2 + C \sum_{i=1}^{m} (\xi_i + \xi_i^*)
+```
 **Subject to the following constraints:**
 
 1. The upper boundary constraint (points cannot be too high above the tube):
-
-$$y_i - (w^T x_i + b) \leq \epsilon + \xi_i$$
-
+```math
+y_i - (w^T x_i + b) \leq \epsilon + \xi_i
+```
 2. The lower boundary constraint (points cannot be too far below the tube):
-
-$$(w^T x_i + b) - y_i \leq \epsilon + \xi_i^*$$
-
+```math
+(w^T x_i + b) - y_i \leq \epsilon + \xi_i^*
+```
 3. Slack variables must be non-negative (distance cannot be negative):
-
-$$\xi_i, \xi_i^* \geq 0$$
-
+```math
+\xi_i, \xi_i^* \geq 0
+```
 **How the Hyperparameters fit into the Math:**
 
 * **Minimizing $\frac{1}{2} ||w||^2$:** This flattens the function, maximizing the generalized robustness of the tube.
@@ -578,9 +598,9 @@ A Decision Tree splits the dataset into smaller and smaller orthogonal (axis-par
 
 ### 2. The Math of the Split: Gini Impurity
 To decide *which* feature to split on and at *what* threshold, the tree uses a cost function called **Gini Impurity** to measure how "mixed" a node is. The algorithm desperately wants to minimize this impurity.
-
-$$ G_i = 1 - \sum_{k=1}^{n} p_{i,k}^2 $$
-
+```math
+G_i = 1 - \sum_{k=1}^{n} p_{i,k}^2
+```
 *   $n$ is the total number of classes.
 *   $p_{i,k}$ is the ratio of class $k$ instances inside that specific node $i$.
 
@@ -677,7 +697,9 @@ We have $m = 5$ training instances predicting if we should "Go for a Walk":
 
 #### 2. The Formula for Gini Impurity
 It measures the purity of a node ($0$ means perfectly pure, meaning all instances belong to one class).
-$$G = 1 - \sum_{k=1}^{K} (p_k)^2$$
+```math
+G = 1 - \sum_{k=1}^{K} (p_k)^2
+```
 Where $p_k$ is the ratio of instances belonging to class $k$ in that node.
 
 #### 3. Step 1: Calculate Total Impurity at the Root Node
@@ -685,13 +707,14 @@ Before making any splits, let's look at all 5 target labels: `[Yes, Yes, Yes, No
 *   Total instances = $5$
 *   Probability of 'Yes' ($p_1$) = $3/5 = 0.6$
 *   Probability of 'No' ($p_2$) = $2/5 = 0.4$
-
-$$G_{root} = 1 - (0.6^2 + 0.4^2) = 1 - (0.36 + 0.16) = 0.48$$
-
+```math
+G_{root} = 1 - (0.6^2 + 0.4^2) = 1 - (0.36 + 0.16) = 0.48
+```
 #### 4. Step 2: Evaluate Potential Splits
 We evaluate the cost function for both features to see which one provides the lowest weighted Gini impurity for the child nodes. The weighted cost function is:
-$$J(k, t_k) = \frac{m_{left}}{m} G_{left} + \frac{m_{right}}{m} G_{right}$$
-
+```math
+J(k, t_k) = \frac{m_{left}}{m} G_{left} + \frac{m_{right}}{m} G_{right}
+```
 **Option A: Split by "Weather == Sunny"**
 *   **Left Node (Sunny):** Instances 1, 2 $\rightarrow$ Labels: `[Yes, Yes]`
     *   $m_{left} = 2$
@@ -773,16 +796,18 @@ Instead of drawing a curved line through the data (like Polynomial Regression), 
 The CART algorithm works mostly the same way as in classification, except that instead of trying to split the training set to minimize Gini Impurity, **it tries to split the training set to minimize Mean Squared Error (MSE)**.
 
 To evaluate a split using feature $k$ and threshold $t_k$, CART minimizes the weighted cost function $J(k, t_k)$:
-
-$$ J(k, t_k) = \frac{m_{\text{left}}}{m} \text{MSE}_{\text{left}} + \frac{m_{\text{right}}}{m} \text{MSE}_{\text{right}} $$
-
+```math
+J(k, t_k) = \frac{m_{\text{left}}}{m} \text{MSE}_{\text{left}} + \frac{m_{\text{right}}}{m} \text{MSE}_{\text{right}}
+```
 Where:
 1.  **Node Prediction ($\hat{y}_{\text{node}}$):** The mean target value of instances in the node.
-    $$ \hat{y}_{\text{node}} = \frac{1}{m_{\text{node}}} \sum_{i \in \text{node}} y^{(i)} $$
-
+```math
+\hat{y}_{\text{node}} = \frac{1}{m_{\text{node}}} \sum_{i \in \text{node}} y^{(i)}
+```
 2.  **Node Squared Error ($\text{MSE}_{\text{node}}$):** The total error/variance of instances relative to that node's mean prediction.
-    $$ \text{MSE}_{\text{node}} = \sum_{i \in \text{node}} \left( \hat{y}_{\text{node}} - y^{(i)} \right)^2 $$
-
+```math
+\text{MSE}_{\text{node}} = \sum_{i \in \text{node}} \left( \hat{y}_{\text{node}} - y^{(i)} \right)^2
+```
 ---
 
 #### 3. Classification vs. Regression Trees (Quick Summary)
@@ -1006,27 +1031,30 @@ To truly understand AdaBoost for high-level interviews, you need to know how it 
 
 **Step 1: Calculate the Weighted Error Rate ($r_j$)**
 For the $j^{th}$ predictor, we calculate its error rate by summing the weights of all the instances it got wrong, divided by the total sum of all weights.
-
-$$ r_j = \frac{\sum_{\substack{i=1 \\ \hat{y}_j^{(i)} \ne y^{(i)}}}^{m} w^{(i)}}{\sum_{i=1}^{m} w^{(i)}} $$
+```math
+r_j = \frac{\sum_{\substack{i=1 \\ \hat{y}_j^{(i)} \ne y^{(i)}}}^{m} w^{(i)}}{\sum_{i=1}^{m} w^{(i)}}
+```
 *(Where $\hat{y}_j^{(i)}$ is the $j^{th}$ predictor's prediction for the $i^{th}$ instance).*
 
 **Step 2: Calculate the Predictor's Voting Weight ($\alpha_j$)**
 Based on its error rate, we determine how much "say" this predictor gets in the final vote. 
-
-$$ \alpha_j = \eta \log \frac{1 - r_j}{r_j} $$
+```math
+\alpha_j = \eta \log \frac{1 - r_j}{r_j}
+```
 *(Where $\eta$ is the learning rate hyperparameter. If a predictor is highly accurate, its error rate $r_j$ is close to 0, making its weight $\alpha_j$ very high. If it is just guessing randomly, its weight will be close to 0).*
 
 **Step 3: The Weight Update Rule ($w^{(i)}$)**
 Now, we update the weights of the individual training instances for the *next* predictor to use.
-
-$$ w^{(i)} \leftarrow \begin{cases} w^{(i)} & \text{if } \hat{y}_j^{(i)} = y^{(i)} \\ w^{(i)} \exp(\alpha_j) & \text{if } \hat{y}_j^{(i)} \ne y^{(i)} \end{cases} $$
+```math
+w^{(i)} \leftarrow \begin{cases} w^{(i)} & \text{if } \hat{y}_j^{(i)} = y^{(i)} \\ w^{(i)} \exp(\alpha_j) & \text{if } \hat{y}_j^{(i)} \ne y^{(i)} \end{cases}
+```
 *(If the predictor got the instance right, the weight stays the same. If it got it wrong, the weight is multiplied by $e^{\alpha_j}$, making it heavier for the next round). Then, all instance weights are normalized (divided by $\sum_{i=1}^{m} w^{(i)}$).*
 
 **Step 4: Making the Final Prediction ($\hat{y}(\mathbf{x})$)**
 To make a prediction on new data, AdaBoost computes the predictions of all $N$ predictors and weighs them by their predictor weight ($\alpha_j$). The predicted class is the one that receives the majority of the weighted votes.
-
-$$ \hat{y}(\mathbf{x}) = \underset{k}{\text{argmax}} \sum_{\substack{j=1 \\ \hat{y}_j(\mathbf{x}) = k}}^{N} \alpha_j $$
-
+```math
+\hat{y}(\mathbf{x}) = \underset{k}{\text{argmax}} \sum_{\substack{j=1 \\ \hat{y}_j(\mathbf{x}) = k}}^{N} \alpha_j
+```
 ---
 
 #### 3. The One Major Trade-off: No Parallelization
@@ -1086,24 +1114,22 @@ Using **Equation 7-1**, we sum the weights of all the incorrect predictions and 
 
 * Sum of all weights = $1.0$
 * Incorrect instance: Instance 4 (weight = 0.2)
-
-$$r_1 = \frac{0.2}{1.0} = 0.2$$
-
+```math
+r_1 = \frac{0.2}{1.0} = 0.2
+```
 **Step 2: Calculate the Predictor Weight ($\alpha_1$)**
 Using **Equation 7-2**, we calculate how much "say" this predictor gets in the final vote. A lower error rate means a higher weight.
-
-$$\alpha_1 = 1 \cdot \log \left( \frac{1 - 0.2}{0.2} \right) = \log(4) \approx 1.386$$
-
+```math
+\alpha_1 = 1 \cdot \log \left( \frac{1 - 0.2}{0.2} \right) = \log(4) \approx 1.386
+```
 **Step 3: Update Instance Weights ($w^{(i)}$)**
 Using **Equation 7-3**, we increase the weight of the instance our model got wrong so the next model pays more attention to it.
 
 * **For correct instances (1, 2, 3, 5):** The weight stays the same (before normalization). $w^{(i)} = 0.2$
 * **For the incorrect instance (4):** We multiply its weight by $\exp(\alpha_1)$.
-
-$$w^{(4)} = 0.2 \times \exp(1.386) = 0.2 \times 4 = 0.8$$
-
-
-
+```math
+w^{(4)} = 0.2 \times \exp(1.386) = 0.2 \times 4 = 0.8
+```
 **Step 4: Normalize the Weights**
 The bottom of Equation 7-3 tells us to divide all weights by their total sum so they add up to 1 again.
 
@@ -1131,14 +1157,14 @@ When we train Predictor 2, the algorithm is heavily penalized if it gets Instanc
 
 **Step 1: Calculate the Error Rate ($r_2$)**
 It only got Instance 2 wrong. Look at the table above: the current weight of Instance 2 is 0.125.
-
-$$r_2 = \frac{0.125}{1.0} = 0.125$$
-
+```math
+r_2 = \frac{0.125}{1.0} = 0.125
+```
 **Step 2: Calculate the Predictor Weight ($\alpha_2$)**
 Because its weighted error rate is lower than Predictor 1, Predictor 2 gets a larger say in the final ensemble.
-
-$$\alpha_2 = 1 \cdot \log \left( \frac{1 - 0.125}{0.125} \right) = \log(7) \approx 1.946$$
-
+```math
+\alpha_2 = 1 \cdot \log \left( \frac{1 - 0.125}{0.125} \right) = \log(7) \approx 1.946
+```
 *(We would then update and normalize the instance weights again for a 3rd predictor, but let's stop here and see how they vote together).*
 
 ---
@@ -1195,14 +1221,16 @@ Let's assume we are predicting house prices ($y$) using input features ($X$).
 
 **Making the Final Prediction:**
 When a new data point ($\mathbf{x}$) comes in, you pass it through all the trees and simply sum their predictions:
-$$ \hat{y}_{\text{final}} = \text{Tree}_1(\mathbf{x}) + \text{Tree}_2(\mathbf{x}) + \text{Tree}_3(\mathbf{x}) + \dots $$
-
+```math
+\hat{y}_{\text{final}} = \text{Tree}_1(\mathbf{x}) + \text{Tree}_2(\mathbf{x}) + \text{Tree}_3(\mathbf{x}) + \dots
+```
 #### 3. Shrinkage (The Learning Rate)
 If we just add up the raw predictions of 100 trees, the model will quickly overfit and memorize the noise in the training data. To prevent this, Gradient Boosting uses a regularization technique called **Shrinkage** via a learning rate hyperparameter ($\eta$).
 
 Instead of adding the full prediction of a tree, we multiply it by a small learning rate (e.g., $0.1$):
-$$ \hat{y}_{\text{final}} = \text{Tree}_1(\mathbf{x}) + \eta \text{Tree}_2(\mathbf{x}) + \eta \text{Tree}_3(\mathbf{x}) + \dots $$
-
+```math
+\hat{y}_{\text{final}} = \text{Tree}_1(\mathbf{x}) + \eta \text{Tree}_2(\mathbf{x}) + \eta \text{Tree}_3(\mathbf{x}) + \dots
+```
 *   **The Trade-off:** A lower learning rate means the algorithm will need more trees (`n_estimators`) to fit the training set, but the resulting model will usually generalize much better to unseen data.
 
 ---
@@ -1321,21 +1349,28 @@ When you are handed a dataset with 1,000 features, feeding all of them into a mo
 ### 1. The Engine of PCA: Singular Value Decomposition (SVD)
 
 Under the hood, PCA tears your dataset apart using a linear algebra technique called **SVD**. SVD takes your original dataset matrix ($A$) and decomposes it into three fundamental building blocks: 
-$$A = U \Sigma V^T$$
-
+```math
+A = U \Sigma V^T
+```
 Here is how we solve this step-by-step for a simple 2x2 matrix:
-$$A = \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix}$$
-
+```math
+A = \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix}
+```
 #### Step 1: Find $V$ (Right Singular Vectors / Principal Components)
 First, we find the absolute best directions to view our data from. We do this by calculating the eigenvectors of $A^T A$.
 
 1. **Calculate $A^T A$:**
-   $$A^T A = \begin{pmatrix} 2 & -1 \\ 2 & 1 \end{pmatrix} \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} = \begin{pmatrix} 5 & 3 \\ 3 & 5 \end{pmatrix}$$
-
+```math
+A^T A = \begin{pmatrix} 2 & -1 \\ 2 & 1 \end{pmatrix} \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} = \begin{pmatrix} 5 & 3 \\ 3 & 5 \end{pmatrix}
+```
 2. **Find the Eigenvalues ($\lambda$):** 
    We solve the characteristic equation $\det(A^T A - \lambda I) = 0$:
-   $$\det \begin{pmatrix} 5 - \lambda & 3 \\ 3 & 5 - \lambda \end{pmatrix} = (5 - \lambda)^2 - 9 = 0$$
-   $$\lambda^2 - 10\lambda + 16 = 0 \implies (\lambda - 8)(\lambda - 2) = 0$$
+```math
+\det \begin{pmatrix} 5 - \lambda & 3 \\ 3 & 5 - \lambda \end{pmatrix} = (5 - \lambda)^2 - 9 = 0
+```
+```math
+\lambda^2 - 10\lambda + 16 = 0 \implies (\lambda - 8)(\lambda - 2) = 0
+```
    The eigenvalues are $\lambda_1 = 8$ and $\lambda_2 = 2$.
 
 3. **Find the Eigenvectors (and normalize them):**
@@ -1344,31 +1379,38 @@ First, we find the absolute best directions to view our data from. We do this by
 
 4. **Construct $V$ and $V^T$:**
    We place $v_1$ and $v_2$ as columns in $V$:
-   $$V = \begin{pmatrix} 1/\sqrt{2} & -1/\sqrt{2} \\ 1/\sqrt{2} & 1/\sqrt{2} \end{pmatrix} \implies V^T = \begin{pmatrix} 1/\sqrt{2} & 1/\sqrt{2} \\ -1/\sqrt{2} & 1/\sqrt{2} \end{pmatrix}$$
-
+```math
+V = \begin{pmatrix} 1/\sqrt{2} & -1/\sqrt{2} \\ 1/\sqrt{2} & 1/\sqrt{2} \end{pmatrix} \implies V^T = \begin{pmatrix} 1/\sqrt{2} & 1/\sqrt{2} \\ -1/\sqrt{2} & 1/\sqrt{2} \end{pmatrix}
+```
 #### Step 2: Find $\Sigma$ (Singular Values)
 Now we weigh the importance of those directions. The singular values ($\sigma$) are simply the square roots of our eigenvalues, placed on the diagonal of a matrix in descending order.
 * $\sigma_1 = \sqrt{8} = 2\sqrt{2}$
 * $\sigma_2 = \sqrt{2}$
-
-$$\Sigma = \begin{pmatrix} 2\sqrt{2} & 0 \\ 0 & \sqrt{2} \end{pmatrix}$$
-
+```math
+\Sigma = \begin{pmatrix} 2\sqrt{2} & 0 \\ 0 & \sqrt{2} \end{pmatrix}
+```
 #### Step 3: Find $U$ (Left Singular Vectors)
 Finally, we map our right singular vectors ($v$) through the original matrix $A$ and scale them down by their corresponding singular value ($\sigma$). The formula is $u_i = \frac{1}{\sigma_i} A v_i$.
 
 1. **Calculate $u_1$:**
-   $$u_1 = \frac{1}{2\sqrt{2}} \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} \begin{pmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \end{pmatrix} = \frac{1}{2\sqrt{2}} \begin{pmatrix} 4/\sqrt{2} \\ 0 \end{pmatrix} = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$$
-
+```math
+u_1 = \frac{1}{2\sqrt{2}} \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} \begin{pmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \end{pmatrix} = \frac{1}{2\sqrt{2}} \begin{pmatrix} 4/\sqrt{2} \\ 0 \end{pmatrix} = \begin{pmatrix} 1 \\ 0 \end{pmatrix}
+```
 2. **Calculate $u_2$:**
-   $$u_2 = \frac{1}{\sqrt{2}} \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} \begin{pmatrix} -1/\sqrt{2} \\ 1/\sqrt{2} \end{pmatrix} = \frac{1}{\sqrt{2}} \begin{pmatrix} 0 \\ 2/\sqrt{2} \end{pmatrix} = \begin{pmatrix} 0 \\ 1 \end{pmatrix}$$
-
+```math
+u_2 = \frac{1}{\sqrt{2}} \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} \begin{pmatrix} -1/\sqrt{2} \\ 1/\sqrt{2} \end{pmatrix} = \frac{1}{\sqrt{2}} \begin{pmatrix} 0 \\ 2/\sqrt{2} \end{pmatrix} = \begin{pmatrix} 0 \\ 1 \end{pmatrix}
+```
 3. **Construct $U$:**
-   $$U = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$$
-
+```math
+U = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}
+```
 **The Final Result:** We have successfully decomposed the matrix! 
-$$A = U \Sigma V^T$$
-$$\begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix} \begin{pmatrix} 2\sqrt{2} & 0 \\ 0 & \sqrt{2} \end{pmatrix} \begin{pmatrix} 1/\sqrt{2} & 1/\sqrt{2} \\ -1/\sqrt{2} & 1/\sqrt{2} \end{pmatrix}$$
-
+```math
+A = U \Sigma V^T
+```
+```math
+\begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix} \begin{pmatrix} 2\sqrt{2} & 0 \\ 0 & \sqrt{2} \end{pmatrix} \begin{pmatrix} 1/\sqrt{2} & 1/\sqrt{2} \\ -1/\sqrt{2} & 1/\sqrt{2} \end{pmatrix}
+```
 ---
 
 ### 2. Kernel PCA (kPCA) and The Kernel Trick
@@ -1424,9 +1466,9 @@ Instead of looking at the massive, global structure of the dataset, LLE zooms in
 *   **The Constraints:** If a point $\mathbf{x}^{(j)}$ is *not* one of the $k$ closest neighbors, its weight is forced to 0. Furthermore, the weights for the neighbors of each instance must be normalized (they must sum to 1).
 
 This creates our first constrained optimization problem, resulting in a weight matrix $\widehat{\mathbf{W}}$ that perfectly encodes the local linear relationships between all training instances:
-
-$$ \widehat{\mathbf{W}} = \underset{\mathbf{W}}{\text{argmin}} \sum_{i=1}^{m} \left( \mathbf{x}^{(i)} - \sum_{j=1}^{m} w_{i,j} \mathbf{x}^{(j)} \right)^2 $$
-
+```math
+\widehat{\mathbf{W}} = \underset{\mathbf{W}}{\text{argmin}} \sum_{i=1}^{m} \left( \mathbf{x}^{(i)} - \sum_{j=1}^{m} w_{i,j} \mathbf{x}^{(j)} \right)^2
+```
 #### Step 2: Reducing Dimensionality While Preserving Relationships
 Now that we have a matrix ($\widehat{\mathbf{W}}$) that perfectly describes how every point relates to its neighbors, we want to map the training instances into a new $d$-dimensional space (where $d < n$). 
 
@@ -1435,9 +1477,9 @@ Now that we have a matrix ($\widehat{\mathbf{W}}$) that perfectly describes how 
 *   **The Reversal:** This looks identical to Step 1, but we flip the variables. Instead of keeping the instances fixed and searching for optimal weights, we now keep the weights fixed ($\widehat{w}_{i,j}$) and search for the optimal physical positions of the new instances ($\mathbf{Z}$) in the low-dimensional space.
 
 This leads to the final unconstrained optimization problem:
-
-$$ \widehat{\mathbf{Z}} = \underset{\mathbf{Z}}{\text{argmin}} \sum_{i=1}^{m} \left( \mathbf{z}^{(i)} - \sum_{j=1}^{m} \widehat{w}_{i,j} \mathbf{z}^{(j)} \right)^2 $$
-
+```math
+\widehat{\mathbf{Z}} = \underset{\mathbf{Z}}{\text{argmin}} \sum_{i=1}^{m} \left( \mathbf{z}^{(i)} - \sum_{j=1}^{m} \widehat{w}_{i,j} \mathbf{z}^{(j)} \right)^2
+```
 #### The Major Drawback: Computational Complexity
 While LLE is brilliant mathematically, you must be careful when using it on large datasets. `scikit-learn`'s implementation scales beautifully for finding neighbors and optimizing weights, but the final step (constructing the low-dimensional representations) has a complexity of $O(dm^2)$. 
 
@@ -1500,8 +1542,9 @@ For every single data point, it calculates:
 *   $b$: The mean distance to all points in the *next nearest* cluster (Separation).
 
 The Silhouette Score for a point is: 
-$$ s = \frac{b - a}{\max(a, b)} $$
-
+```math
+s = \frac{b - a}{\max(a, b)}
+```
 *   **Score = +1:** The point is perfectly inside its own cluster and far from others. (Excellent)
 *   **Score = 0:** The point is right on the boundary between two clusters.
 *   **Score = -1:** The point was likely assigned to the wrong cluster.
@@ -1627,9 +1670,13 @@ To solve complex problems, we must inject **non-linearity** into the network. We
 
 #### The Big Three Activation Functions:
 1.  **ReLU (Rectified Linear Unit):** The undisputed default for Hidden Layers. It simply outputs the input directly if it is positive; otherwise, it outputs zero. It is computationally incredibly fast and solves major mathematical issues during training.
-    $$ \text{ReLU}(x) = \max(0, x) $$
+```math
+\text{ReLU}(x) = \max(0, x)
+```
 2.  **Sigmoid:** Squashes any number into a range between 0 and 1. It is almost exclusively used in the **Output Layer** for binary classification (e.g., Is this spam? 0.99 = Yes). It is rarely used in hidden layers today because it causes the network to stop learning (the Vanishing Gradient problem).
-    $$ \sigma(x) = \frac{1}{1 + e^{-x}} $$
+```math
+\sigma(x) = \frac{1}{1 + e^{-x}}
+```
 3.  **Softmax:** Used exclusively in the **Output Layer** for Multi-Class Classification (e.g., Is this a cat, dog, or bird?). It takes a vector of raw scores and turns them into a list of probabilities that perfectly sum to 1.
 
 ---
@@ -1660,18 +1707,23 @@ Forward propagation is simply the process of passing data from the input layer, 
 
 For a single artificial neuron, the math is a two-step process:
 1.  **The Linear Combination:** Multiply the inputs by their weights and add the bias.
-    $$ z = (w_1 x_1 + w_2 x_2 + \dots + w_n x_n) + b $$
+```math
+z = (w_1 x_1 + w_2 x_2 + \dots + w_n x_n) + b
+```
     *(In linear algebra terms for a whole layer: $\mathbf{z} = \mathbf{W}\mathbf{x} + \mathbf{b}$)*
 2.  **The Activation:** Pass that result through an activation function (like ReLU) to introduce non-linearity.
-    $$ a = \text{ReLU}(z) $$
-
+```math
+a = \text{ReLU}(z)
+```
 This output ($a$) is then passed as the input ($x$) to the next layer. This repeats until the final prediction is made.
 
 ### 2. The Loss Function (Calculating the Error)
 Once the network makes its prediction ($\hat{y}$), we compare it to the actual true label ($y$). The mathematical formula used to measure this distance is the **Loss Function** (or Cost Function).
 
 *   **For Regression:** We usually use **Mean Squared Error (MSE)**.
-    $$ L = \frac{1}{2}(y - \hat{y})^2 $$
+```math
+L = \frac{1}{2}(y - \hat{y})^2
+```
 *   **For Classification:** We use **Cross-Entropy Loss** (Log Loss), which heavily penalizes the network if it is highly confident in the wrong answer.
 
 ### 3. Backpropagation (The Engine of Learning)
@@ -1680,8 +1732,9 @@ Backpropagation is short for "backward propagation of errors." It is the algorit
 It does this using the **Chain Rule of Calculus**. We want to find the partial derivative of the Loss with respect to a specific weight ($\frac{\partial L}{\partial w}$). In plain English: *"If I tweak this specific weight by a tiny amount, exactly how much will the final error change?"*
 
 By applying the Chain Rule, we step backward through the network's math:
-$$ \frac{\partial L}{\partial w} = \frac{\partial L}{\partial a} \cdot \frac{\partial a}{\partial z} \cdot \frac{\partial z}{\partial w} $$
-
+```math
+\frac{\partial L}{\partial w} = \frac{\partial L}{\partial a} \cdot \frac{\partial a}{\partial z} \cdot \frac{\partial z}{\partial w}
+```
 #### The Mathematical Example (Step-by-Step)
 Imagine a tiny network with 1 input, 1 neuron, and 1 output. 
 *   **Input ($x$):** 2
@@ -1707,10 +1760,13 @@ Multiply them together: $\frac{\partial L}{\partial w} = 1 \cdot 1 \cdot 2 = \ma
 Now that Backpropagation has given us the gradient (the slope of the error), we use an optimizer algorithm called **Gradient Descent** to physically update the weight.
 
 We update the old weight by subtracting the gradient, scaled by a hyperparameter called the **Learning Rate** ($\alpha$):
-$$ w_{\text{new}} = w_{\text{old}} - \alpha \left( \frac{\partial L}{\partial w} \right) $$
-
+```math
+w_{\text{new}} = w_{\text{old}} - \alpha \left( \frac{\partial L}{\partial w} \right)
+```
 If our learning rate $\alpha = 0.1$:
-$$ w_{\text{new}} = 0.5 - 0.1(2) = 0.3 $$
+```math
+w_{\text{new}} = 0.5 - 0.1(2) = 0.3
+```
 The weight has been updated from 0.5 to 0.3. The next time the network makes a guess, its error will be smaller!
 
 ![Gradient Descent 3D Surface](./assets/gradient_descent_3d.png)
@@ -1750,8 +1806,12 @@ Momentum accelerates gradient descent by using a moving average of past gradient
 
 *   **The Intuition:** It behaves like a heavy ball rolling down a hill. The momentum term increases updates for dimensions whose gradients point in the same directions and reduces updates for dimensions whose gradients change directions.
 *   **The Math:** It uses an exponentially moving average to store trend information about a set of previous gradient values.
-    $$ v_t = \beta \cdot v_{t-1} + (1 - \beta) \cdot \nabla_\theta J(\theta) $$
-    $$ \theta_{t+1} = \theta_t - \alpha \cdot v_t $$
+```math
+v_t = \beta \cdot v_{t-1} + (1 - \beta) \cdot \nabla_\theta J(\theta)
+```
+```math
+\theta_{t+1} = \theta_t - \alpha \cdot v_t
+```
     *(Where $v_t$ is the velocity/running average, $\beta$ is the momentum term typically set close to 0.9, and $\alpha$ is the learning rate).*
 
 ### 3. AdaGrad (Adaptive Gradient Algorithm)
@@ -1759,7 +1819,9 @@ Standard algorithms keep the learning rate constant throughout the training, whi
 
 *   **The Intuition:** If a weight has been having very huge updates, the learning rate for that specific weight will decrease. Inversely, for smaller gradients, the learning rate will be bigger. This way, Adagrad deals with vanishing and exploding gradient problems.
 *   **The Math:** It achieves this by storing the sum of squared historical gradients for each parameter.
-    $$ \theta_{t+1} = \theta_t - \frac{\alpha}{\sqrt{G_{diag} + \epsilon}} \cdot \nabla_\theta J(\theta) $$
+```math
+\theta_{t+1} = \theta_t - \frac{\alpha}{\sqrt{G_{diag} + \epsilon}} \cdot \nabla_\theta J(\theta)
+```
     *(Where $G_{diag}$ is a diagonal matrix containing the sum of past squared gradients, and $\epsilon$ is a very small value to ensure division by zero does not occur).*
 *   **The Fatal Flaw:** Because it accumulates squared gradients, the denominator always grows. A limitation of AdaGrad is that it tends to overly decrease the learning rate over time. This causes the algorithm to tend to converge slowly during the last iterations where it becomes very low.
 
@@ -1768,8 +1830,12 @@ RMSprop was devised by the legendary Geoffrey Hinton to specifically fix AdaGrad
 
 *   **The Intuition:** Instead of keeping a sum of all past squared gradients, RMSProp uses an exponentially weighted moving average of squared gradients. This puts more emphasis on recent gradient values rather than equally distributing importance.
 *   **The Math:**
-    $$ S_t = \beta S_{t-1} + (1 - \beta) (\nabla_\theta J)^2 $$
-    $$ \theta_{t+1} = \theta_t - \frac{\alpha}{\sqrt{S_t} + \epsilon} \cdot \nabla_\theta J $$
+```math
+S_t = \beta S_{t-1} + (1 - \beta) (\nabla_\theta J)^2
+```
+```math
+\theta_{t+1} = \theta_t - \frac{\alpha}{\sqrt{S_t} + \epsilon} \cdot \nabla_\theta J
+```
     *(By prioritizing recent gradients, RMSProp automatically will decrease the size of the gradient steps towards minima when the steps are too large, making the algorithm less prone to overshooting without causing the learning rate to decay to zero).*
 
 ### 5. Adam (Adaptive Moment Estimation)
@@ -1778,14 +1844,21 @@ Adam is currently the most famous optimization algorithm in deep learning. Adam 
 *   **The Intuition:** It keeps track of the exponentially moving averages for computed gradients (Momentum) and squared gradients (RMSProp) respectively. It works well with large datasets and complex models because it uses memory efficiently and adapts the learning rate for each parameter automatically.
 *   **The Math:**
     1.  **Calculate Momentum (First Moment):**
-        $$ m_t = \beta_1 m_{t-1} + (1 - \beta_1) \nabla_\theta J $$
+```math
+m_t = \beta_1 m_{t-1} + (1 - \beta_1) \nabla_\theta J
+```
     2.  **Calculate RMSProp (Second Moment):**
-        $$ v_t = \beta_2 v_{t-1} + (1 - \beta_2) (\nabla_\theta J)^2 $$
+```math
+v_t = \beta_2 v_{t-1} + (1 - \beta_2) (\nabla_\theta J)^2
+```
     3.  **Bias Correction:** Because $m$ and $v$ start at zero, they are heavily biased toward zero in the beginning. Adam applies bias correction to prevent instability during early training stages.
-        $$ \hat{m}_t = \frac{m_t}{1 - \beta_1^t} \quad \text{and} \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t} $$
+```math
+\hat{m}_t = \frac{m_t}{1 - \beta_1^t} \quad \text{and} \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}
+```
     4.  **Final Update:**
-        $$ \theta_{t+1} = \theta_t - \frac{\alpha \hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} $$
-
+```math
+\theta_{t+1} = \theta_t - \frac{\alpha \hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
+```
 ---
 
 ### 6. Placement Prep: Optimizers Flashcards
@@ -1811,17 +1884,23 @@ Regularization is a set of techniques used to artificially constrain the network
 
 ### 1. Mathematical Weight Penalties (L1 and L2)
 The most fundamental way to constrain a network is to alter its Loss Function. We add a "penalty term" ($\Omega$) to the loss function that mathematically punishes the network for having large weights.
-$$ L_{\text{total}} = L_{\text{data}} + \Omega(w) $$
+```math
+L_{\text{total}} = L_{\text{data}} + \Omega(w)
+```
 *(Where $L_{\text{data}}$ is your standard loss like MSE or Cross-Entropy, and $\Omega(w)$ is the penalty applied to the weights).*
 
 #### L1 Regularization (Lasso / Sparsity)
 L1 adds the sum of the absolute values of the weights to the loss function.
-$$ \Omega(w) = \lambda \sum \vert{}w_i\vert{} $$
+```math
+\Omega(w) = \lambda \sum \vert{}w_i\vert{}
+```
 *   **The Effect:** L1 calculates the derivative of an absolute value, which is a constant (either +1 or -1). This physically forces the weights of less important features down to exactly zero. It acts as a built-in feature selection tool, leaving a "sparse" network where only the most critical connections survive.
 
 #### L2 Regularization (Ridge / Weight Decay)
 L2 adds the sum of the squared values of the weights to the loss function.
-$$ \Omega(w) = \frac{\lambda}{2} \sum w_i^2 $$
+```math
+\Omega(w) = \frac{\lambda}{2} \sum w_i^2
+```
 *   **The Effect:** Because it squares the weights, L2 heavily penalizes outlier weights that are extremely large, but the penalty approaches zero as the weight gets smaller. It smoothly shrinks all weights toward zero, but rarely pushes them to exactly zero. It forces the network to rely on all features a little bit, rather than heavily relying on just one feature.
 
 ![How Regularization Constrains Neural Network Weights](./assets/regularization_weights.png)
@@ -1845,7 +1924,9 @@ During every single training batch, **Dropout** literally deactivates a random p
 *   **The Effect:** Because a neuron never knows if its neighboring "super neuron" will be active or dead on any given batch, it cannot rely on it. It is forced to independently learn useful features from the data.
 *   **The Result:** The network distributes the learning across the entire architecture, creating a highly robust, ensemble-like model.
 *   **Crucial Note:** Dropout is *strictly* turned off during inference/testing. During testing, all neurons are active. However, because a neuron is now receiving 100% of its inputs (instead of, say, 50% during training), the final signal will be twice as large as the network expects, blowing up the activations. To fix this, the outgoing weights are mathematically scaled down by the probability of the neuron being active:
-    $$ W_{\text{test}} = W_{\text{train}} \times (1 - p) $$
+```math
+W_{\text{test}} = W_{\text{train}} \times (1 - p)
+```
     *(Where $p$ is the dropout rate. If $p=0.5$, we multiply all weights by 0.5 during testing to perfectly balance the expected signal).*
 
 ![How Dropout Prevents Co-adaptation](./assets/dropout_visualization.png)
@@ -1949,11 +2030,15 @@ The number **3** becomes the very first pixel in the top-left corner of the new 
 When you slide a $3 \times 3$ filter over a $5 \times 5$ image, the filter cannot scan the very edges without falling off the image. Therefore, the resulting Feature Map is smaller than the input. 
 
 The mathematical formula to calculate the output size of a feature map (assuming a stride of 1 and no padding) is:
-$$ \text{Output Size} = n - f + 1 $$
+```math
+\text{Output Size} = n - f + 1
+```
 *(Where $n$ is the input image size, and $f$ is the filter size).*
 
 For our $5 \times 5$ image with a $3 \times 3$ filter:
-$$ \text{Output Size} = 5 - 3 + 1 = 3 $$
+```math
+\text{Output Size} = 5 - 3 + 1 = 3
+```
 The resulting Feature Map will be a $3 \times 3$ matrix.
 
 ---
@@ -1994,9 +2079,9 @@ By default, a filter slides over by 1 pixel at a time ($s=1$). However, sometime
 
 #### 3. The Master Formula for CNN Dimensions
 This is the single most important mathematical formula to memorize for Computer Vision interviews. If you are given an Input Image of size $n \times n$, a Filter of size $f \times f$, a Padding of $p$, and a Stride of $s$, the exact spatial dimension of the output feature map is:
-
-$$ \text{Output Size} = \lfloor \frac{n + 2p - f}{s} \rfloor + 1 $$
-
+```math
+\text{Output Size} = \lfloor \frac{n + 2p - f}{s} \rfloor + 1
+```
 *(Note: $\lfloor \dots \rfloor$ means you round down/floor the result if it is a decimal).*
 
 **The Math Example:**
@@ -2005,10 +2090,15 @@ You have a $7 \times 7$ input image. You apply a $3 \times 3$ filter. You use a 
 *   $f = 3$
 *   $p = 1$
 *   $s = 2$
-
-$$ \text{Output Size} = \lfloor \frac{7 + 2(1) - 3}{2} \rfloor + 1 $$
-$$ \text{Output Size} = \lfloor \frac{7 + 2 - 3}{2} \rfloor + 1 $$
-$$ \text{Output Size} = \lfloor \frac{6}{2} \rfloor + 1 = 3 + 1 = \mathbf{4} $$
+```math
+\text{Output Size} = \lfloor \frac{7 + 2(1) - 3}{2} \rfloor + 1
+```
+```math
+\text{Output Size} = \lfloor \frac{7 + 2 - 3}{2} \rfloor + 1
+```
+```math
+\text{Output Size} = \lfloor \frac{6}{2} \rfloor + 1 = 3 + 1 = \mathbf{4}
+```
 The output feature map will be exactly **$4 \times 4$**.
 
 ---
@@ -2131,8 +2221,9 @@ To avoid this parameter explosion, modern networks use $1 \times 1$ convolutions
 Think of a standard $3 \times 3$ convolution as a magnifying glass that looks at a spatial patch of 9 pixels. A $1 \times 1$ convolution is like a laser beam. It looks at exactly **one single pixel**, but it shines straight down through all the depth channels (colors/features) of that pixel.
 *   **Why is this useful? (The Dimensionality Bottleneck):** Imagine you have 512 channels of data. Doing a $3 \times 3$ convolution on 512 channels is computationally exhausting. Instead, you can shoot $64$ different $1 \times 1$ "lasers" at the image. They will mathematically squash those 512 channels down into just 64 channels, saving massive amounts of computational power before you do your heavy lifting. 
 *   **The Math:** It simply calculates the dot product of the input channels at that exact pixel with the filter weights:
-    $$ Y_{i,j,k} = \sum_{c=1}^{C} W_{k,c} X_{i,j,c} $$
-
+```math
+Y_{i,j,k} = \sum_{c=1}^{C} W_{k,c} X_{i,j,c}
+```
 ![1x1 Convolution Visualization](./assets/pointwise_visual.png)
 
 #### 3. The Modern Finisher: Global Average Pooling (GAP)
@@ -2190,8 +2281,9 @@ Let $X$ be our Input Image ($3 \times 3$), $W$ be our Filter ($2 \times 2$), and
 *(Note on $dY$: Where does this error gradient actually come from? $dY$ is simply the derivative of the Loss function with respect to the output of this layer. If this convolutional layer was followed immediately by a ReLU activation, $dY$ is calculated by taking the error gradient from the layer above and zeroing out any gradients where the forward-pass pixels were zero or negative).*
 
 **The Rule:** The gradient of the weights ($dW$) is calculated by convolving the original Input Image ($X$) with the Error Gradient ($dY$).
-$$dW = X * dY$$
-
+```math
+dW = X * dY
+```
 **The Hands-on Math:**
 Assume the Input ($X$) and the Error ($dY$) are:
 ```math
@@ -2325,7 +2417,9 @@ dY = \begin{bmatrix} 0 & 0 \\ -0.135 & 0.180 \end{bmatrix}
 
 **Step 5: Convolutional Weight Gradients ($dW_1$)**
 Finally, as learned in Topic 5, we calculate the gradient for our convolution filter by convolving the original Input ($X$) with the ReLU Error Gradient ($dY$).
-$$dW_1 = X * dY$$
+```math
+dW_1 = X * dY
+```
 *   **Top-Left:** $(1 \cdot 0) + (1 \cdot 0) + (1 \cdot -0.135) + (1 \cdot 0.180) = \mathbf{0.045}$
 *   **Top-Right:** $(1 \cdot 0) + (1 \cdot 0) + (1 \cdot -0.135) + (0 \cdot 0.180) = \mathbf{-0.135}$
 *   **Bottom-Left:** $(1 \cdot 0) + (1 \cdot 0) + (0 \cdot -0.135) + (1 \cdot 0.180) = \mathbf{0.180}$
@@ -2347,7 +2441,9 @@ Classic CNNs simply stacked Conv $\rightarrow$ ReLU $\rightarrow$ Pool in a stra
 ### 1. Residual Connections (ResNet)
 As standard networks get deeper, they suffer from the **Vanishing Gradient Problem**. By the time the error gradient propagates backward through 50 activation functions, it multiplies down to zero, and early layers stop learning entirely.
 *   **The Fix:** ResNet introduced the "Skip Connection" (or Shortcut Connection). Instead of strictly mapping an input through a convolution to get an output ($F(x)$), ResNet physically adds the original input back to the output before the final activation: 
-    $$ H(x) = F(x) + x $$
+```math
+H(x) = F(x) + x
+```
 *   **The Gradient Superhighway:** During backpropagation, the derivative of $x$ is exactly $1$. This allows the error gradient to bypass the heavy convolutions and flow straight backward through the network at full strength, allowing networks to scale to 152+ layers.
 
 ### 2. Depthwise Separable Convolutions (MobileNet)
@@ -2461,12 +2557,14 @@ Let's look at the exact mathematical equations happening inside a standard Vanil
 
 **Step 1: Update the Hidden State (Memory)**
 The network concatenates the current input and the past memory, multiplies them by their respective shared weight matrices, adds a bias, and passes them through a $\tanh$ activation function to keep the values constrained between -1 and 1.
-$$ h_t = \tanh(W_{hx} x_t + W_{hh} h_{t-1} + b_h) $$
-
+```math
+h_t = \tanh(W_{hx} x_t + W_{hh} h_{t-1} + b_h)
+```
 **Step 2: Calculate the Output (Prediction)**
 Once the new hidden state ($h_t$) is calculated, we use it to make a prediction for that specific time step (e.g., "What is the next word in the sentence?"). 
-$$ y_t = \text{Softmax}(W_{yh} h_t + b_y) $$
-
+```math
+y_t = \text{Softmax}(W_{yh} h_t + b_y)
+```
 *Note: The initial hidden state at $t=0$ ($h_0$) is usually initialized as a matrix of pure zeros, because the network hasn't seen any past data yet!*
 
 ---
@@ -2517,21 +2615,32 @@ We will trace a Mini-RNN across $t=1$ and $t=2$, predicting a single value at th
 
 **Time Step 1 ($t=1$):**
 The network looks at the first input ($x_1$) and combines it with its initial memory ($h_0$).
-$$ z_1 = (W_{hx} \cdot x_1) + (W_{hh} \cdot h_0) $$
-$$ z_1 = (2 \cdot 1) + (1 \cdot 0) = \mathbf{2} $$
+```math
+z_1 = (W_{hx} \cdot x_1) + (W_{hh} \cdot h_0)
+```
+```math
+z_1 = (2 \cdot 1) + (1 \cdot 0) = \mathbf{2}
+```
 We pass $z_1$ through the ReLU activation to get our first hidden state:
-$$ h_1 = \text{ReLU}(2) = \mathbf{2} $$
-
+```math
+h_1 = \text{ReLU}(2) = \mathbf{2}
+```
 **Time Step 2 ($t=2$):**
 The network looks at the second input ($x_2$) and combines it with the memory of the first step ($h_1$).
-$$ z_2 = (W_{hx} \cdot x_2) + (W_{hh} \cdot h_1) $$
-$$ z_2 = (2 \cdot 2) + (1 \cdot 2) = 4 + 2 = \mathbf{6} $$
-$$ h_2 = \text{ReLU}(6) = \mathbf{6} $$
-
+```math
+z_2 = (W_{hx} \cdot x_2) + (W_{hh} \cdot h_1)
+```
+```math
+z_2 = (2 \cdot 2) + (1 \cdot 2) = 4 + 2 = \mathbf{6}
+```
+```math
+h_2 = \text{ReLU}(6) = \mathbf{6}
+```
 **The Final Prediction (Output):**
 Using the final hidden state ($h_2$), we calculate our prediction ($\hat{y}$).
-$$ \hat{y} = W_{yh} \cdot h_2 = 1 \cdot 6 = \mathbf{6} $$
-
+```math
+\hat{y} = W_{yh} \cdot h_2 = 1 \cdot 6 = \mathbf{6}
+```
 ---
 
 ![RNN Backward Pass](./assets/rnn_backward_pass.png)
@@ -2539,33 +2648,53 @@ $$ \hat{y} = W_{yh} \cdot h_2 = 1 \cdot 6 = \mathbf{6} $$
 ### 2. Backpropagation Through Time (BPTT)
 
 The network predicted 6. The target was 4. Using Mean Squared Error $L = \frac{1}{2}(\hat{y} - y)^2$, the derivative of the loss with respect to our prediction is:
-$$ d\hat{y} = \hat{y} - y = 6 - 4 = \mathbf{2} $$
-
+```math
+d\hat{y} = \hat{y} - y = 6 - 4 = \mathbf{2}
+```
 **Step 1: Gradients at the Output**
 First, we find the gradient for the output weight ($dW_{yh}$) and pass the error back into the final hidden state ($dh_2$).
-$$ dW_{yh} = d\hat{y} \cdot h_2 = 2 \cdot 6 = \mathbf{12} $$
-$$ dh_2 = d\hat{y} \cdot W_{yh} = 2 \cdot 1 = \mathbf{2} $$
-
+```math
+dW_{yh} = d\hat{y} \cdot h_2 = 2 \cdot 6 = \mathbf{12}
+```
+```math
+dh_2 = d\hat{y} \cdot W_{yh} = 2 \cdot 1 = \mathbf{2}
+```
 **Step 2: Gradients at $t=2$**
 The error ($dh_2 = 2$) has entered the unrolled network. First, we pass it backward through the ReLU activation to get $dz_2$. (Since $z_2 = 6 > 0$, the derivative of ReLU is 1).
-$$ dz_2 = dh_2 \cdot 1 = \mathbf{2} $$
+```math
+dz_2 = dh_2 \cdot 1 = \mathbf{2}
+```
 Now, we calculate how much the weights contributed to the error *at this specific time step*:
-$$ dW_{hx(t=2)} = dz_2 \cdot x_2 = 2 \cdot 2 = \mathbf{4} $$
-$$ dW_{hh(t=2)} = dz_2 \cdot h_1 = 2 \cdot 2 = \mathbf{4} $$
+```math
+dW_{hx(t=2)} = dz_2 \cdot x_2 = 2 \cdot 2 = \mathbf{4}
+```
+```math
+dW_{hh(t=2)} = dz_2 \cdot h_1 = 2 \cdot 2 = \mathbf{4}
+```
 Finally, we pass the error **backward through time** to the previous hidden state ($dh_1$):
-$$ dh_1 = dz_2 \cdot W_{hh} = 2 \cdot 1 = \mathbf{2} $$
-
+```math
+dh_1 = dz_2 \cdot W_{hh} = 2 \cdot 1 = \mathbf{2}
+```
 **Step 3: Gradients at $t=1$**
 The error ($dh_1 = 2$) has successfully traveled back in time to the first step. We pass it through ReLU (since $z_1 = 2 > 0$, derivative is 1).
-$$ dz_1 = dh_1 \cdot 1 = \mathbf{2} $$
+```math
+dz_1 = dh_1 \cdot 1 = \mathbf{2}
+```
 We calculate how much the weights contributed to the error *at this earlier time step*:
-$$ dW_{hx(t=1)} = dz_1 \cdot x_1 = 2 \cdot 1 = \mathbf{2} $$
-$$ dW_{hh(t=1)} = dz_1 \cdot h_0 = 2 \cdot 0 = \mathbf{0} $$
-
+```math
+dW_{hx(t=1)} = dz_1 \cdot x_1 = 2 \cdot 1 = \mathbf{2}
+```
+```math
+dW_{hh(t=1)} = dz_1 \cdot h_0 = 2 \cdot 0 = \mathbf{0}
+```
 **Step 4: Gradient Accumulation (The Core Rule of RNNs)**
 Because $W_{hx}$ and $W_{hh}$ are global shared weights used at both $t=1$ and $t=2$, we must **sum** their local gradients to find the true, final gradient for the optimizer to use.
-$$ dW_{hx} = dW_{hx(t=2)} + dW_{hx(t=1)} = 4 + 2 = \mathbf{6} $$
-$$ dW_{hh} = dW_{hh(t=2)} + dW_{hh(t=1)} = 4 + 0 = \mathbf{4} $$
+```math
+dW_{hx} = dW_{hx(t=2)} + dW_{hx(t=1)} = 4 + 2 = \mathbf{6}
+```
+```math
+dW_{hh} = dW_{hh(t=2)} + dW_{hh(t=1)} = 4 + 0 = \mathbf{4}
+```
 *(The optimizer will now use $dW_{hx}=6$, $dW_{hh}=4$, and $dW_{yh}=12$ to update the weights!)*
 
 ---
@@ -2611,8 +2740,9 @@ A **Bidirectional RNN** solves this by running two completely separate RNNs simu
 2.  **The Backward RNN:** Reads the sequence from right-to-left (e.g., $x_3 \rightarrow x_2 \rightarrow x_1$).
 
 At each time step $t$, the network takes the hidden state from the Forward RNN ($\overrightarrow{h_t}$) and concatenates it with the hidden state from the Backward RNN ($\overleftarrow{h_t}$). 
-$$ h_t = [\overrightarrow{h_t}, \overleftarrow{h_t}] $$
-
+```math
+h_t = [\overrightarrow{h_t}, \overleftarrow{h_t}]
+```
 This combined hidden state now contains complete context from both the past *and* the future, allowing the network to make a highly informed prediction ($y_t$) for that specific word.
 
 *(Note: BiRNNs can only be used when the entire sequence is available at once, like processing a whole document. They cannot be used for real-time forecasting where the future data hasn't happened yet).*
