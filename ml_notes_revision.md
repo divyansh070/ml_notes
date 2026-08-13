@@ -1885,3 +1885,70 @@ If you cannot get more data, you fabricate it using **Data Augmentation**.
 
 **Q6: What is the "Patience" parameter in Early Stopping?**
 *   **Answer:** The Validation Loss often fluctuates slightly during training. If Early Stopping halted training the very first time the loss ticked upward, it might stop the model prematurely before a breakthrough. The "Patience" parameter tells the algorithm to wait for a specific number of epochs (e.g., 5 or 10) to see if the loss continues to worsen before officially pulling the plug and stopping training.
+
+
+
+
+
+## Part 5: Computer Vision — Convolutional Neural Networks (CNNs)
+
+If you feed a 1000x1000 pixel image into a standard Multi-Layer Perceptron (MLP), the input layer would need 1,000,000 neurons. If the first hidden layer has 1,000 neurons, you immediately have 1 billion weights to train. The network will instantly overfit, and training will crawl to a halt. 
+
+**Convolutional Neural Networks (CNNs)** solve this through **Parameter Sharing** and **Local Connectivity**. Instead of looking at every pixel at once, a CNN acts like a flashlight, scanning small patches of the image one by one to detect patterns like edges, textures, and eventually, entire objects.
+
+---
+
+### Topic 1: The Convolution Operation (Kernels & Feature Maps)
+
+The core engine of a CNN is the Convolutional Layer. It does not use standard weights. Instead, it uses small, square matrices called **Filters** (or Kernels). 
+
+#### 1. How the "Flashlight" Works
+Imagine a 5x5 pixel image and a 3x3 Filter designed to detect vertical edges.
+1.  The 3x3 filter is placed over the top-left 3x3 patch of the input image.
+2.  The network performs an **element-wise multiplication** between the pixels in the image and the weights in the filter.
+3.  It sums all those values together into a single number. 
+4.  That single number is placed into a new output matrix called the **Feature Map**.
+5.  The filter then slides over by one pixel and repeats the process until it has scanned the entire image.
+
+#### 2. The Mathematical Example (Solved)
+Let's look at the exact math for the very first step of a convolution.
+
+**Input Image Patch ($3 \times 3$)**:
+$$ \begin{bmatrix} 1 & 1 & 0 \\ 1 & 1 & 0 \\ 1 & 1 & 0 \end{bmatrix} $$
+
+**Vertical Edge Filter ($3 \times 3$)**:
+$$ \begin{bmatrix} 1 & 0 & -1 \\ 1 & 0 & -1 \\ 1 & 0 & -1 \end{bmatrix} $$
+
+**The Operation:** We multiply each corresponding cell and sum them up.
+$$ (1 \cdot 1) + (1 \cdot 0) + (0 \cdot -1) = 1 $$
+$$ (1 \cdot 1) + (1 \cdot 0) + (0 \cdot -1) = 1 $$
+$$ (1 \cdot 1) + (1 \cdot 0) + (0 \cdot -1) = 1 $$
+**Sum = 3**. 
+
+The number **3** becomes the very first pixel in the top-left corner of the new Feature Map. Because the number is highly positive, the network knows it just found a strong vertical edge!
+
+![The Convolution Operation](./assets/convolution_visual.png)
+
+#### 3. Output Dimension Formula (Without Padding)
+When you slide a $3 \times 3$ filter over a $5 \times 5$ image, the filter cannot scan the very edges without falling off the image. Therefore, the resulting Feature Map is smaller than the input. 
+
+The mathematical formula to calculate the output size of a feature map (assuming a stride of 1 and no padding) is:
+$$ \text{Output Size} = n - f + 1 $$
+*(Where $n$ is the input image size, and $f$ is the filter size).*
+
+For our $5 \times 5$ image with a $3 \times 3$ filter:
+$$ \text{Output Size} = 5 - 3 + 1 = 3 $$
+The resulting Feature Map will be a $3 \times 3$ matrix.
+
+---
+
+### Topic 1 Placement Prep: Convolution Flashcards
+
+**Q1: What is the primary advantage of a Convolutional Layer over a standard Fully Connected (Dense) Layer when processing images?**
+*   **Answer:** CNNs utilize "Parameter Sharing" and "Local Connectivity." Instead of learning a separate weight for every single pixel (which leads to millions of parameters and overfitting), a CNN learns a single small filter (e.g., $3 \times 3$) and sweeps it across the entire image. This drastically reduces the number of parameters and allows the network to recognize a feature (like an eye) regardless of where it is physically located in the image (Translation Invariance).
+
+**Q2: In a CNN, what exactly is the network "learning" during backpropagation?**
+*   **Answer:** It is learning the optimal numerical values inside the Filters/Kernels. While humans manually design filters to find hardcoded features (like a Sobel filter for edges), a CNN starts with random numbers in its filters and uses Gradient Descent to figure out exactly what patterns (edges, textures, shapes) it needs to look for to minimize the loss function.
+
+**Q3: If you pass a 32x32 image through a Convolutional Layer with a 5x5 filter (with a stride of 1 and no padding), what are the dimensions of the resulting feature map?**
+*   **Answer:** The output dimension is $28 \times 28$. The formula is $(n - f + 1)$. So, $(32 - 5 + 1) = 28$.
