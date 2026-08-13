@@ -2746,3 +2746,60 @@ h_t = [\overrightarrow{h_t}, \overleftarrow{h_t}]
 This combined hidden state now contains complete context from both the past *and* the future, allowing the network to make a highly informed prediction ($y_t$) for that specific word.
 
 *(Note: BiRNNs can only be used when the entire sequence is available at once, like processing a whole document. They cannot be used for real-time forecasting where the future data hasn't happened yet).*
+
+
+
+## Topic 5: Long Short-Term Memory (LSTMs) & The Cure for Amnesia
+
+Vanilla RNNs fail on long sequences because Backpropagation Through Time (BPTT) repeatedly multiplies the gradient by the same weight matrix, causing it to vanish to zero. 
+
+**Long Short-Term Memory (LSTM)** networks solve this by adding a secondary memory track and using mathematical "Gates" to strictly control what information is allowed to enter, leave, or be deleted from the network.
+
+![LSTM Cell Visualization](./assets/lstm_cell_visual.png)
+
+### 1. The Two Memory States
+An LSTM has two distinct memory streams flowing through time:
+1.  **The Hidden State ($h_t$):** The short-term "working memory." This is what the LSTM outputs to the rest of the network to make immediate predictions. 
+2.  **The Cell State ($C_t$):** The long-term "internal memory." It acts like a conveyor belt running straight down the entire chain. It undergoes very minor linear operations, making it extremely easy for information—and error gradients—to flow unchanged across thousands of time steps.
+
+### 2. The Three Mathematical Gates
+An LSTM uses neural network layers (Gates) to protect and control the Cell State. These gates primarily use the **Sigmoid ($\sigma$)** activation function, which outputs a number between $0$ and $1$. 
+*   An output of $0$ means "delete this completely." 
+*   An output of $1$ means "let this completely through."
+
+**Gate 1: The Forget Gate ($f_t$)**
+Should we remember the past, or wipe the slate clean? The Forget Gate looks at the previous hidden state ($h_{t-1}$) and the current input ($x_t$), and outputs a number between 0 and 1 for each number in the Cell State.
+$$ f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f) $$
+*(If $f_t = 0$, the LSTM literally erases that piece of memory from the Cell State).*
+
+**Gate 2: The Input Gate ($i_t$ and $\tilde{C}_t$)**
+What new information should we store in the Cell State? This is a two-part step:
+1.  The **Input Gate ($i_t$)** uses a Sigmoid to decide *which* values we will update (0 to 1).
+2.  A **$\tanh$ layer ($\tilde{C}_t$)** creates a vector of *new candidate values* that could be added to the state (scaled between -1 and 1).
+We multiply these together to scale the new information, and then **add** it to the Cell State.
+
+**Gate 3: The Output Gate ($o_t$)**
+What parts of the long-term Cell State should we expose as our new short-term Hidden State ($h_t$)? 
+We use a Sigmoid gate ($o_t$) to decide what parts of the Cell State are currently relevant. We then push the Cell State through a $\tanh$ (to push the values between -1 and 1) and multiply it by our gate.
+$$ h_t = o_t \cdot \tanh(C_t) $$
+
+### 3. Why LSTMs Fix the Vanishing Gradient
+In a Vanilla RNN, the hidden state is updated using matrix multiplication: $h_t = \tanh(W_{hh}h_{t-1} + \dots)$. During BPTT, this requires multiplying by $W_{hh}$ repeatedly.
+
+In an LSTM, the long-term Cell State ($C_t$) is updated using **Addition**: 
+$$ C_t = (f_t \cdot C_{t-1}) + (i_t \cdot \tilde{C}_t) $$
+
+Because the fundamental operation keeping the memory alive is addition ($+$) rather than matrix multiplication, the derivative flowing backward through the Cell State is $1$. The LSTM creates a "Gradient Superhighway" (conceptually identical to a ResNet Skip Connection), allowing gradients to flow backward through thousands of time steps without vanishing!
+
+---
+
+### Topic 5 Placement Prep: Elite LSTM Flashcards
+
+**Q1: In an LSTM, why do the Gates use a Sigmoid ($\sigma$) activation function, but the Candidate Values ($\tilde{C}_t$) use a $\tanh$ activation function?**
+*   **Answer:** Sigmoid restricts values between $0$ and $1$. This perfectly mimics a physical "valve" or percentage—$0$ means the gate is completely closed (block the data), and $1$ means the gate is completely open (pass the data). $\tanh$ restricts values between $-1$ and $1$. This is required for candidate values because the network must be able to *subtract* (decrease) or *add* (increase) to the state. If candidate values used Sigmoid, the Cell State could only ever grow larger and would eventually explode.
+
+**Q2: Explain how the Forget Gate ($f_t$) physically dictates the flow of gradients during Backpropagation Through Time.**
+*   **Answer:** The Cell State update equation is $C_t = f_t \cdot C_{t-1} + \dots$. During backpropagation, the error gradient flowing back to the previous cell state ($C_{t-1}$) is directly multiplied by $f_t$. If the network learned that a piece of memory was useless and set $f_t \approx 0$, it completely shuts off the gradient flow for that path. If $f_t \approx 1$, the gradient flows perfectly backwards without vanishing. The LSTM dynamically learns exactly how far back in time the gradients should travel.
+
+**Q3: What is a GRU (Gated Recurrent Unit), and how does it differ architecturally from an LSTM?**
+*   **Answer:** A GRU is a streamlined, more computationally efficient version of an LSTM. The primary difference is that a GRU completely removes the separate Cell State ($C_t$) and relies strictly on the Hidden State ($h_t$) to transfer memory. Furthermore, it merges the Forget and Input gates into a single "Update Gate." It achieves similar performance to an LSTM on many tasks, but requires significantly fewer weights/parameters, making it faster to train.
