@@ -2819,7 +2819,7 @@ To prove how an LSTM cures the Vanishing Gradient problem and controls the flow 
 *   **Previous States:** $h_0 = 0$, $C_0 = 0$
 *   **Shared Weights:** $W_f = 1$, $W_i = 1$, $W_c = 1$, $W_o = 1$. (Biases = 0).
 
-![LSTM Forward Pass](./assets/lstm_math_forward.png)
+![LSTM Forward Pass](./assets/lstm_template_forward.png)
 
 ### 1. The Forward Pass (Calculating the Memory)
 
@@ -2857,7 +2857,7 @@ h_1 = o_1 \cdot \tanh(C_1) = 0.88 \cdot \tanh(0.84) = 0.88 \cdot 0.69 \approx \m
 ```
 ---
 
-![LSTM Backward Pass](./assets/lstm_math_backward.png)
+![LSTM Backward Pass](./assets/lstm_template_backward.png)
 
 ### 2. The Backward Pass (Routing the Gradients)
 
