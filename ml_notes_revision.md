@@ -2769,7 +2769,9 @@ An LSTM uses neural network layers (Gates) to protect and control the Cell State
 
 **Gate 1: The Forget Gate ($f_t$)**
 Should we remember the past, or wipe the slate clean? The Forget Gate looks at the previous hidden state ($h_{t-1}$) and the current input ($x_t$), and outputs a number between 0 and 1 for each number in the Cell State.
-$$ f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f) $$
+```math
+f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)
+```
 *(If $f_t = 0$, the LSTM literally erases that piece of memory from the Cell State).*
 
 **Gate 2: The Input Gate ($i_t$ and $\tilde{C}_t$)**
@@ -2781,14 +2783,16 @@ We multiply these together to scale the new information, and then **add** it to 
 **Gate 3: The Output Gate ($o_t$)**
 What parts of the long-term Cell State should we expose as our new short-term Hidden State ($h_t$)? 
 We use a Sigmoid gate ($o_t$) to decide what parts of the Cell State are currently relevant. We then push the Cell State through a $\tanh$ (to push the values between -1 and 1) and multiply it by our gate.
-$$ h_t = o_t \cdot \tanh(C_t) $$
-
+```math
+h_t = o_t \cdot \tanh(C_t)
+```
 ### 3. Why LSTMs Fix the Vanishing Gradient
 In a Vanilla RNN, the hidden state is updated using matrix multiplication: $h_t = \tanh(W_{hh}h_{t-1} + \dots)$. During BPTT, this requires multiplying by $W_{hh}$ repeatedly.
 
 In an LSTM, the long-term Cell State ($C_t$) is updated using **Addition**: 
-$$ C_t = (f_t \cdot C_{t-1}) + (i_t \cdot \tilde{C}_t) $$
-
+```math
+C_t = (f_t \cdot C_{t-1}) + (i_t \cdot \tilde{C}_t)
+```
 Because the fundamental operation keeping the memory alive is addition ($+$) rather than matrix multiplication, the derivative flowing backward through the Cell State is $1$. The LSTM creates a "Gradient Superhighway" (conceptually identical to a ResNet Skip Connection), allowing gradients to flow backward through thousands of time steps without vanishing!
 
 ---
@@ -2803,3 +2807,125 @@ Because the fundamental operation keeping the memory alive is addition ($+$) rat
 
 **Q3: What is a GRU (Gated Recurrent Unit), and how does it differ architecturally from an LSTM?**
 *   **Answer:** A GRU is a streamlined, more computationally efficient version of an LSTM. The primary difference is that a GRU completely removes the separate Cell State ($C_t$) and relies strictly on the Hidden State ($h_t$) to transfer memory. Furthermore, it merges the Forget and Input gates into a single "Update Gate." It achieves similar performance to an LSTM on many tasks, but requires significantly fewer weights/parameters, making it faster to train.
+
+
+## Topic 6: End-to-End LSTM Math Walkthrough (Scalar Mini-LSTM)
+
+To prove how an LSTM cures the Vanishing Gradient problem and controls the flow of memory, we will hand-trace the calculus for a simplified, 1-Dimensional LSTM cell at a single time step ($t=1$). 
+
+**Initial Parameters:**
+*   **Time Step:** $t = 1$
+*   **Current Input:** $x_1 = 2$
+*   **Previous States:** $h_0 = 0$, $C_0 = 0$
+*   **Shared Weights:** $W_f = 1$, $W_i = 1$, $W_c = 1$, $W_o = 1$. (Biases = 0).
+
+![LSTM Forward Pass](./assets/lstm_math_forward.png)
+
+### 1. The Forward Pass (Calculating the Memory)
+
+**Step 1: The Forget Gate ($f_1$)**
+The network decides what to forget from the previous cell state.
+```math
+z_f = W_f \cdot x_1 = 1 \cdot 2 = 2
+```
+```math
+f_1 = \sigma(2) \approx \mathbf{0.88}
+```
+**Step 2: The Input Gate & Candidate ($\tilde{C}_1$)**
+The network decides what new data to add. (Note: $\tanh(2) \approx 0.96$).
+```math
+i_1 = \sigma(W_i \cdot x_1) = \sigma(2) \approx \mathbf{0.88}
+```
+```math
+\tilde{C}_1 = \tanh(W_c \cdot x_1) = \tanh(2) \approx \mathbf{0.96}
+```
+**Step 3: Update the Cell State ($C_1$)**
+We multiply the old state by the forget gate, and add the new information.
+```math
+C_1 = (f_1 \cdot C_0) + (i_1 \cdot \tilde{C}_1)
+```
+```math
+C_1 = (0.88 \cdot 0) + (0.88 \cdot 0.96) \approx \mathbf{0.84}
+```
+**Step 4: The Output Gate & Hidden State ($h_1$)**
+We decide what part of the internal cell state to reveal to the outside world.
+```math
+o_1 = \sigma(W_o \cdot x_1) = \sigma(2) \approx \mathbf{0.88}
+```
+```math
+h_1 = o_1 \cdot \tanh(C_1) = 0.88 \cdot \tanh(0.84) = 0.88 \cdot 0.69 \approx \mathbf{0.61}
+```
+---
+
+![LSTM Backward Pass](./assets/lstm_math_backward.png)
+
+### 2. The Backward Pass (Routing the Gradients)
+
+Assume the loss function sends an error gradient of **$dh_1 = 2$** backward into our cell. We must use the Product Rule and Chain Rule to split this error and route it to our four weights.
+
+**Step 1: Splitting the Error at the Hidden State**
+The forward equation was $h_1 = o_1 \cdot \tanh(C_1)$. The error $dh_1 = 2$ splits into two paths:
+1.  **Gradient to the Output Gate ($do_1$):**
+```math
+do_1 = dh_1 \cdot \tanh(C_1) = 2 \cdot 0.69 = \mathbf{1.38}
+```
+2.  **Gradient entering the Cell State ($dC_1$):**
+    The error passes backward through the multiplication, then backward through the $\tanh$ activation. (The derivative of $\tanh(x)$ is $1 - \tanh^2(x)$).
+```math
+dC_1 = dh_1 \cdot o_1 \cdot (1 - \tanh^2(C_1))
+```
+```math
+dC_1 = 2 \cdot 0.88 \cdot (1 - 0.69^2) = 1.76 \cdot 0.52 \approx \mathbf{0.92}
+```
+**Step 2: Distributing the Cell State Error ($dC_1$)**
+The forward equation was $C_1 = (f_1 \cdot C_0) + (i_1 \cdot \tilde{C}_1)$. The error $dC_1 = 0.92$ flows across the addition node.
+1.  **Gradient to the Forget Gate ($df_1$):**
+    $$ df_1 = dC_1 \cdot C_0 = 0.92 \cdot 0 = \mathbf{0} $$ *(Since $C_0=0$, forgetting had no mathematical impact on the error).*
+2.  **Gradient to the Input Gate ($di_1$):**
+```math
+di_1 = dC_1 \cdot \tilde{C}_1 = 0.92 \cdot 0.96 \approx \mathbf{0.88}
+```
+3.  **Gradient to the Candidate ($\tilde{C}_1$):**
+```math
+d\tilde{C}_1 = dC_1 \cdot i_1 = 0.92 \cdot 0.88 \approx \mathbf{0.81}
+```
+**Step 3: Calculating the Final Weight Updates ($dW$)**
+We now pass the gate errors through their respective activation function derivatives to update the actual weights. 
+*(Note: The derivative of Sigmoid is $\sigma \cdot (1 - \sigma)$. So $\sigma'(2) = 0.88 \cdot 0.12 \approx 0.11$. The derivative of Tanh is $1 - \tanh^2$. So $\tanh'(2) = 1 - 0.96^2 \approx 0.08$.)*
+
+*   **Output Weight:** $dW_o = do_1 \cdot \sigma'(2) \cdot x_1 = 1.38 \cdot 0.11 \cdot 2 \approx \mathbf{0.30}$
+*   **Input Weight:** $dW_i = di_1 \cdot \sigma'(2) \cdot x_1 = 0.88 \cdot 0.11 \cdot 2 \approx \mathbf{0.19}$
+*   **Candidate Weight:** $dW_c = d\tilde{C}_1 \cdot \tanh'(2) \cdot x_1 = 0.81 \cdot 0.08 \cdot 2 \approx \mathbf{0.13}$
+*   **Forget Weight:** $dW_f = df_1 \cdot \sigma'(2) \cdot x_1 = 0 \cdot 0.11 \cdot 2 = \mathbf{0}$
+
+*(The optimizer will now use these exact gradients to adjust the weights for the next epoch!)*
+
+---
+
+## Topic 7: Modern LSTM Architectural Variants
+
+Standard LSTMs are powerful, but they have a few architectural blind spots that are frequently patched in production environments.
+
+### 1. Bidirectional LSTMs (BiLSTMs)
+**The Problem:** A standard LSTM reads a sequence sequentially from left to right (e.g., $t=1 \rightarrow t=2 \rightarrow t=3$). However, in natural language, the context of a word often relies heavily on the words that come *after* it. 
+*   *Example:* "I went to the **bank** to deposit my check" vs "I went to the **bank** of the river."
+**The Solution:** A Bidirectional LSTM runs two completely independent LSTMs at the exact same time. 
+*   One LSTM processes the sequence forward.
+*   One LSTM processes the sequence strictly in reverse.
+*   The final output for any given time step ($t$) is the concatenation of the forward Hidden State and the backward Hidden State: $h_t = [\overrightarrow{h_t}, \overleftarrow{h_t}]$.
+
+### 2. Peephole Connections
+**The Problem:** In a standard LSTM, the three gates (Forget, Input, Output) are only allowed to look at the short-term memory ($h_{t-1}$) and the current input ($x_t$) to make their decisions. They are completely blind to the long-term Cell State ($C_{t-1}$) when deciding whether to open or close!
+**The Solution:** Introduced by Felix Gers, Peephole Connections allow the gates to mathematically "peek" at the Cell State. 
+*   The math changes slightly: $f_t = \sigma(W_f \cdot [C_{t-1}, h_{t-1}, x_t] + b_f)$. 
+*   This drastically improves the network's ability to count and time exact intervals, as the gates can explicitly read the core memory before altering it.
+
+---
+
+### Placement Prep: Elite LSTM Flashcards
+
+**Q1: In an LSTM, if the Forget Gate outputs exactly 1, and the Input Gate outputs exactly 0, what mathematically happens to the Cell State ($C_t$), and what does this mean for the gradient?**
+*   **Answer:** If $f_t = 1$ and $i_t = 0$, the update equation $C_t = (1 \cdot C_{t-1}) + (0 \cdot \tilde{C}_t)$ collapses to simply $C_t = C_{t-1}$. The Cell State passes forward completely unaltered. Consequently, during backpropagation, the derivative is exactly 1, meaning the error gradient flows backward through that time step with $100\%$ of its strength preserved (a perfect gradient superhighway).
+
+**Q2: During backpropagation in an LSTM, why is the error gradient entering the Cell State ($dC_1$) smaller than the total error gradient provided by the loss function ($dh_1$)?**
+*   **Answer:** Because of the Output Gate ($o_t$). The error $dh_1$ represents the total error of the prediction. However, that prediction was generated by applying the Output Gate as a mathematical filter: $h_1 = o_1 \cdot \tanh(C_1)$. By the Product Rule, the error flowing back into the Cell State is multiplied by $o_1$. If the Output Gate was partially closed (e.g., $o_1 = 0.5$), it shielded the internal Cell State from the final output, and therefore shields it from receiving the full magnitude of the resulting error.
