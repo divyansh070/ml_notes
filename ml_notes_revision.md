@@ -2187,6 +2187,8 @@ The beautiful secret of CNNs is that calculating these sums mathematically trans
 We need to know how much to tweak our filter weights to reduce the error.
 Let $X$ be our Input Image ($3 \times 3$), $W$ be our Filter ($2 \times 2$), and $dY$ be the error gradient flowing backward from the next layer ($2 \times 2$).
 
+*(Note on $dY$: Where does this error gradient actually come from? $dY$ is simply the derivative of the Loss function with respect to the output of this layer. If this convolutional layer was followed immediately by a ReLU activation, $dY$ is calculated by taking the error gradient from the layer above and zeroing out any gradients where the forward-pass pixels were zero or negative).*
+
 **The Rule:** The gradient of the weights ($dW$) is calculated by convolving the original Input Image ($X$) with the Error Gradient ($dY$).
 $$dW = X * dY$$
 
@@ -2230,3 +2232,108 @@ Now that we updated the filter, we must pass the error backward to the previous 
 
 **Q3: If a Convolutional Layer uses a Stride of 2 during the forward pass, how is the Error Gradient ($dY$) handled during the backward pass?**
 *   **Answer:** A Stride of 2 means the forward pass actively skipped pixels. During the backward pass, we must perform a **Dilated (or Strided) Backpropagation**. The framework takes the dense Error Gradient ($dY$) and physically injects zeros between its elements (often called "fractionally striding"). This ensures that no error gradient is routed back to the pixels that were skipped and played no mathematical role in the forward pass.
+
+---
+
+## Topic 6: Complete CNN End-to-End Math Walkthrough
+
+To cement the concepts of convolutions, activation functions, and backpropagation, let's trace a single grayscale image through an entire mini-CNN.
+
+**The Mini-CNN Architecture:**
+1.  **Input:** $3 \times 3$ image.
+2.  **Layer 1 (Conv):** A single $2 \times 2$ filter. No padding, Stride 1.
+3.  **Layer 2 (Activation):** ReLU.
+4.  **Layer 3 (Flatten):** Flatten to a $1 \times 4$ vector.
+5.  **Layer 4 (Dense Output):** A single output neuron for Binary Classification.
+6.  **Loss Function:** Binary Cross-Entropy.
+
+### Part 1: The Forward Pass
+We push our data from the pixels all the way to a final probability prediction.
+
+![CNN Forward Pass](./assets/cnn_forward_pass.png)
+
+**Step 1: The Input ($X$)**
+```math
+X = \begin{bmatrix} 1 & 1 & 1 \\ 1 & 1 & 0 \\ 0 & 1 & 1 \end{bmatrix}
+```
+
+**Step 2: Convolution ($W_1 \rightarrow Z_1$)**
+We slide a $2 \times 2$ filter ($W_1$) over the input.
+```math
+W_1 = \begin{bmatrix} 1 & -1 \\ -1 & 1 \end{bmatrix}
+```
+*   **Top-Left:** $(1 \cdot 1) + (1 \cdot -1) + (1 \cdot -1) + (1 \cdot 1) = \mathbf{0}$
+*   **Top-Right:** $(1 \cdot 1) + (1 \cdot -1) + (1 \cdot -1) + (0 \cdot 1) = \mathbf{-1}$
+*   **Bottom-Left:** $(1 \cdot 1) + (1 \cdot -1) + (0 \cdot -1) + (1 \cdot 1) = \mathbf{2}$
+*   **Bottom-Right:** $(1 \cdot 1) + (0 \cdot -1) + (1 \cdot -1) + (1 \cdot 1) = \mathbf{1}$
+```math
+Z_1 = \begin{bmatrix} 0 & -1 \\ 2 & 1 \end{bmatrix}
+```
+
+**Step 3: ReLU Activation ($A_1$)**
+We apply $max(0, z)$ to zero out negative values.
+```math
+A_1 = \begin{bmatrix} 0 & 0 \\ 2 & 1 \end{bmatrix}
+```
+
+**Step 4: Flatten ($F$)**
+We unravel the $2 \times 2$ matrix into a $1 \times 4$ vector.
+```math
+F = \begin{bmatrix} 0 & 0 & 2 & 1 \end{bmatrix}
+```
+
+**Step 5: Dense Layer & Prediction**
+We multiply by our dense weights ($W_2$) (assume Bias = 0).
+```math
+W_2 = \begin{bmatrix} 0.1 \\ 0.2 \\ 0.3 \\ -0.4 \end{bmatrix}
+```
+*   **Logit ($z$):** $(0 \cdot 0.1) + (0 \cdot 0.2) + (2 \cdot 0.3) + (1 \cdot -0.4) = 0.6 - 0.4 = \mathbf{0.2}$
+*   **Prediction ($p$):** We apply the Sigmoid function: $1 / (1 + e^{-0.2}) \approx \mathbf{0.55}$
+
+Our network predicts a $55\%$ probability!
+
+---
+
+### Part 2: The Backward Pass
+Assume the true label for this image is $y = 1.0$. Our prediction of $0.55$ means we have some error. We must flow this error backward to update our weights!
+
+![CNN Backward Pass](./assets/cnn_backward_pass.png)
+
+**Step 1: The Error Gradient (Loss $\rightarrow dZ$)**
+Using the derivative of Binary Cross-Entropy with Sigmoid, the error gradient at the output is simply $p - y$.
+*   $Error = 0.55 - 1.0 = \mathbf{-0.45}$
+
+**Step 2: Dense Weight Gradients ($dW_2$)**
+To update the dense weights, we multiply the Error by the inputs to that layer ($F$).
+*   $dW_2 = Error \cdot F = -0.45 \cdot [0, 0, 2, 1] = \mathbf{[0, 0, -0.9, -0.45]}$
+
+**Step 3: Propagate to Flatten Layer ($dF \rightarrow dA_1$)**
+We push the Error backward through the dense weights to find the gradient of the flattened vector.
+*   $dF = Error \cdot W_2 = -0.45 \cdot [0.1, 0.2, 0.3, -0.4] = \mathbf{[-0.045, -0.090, -0.135, 0.180]}$
+*   **Unflatten ($dA_1$):** We reshape this $1 \times 4$ gradient back into a $2 \times 2$ matrix:
+```math
+dA_1 = \begin{bmatrix} -0.045 & -0.090 \\ -0.135 & 0.180 \end{bmatrix}
+```
+
+**Step 4: The ReLU Mask ($dY$)**
+The error flows backward through the ReLU layer. ReLU acts as a valve: it only allows error to flow backward through pixels that were *positive* during the forward pass ($Z_1$).
+*   Looking back at $Z_1$, only the bottom row was positive. The top row was $\le 0$.
+*   Therefore, we zero out the top row of $dA_1$ to get our convolutional error gradient ($dY$):
+```math
+dY = \begin{bmatrix} 0 & 0 \\ -0.135 & 0.180 \end{bmatrix}
+```
+
+**Step 5: Convolutional Weight Gradients ($dW_1$)**
+Finally, as learned in Topic 5, we calculate the gradient for our convolution filter by convolving the original Input ($X$) with the ReLU Error Gradient ($dY$).
+$$dW_1 = X * dY$$
+*   **Top-Left:** $(1 \cdot 0) + (1 \cdot 0) + (1 \cdot -0.135) + (1 \cdot 0.180) = \mathbf{0.045}$
+*   **Top-Right:** $(1 \cdot 0) + (1 \cdot 0) + (1 \cdot -0.135) + (0 \cdot 0.180) = \mathbf{-0.135}$
+*   **Bottom-Left:** $(1 \cdot 0) + (1 \cdot 0) + (0 \cdot -0.135) + (1 \cdot 0.180) = \mathbf{0.180}$
+*   **Bottom-Right:** $(1 \cdot 0) + (0 \cdot 0) + (1 \cdot -0.135) + (1 \cdot 0.180) = \mathbf{0.045}$
+
+```math
+dW_1 = \begin{bmatrix} 0.045 & -0.135 \\ 0.180 & 0.045 \end{bmatrix}
+```
+
+**Conclusion:**
+We have successfully calculated exactly how much every single weight in both the Dense Layer ($dW_2$) and the Convolutional Filter ($dW_1$) needs to change to reduce the error for this specific image!
