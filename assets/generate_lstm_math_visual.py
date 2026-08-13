@@ -1,165 +1,127 @@
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, FancyArrowPatch, Rectangle
+from matplotlib.patches import Rectangle, FancyArrowPatch, Circle
 
-# --- CONFIGURATION ---
-C_NODE = '#f0f0f0'
-C_MATH = '#f1c40f'
-C_LINE = '#333333'
-
-def draw_node(ax, x, y, text, radius=0.4, color=C_NODE, text_color='black', fontsize=14):
+def draw_node(ax, x, y, text, color, radius=0.35):
     circle = Circle((x, y), radius, facecolor=color, edgecolor='black', lw=2, zorder=3)
     ax.add_patch(circle)
-    ax.text(x, y, text, ha='center', va='center', fontsize=fontsize, fontweight='bold', color=text_color, zorder=4)
+    ax.text(x, y, text, ha='center', va='center', fontsize=12, fontweight='bold', color='black' if color != '#333' else 'white', zorder=4)
 
-def draw_arrow(ax, start, end, color=C_LINE, lw=2, rad=0.0):
-    arrow = FancyArrowPatch(start, end, connectionstyle=f"arc3,rad={rad}", 
-                            color=color, arrowstyle='-|>', mutation_scale=20, lw=lw, zorder=2)
+def draw_wire(ax, start, end, text=None, color='#333333', text_color='black', text_y_offset=0):
+    arrow = FancyArrowPatch(start, end, arrowstyle='-|>', mutation_scale=15, color=color, lw=2, zorder=1)
     ax.add_patch(arrow)
-
-def draw_line(ax, start, end, color=C_LINE, lw=2):
-    ax.plot([start[0], end[0]], [start[1], end[1]], color=color, lw=lw, zorder=1)
+    if text:
+        mid_x = (start[0] + end[0]) / 2
+        mid_y = ((start[1] + end[1]) / 2) + text_y_offset
+        ax.text(mid_x, mid_y, text, ha='center', va='center', fontsize=10, fontweight='bold', color=text_color,
+                bbox=dict(facecolor='white', edgecolor=color, boxstyle='round,pad=0.2', alpha=0.9), zorder=5)
 
 # ==========================================
-# 1. FORWARD PASS
+# 1. FORWARD PASS: The Computational Graph
 # ==========================================
-fig, ax = plt.subplots(figsize=(12, 7))
-ax.set_xlim(0, 13)
-ax.set_ylim(0, 7)
+fig, ax = plt.subplots(figsize=(14, 8))
+ax.set_xlim(0, 14)
+ax.set_ylim(0, 8)
 ax.axis('off')
 
-# Bounding box
-rect = Rectangle((1.5, 1.5), 9.5, 4.5, fill=True, facecolor='#f8f9fa', edgecolor='gray', lw=2, linestyle='--', zorder=0)
-ax.add_patch(rect)
-
-# Track: Cell State
-draw_line(ax, (1, 5), (12, 5), lw=3, color='gray')
-ax.text(1, 5.3, r"$C_0 = 0$", ha='center', fontsize=16, fontweight='bold')
-ax.text(12, 5.3, r"$C_1 = 0.84$", ha='center', fontsize=16, fontweight='bold')
-
-# Label formula
-ax.text(6, 6, r"$C_1 = (0.88 \cdot 0) + (0.88 \cdot 0.96) = 0.84$", ha='center', fontsize=14, fontweight='bold', bbox=dict(facecolor='white', edgecolor='gray', alpha=1.0, pad=3))
+# Cell State Conveyor Belt
+ax.plot([1, 13], [6, 6], color='gray', lw=4, zorder=0)
+ax.text(1, 6.3, r"$C_0 = 0$", ha='center', fontsize=14, fontweight='bold')
+ax.text(13, 6.3, r"$C_1 = 0.84$", ha='center', fontsize=14, fontweight='bold')
 
 # Input
-ax.text(6, 0.5, r"$x_1 = 2$", ha='center', fontsize=16, fontweight='bold')
-draw_line(ax, (6, 0.8), (6, 1.8), lw=2)
-draw_line(ax, (3, 1.8), (9, 1.8), lw=2)
+ax.text(6, 0.5, r"Input: $x_1 = 2$", ha='center', fontsize=14, fontweight='bold')
+ax.plot([6, 6], [0.8, 1.5], color='black', lw=2)
+ax.plot([2.5, 10.5], [1.5, 1.5], color='black', lw=2)
 
-white_bbox = dict(facecolor='white', edgecolor='none', alpha=1.0, pad=2)
+# Forget Gate (Red)
+draw_wire(ax, (2.5, 1.5), (2.5, 2.65), text=r"$W_f \cdot x_1 = 2$")
+draw_node(ax, 2.5, 3, r"$\sigma$", '#ff9999')
+draw_wire(ax, (2.5, 3.35), (2.5, 5.65), text=r"$f_1 = 0.88$")
+draw_node(ax, 2.5, 6, r"$\otimes$", '#f1c40f')
+ax.text(2.5, 6.7, r"$0.88 \times 0 = \mathbf{0}$", ha='center', fontsize=10, bbox=dict(facecolor='#e8f6f3', edgecolor='gray'))
 
-# Forget Gate
-draw_arrow(ax, (3, 1.8), (3, 2.6))
-draw_node(ax, 3, 3, r"$\sigma$", radius=0.3, color='#e74c3c', text_color='white')
-ax.text(3, 2.0, r"$f_1=0.88$", ha='center', va='center', fontsize=12, fontweight='bold', color='red', bbox=white_bbox, zorder=5)
-draw_arrow(ax, (3, 3.4), (3, 4.6))
-draw_node(ax, 3, 5, r"$\otimes$", radius=0.3, color=C_MATH)
+# Input Gate (Green)
+draw_wire(ax, (5, 1.5), (5, 2.65), text=r"$W_i \cdot x_1 = 2$")
+draw_node(ax, 5, 3, r"$\sigma$", '#99ff99')
+draw_wire(ax, (5, 3.35), (6, 4.2), text=r"$i_1 = 0.88$")
 
-# Input Gate & Candidate
-draw_arrow(ax, (5, 1.8), (5, 2.6))
-draw_node(ax, 5, 3, r"$\sigma$", radius=0.3, color='#2ecc71', text_color='white')
-ax.text(5, 2.0, r"$i_1=0.88$", ha='center', va='center', fontsize=12, fontweight='bold', color='green', bbox=white_bbox, zorder=5)
+# Candidate (Green)
+draw_wire(ax, (7, 1.5), (7, 2.65), text=r"$W_c \cdot x_1 = 2$")
+draw_node(ax, 7, 3, r"$\mathrm{tanh}$", '#99ff99')
+draw_wire(ax, (7, 3.35), (6, 4.2), text=r"$\widetilde{C}_1 = 0.96$", text_y_offset=-0.2)
 
-draw_arrow(ax, (7, 1.8), (7, 2.6))
-draw_node(ax, 7, 3, r"$\mathrm{tanh}$", radius=0.3, color='#2ecc71', text_color='white', fontsize=10)
-# USING \widetilde TO BYPASS TAB BUG
-ax.text(7, 2.0, r"$\widetilde{C}_1=0.96$", ha='center', va='center', fontsize=12, fontweight='bold', color='green', bbox=white_bbox, zorder=5)
+# Merge Input & Candidate
+draw_node(ax, 6, 4.5, r"$\otimes$", '#f1c40f')
+draw_wire(ax, (6, 4.85), (6, 5.65), text=r"$0.88 \times 0.96 = \mathbf{0.84}$")
+draw_node(ax, 6, 6, r"$\oplus$", '#f1c40f')
+ax.text(6, 6.7, r"$0 + 0.84 = \mathbf{0.84}$", ha='center', fontsize=10, bbox=dict(facecolor='#e8f6f3', edgecolor='gray'))
 
-draw_arrow(ax, (5, 3.4), (5.8, 3.8))
-draw_arrow(ax, (7, 3.4), (6.2, 3.8))
-draw_node(ax, 6, 4, r"$\otimes$", radius=0.3, color=C_MATH)
-draw_arrow(ax, (6, 4.4), (6, 4.6))
-draw_node(ax, 6, 5, r"$\oplus$", radius=0.3, color=C_MATH)
+# Output Gate (Blue)
+draw_wire(ax, (10.5, 1.5), (10.5, 2.65), text=r"$W_o \cdot x_1 = 2$")
+draw_node(ax, 10.5, 3, r"$\sigma$", '#99ccff')
+draw_wire(ax, (10.5, 3.35), (11.5, 4.2), text=r"$o_1 = 0.88$")
 
-# Output Gate
-draw_arrow(ax, (9, 1.8), (9, 2.6))
-draw_node(ax, 9, 3, r"$\sigma$", radius=0.3, color='#3498db', text_color='white')
-ax.text(9, 2.0, r"$o_1=0.88$", ha='center', va='center', fontsize=12, fontweight='bold', color='blue', bbox=white_bbox, zorder=5)
+# Tanh of Cell State
+draw_wire(ax, (11.5, 6), (11.5, 5.35))
+draw_node(ax, 11.5, 5, r"$\mathrm{tanh}$", '#99ccff')
+draw_wire(ax, (11.5, 4.65), (11.5, 4.2), text=r"$\mathrm{tanh}(0.84) = 0.69$", text_y_offset=0.2)
 
-draw_arrow(ax, (10, 5), (10, 4.4))
-draw_node(ax, 10, 4, r"$\mathrm{tanh}$", radius=0.3, color='#3498db', text_color='white', fontsize=10)
+# Final Hidden State
+draw_node(ax, 11.5, 4, r"$\otimes$", '#f1c40f')
+draw_wire(ax, (11.5, 3.65), (11.5, 2.5), text=r"$h_1 = 0.88 \times 0.69 = \mathbf{0.61}$", text_y_offset=-0.4)
 
-draw_arrow(ax, (9, 3.4), (9.7, 3.6))
-draw_arrow(ax, (10, 3.6), (10, 3.4))
-draw_node(ax, 10, 3, r"$\otimes$", radius=0.3, color=C_MATH)
-
-# Final hidden state
-draw_arrow(ax, (10.4, 3), (11.5, 3))
-ax.text(12, 3, r"$h_1 = 0.61$", ha='center', fontsize=16, fontweight='bold')
-# USING \mathrm{tanh} TO BYPASS TAB BUG
-ax.text(10, 2.0, r"$0.88 \cdot \mathrm{tanh}(0.84)$", ha='center', fontsize=12, fontweight='bold', bbox=dict(facecolor='white', edgecolor='gray', pad=2, alpha=1.0), zorder=5)
-
-plt.suptitle("LSTM Forward Pass: Calculating State Values", fontsize=20, fontweight='bold', y=0.95)
+plt.suptitle("LSTM Forward Pass: Explicit Math Tracking", fontsize=18, fontweight='bold')
 plt.savefig('assets/lstm_math_forward.png', dpi=300, bbox_inches='tight')
 plt.close()
 
 
 # ==========================================
-# 2. BACKWARD PASS (BPTT)
+# 2. BACKWARD PASS: Explicit Chain Rule
 # ==========================================
-fig, ax = plt.subplots(figsize=(12, 7))
-ax.set_xlim(0, 13)
-ax.set_ylim(0, 7)
+fig, ax = plt.subplots(figsize=(14, 8))
+ax.set_xlim(0, 14)
+ax.set_ylim(0, 8)
 ax.axis('off')
 
-# Same Bounding box
-rect = Rectangle((1.5, 1.5), 9.5, 4.5, fill=True, facecolor='#f8f9fa', edgecolor='gray', lw=2, linestyle='--', zorder=0)
-ax.add_patch(rect)
+# Structural elements (faded)
+ax.plot([1, 13], [6, 6], color='lightgray', lw=4, zorder=0)
+draw_node(ax, 2.5, 3, r"$\sigma$", '#ffe6e6')
+draw_node(ax, 5, 3, r"$\sigma$", '#e6ffe6')
+draw_node(ax, 7, 3, r"$\mathrm{tanh}$", '#e6ffe6')
+draw_node(ax, 10.5, 3, r"$\sigma$", '#e6f2ff')
+draw_node(ax, 11.5, 5, r"$\mathrm{tanh}$", '#e6f2ff')
 
-# Draw baseline structural elements
-draw_line(ax, (1, 5), (12, 5), lw=3, color='gray') 
-draw_line(ax, (6, 0.8), (6, 1.8), lw=2, color='gray') 
-draw_line(ax, (3, 1.8), (9, 1.8), lw=2, color='gray')
-draw_node(ax, 3, 3, r"$\sigma$", radius=0.3, color='#e74c3c', text_color='white')
-draw_node(ax, 3, 5, r"$\otimes$", radius=0.3, color=C_MATH)
-draw_node(ax, 5, 3, r"$\sigma$", radius=0.3, color='#2ecc71', text_color='white')
-draw_node(ax, 7, 3, r"$\mathrm{tanh}$", radius=0.3, color='#2ecc71', text_color='white', fontsize=10)
-draw_node(ax, 6, 4, r"$\otimes$", radius=0.3, color=C_MATH)
-draw_node(ax, 6, 5, r"$\oplus$", radius=0.3, color=C_MATH)
-draw_node(ax, 9, 3, r"$\sigma$", radius=0.3, color='#3498db', text_color='white')
-draw_node(ax, 10, 4, r"$\mathrm{tanh}$", radius=0.3, color='#3498db', text_color='white', fontsize=10)
-draw_node(ax, 10, 3, r"$\otimes$", radius=0.3, color=C_MATH)
+# Error enters
+ax.text(12.5, 2.5, r"Total Error: $dh_1 = 2$", ha='center', fontsize=12, fontweight='bold', color='red', bbox=dict(facecolor='#ffcccc', edgecolor='red'))
+draw_wire(ax, (12.5, 2.8), (11.8, 3.8), color='red')
 
-# Base text
-ax.text(6, 0.5, r"$x_1 = 2$", ha='center', fontsize=14, fontweight='bold', color='gray')
-ax.text(1, 5.3, r"$C_0 = 0$", ha='center', fontsize=14, fontweight='bold', color='gray')
+# Split 1: To Output Gate
+draw_wire(ax, (11.3, 3.8), (10.7, 3.3), text=r"$dh_1 \times \mathrm{tanh}(C_1)$" + "\n" + r"$2 \times 0.69 = \mathbf{1.38}$", color='red')
+ax.text(10.5, 2.2, r"$\times \sigma' \rightarrow 1.38 \times 0.11 = \mathbf{0.15}$", ha='center', color='red', fontsize=9, bbox=dict(facecolor='white', edgecolor='red'))
 
-red_bbox = dict(facecolor='white', edgecolor='red', alpha=1.0, pad=3)
+# Split 2: To Cell State (Through Tanh)
+draw_wire(ax, (11.5, 4.2), (11.5, 4.6), color='red')
+ax.text(12.8, 4.4, r"Chain Rule:" + "\n" + r"$dh_1 \times o_1$" + "\n" + r"$2 \times 0.88 = 1.76$", ha='center', color='red', fontsize=9, bbox=dict(facecolor='white', edgecolor='red'))
+draw_wire(ax, (11.5, 5.4), (11.5, 5.8), text=r"$\times \mathrm{tanh}'$" + "\n" + r"$1.76 \times 0.52 = \mathbf{0.92}$", color='red')
 
-# 1. Error enters
-ax.text(12, 3, r"$dh_1 = 2$", ha='center', va='center', fontsize=16, fontweight='bold', color='red', bbox=red_bbox)
-draw_arrow(ax, (11.2, 3), (10.5, 3), color='red', lw=3)
+# Flow across Cell State
+draw_wire(ax, (11.2, 6.2), (6.2, 6.2), text=r"Gradient Superhighway: $dC_1 = 0.92$", color='red')
 
-# 2. Split at mult (10, 3)
-draw_arrow(ax, (10, 3.4), (10, 3.8), color='red', lw=3)
-ax.text(10, 4.6, r"$dC_1 = 0.92$", ha='center', va='center', fontsize=14, fontweight='bold', color='red', bbox=red_bbox, zorder=5)
-draw_arrow(ax, (9.8, 5), (9.0, 5), color='red', lw=3) 
+# Split 3: To Forget Gate (Flows down)
+draw_wire(ax, (2.5, 5.8), (2.5, 3.4), text=r"$dC_1 \times C_0$" + "\n" + r"$0.92 \times 0 = \mathbf{0}$", color='red')
+ax.text(2.5, 2.2, r"$\times \sigma' \rightarrow 0 \times 0.11 = \mathbf{0}$", ha='center', color='red', fontsize=9, bbox=dict(facecolor='white', edgecolor='red'))
 
-draw_arrow(ax, (9.6, 3), (9.3, 3), color='red', lw=3)
-ax.text(8.3, 2.5, r"$do_1 = 1.38$", ha='center', va='center', fontsize=14, fontweight='bold', color='red', bbox=red_bbox, zorder=5)
+# Split 4: Down to Input / Candidate
+draw_wire(ax, (5.8, 5.8), (5.8, 4.7), color='red')
+# To Input
+draw_wire(ax, (5.5, 4.3), (5.2, 3.4), text=r"$dC_1 \times \widetilde{C}_1$" + "\n" + r"$0.92 \times 0.96 = \mathbf{0.88}$", color='red', text_y_offset=0.2)
+ax.text(5, 2.2, r"$\times \sigma' \rightarrow 0.88 \times 0.11 = \mathbf{0.10}$", ha='center', color='red', fontsize=9, bbox=dict(facecolor='white', edgecolor='red'))
+# To Candidate
+draw_wire(ax, (6.1, 4.3), (6.8, 3.4), text=r"$dC_1 \times i_1$" + "\n" + r"$0.92 \times 0.88 = \mathbf{0.81}$", color='red', text_y_offset=0.2)
+ax.text(7.5, 2.2, r"$\times \mathrm{tanh}' \rightarrow 0.81 \times 0.08 = \mathbf{0.06}$", ha='center', color='red', fontsize=9, bbox=dict(facecolor='white', edgecolor='red'))
 
-# 3. Flowing across cell state
-draw_arrow(ax, (8, 5.2), (6.5, 5.2), color='red', lw=3) 
-ax.text(7.2, 5.6, r"$dC_1 = 0.92$", ha='center', va='center', fontsize=12, fontweight='bold', color='red', bbox=red_bbox, zorder=5)
-
-# 4. Split at addition (6, 5)
-draw_arrow(ax, (5.8, 5.2), (3.5, 5.2), color='red', lw=3) 
-ax.text(4.5, 5.6, r"$dC_1 = 0.92$", ha='center', va='center', fontsize=12, fontweight='bold', color='red', bbox=red_bbox, zorder=5)
-
-# 5. Forget gate error
-draw_arrow(ax, (2.6, 5), (2.6, 4.4), color='red', lw=3) 
-ax.text(2.6, 4.0, r"$df_1 = 0$", ha='center', va='center', fontsize=12, fontweight='bold', color='red', bbox=red_bbox, zorder=5)
-
-# 6. Input gate / candidate error
-draw_arrow(ax, (6, 4.6), (6, 4.4), color='red', lw=3) 
-draw_arrow(ax, (5.7, 3.8), (5, 3.4), color='red', lw=3) 
-ax.text(4.2, 3.6, r"$di_1 = 0.88$", ha='center', va='center', fontsize=12, fontweight='bold', color='red', bbox=red_bbox, zorder=5)
-
-draw_arrow(ax, (6.3, 3.8), (7, 3.4), color='red', lw=3) 
-# USING \widetilde TO BYPASS TAB BUG
-ax.text(7.8, 3.6, r"$d\widetilde{C}_1 = 0.81$", ha='center', va='center', fontsize=12, fontweight='bold', color='red', bbox=red_bbox, zorder=5)
-
-
-plt.suptitle("LSTM Backward Pass: Error Routing & Gradient Calculus", fontsize=20, fontweight='bold', y=0.95)
+plt.suptitle("LSTM Backward Pass: Exposing the Chain Rule", fontsize=18, fontweight='bold')
 plt.savefig('assets/lstm_math_backward.png', dpi=300, bbox_inches='tight')
 plt.close()
 
-print("Saved assets/lstm_math_forward.png and assets/lstm_math_backward.png")
+print("Computational Graphs generated successfully!")
