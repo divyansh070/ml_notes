@@ -1844,7 +1844,9 @@ In a standard deep neural network, neurons often develop "Co-adaptation." This m
 During every single training batch, **Dropout** literally deactivates a random percentage of neurons (usually 20% to 50%) in the hidden layers. 
 *   **The Effect:** Because a neuron never knows if its neighboring "super neuron" will be active or dead on any given batch, it cannot rely on it. It is forced to independently learn useful features from the data.
 *   **The Result:** The network distributes the learning across the entire architecture, creating a highly robust, ensemble-like model.
-*   **Crucial Note:** Dropout is *strictly* turned off during inference/testing. During testing, all neurons are active, but their outgoing weights are scaled down mathematically by the dropout rate to compensate for having more active connections than during training.
+*   **Crucial Note:** Dropout is *strictly* turned off during inference/testing. During testing, all neurons are active. However, because a neuron is now receiving 100% of its inputs (instead of, say, 50% during training), the final signal will be twice as large as the network expects, blowing up the activations. To fix this, the outgoing weights are mathematically scaled down by the probability of the neuron being active:
+    $$ W_{\text{test}} = W_{\text{train}} \times (1 - p) $$
+    *(Where $p$ is the dropout rate. If $p=0.5$, we multiply all weights by 0.5 during testing to perfectly balance the expected signal).*
 
 ![How Dropout Prevents Co-adaptation](./assets/dropout_visualization.png)
 
@@ -1875,8 +1877,8 @@ If you cannot get more data, you fabricate it using **Data Augmentation**.
 **Q3: Explain the concept of "Co-adaptation" in neural networks and how Dropout solves it.**
 *   **Answer:** Co-adaptation happens when a neuron relies too heavily on the output of specific neurons in the previous layer, failing to learn robust features on its own. Dropout randomly deactivates neurons during each training pass, forcing every single neuron to independently learn useful features, as it cannot mathematically guarantee that its "favorite" input neurons will be active during that specific batch.
 
-**Q4: Why must Dropout be turned off during model testing/inference?**
-*   **Answer:** Dropout is only a training tool used to force robust learning. During inference, we want the model to use all of its learned computational power to make the best possible prediction. If we left Dropout on, the model's output would be random and unstable. However, to account for the sudden influx of active signals, the outgoing weights of the neurons are mathematically scaled down by the dropout rate during testing.
+**Q4: Why must Dropout be turned off during model testing/inference, and what mathematical adjustment is made?**
+*   **Answer:** Dropout forces robust learning by randomly deactivating pathways. During inference, we want a stable, deterministic prediction, so we leave 100% of neurons active. However, if we trained a network with 50% dropout, turning all neurons on during testing means the next layer suddenly receives twice as much signal as it is used to. To compensate, we mathematically scale the testing weights by multiplying them by the retention probability $(1 - p)$. For example, if dropout was $p=0.5$, we scale the testing weights by $0.5$ to keep the expected output balanced.
 
 **Q5: You are training a very deep network. Your training loss is at 0.01, but your validation loss is at 2.50. What is happening, and how do you fix it?**
 *   **Answer:** The network is severely overfitting. It has memorized the training data but fails to generalize to unseen validation data. To fix this, you should increase regularization (increase Dropout rates or L2 penalty values), apply Data Augmentation to create a more robust training set, or implement Early Stopping to halt training before the divergence occurs.
