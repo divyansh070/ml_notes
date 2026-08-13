@@ -2172,3 +2172,61 @@ If you build a network using *only* Convolutions and GAP (a Fully Convolutional 
 
 **Q5: Why is Global Average Pooling (GAP) generally preferred over Global Max Pooling (GMP) for standard image classification?**
 *   **Answer:** GMP extracts only the absolute highest activation value from the map. This trains the network to find one single hyper-specific feature (like a dog's nose) and ignore everything else. GAP calculates the average of the whole map, which forces the network's activations to spread out and recognize the *entire extent* of the object (the nose, ears, and body) to maximize its score, leading to much better generalization.
+
+
+
+## Topic 5: The Math of CNN Backpropagation
+
+In a standard Dense layer, backpropagation is calculated using simple matrix multiplication. In a Convolutional Neural Network, backpropagation is significantly more complex because of **Weight Sharing**. A single weight in a $3 \times 3$ filter doesn't just affect one output pixel—it slides across the image and affects every single pixel in the resulting feature map.
+
+According to the multivariate chain rule, if a single variable affects multiple outputs, its total gradient is the sum of the gradients from all those outputs.
+
+The beautiful secret of CNNs is that calculating these sums mathematically transforms into another convolution operation. There are two calculations we must perform during the backward pass: updating the weights, and passing the error to the previous layer.
+
+#### 1. Calculating the Gradient of the Weights ($dW$)
+We need to know how much to tweak our filter weights to reduce the error.
+Let $X$ be our Input Image ($3 \times 3$), $W$ be our Filter ($2 \times 2$), and $dY$ be the error gradient flowing backward from the next layer ($2 \times 2$).
+
+**The Rule:** The gradient of the weights ($dW$) is calculated by convolving the original Input Image ($X$) with the Error Gradient ($dY$).
+$$dW = X * dY$$
+
+**The Hands-on Math:**
+Assume the Input ($X$) and the Error ($dY$) are:
+```math
+X = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{bmatrix}, \quad dY = \begin{bmatrix} 2 & 0 \\ 0 & -1 \end{bmatrix}
+```
+
+To find $dW$, we slide $dY$ over $X$ just like a normal filter:
+*   **Top-Left Window:** $(1 \cdot 2) + (2 \cdot 0) + (4 \cdot 0) + (5 \cdot -1) = 2 - 5 = \mathbf{-3}$
+*   **Top-Right Window:** $(2 \cdot 2) + (3 \cdot 0) + (5 \cdot 0) + (6 \cdot -1) = 4 - 6 = \mathbf{-2}$
+*   **Bottom-Left Window:** $(4 \cdot 2) + (5 \cdot 0) + (7 \cdot 0) + (8 \cdot -1) = 8 - 8 = \mathbf{0}$
+*   **Bottom-Right Window:** $(5 \cdot 2) + (6 \cdot 0) + (8 \cdot 0) + (9 \cdot -1) = 10 - 9 = \mathbf{1}$
+
+The resulting gradient matrix for our weights is:
+```math
+dW = \begin{bmatrix} -3 & -2 \\ 0 & 1 \end{bmatrix}
+```
+The optimizer (like Adam or SGD) will now use this exact $dW$ matrix to update the $2 \times 2$ filter!
+
+![CNN Backprop Visualization](./assets/cnn_backprop_visual.png)
+
+#### 2. Passing the Error Backward ($dX$)
+Now that we updated the filter, we must pass the error backward to the previous Convolutional Layer. We need to find $dX$ (how much each pixel in the input image contributed to the overall error).
+
+**The Rule:** To calculate the gradient of the input ($dX$), we must perform a **Full Convolution** of the Error Gradient ($dY$) with the flipped Filter ($W$).
+*   **The Flipped Filter:** We rotate the original $2 \times 2$ filter weights 180 degrees. (If top-left was $w_1$ and bottom-right was $w_4$, they swap places).
+*   **Full Padding:** We add a massive border of zeros around the $2 \times 2$ Error Gradient ($dY$).
+*   **The Convolution:** We slide the flipped filter over the heavily padded $dY$. The mathematical result will be a $3 \times 3$ matrix, which perfectly matches the dimensions of our Input Image ($X$), allowing the error to flow seamlessly into the previous layer.
+
+---
+
+### Topic 5 Placement Prep: Elite Backprop Flashcards
+
+**Q1: In standard mathematical terms, deep learning frameworks (like PyTorch and TensorFlow) do not actually perform "Convolutions" during the forward pass. What do they perform, and why does the distinction matter during backpropagation?**
+*   **Answer:** They actually perform **Cross-Correlation**. A true mathematical convolution requires the filter matrix to be flipped 180 degrees before sliding it across the input. Deep learning frameworks skip this flipping step during the forward pass to save compute (since the network will just learn the unflipped weights anyway). However, during backpropagation, to correctly calculate the gradient of the input ($dX$), the framework must formally flip the filter to route the gradients back to the correct spatial pixels.
+
+**Q2: Explain why the gradient of a Convolutional Filter ($dW$) is computed by convolving the input with the output error.**
+*   **Answer:** Because of Weight Sharing. A single weight in a filter is multiplied against multiple different pixels in the input image as it slides across. By the multivariate chain rule, the total gradient for that single weight is the sum of all the individual local gradients it generated. Convolving the input image with the output error matrix is simply a highly optimized, vectorized way of calculating and summing those exact chain-rule products for every weight simultaneously.
+
+**Q3: If a Convolutional Layer uses a Stride of 2 during the forward pass, how is the Error Gradient ($dY$) handled during the backward pass?**
+*   **Answer:** A Stride of 2 means the forward pass actively skipped pixels. During the backward pass, we must perform a **Dilated (or Strided) Backpropagation**. The framework takes the dense Error Gradient ($dY$) and physically injects zeros between its elements (often called "fractionally striding"). This ensures that no error gradient is routed back to the pixels that were skipped and played no mathematical role in the forward pass.
