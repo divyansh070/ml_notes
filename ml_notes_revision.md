@@ -2058,7 +2058,7 @@ The output feature map will be exactly **$4 \times 4$**.
 *   **Answer:** This is achieved using a **Transposed Convolution** (often incorrectly called a deconvolution). A fractional stride (e.g., $s=1/2$) mathematically works by physically injecting zeros *between* the pixels of the input feature map, forcing the matrix to expand. A standard convolutional filter is then passed over this padded, expanded matrix, allowing the network's weights to explicitly learn how to properly interpolate and "paint" the missing high-resolution details.
 
 
-### Topic 3: Pooling Layers (Downsampling & Invariance)
+### Topic 3: Pooling Layers (Downsampling, Invariance, & Receptive Fields)
 
 While Convolutional layers extract features (edges, textures, eyes), Pooling Layers aggressively compress the spatial dimensions of those features. Pooling layers have zero trainable parameters (no weights or biases). They strictly apply a fixed mathematical rule over a sliding window.
 
@@ -2070,12 +2070,20 @@ While Convolutional layers extract features (edges, textures, eyes), Pooling Lay
 
 ![Max Pooling vs. Average Pooling](./assets/pooling_visual.png)
 
-#### 2. The Concept of "Translation Invariance"
+#### 2. Equivariance vs. Invariance (Crucial Distinction)
 
-Pooling provides a critical property called **Local Translation Invariance**.
-If a picture of a cat shifts exactly one pixel to the right, the Convolutional layer's output will also shift exactly one pixel to the right (this is called Equivariance). However, because Max Pooling extracts the highest value from a $2 \times 2$ region, shifting the image slightly will likely result in the exact same maximum value being pooled. The network learns to recognize that the feature exists, while actively throwing away information about exactly where it exists.
+*   **Convolution is Equivariant:** If you shift a picture of a cat 1 pixel to the right, the activations in the Convolutional layer's feature map will also shift exactly 1 pixel to the right. The features move with the object.
+*   **Pooling is Invariant:** Pooling provides **Local Translation Invariance**. Because Max Pooling extracts the highest value from a $2 \times 2$ region, shifting the cat slightly will likely result in the exact same maximum value being pooled. The network learns to recognize that the feature exists, while actively throwing away information about *exactly* where it exists.
 
-#### 3. Global Average Pooling (GAP)
+#### 3. Receptive Field Expansion
+
+By downsampling the image by half, pooling layers geometrically accelerate the expansion of the **Receptive Field**. Without pooling or strides, a deep convolutional layer can only "see" a tiny patch of the original image. But if a $3 \times 3$ filter acts on a feature map that has already been halved by pooling, that filter is mathematically processing a $6 \times 6$ area of the original input image. Pooling allows deeper layers to understand global context without adding any trainable parameters.
+
+#### 4. Overlapping Pooling
+
+Typically, pooling uses $f=2$ and $s=2$ (non-overlapping). However, pioneering architectures like AlexNet utilized **Overlapping Pooling** ($f=3$, $s=2$). By allowing the pooling windows to overlap, the network became slightly more robust to precise spatial locations, which empirical results showed reduced overfitting by roughly 0.4%.
+
+#### 5. Global Average Pooling (GAP)
 
 In older networks (like VGG16), the final 3D feature maps were physically unrolled (Flattened) into a massive 1D vector and passed through standard dense layers to make a prediction. This resulted in millions of parameters and massive overfitting.
 
@@ -2088,11 +2096,17 @@ Modern architectures (like ResNet) use **Global Average Pooling (GAP)** instead.
 **Q1: Since Pooling layers have no trainable weights, how does the error gradient physically flow through a Max Pooling layer versus an Average Pooling layer during Backpropagation?**
 *   **Answer:** During the forward pass, a $2 \times 2$ Max Pool routes only the single highest value. Therefore, during backpropagation, the gradient is routed 100% to the index of that winning pixel, and the other 3 pixels receive a gradient of exactly 0. In a $2 \times 2$ Average Pool, the gradient is distributed equally; each of the 4 pixels receives exactly $\frac{1}{4}$ of the incoming gradient.
 
-**Q2: What is the architectural advantage of replacing traditional Flattening + Dense Layers with a Global Average Pooling (GAP) layer at the end of a CNN?**
+**Q2: Differentiate between "Translation Equivariance" and "Translation Invariance" in the context of a CNN.**
+*   **Answer:** Convolutional layers are *equivariant*; if the input shifts, the output feature map shifts by the exact same amount. Pooling layers (and the overall CNN prediction) strive to be *invariant*; regardless of where the object shifts in the image, the final classification output ("Cat") remains completely unchanged. Pooling forces invariance by destroying precise spatial coordinates.
+
+**Q3: What is the architectural advantage of replacing traditional Flattening + Dense Layers with a Global Average Pooling (GAP) layer at the end of a CNN?**
 *   **Answer:** GAP drastically reduces the total parameter count of the network (often saving tens of millions of weights), which heavily prevents overfitting. Furthermore, because standard Dense layers require a strictly fixed input size, utilizing GAP makes the neural network fully convolutional, meaning it can dynamically accept input images of any resolution (e.g., passing a 1080p image into a model trained on $224 \times 224$ images).
 
-**Q3: Geoffrey Hinton (a godfather of Deep Learning) famously criticized Max Pooling, leading him to develop Capsule Networks. What is the fundamental structural flaw of Max Pooling?**
+**Q4: Geoffrey Hinton (a godfather of Deep Learning) famously criticized Max Pooling, leading him to develop Capsule Networks. What is the fundamental structural flaw of Max Pooling?**
 *   **Answer:** Max Pooling actively destroys spatial hierarchies and positional relationships in the data. It tells the network if a feature exists, but forgets where it is relative to other features. Because of this, a CNN might look at an image where a mouth is physically located above the eyes and still confidently classify it as a "Face," simply because both features triggered high activations that survived the pooling layer.
 
-**Q4: You are building a CNN to read highly fine-grained barcodes, where the exact thickness and spacing of the lines hold all the information. Should you aggressively use Max Pooling?**
+**Q5: You are building a CNN to read highly fine-grained barcodes, where the exact thickness and spacing of the lines hold all the information. Should you aggressively use Max Pooling?**
 *   **Answer:** No. Max Pooling explicitly introduces translation invariance and discards exact spatial data. For highly fine-grained spatial tasks (like reading barcodes or precise medical image segmentation), throwing away spatial resolution will destroy the model's accuracy. You should minimize pooling and rely on Strided Convolutions or Dilated Convolutions to expand the receptive field without completely discarding spatial coordinates.
+
+**Q6: What is "Stochastic Pooling" and what problem does it attempt to solve?**
+*   **Answer:** Stochastic pooling is a regularization technique designed to replace standard Max Pooling to prevent overfitting. Instead of always taking the absolute maximum value, it calculates the probabilities of all values in the region and randomly samples one. Stronger activations have a higher chance of being picked, but occasionally weaker ones are chosen, acting similarly to Dropout by forcing the network to not overly rely on a single dominant feature.
