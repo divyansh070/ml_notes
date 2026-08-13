@@ -2878,12 +2878,17 @@ dC_1 = dh_1 \cdot o_1 \cdot (1 - \tanh^2(C_1))
 dC_1 = 2 \cdot 0.88 \cdot (1 - 0.69^2) = 1.76 \cdot 0.52 \approx \mathbf{0.92}
 ```
 **Step 2: Distributing the Cell State Error ($dC_1$)**
-The forward equation was $C_1 = (f_1 \cdot C_0) + (i_1 \cdot \tilde{C}_1)$. The error $dC_1 = 0.92$ flows across the addition node.
+The forward equation was:
+```math
+C_1 = (f_1 \cdot C_0) + (i_1 \cdot \tilde{C}_1)
+```
+The error $dC_1 = 0.92$ flows across the addition node.
 1.  **Gradient to the Forget Gate ($df_1$):**
 ```math
 df_1 = dC_1 \cdot C_0 = 0.92 \cdot 0 = \mathbf{0}
 ```
 *(Since $C_0=0$, forgetting had no mathematical impact on the error).*
+
 2.  **Gradient to the Input Gate ($di_1$):**
 ```math
 di_1 = dC_1 \cdot \tilde{C}_1 = 0.92 \cdot 0.96 \approx \mathbf{0.88}
@@ -2894,12 +2899,31 @@ d\tilde{C}_1 = dC_1 \cdot i_1 = 0.92 \cdot 0.88 \approx \mathbf{0.81}
 ```
 **Step 3: Calculating the Final Weight Updates ($dW$)**
 We now pass the gate errors through their respective activation function derivatives to update the actual weights. 
-*(Note: The derivative of Sigmoid is $\sigma \cdot (1 - \sigma)$. So $\sigma'(2) = 0.88 \cdot 0.12 \approx 0.11$. The derivative of Tanh is $1 - \tanh^2$. So $\tanh'(2) = 1 - 0.96^2 \approx 0.08$.)*
+*(Note: The derivative of Sigmoid is $\sigma \cdot (1 - \sigma)$).*
+```math
+\sigma'(2) = 0.88 \cdot 0.12 \approx 0.11
+```
+*(The derivative of Tanh is $1 - \tanh^2(x)$).*
+```math
+\tanh'(2) = 1 - 0.96^2 \approx 0.08
+```
 
-*   **Output Weight:** $dW_o = do_1 \cdot \sigma'(2) \cdot x_1 = 1.38 \cdot 0.11 \cdot 2 \approx \mathbf{0.30}$
-*   **Input Weight:** $dW_i = di_1 \cdot \sigma'(2) \cdot x_1 = 0.88 \cdot 0.11 \cdot 2 \approx \mathbf{0.19}$
-*   **Candidate Weight:** $dW_c = d\tilde{C}_1 \cdot \tanh'(2) \cdot x_1 = 0.81 \cdot 0.08 \cdot 2 \approx \mathbf{0.13}$
-*   **Forget Weight:** $dW_f = df_1 \cdot \sigma'(2) \cdot x_1 = 0 \cdot 0.11 \cdot 2 = \mathbf{0}$
+**Output Weight:** 
+```math
+dW_o = do_1 \cdot \sigma'(2) \cdot x_1 = 1.38 \cdot 0.11 \cdot 2 \approx \mathbf{0.30}
+```
+**Input Weight:** 
+```math
+dW_i = di_1 \cdot \sigma'(2) \cdot x_1 = 0.88 \cdot 0.11 \cdot 2 \approx \mathbf{0.19}
+```
+**Candidate Weight:** 
+```math
+dW_c = d\tilde{C}_1 \cdot \tanh'(2) \cdot x_1 = 0.81 \cdot 0.08 \cdot 2 \approx \mathbf{0.13}
+```
+**Forget Weight:** 
+```math
+dW_f = df_1 \cdot \sigma'(2) \cdot x_1 = 0 \cdot 0.11 \cdot 2 = \mathbf{0}
+```
 
 *(The optimizer will now use these exact gradients to adjust the weights for the next epoch!)*
 
