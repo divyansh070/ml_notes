@@ -2422,3 +2422,79 @@ Standard augmentation rotates or flips images. Modern state-of-the-art architect
 
 **Q3: Why does standard 1D Batch Normalization fail when applied naively to Convolutional feature maps, necessitating `BatchNorm2d`?**
 *   **Answer:** Standard 1D batch norm normalizes across the batch for each individual element/pixel. In a 2D feature map, this would mean applying a separate normalizer to the pixel at coordinates (0,0), another for (0,1), etc. This destroys the fundamental CNN property of "Translation Invariance" (the network should recognize a feature regardless of its spatial location). `BatchNorm2d` calculates the statistics across the entire height and width *per channel*, ensuring that the entire feature map is scaled uniformly regardless of spatial shifts.
+
+
+
+## Part 6: Sequential Data — Recurrent Neural Networks (RNNs)
+
+Standard Feedforward Networks (MLPs and CNNs) have two fatal flaws when dealing with sequential data (like text sentences or time-series):
+1.  They strictly require a fixed input size (e.g., exactly 224x224 pixels). Sentences have highly variable lengths.
+2.  They have absolutely no memory. If you feed them the word "Apple," they process it independently, completely forgetting the word that came right before it.
+
+**Recurrent Neural Networks (RNNs)** solve this by introducing a **Hidden State**—a mathematical memory buffer that gets passed forward through time, allowing the network to combine information from the past with the current input.
+
+---
+
+### Topic 1: The Vanilla RNN Architecture & The Hidden State
+
+Instead of processing an entire sentence at once, an RNN processes it one word (time step, $t$) at a time. 
+
+At time step $t$, the RNN takes two distinct inputs:
+1.  **$x_t$:** The current input (e.g., the exact word we are looking at right now).
+2.  **$h_{t-1}$:** The previous hidden state (the network's mathematical summary of all the words it has seen so far).
+
+The RNN mathematically squashes these two inputs together to create a brand new hidden state ($h_t$). This new hidden state is then used to make a prediction ($y_t$) AND it is passed forward to the next time step ($t+1$). 
+
+#### Temporal Weight Sharing
+Just as CNNs share spatial weights (sliding a filter across an image), RNNs share **temporal weights**. An RNN does not learn different weights for the 1st word, 2nd word, and 3rd word. It learns exactly **three global weight matrices** and reuses them at every single time step:
+*   **$W_{hx}$**: The weights applied to the new input data.
+*   **$W_{hh}$**: The weights applied to the memory of the past (the hidden state).
+*   **$W_{yh}$**: The weights applied to the current hidden state to make a final prediction.
+
+![RNN Unroll Visualization](./assets/rnn_unroll_visual.png)
+
+---
+
+### Topic 2: The Math of the Forward Pass
+
+Let's look at the exact mathematical equations happening inside a standard Vanilla RNN at a single time step ($t$).
+
+**Step 1: Update the Hidden State (Memory)**
+The network concatenates the current input and the past memory, multiplies them by their respective shared weight matrices, adds a bias, and passes them through a $\tanh$ activation function to keep the values constrained between -1 and 1.
+$$ h_t = \tanh(W_{hx} x_t + W_{hh} h_{t-1} + b_h) $$
+
+**Step 2: Calculate the Output (Prediction)**
+Once the new hidden state ($h_t$) is calculated, we use it to make a prediction for that specific time step (e.g., "What is the next word in the sentence?"). 
+$$ y_t = \text{Softmax}(W_{yh} h_t + b_y) $$
+
+*Note: The initial hidden state at $t=0$ ($h_0$) is usually initialized as a matrix of pure zeros, because the network hasn't seen any past data yet!*
+
+---
+
+### Topic 3: Backpropagation Through Time (BPTT) & The Fatal Flaw
+
+Because an RNN uses the exact same weight matrices repeatedly across time, calculating the error gradient is uniquely difficult. 
+
+To find out how much the weight matrix $W_{hh}$ contributed to the error at time step $t=10$, we have to use the Chain Rule to trace the error backward from $t=10 \rightarrow t=9 \rightarrow t=8 \dots$ all the way to $t=1$. This algorithm is called **Backpropagation Through Time (BPTT)**.
+
+#### The Fatal Flaw: The Vanishing & Exploding Gradient
+This creates a massive mathematical disaster. When you backpropagate through time, you are repeatedly multiplying the error gradient by the *exact same weight matrix* ($W_{hh}$) over and over again.
+
+Imagine tracing an error backward across a 50-word sentence. You must multiply $W_{hh}$ by itself 50 times ($W_{hh}^{50}$).
+*   **Vanishing Gradients:** If the eigenvalues (values) of the $W_{hh}$ matrix are even slightly less than $1$ (e.g., $0.9$), then $0.9^{50} \approx 0.005$. The gradient vanishes to zero. The network completely forgets early words in a long sentence.
+*   **Exploding Gradients:** If the values of $W_{hh}$ are slightly greater than $1$ (e.g., $1.1$), then $1.1^{50} \approx 117$. The gradient explodes to infinity, and the network mathematically crashes (outputs `NaN`).
+
+Because of this specific structural flaw, Vanilla RNNs are virtually useless for sequences longer than 5 to 10 time steps. 
+
+---
+
+### Topic 3 Placement Prep: Elite RNN Flashcards
+
+**Q1: Contrast the concept of "Weight Sharing" in CNNs versus RNNs. Why do both architectures use it?**
+*   **Answer:** CNNs use *Spatial Weight Sharing*; they slide a single filter across different physical locations of an image, allowing them to detect a feature (like an eye) regardless of its coordinates. RNNs use *Temporal Weight Sharing*; they apply the exact same weight matrices ($W_{hx}, W_{hh}$) at every time step. Both use weight sharing to drastically reduce the total parameter count, prevent catastrophic overfitting, and allow the network to handle inputs of variable sizes (variable image resolutions for CNNs, variable sequence lengths for RNNs).
+
+**Q2: Deep MLPs (50 layers) suffer from Vanishing Gradients, and RNNs (unrolled for 50 time steps) also suffer from Vanishing Gradients. Why is the mathematical cause fundamentally worse in an RNN?**
+*   **Answer:** In a 50-layer MLP, the gradient is multiplied by 50 *different* weight matrices ($W_{50} \cdot W_{49} \cdot W_{48} \dots$). While it can vanish, careful initialization (like He or Xavier initialization) can usually balance the gradient out. In an RNN, BPTT multiplies the gradient by the *exact same weight matrix* 50 times ($W_{hh}^{50}$). Multiplying a matrix by itself repeatedly is identical to taking it to a power, guaranteeing that the gradient will aggressively collapse to 0 or explode to infinity exponentially faster than in an MLP.
+
+**Q3: How do we practically fix the "Exploding Gradient" problem in Vanilla RNNs during training?**
+*   **Answer:** We use a technique called **Gradient Clipping**. Before the optimizer uses the calculated gradients to update the weights, we mathematically check if the L2 norm (magnitude) of the gradient exceeds a specific threshold. If it does, we scale the gradient vector down so its magnitude equals the threshold, while perfectly preserving its *direction*. This prevents the weights from taking a massive, destructive step during optimization.
