@@ -449,17 +449,17 @@ We add the **Positional Encodings** (calculated for $pos \in \{0, 1\}$ and $i \i
 $PE_0 = [\sin(0), \cos(0)] = [0, 1]$
 $PE_1 = [\sin(1), \cos(1)] \approx [0.84, 0.54]$
 
-$$
+```math
 X_0 = E_0 + PE_0 = [0.8, -0.2] + [0, 1] = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix}
-$$
-$$
+```
+```math
 X_1 = E_1 + PE_1 = [-0.1, 0.9] + [0.84, 0.54] = \begin{bmatrix} 0.74 & 1.44 \end{bmatrix}
-$$
+```
 
 **Final Input Matrix to Encoder ($X$):**
-$$
+```math
 X = \begin{bmatrix} X_0 \\ X_1 \end{bmatrix} = \begin{bmatrix} 0.8 & 0.8 \\ 0.74 & 1.44 \end{bmatrix}
-$$
+```
 
 
 ### Step 2: Encoder Block Forward Pass
@@ -472,9 +472,15 @@ The input matrix ($X$) is contextualized by 1 Head ($h=1$) and 1 Layer. We defin
 Word 1 ($X_0 = [0.8, 0.8]$) must look at Word 1 and Word 2.
 
 1.  **Generate Queries, Keys, Values (Q, K, V):**
-    $$ Q_0 = X_0 \cdot W_Q = [0.8, 0.8] \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix} $$
-    $$ K_0 = X_0 \cdot W_K = [0.8, 0.8] \begin{bmatrix} 0.5 & 0.5 \\ 0.2 & 0.8 \end{bmatrix} = \begin{bmatrix} 0.56 & 1.04 \end{bmatrix} $$
-    $$ K_1 = X_1 \cdot W_K = [0.74, 1.44] \begin{bmatrix} 0.5 & 0.5 \\ 0.2 & 0.8 \end{bmatrix} = \begin{bmatrix} 0.66 & 1.52 \end{bmatrix} $$
+    ```math
+    Q_0 = X_0 \cdot W_Q = [0.8, 0.8] \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix}
+    ```
+    ```math
+    K_0 = X_0 \cdot W_K = [0.8, 0.8] \begin{bmatrix} 0.5 & 0.5 \\ 0.2 & 0.8 \end{bmatrix} = \begin{bmatrix} 0.56 & 1.04 \end{bmatrix}
+    ```
+    ```math
+    K_1 = X_1 \cdot W_K = [0.74, 1.44] \begin{bmatrix} 0.5 & 0.5 \\ 0.2 & 0.8 \end{bmatrix} = \begin{bmatrix} 0.66 & 1.52 \end{bmatrix}
+    ```
 
 2.  **Calculate Raw Attention Scores (Dot Products):**
     $Score(0 \cdot 0) = Q_0 \cdot K_0 = (0.8 \cdot 0.56) + (0.8 \cdot 1.04) = 0.448 + 0.832 = 1.28$
@@ -484,12 +490,16 @@ Word 1 ($X_0 = [0.8, 0.8]$) must look at Word 1 and Word 2.
     $d_k = 2$, so $\sqrt{d_k} \approx 1.41$. We scale the scores:
     Scaled Scores = $[1.28/1.41, 1.74/1.41] = [0.91, 1.23]$
     Apply row-wise Softmax:
-    $$ \text{softmax}([0.91, 1.23]) \approx \begin{bmatrix} 0.42 & 0.58 \end{bmatrix} $$
+    ```math
+    \text{softmax}([0.91, 1.23]) \approx \begin{bmatrix} 0.42 & 0.58 \end{bmatrix}
+    ```
     *Word 1 decides to pay 42% attention to itself and 58% to Word 2.*
 
 4.  **Multiply by V (The final blend for Word 1):**
     The values are $V_0 = X_0 W_V = [1.6, 1.6]$ and $V_1 = X_1 W_V = [1.48, 2.88]$.
-    $$ Z_0 = (0.42 \cdot V_0) + (0.58 \cdot V_1) \approx \begin{bmatrix} 1.53 & 2.34 \end{bmatrix} $$
+    ```math
+    Z_0 = (0.42 \cdot V_0) + (0.58 \cdot V_1) \approx \begin{bmatrix} 1.53 & 2.34 \end{bmatrix}
+    ```
 
 This blended vector ($Z_0$) is now fully aware of both "Good" and "morning." The process repeats for all tokens.
 
@@ -498,9 +508,9 @@ The contextualized matrix ($Z$) is combined with the original input via the Resi
 
 The final output is a $2 \times 2$ matrix, the **English Blueprint H**, where every row is a deep, context-aware representation.
 
-$$
+```math
 \text{English Blueprint (Encoder Output H)} = \begin{bmatrix} 1.1 & -0.9 \\ -1.1 & 1.3 \end{bmatrix}
-$$
+```
 
 ### Step 3: Decoder Block Forward Pass
 
@@ -523,9 +533,15 @@ $Y_0 = [1.0, 1.0] + [0, 1] = \begin{bmatrix} 1.0 & 2.0 \end{bmatrix}$.
     This is the most important generative step. The generated output so far (`<Start>`) must "cross-examine" the Encoder context.
 
     We source $Q, K, V$:
-    $$ Q_{dec} = Y_0 \cdot W_Q^{cross} = \begin{bmatrix} 1.0 & 2.0 \end{bmatrix} $$
-    $$ K_{enc} = H_{enc} \cdot W_K^{cross} $$
-    $$ K_{word0} = [1.1, -0.9], K_{word1} = [-1.1, 1.3] $$
+    ```math
+    Q_{dec} = Y_0 \cdot W_Q^{cross} = \begin{bmatrix} 1.0 & 2.0 \end{bmatrix}
+    ```
+    ```math
+    K_{enc} = H_{enc} \cdot W_K^{cross}
+    ```
+    ```math
+    K_{word0} = [1.1, -0.9], K_{word1} = [-1.1, 1.3]
+    ```
     *(We assume simplified projections where $W_Q=I$ and $W_K=I$ for cross).*
 
     **Calculate Attention Scores (Blended context):**
@@ -533,7 +549,9 @@ $Y_0 = [1.0, 1.0] + [0, 1] = \begin{bmatrix} 1.0 & 2.0 \end{bmatrix}$.
     $Score(Dec0 \cdot Enc1) = [1.0, 2.0] \cdot [-1.1, 1.3] = -1.1 + 2.6 = 1.5$
 
     We divide by $\sqrt{d_k}$ and apply Softmax:
-    $$ \text{softmax}([-0.7/1.41, 1.5/1.41]) \approx \text{softmax}([-0.5, 1.06]) \approx \begin{bmatrix} 0.17 & 0.83 \end{bmatrix} $$
+    ```math
+    \text{softmax}([-0.7/1.41, 1.5/1.41]) \approx \text{softmax}([-0.5, 1.06]) \approx \begin{bmatrix} 0.17 & 0.83 \end{bmatrix}
+    ```
     *The generated token decides to pay 17% attention to "Good" and 83% attention to "morning."*
 
     This creates the blended contextualized French vector ($Z_{cross}$), ensuring the Decoder is generating text based *only* on the English blueprint.
@@ -542,7 +560,9 @@ $Y_0 = [1.0, 1.0] + [0, 1] = \begin{bmatrix} 1.0 & 2.0 \end{bmatrix}$.
     $Z_{cross}$ is added with the previous Residual, passed through LayerNorm, expanded in the FFN (projecting context into factual memory space), compressed back, and passed through a final Add&Norm layer.
 
 The final Decoder output vector ($h_{dec}$) is passed through a Linear layer and a Softmax, yielding a probability distribution across the entire French vocabulary:
-$$ \text{Prediction} = [0.01, 0.98, \dots] $$
+```math
+\text{Prediction} = [0.01, 0.98, \dots]
+```
 We select the word with the highest probability (0.98): `"Bonjour"`.
 
 
@@ -559,16 +579,22 @@ We will trace the explicit calculus for **allocating the gradient within the Enc
 #### Allocating the Error at the Dot Product (Chain Rule Walkthrough)
 
 We start with the Raw Attention score matrix exiting Step 2:
-$$ S = Q \cdot K^T = \begin{bmatrix} 1.28 & 1.74 \\ \dots & \dots \end{bmatrix} $$
+```math
+S = Q \cdot K^T = \begin{bmatrix} 1.28 & 1.74 \\ \dots & \dots \end{bmatrix}
+```
 We know $Q_0 = [0.8, 0.8]$, $K_0 = [0.56, 1.04]$, and $Score(0 \cdot 0) = 1.28$.
 
 The optimizer reverse-calculates how much $K_0$ *contributed* to that $1.28$ score. The formula for the score is $S = Q_0 \cdot K_0 = Q_{0,dim0}K_{0,dim0} + Q_{0,dim1}K_{0,dim1}$. By the Product Rule:
 
-$$ \frac{\partial S_{(0\cdot 0)}}{\partial K_{0}} = Q_0^T = \begin{bmatrix} 0.8 \\ 0.8 \end{bmatrix} $$
+```math
+\frac{\partial S_{(0\cdot 0)}}{\partial K_{0}} = Q_0^T = \begin{bmatrix} 0.8 \\ 0.8 \end{bmatrix}
+```
 
 **Distributing the Gradient backwards into Key Matrix (dK):**
 Assume an incoming error gradient ($dL = 1.0$) hits the raw score $1.28$. The new gradient for $K_0$ ($dK_{0,dim0}$ and $dK_{0,dim1}$) is:
-$$ dK_{0} = dL \cdot Q_0^T = 1.0 \cdot \begin{bmatrix} 0.8 \\ 0.8 \end{bmatrix} = \begin{bmatrix} 0.8 \\ 0.8 \end{bmatrix} $$
+```math
+dK_{0} = dL \cdot Q_0^T = 1.0 \cdot \begin{bmatrix} 0.8 \\ 0.8 \end{bmatrix} = \begin{bmatrix} 0.8 \\ 0.8 \end{bmatrix}
+```
 
 #### Propagating all the way back to the Weights ($W_K$)
 
@@ -576,14 +602,20 @@ The final shared weights $W_K$ were used to create $K_0$ *and* $K_1$ across mult
 
 We must calculate the local gradient contribution for $W_K$ from Word 1 ($K_0$) and Word 2 ($K_1$).
 The formula was $K = X \cdot W_K$. By the Product Rule:
-$$ \frac{\partial K}{\partial W_K} = X^T $$
+```math
+\frac{\partial K}{\partial W_K} = X^T
+```
 
 **Allocating Gradient from $K_0$:**
-$$ dW_{K(word0)} = X_0^T \cdot dK_0 = \begin{bmatrix} 0.8 \\ 0.8 \end{bmatrix} \cdot \begin{bmatrix} 0.8 \\ 0.8 \end{bmatrix} = \begin{bmatrix} 0.64 & 0.64 \\ 0.64 & 0.64 \end{bmatrix} $$
+```math
+dW_{K(word0)} = X_0^T \cdot dK_0 = \begin{bmatrix} 0.8 \\ 0.8 \end{bmatrix} \cdot \begin{bmatrix} 0.8 \\ 0.8 \end{bmatrix} = \begin{bmatrix} 0.64 & 0.64 \\ 0.64 & 0.64 \end{bmatrix}
+```
 
 **The Final Gradient Accumulation:**
 Assume Word 2 ($K_1$) also received an error and generated its own local gradient $dW_{K(word1)}$. The optimizer merges these two unique insights:
 
-$$ \text{Final } dW_K = \sum dW_K = dW_{K(word0)} + dW_{K(word1)} + (\text{all Decoder cross-attn } dW_K) $$
+```math
+\text{Final } dW_K = \sum dW_K = dW_{K(word0)} + dW_{K(word1)} + (\text{all Decoder cross-attn } dW_K)
+```
 
 The optimizer now knows exactly how to adjust $W_K$ to create better Keys in the next epoch. The same matrix-blending logic applies to the other 4 weight paths (Add&Norm, FFN, Attention Q/V).
