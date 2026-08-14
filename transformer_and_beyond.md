@@ -270,3 +270,61 @@ We subtract the mean, divide by the standard deviation (adding a tiny $\epsilon$
 
 **Q3: How does Layer Normalization specifically aid the flow of gradients in a deep, 96-layer Transformer?**
 *   **Answer:** Without normalization, the repeated matrix multiplications in the Attention and Feed-Forward layers cause the variance of the embeddings to exponentially explode, pushing the values deep into the flat regions of activation functions (like Softmax or GeLU). In these flat regions, the derivative approaches zero, killing the gradients. By repeatedly re-centering the embedding vectors back to a unit variance at every layer, LayerNorm keeps the values in the "steep" regions of the activation functions, ensuring strong, healthy gradients can backpropagate all the way to layer 1.
+
+
+## Topic 5: The Encoder Block (Understanding Context)
+
+A Transformer relies on stacking multiple identical blocks on top of each other. The **Encoder Block** is specifically designed to read an input sequence and build a deep, mathematically rich understanding of the context of every single word. 
+
+Models that only use the Encoder half of the Transformer (like Google's **BERT**) are phenomenal at text classification, sentiment analysis, and search engine retrieval, because their entire architecture is dedicated to reading and contextualizing.
+
+### 1. The Architecture of the Encoder
+A single Encoder Block contains two main sub-layers:
+1.  **Multi-Head Self-Attention:** Routes information between the words.
+2.  **Position-wise Feed-Forward Network (FFN):** Memorizes facts and processes the routed information.
+
+![Encoder Block Architecture](./assets/encoder_block_architecture.png)
+
+### 2. The Residual Connections (Add & Norm)
+
+Notice that around both the Attention mechanism and the FFN, there is a path that completely bypasses the mathematical layers. This is a **Residual Connection** (identical to a ResNet in Computer Vision). 
+
+After the bypass, the original input ($x$) is added back to the output of the sub-layer ($\text{Sublayer}(x)$), and then immediately passed through a Layer Normalization function.
+
+```math
+\text{Output} = \text{LayerNorm}(x + \text{Sublayer}(x))
+```
+
+*   **The "Add" (Residual):** Prevents the Vanishing Gradient problem. If you stack 24 Encoder blocks (like in BERT-Large), the gradients during backpropagation would normally multiply down to zero. The residual connections create a "gradient superhighway" straight from layer 24 down to layer 1.
+*   **The "Norm" (LayerNorm):** Prevents the values from exponentially exploding as they are repeatedly added together across 24 layers.
+
+### 3. The Feed-Forward Network (The Transformer's Memory)
+
+While the Attention mechanism is famous, it does virtually no "thinking" or "remembering." Attention is strictly a **routing mechanism**—it just moves data from one word to another. 
+
+The actual memorization of world knowledge (e.g., knowing that "Paris" is the capital of "France") happens entirely inside the **Position-wise Feed-Forward Network (FFN)**. 
+
+Every single word vector (dimension $512$) is passed independently through a massive, two-layer Multi-Layer Perceptron (MLP):
+
+```math
+\text{FFN}(x) = \text{ReLU}(x W_1 + b_1) W_2 + b_2
+```
+
+**The Massive Expansion:**
+In the original Transformer paper, $W_1$ expands the $512$-dimensional embedding into a massive $2048$-dimensional vector space. After applying the non-linear ReLU (or GELU) activation, $W_2$ mathematically compresses it back down to exactly $512$ dimensions. 
+*   This expansion allows the network to project the word into a much higher-dimensional space to identify highly complex, abstract features before compressing the most important insights back into the word's primary representation.
+
+---
+
+### Topic 5 Placement Prep: Elite Encoder Flashcards
+
+**Q1: In an Encoder block, does the Feed-Forward Network (FFN) mix information between different words in the sentence?**
+*   **Answer:** No, absolutely not. The FFN is "Position-wise," meaning the exact same dense neural network is applied to the 512-dimensional vector of Word 1, and then applied completely independently to the 512-dimensional vector of Word 2. No data crosses between the words during the FFN step. Information *only* mixes between different words during the Self-Attention step.
+
+**Q2: What is the architectural reason for placing the Residual Addition ($x + \text{Sublayer}(x)$) *before* the Layer Normalization, rather than after it? (Note: Pre-LN vs Post-LN).**
+*   **Answer:** The original "Attention is All You Need" paper placed normalization *after* the addition (Post-LN). However, in extremely deep networks (e.g., GPT-3 with 96 layers), Post-LN causes the gradients near the output to be massive and the gradients near the input to be tiny, leading to highly unstable training requiring careful learning rate warmups. Modern architectures (like GPT-2/3 and LLaMA) use **Pre-LN**, moving the LayerNorm *inside* the residual block directly before the Attention and FFN layers. This ensures the residual superhighway is pure, un-normalized addition from start to finish, vastly stabilizing deep training.
+
+**Q3: The parameters of the FFN account for roughly two-thirds of a Transformer's total parameter count. If Attention is the core innovation, why is the FFN so massively oversized (e.g., expanding from 512 to 2048)?**
+*   **Answer:** Research (like the "Transformer Feed-Forward Layers Are Key-Value Memories" paper) indicates that the FFN acts as a massive, un-normalized Key-Value memory database for the model's world knowledge. The expansion to 2048 dimensions gives the hidden layer enough neurons to store factual associations (e.g., if the input vector activates the pattern for "Eiffel", the expanded neurons trigger the pattern for "Tower" and "Paris"). Without an oversized FFN, the model would be excellent at grammar (via Attention) but would hallucinate facts constantly due to a lack of memory capacity.
+**Q4: The original Transformer paper used ReLU in the Feed-Forward Network, but modern models (like GPT-3, LLaMA, and ViT) almost exclusively use GeLU (Gaussian Error Linear Unit) or SwiGLU. Why?**
+*   **Answer:** ReLU is a rigid function: it strictly outputs $0$ for any negative input. This can cause the "Dying ReLU" problem, where neurons get permanently stuck outputting zero and stop updating. GeLU is a smoother, probabilistic variation of ReLU. Instead of a hard cutoff at $0$, it has a gentle, smooth curve that allows a tiny amount of negative values to pass through. This smoothness ensures that gradients never completely die, leading to much faster convergence and deeper mathematical representations during training.
