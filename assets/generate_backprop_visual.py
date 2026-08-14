@@ -1,112 +1,118 @@
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, Circle, FancyArrowPatch
+from matplotlib.patches import Rectangle, FancyArrowPatch, Circle
 import numpy as np
 
-# --- CONFIGURATION & HELPERS ---
-C_BG = '#f8f9fa'
-C_MATH = '#f1c40f'
-C_TEXT = 'black'
-
-def draw_node(ax, x, y, text, radius=0.4, color=C_MATH, text_color='black', fontsize=16):
-    circle = Circle((x, y), radius, facecolor=color, edgecolor='black', lw=2, zorder=3)
-    ax.add_patch(circle)
-    ax.text(x, y, text, ha='center', va='center', fontsize=fontsize, fontweight='bold', color=text_color, zorder=4)
-
-def draw_wire(ax, start, end, text=None, color='#333', text_color='black', text_y_offset=0, bold=True, rad=0.0, lw=2, ls='-'):
-    arrow = FancyArrowPatch(start, end, connectionstyle=f"arc3,rad={rad}", arrowstyle='-|>', mutation_scale=15, color=color, lw=lw, linestyle=ls, zorder=1)
-    ax.add_patch(arrow)
-    if text:
-        mid_x = (start[0] + end[0]) / 2
-        mid_y = ((start[1] + end[1]) / 2) + text_y_offset
-        f_weight = 'bold' if bold else 'normal'
-        ax.text(mid_x, mid_y, text, ha='center', va='center', fontsize=10, fontweight=f_weight, color=text_color,
-                bbox=dict(facecolor='white', edgecolor='none', alpha=0.9), zorder=5)
-
-def draw_arrow(ax, start, end, text=None, rad=0.0, color='#333', lw=2):
-    draw_wire(ax, start, end, text=text, rad=rad, color=color, lw=lw)
-
-def draw_matrix(ax, x, y, matrix, title, color='gray'):
+# --- HELPERS ---
+def draw_matrix(ax, x, y, matrix, title, cell_w=1.2, cell_h=0.6, fontsize=11, title_fontsize=12, bg='white'):
     rows, cols = matrix.shape
-    height, width = rows * 0.8, cols * 1.5
-    ax.text(x + width/2, y + height + 0.3, title, ha='center', va='bottom', fontsize=12, fontweight='bold')
+    w, h = cols * cell_w, rows * cell_h
+    ax.text(x + w/2, y + h + 0.25, title, ha='center', va='bottom', fontsize=title_fontsize, fontweight='bold')
     for r in range(rows):
         for c in range(cols):
-            val = matrix[rows-1-r, c]
-            rect = Rectangle((x + c*1.5, y + r*0.8), 1.5, 0.8, facecolor='white', edgecolor='black', lw=1, zorder=2)
+            val = matrix[r, c]
+            rect = Rectangle((x + c*cell_w, y + (rows-1-r)*cell_h), cell_w, cell_h,
+                              facecolor=bg, edgecolor='black', lw=1.5, zorder=2)
             ax.add_patch(rect)
-            ax.text(x + c*1.5 + 0.75, y + r*0.8 + 0.4, f"{val:.2f}", ha='center', va='center', fontsize=10, fontweight='bold')
-    return x + width, y + height
+            ax.text(x + c*cell_w + cell_w/2, y + (rows-1-r)*cell_h + cell_h/2,
+                    f"{val:.2f}", ha='center', va='center', fontsize=fontsize, fontweight='bold', zorder=3)
 
-def draw_math_box(ax, x, y, text, color='red', fontsize=10, bold=True):
-    f_weight = 'bold' if bold else 'normal'
-    ax.text(x, y, text, ha='center', va='center', fontsize=fontsize, fontweight=f_weight, color=color,
-            bbox=dict(facecolor='white', edgecolor=color, boxstyle='round,pad=0.3', alpha=0.95), zorder=6)
-
-def draw_gradient_wire(ax, start, end, derivative_text, gradient_val, color='red', fontsize=9, rad=0.0):
-    """Draws a red backprop wire annotated with the partial derivative and gradient."""
-    arrow = FancyArrowPatch(start, end, connectionstyle=f"arc3,rad={rad}", arrowstyle='-|>', mutation_scale=15, color=color, lw=2.5, linestyle='--', zorder=1)
+def draw_arrow(ax, start, end, color='#555', lw=2, text=None, text_offset=(0, 0.2), ls='-'):
+    arrow = FancyArrowPatch(start, end, arrowstyle='-|>', mutation_scale=18, color=color, lw=lw, linestyle=ls, zorder=1)
     ax.add_patch(arrow)
-    mid_x, mid_y = (start[0]+end[0])/2, (start[1]+end[1])/2
-    wire_text = r"$\times$ $\frac{\partial \text{Node}}{\partial \text{Path}}$" + "\n" + derivative_text
-    ax.text(mid_x, mid_y + 0.3, wire_text, ha='center', va='center', fontsize=fontsize, fontweight='normal', color=color,
-            bbox=dict(facecolor='white', edgecolor='red', boxstyle='round,pad=0.2', alpha=0.9), zorder=5)
-    draw_math_box(ax, end[0], end[1]+0.8, gradient_val, 'red', fontsize=10, bold=True)
+    if text:
+        mx, my = (start[0]+end[0])/2 + text_offset[0], (start[1]+end[1])/2 + text_offset[1]
+        ax.text(mx, my, text, ha='center', va='center', fontsize=10, fontweight='bold',
+                bbox=dict(facecolor='white', edgecolor='none', alpha=0.9), zorder=4)
 
-# ==========================================
-# 3. BACKPASS TRACE: EXPLICIT CHAIN RULE
-# ==========================================
-fig, ax = plt.subplots(figsize=(14, 11))
-ax.set_xlim(0, 18)
-ax.set_ylim(0, 12)
-ax.axis('off')
+def draw_box(ax, x, y, w, h, text, bg, fontsize=12, text_color='black'):
+    rect = Rectangle((x, y), w, h, facecolor=bg, edgecolor='black', lw=2, zorder=2)
+    ax.add_patch(rect)
+    ax.text(x + w/2, y + h/2, text, ha='center', va='center', fontsize=fontsize, fontweight='bold', color=text_color, zorder=3)
 
-# Data Setup
-Q0 = np.array([[0.8, 0.8]])
+def draw_gradient_box(ax, x, y, text, fontsize=11):
+    ax.text(x, y, text, ha='center', va='center', fontsize=fontsize, fontweight='bold', color='red',
+            bbox=dict(facecolor='#fff0f0', edgecolor='red', boxstyle='round,pad=0.4', lw=2), zorder=5)
+
+# --- DATA ---
+Q0 = np.array([[0.80, 0.80]])
 K0 = np.array([[0.56, 1.04]])
-Softmax_Weights = np.array([[0.8, 0.2], [0.1, 0.9]])
+Weights = np.array([[0.42, 0.58], [0.18, 0.82]])
+dWk_word0 = np.array([[0.64, 0.64], [0.64, 0.64]])
 
-# Faded Forward Structure
-draw_matrix(ax, 0.5, 9, Q0, "Query Q0", color='lightgray')
-draw_matrix(ax, 6.5, 9.1, K0, "Key K0", color='lightgray')
-rect_node = Rectangle((10.5, 9.1), 3, 1.6, facecolor='lightyellow', edgecolor='black', lw=1)
-ax.add_patch(rect_node)
-ax.text(12, 9.9, r"Node: $Q_0 \cdot K^T$ (Attn Score)", ha='center', fontsize=11, fontweight='bold')
-ax.text(12, 9.5, r"Result $Score(0\cdot0)=1.28$", ha='center', fontsize=9, color='gray')
-draw_matrix(ax, 15.5, 9.1, Softmax_Weights, "Attn Weights", color='lightgray')
+# --- FIGURE: Clean 3-tier layout ---
+fig, ax = plt.subplots(figsize=(18, 16))
+ax.set_xlim(-1, 19)
+ax.set_ylim(-1, 16)
+ax.axis('off')
+fig.patch.set_facecolor('white')
 
-# --- GRADIENT ERROR ARRIVES (dL = 2.0) ---
-ax.text(17.5, 10.5, "Total Error penalty ($dL$) enters:", ha='center', fontsize=10, fontweight='bold', color='red', bbox=dict(facecolor='#ffcccc', edgecolor='red'))
-draw_gradient_wire(ax, (17, 10.5), (16, 9.9), derivative_text="Allocating 2.0 down path", gradient_val="1.0")
+# ==========================================
+# TIER 1 (TOP): Forward pass structure (faded)
+# ==========================================
+ax.text(9, 15.5, "— Forward Pass (faded reference) —", ha='center', fontsize=14, color='gray', fontstyle='italic')
 
-# --- SPLIT 1: At Attention Scores node (Product Rule) ---
-draw_gradient_wire(ax, (12, 9), (7, 9.1), derivative_text=r"$dL_{(1.0)} \cdot Q_0^T = [0.8, 0.8]$", gradient_val="dK0")
-draw_gradient_wire(ax, (12, 9), (1, 9), derivative_text=r"$dL_{(1.0)} \cdot K_0^T = [0.56, 1.04]$", gradient_val="dQ0", rad=0.2)
+draw_matrix(ax, 0, 13.5, Q0, "Query Q₀", bg='#f0f0f0')
+draw_matrix(ax, 5, 13.5, K0, "Key K₀", bg='#f0f0f0')
 
-# Explicit local gradients boxes
-draw_math_box(ax, 7, 9.9, r"$dK_0 = [0.8, 0.8]$", 'red')
-draw_math_box(ax, 1, 9.8, r"$dQ_0 = [0.56, 1.04]$", 'red')
+draw_arrow(ax, (2.5, 14), (8, 14), color='gray', text="dot product →")
+draw_box(ax, 8, 13.2, 3.5, 1.3, "Score Node\nQ₀·K₀ᵀ = 1.28", '#fef9e7', fontsize=11)
 
-# --- SPLIT 2: All the way back to input Weights (Accumulation) ---
-draw_node(ax, 10, 1.5, r"$W_K$", radius=0.6, color=C_MATH)
-ax.text(10, 0.6, "SHARED Weights", ha='center', fontsize=11, fontweight='bold', color='#333')
+draw_arrow(ax, (11.5, 14), (13, 14), color='gray', text="softmax")
+draw_matrix(ax, 13.5, 13.5, Weights, "Attn Weights", bg='#f0f0f0')
 
-# Allocation path 1: contribution from Word 1 (K0)
-draw_gradient_wire(ax, (6.5, 9.1), (9.4, 2.1), derivative_text=r"Chain rule (K=XW): $X_0^T \cdot dK_0$", gradient_val=r"$dW_{K(word0)}$", color='red')
-local_wk_0 = np.array([[0.64, 0.64], [0.64, 0.64]])
-draw_matrix(ax, 7.5, 4, local_wk_0, r"$dW_{K(word0)}$" + "\n" + r"Word 1's local insight", color='red')
+# ==========================================
+# TIER 2 (MIDDLE): Gradient split at Score node
+# ==========================================
+ax.text(9, 11.5, "— Backward Pass: Error flows RIGHT → LEFT —", ha='center', fontsize=14, color='red', fontweight='bold')
 
-# Allocation path 2: contribution from Word 2 (K1)
-draw_wire(ax, (14, 6), (10.6, 2.1), color='red', text=r"$X_1^T \cdot dK_1$", lw=2.5, ls='--')
-draw_math_box(ax, 11, 4.8, r"$dW_{K(word1)}$", 'red')
+# Error arrives
+draw_gradient_box(ax, 16, 10.5, "Total Loss\ndL = 2.0")
+draw_arrow(ax, (14.5, 10.5), (12, 10.5), color='red', lw=3, ls='--', text="Error signal →")
 
-# THE SUMMATION NODE
-draw_node(ax, 11, 2.1, r"$\oplus$", radius=0.2, color='red')
-draw_arrow(ax, (10, 2.1), (10.8, 2.1), color='red', lw=2)
-draw_arrow(ax, (11, 2.3), (11, 2.5), color='red', lw=2)
-draw_math_box(ax, 11.5, 3.1, r"$\sum dW_K$ = Final Update", 'red', fontsize=12, bold=True)
+# Score node receives error
+draw_box(ax, 8.5, 9.5, 3, 1.5, "Score Node\nReceives dL = 1.0", '#ffcccc', fontsize=11, text_color='red')
 
-plt.suptitle("Transformer synthesis 3: explicit Chain Rule backprop Trace (allocating K gradients d=2)", fontsize=20, fontweight='bold', y=0.98)
-plt.savefig('assets/backprop_explicit_chain_rule.png', dpi=300, bbox_inches='tight')
+# SPLIT: Product Rule creates two gradient paths
+ax.text(9.8, 9, "Product Rule splits the gradient:", ha='center', fontsize=11, color='red', fontstyle='italic')
+
+# Path 1: dK₀ (goes LEFT to Key)
+draw_arrow(ax, (8.5, 10), (6.5, 8.5), color='red', lw=3, ls='--')
+draw_gradient_box(ax, 5, 8.5, r"Path → Key: $\frac{\partial S}{\partial K_0} = Q_0^T$")
+draw_arrow(ax, (5, 7.8), (5, 7))
+draw_gradient_box(ax, 5, 6.5, r"$dK_0 = dL \times Q_0^T$" + "\n" + r"$= 1.0 \times [0.8, 0.8]$" + "\n" + "= [0.8, 0.8]")
+
+# Path 2: dQ₀ (goes LEFT to Query)
+draw_arrow(ax, (8.5, 10.5), (3, 8.5), color='red', lw=3, ls='--')
+draw_gradient_box(ax, 1.5, 8.5, r"Path → Query: $\frac{\partial S}{\partial Q_0} = K_0^T$")
+draw_arrow(ax, (1.5, 7.8), (1.5, 7))
+draw_gradient_box(ax, 1.5, 6.5, r"$dQ_0 = dL \times K_0^T$" + "\n" + r"$= 1.0 \times [0.56, 1.04]$" + "\n" + "= [0.56, 1.04]")
+
+# ==========================================
+# TIER 3 (BOTTOM): Propagate dK back to shared W_K
+# ==========================================
+ax.text(9, 4.5, "— Propagate dK₀ back to shared weights W_K —", ha='center', fontsize=14, color='red', fontweight='bold')
+
+# Chain rule: K = X · W_K, so dW_K = X^T · dK
+draw_arrow(ax, (5, 5.8), (5, 4.2), color='red', lw=3, ls='--', text=r"Chain: $K = X \cdot W_K$")
+
+draw_gradient_box(ax, 5, 3.5, r"$dW_{K(word0)} = X_0^T \cdot dK_0$")
+
+draw_arrow(ax, (5, 2.8), (5, 2.2), color='red', lw=2, ls='--')
+draw_matrix(ax, 3.8, 0.5, dWk_word0, r"$dW_{K(word0)}$ (Word 1's gradient)", bg='#ffcccc')
+
+# Word 2 path (from the right side)
+draw_gradient_box(ax, 13, 3.5, r"$dW_{K(word1)} = X_1^T \cdot dK_1$")
+draw_arrow(ax, (13, 2.8), (13, 2.2), color='red', lw=2, ls='--')
+ax.text(13, 1.5, "(Same process\nfor Word 2)", ha='center', fontsize=11, color='gray', fontstyle='italic')
+
+# Final accumulation
+draw_arrow(ax, (6.2, 0.8), (8, 0), color='red', lw=3, ls='--')
+draw_arrow(ax, (13, 1), (10.5, 0), color='red', lw=3, ls='--')
+draw_gradient_box(ax, 9.2, -0.3, r"$\sum dW_K = dW_{K(word0)} + dW_{K(word1)}$" + "\n→ Update shared weights!")
+
+plt.suptitle("Transformer Synthesis 3: Backpropagation Chain Rule Trace\n(Allocating gradients back to shared Key weights)",
+             fontsize=20, fontweight='bold', y=0.99)
+plt.tight_layout(rect=[0, 0.02, 1, 0.96])
+plt.savefig('assets/backprop_explicit_chain_rule.png', dpi=200, bbox_inches='tight', facecolor='white')
 plt.close()
-
 print("Generated assets/backprop_explicit_chain_rule.png successfully!")

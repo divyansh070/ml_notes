@@ -1,116 +1,101 @@
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, Circle, FancyArrowPatch
+from matplotlib.patches import Rectangle, FancyArrowPatch
 import numpy as np
 
-# --- CONFIGURATION & HELPERS ---
-C_BG = '#f8f9fa'
-C_INPUT = '#d5f5e3'
-C_MATH = '#f1c40f'
-C_QKV = '#d6eaf8'
-C_ATTN = '#fcf3cf'
-C_TEXT = 'black'
-
-def draw_node(ax, x, y, text, radius=0.4, color=C_MATH, text_color='black', fontsize=16):
-    circle = Circle((x, y), radius, facecolor=color, edgecolor='black', lw=2, zorder=3)
-    ax.add_patch(circle)
-    ax.text(x, y, text, ha='center', va='center', fontsize=fontsize, fontweight='bold', color=text_color, zorder=4)
-
-def draw_wire(ax, start, end, text=None, color='#333', text_color='black', text_y_offset=0, bold=True, rad=0.0):
-    arrow = FancyArrowPatch(start, end, connectionstyle=f"arc3,rad={rad}", arrowstyle='-|>', mutation_scale=15, color=color, lw=2, zorder=1)
-    ax.add_patch(arrow)
-    if text:
-        mid_x = (start[0] + end[0]) / 2
-        mid_y = ((start[1] + end[1]) / 2) + text_y_offset
-        f_weight = 'bold' if bold else 'normal'
-        ax.text(mid_x, mid_y, text, ha='center', va='center', fontsize=10, fontweight=f_weight, color=text_color,
-                bbox=dict(facecolor='white', edgecolor='none', alpha=0.9), zorder=5)
-
-def draw_matrix(ax, x, y, matrix, title, color='gray'):
+# --- HELPERS ---
+def draw_matrix(ax, x, y, matrix, title, cell_w=1.2, cell_h=0.6, fontsize=11, title_fontsize=12, bg='white'):
     rows, cols = matrix.shape
-    height, width = rows * 0.8, cols * 1.5
-    
-    # Title
-    ax.text(x + width/2, y + height + 0.3, title, ha='center', va='bottom', fontsize=12, fontweight='bold')
-    
+    w, h = cols * cell_w, rows * cell_h
+    ax.text(x + w/2, y + h + 0.25, title, ha='center', va='bottom', fontsize=title_fontsize, fontweight='bold')
     for r in range(rows):
         for c in range(cols):
-            val = matrix[rows-1-r, c]
-            rect = Rectangle((x + c*1.5, y + r*0.8), 1.5, 0.8, facecolor='white', edgecolor='black', lw=1, zorder=2)
+            val = matrix[r, c]
+            rect = Rectangle((x + c*cell_w, y + (rows-1-r)*cell_h), cell_w, cell_h,
+                              facecolor=bg, edgecolor='black', lw=1.5, zorder=2)
             ax.add_patch(rect)
-            ax.text(x + c*1.5 + 0.75, y + r*0.8 + 0.4, f"{val:.2f}", ha='center', va='center', fontsize=10, fontweight='bold')
-    return x + width, y + height
+            ax.text(x + c*cell_w + cell_w/2, y + (rows-1-r)*cell_h + cell_h/2,
+                    f"{val:.2f}", ha='center', va='center', fontsize=fontsize, fontweight='bold', zorder=3)
+    return x + w/2, y  # bottom center
 
-def draw_math_box(ax, x, y, text, bg_color='white'):
-    ax.text(x, y, text, ha='center', va='center', fontsize=10, fontweight='bold', bbox=dict(facecolor=bg_color, edgecolor='none', alpha=0.9))
+def draw_arrow(ax, start, end, color='#555', lw=2, text=None, text_offset=(0, 0.2)):
+    arrow = FancyArrowPatch(start, end, arrowstyle='-|>', mutation_scale=18, color=color, lw=lw, zorder=1)
+    ax.add_patch(arrow)
+    if text:
+        mx, my = (start[0]+end[0])/2 + text_offset[0], (start[1]+end[1])/2 + text_offset[1]
+        ax.text(mx, my, text, ha='center', va='center', fontsize=10, fontweight='bold',
+                bbox=dict(facecolor='white', edgecolor='none', alpha=0.9), zorder=4)
 
-# ==========================================
-# 1. ENCODER FORWARD PASS: COMP. GRAPH
-# ==========================================
-fig, ax = plt.subplots(figsize=(14, 11))
-ax.set_xlim(0, 18)
-ax.set_ylim(0, 12)
-ax.axis('off')
+def draw_box(ax, x, y, w, h, text, bg, fontsize=12):
+    rect = Rectangle((x, y), w, h, facecolor=bg, edgecolor='black', lw=2, zorder=2)
+    ax.add_patch(rect)
+    ax.text(x + w/2, y + h/2, text, ha='center', va='center', fontsize=fontsize, fontweight='bold', zorder=3)
 
-# Data Setup (Scalar Model, d=2)
-X = np.array([[0.8, 0.8], [0.74, 1.44]]) # Input
-W_Q = np.array([[1.0, 0.0], [0.0, 1.0]]) # Identity Weights for simplicity
+# --- DATA ---
+X = np.array([[0.80, 0.80], [0.74, 1.44]])
 W_K = np.array([[0.5, 0.5], [0.2, 0.8]])
 W_V = np.array([[2.0, 0.0], [0.0, 2.0]])
+Q = X.copy(); K = X @ W_K; V = X @ W_V
+Scores = Q @ K.T
+Weights = np.array([[0.42, 0.58], [0.18, 0.82]])
+Z = Weights @ V
+Z_res = X + Z
+Z_norm = np.array([[1.0, -1.0], [-1.0, 1.0]])
+FFN_out = np.array([[3.0, 3.0], [-1.0, 2.0]])
+H = np.array([[1.1, -0.9], [-1.1, 1.3]])
 
-# 1. Linear Projections (Q, K, V)
-draw_matrix(ax, 0.5, 9, X, "Input X\n[Good, morning]")
-draw_wire(ax, (3.5, 9.5), (5, 10.5), text=r"$W_Q$ $\times$")
-draw_wire(ax, (3.5, 9.5), (5, 9.5), text=r"$W_K$ $\times$")
-draw_wire(ax, (3.5, 9.5), (5, 8.5), text=r"$W_V$ $\times$")
+# --- FIGURE ---
+fig, ax = plt.subplots(figsize=(20, 14))
+ax.set_xlim(-1, 21)
+ax.set_ylim(-1, 14)
+ax.axis('off')
+fig.patch.set_facecolor('white')
 
-draw_matrix(ax, 5.5, 10.1, X @ W_Q, "Query Q")
-draw_matrix(ax, 5.5, 9.1, X @ W_K, "Key K")
-draw_matrix(ax, 5.5, 8.1, X @ W_V, "Value V")
+# ============ ROW 1: Input → Q, K, V (y=11) ============
+draw_matrix(ax, 0, 11, X, "Input X\n[Good, morning]", bg='#d5f5e3')
+draw_arrow(ax, (2.5, 12), (4.5, 13), text=r"$\times W_Q = I$")
+draw_arrow(ax, (2.5, 11.8), (4.5, 11.8), text=r"$\times W_K$")
+draw_arrow(ax, (2.5, 11.5), (4.5, 10.5), text=r"$\times W_V$")
+draw_matrix(ax, 5, 12.5, Q, "Query Q", bg='#d6eaf8')
+draw_matrix(ax, 5, 11, K, "Key K", bg='#fadbd8')
+draw_matrix(ax, 5, 9.5, V, "Value V", bg='#fcf3cf')
 
-# 2. Attention: Raw Scores (QK^T)
-KT = (X @ W_K).T
-draw_wire(ax, (8.5, 10.5), (10, 10))
-draw_wire(ax, (8.5, 9.5), (10, 10))
-draw_matrix(ax, 10.5, 9.1, (X @ W_Q) @ KT, r"Raw Attention Scores" + "\n" + r"$Q \cdot K^T$")
-draw_math_box(ax, 12.5, 11, r"$d_k=2$, $\sqrt{d_k} \approx 1.41$", 'lightgray')
+# ============ ROW 2: Scores → Softmax → Weights (y=11, right side) ============
+draw_arrow(ax, (7.5, 13.2), (9, 12.5), text="Q")
+draw_arrow(ax, (7.5, 11.8), (9, 12.2), text=r"$K^T$")
+draw_matrix(ax, 9.5, 11.5, Scores, r"Raw Scores ($Q \cdot K^T$)", bg='#fef9e7')
+ax.text(12, 11.3, r"$\div \sqrt{d_k}=1.41$", fontsize=10, fontweight='bold', color='gray')
 
-# 3. Attention: Scale & Softmax
-draw_wire(ax, (13.5, 9.5), (15, 9.5), text=r"$\div 1.41$, Softmax")
-# Hardcoded softmax result for clarity
-Softmax_Weights = np.array([[0.8, 0.2], [0.1, 0.9]]) 
-draw_matrix(ax, 15.5, 9.1, Softmax_Weights, "Attention Weights")
+draw_arrow(ax, (12, 12.2), (13.5, 12.2), text="Softmax →")
+draw_matrix(ax, 14, 11.5, Weights, "Attention Weights", bg='#e8daef')
 
-# 4. Attention: Multiply by V
-draw_wire(ax, (17.5, 9.5), (15.5, 6)) # Back towards center
-draw_wire(ax, (8.5, 8.5), (12.5, 6)) # V back towards center
-# Result: V contextualized
-X_context = Softmax_Weights @ (X @ W_V)
-draw_matrix(ax, 13.5, 5, X_context, r"Contextualized" + "\n" + r"Outputs ($Z$)")
+# ============ ROW 3: Weighted sum → Z (y=9) ============
+draw_arrow(ax, (16.5, 11.5), (16.5, 10.2), text="× V ↓")
+draw_arrow(ax, (7.5, 10), (14.5, 9.5), text="V feeds in", text_offset=(0, 0.3))
+draw_matrix(ax, 14.5, 8.5, Z, "Contextualized Z", bg='#d6eaf8')
 
-# 5. Add & Norm 1 (Residual Connection)
-draw_wire(ax, (3.5, 9.5), (7, 6), text=r"+ Residual", rad=0.3, color='red') # From input
-draw_wire(ax, (13.5, 5.5), (10.5, 5.5), color='#333') # From Attention
+# ============ ROW 4: Residual + LayerNorm (y=6.5) ============
+draw_arrow(ax, (16, 8.5), (11, 7.2), text="")
+draw_arrow(ax, (1.2, 11), (1.2, 7.2), color='red', text="Residual\n(skip)", text_offset=(0.8, 0))
+draw_arrow(ax, (1.2, 7.2), (8.5, 7.2), color='red')
+draw_box(ax, 8.5, 6.5, 4, 1.2, "Add & LayerNorm\nX + Z → Normalize", '#d5f5e3', fontsize=11)
+draw_matrix(ax, 13.5, 6.2, Z_norm, "Normalized Z'", bg='#d5f5e3')
 
-draw_matrix(ax, 10.5, 3.5, X + X_context, "Residual Addition")
-draw_wire(ax, (10.5, 3.9), (9, 3.9), text="LayerNorm")
-# Final normalized output Z_prime
-Z_prime = np.array([[1.0, -1.0], [-1.0, 1.0]]) # Hardcoded example
-draw_matrix(ax, 8, 2.5, Z_prime, "Normalized Z'")
+# ============ ROW 5: FFN (y=4) ============
+draw_arrow(ax, (14.5, 6.2), (14.5, 5.3))
+draw_box(ax, 12.5, 4, 4, 1.2, "Feed-Forward Network\n(2→8→2, ReLU)", '#d6eaf8', fontsize=11)
+draw_arrow(ax, (14.5, 4), (14.5, 3.2))
+draw_matrix(ax, 13.5, 2, FFN_out, "FFN Output", bg='#d6eaf8')
 
-# 6. Feed Forward Network (Expansion 2->4->2)
-draw_wire(ax, (8, 2.9), (6, 2.9), text=r"$W_1 \times$, ReLU")
-draw_wire(ax, (6, 2.9), (4, 2.9), text=r"$W_2 \times$")
-X_ffn = np.array([[3.0, 3.0], [-1.0, 2.0]]) # FFN Output example
-draw_matrix(ax, 4, 1.5, X_ffn, "FFN Outputs")
+# ============ ROW 6: Final Add & Norm → Blueprint H (y=0) ============
+draw_arrow(ax, (14.5, 2), (14.5, 1.2))
+draw_arrow(ax, (13.5, 6.5), (13, 1), color='red', text="Residual\n(skip)", text_offset=(-1.2, 0))
+draw_box(ax, 12.5, 0, 4, 1, "Add & LayerNorm", '#d5f5e3', fontsize=11)
+draw_arrow(ax, (12.5, 0.5), (10.5, 0.5))
+draw_matrix(ax, 7.5, -0.2, H, "FINAL Encoder Output\n(Blueprint H)", bg='#e8daef')
 
-# 7. Add & Norm 2 (Final Encoder Output)
-draw_wire(ax, (6.5, 1.9), (8.5, 1.9), color='red', text="+ Residual", rad=-0.2) # Residual Z' to FFN out
-draw_wire(ax, (4, 1.9), (5.5, 1.9))
-# Final context matrix H
-ax.text(10, 0.5, "FINAL Encoder Output (Blueprint H)", ha='center', fontsize=14, fontweight='bold', color='purple', bbox=dict(facecolor='#e8daef', edgecolor='purple'))
-
-plt.suptitle("Transformer synthesis 1: Complete Encoder Forward Prop Computational Graph (d=2)", fontsize=20, fontweight='bold', y=0.98)
-plt.savefig('assets/encoder_forward_scalar.png', dpi=300, bbox_inches='tight')
+plt.suptitle("Transformer Synthesis 1: Complete Encoder Forward Pass (d=2, h=1)",
+             fontsize=20, fontweight='bold', y=0.98)
+plt.tight_layout(rect=[0, 0, 1, 0.96])
+plt.savefig('assets/encoder_forward_scalar.png', dpi=200, bbox_inches='tight', facecolor='white')
 plt.close()
-
 print("Generated assets/encoder_forward_scalar.png successfully!")
