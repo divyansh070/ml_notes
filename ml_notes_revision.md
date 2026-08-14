@@ -25,10 +25,10 @@
 ## Part 1: Linear Regression & Regularization
 
 ### 1. Core Concept of Linear Regression
-*   **Goal:** Predict a continuous target variable ($y$) based on one or more input features ($X$) by fitting a "best-fit" straight line.
+*   **Goal:** Predict a continuous target variable (*y*) based on one or more input features (*X*) by fitting a "best-fit" straight line.
 *   **Equation:** $y = \beta_0 + \beta_1X_1 + \beta_2X_2 + ... + \epsilon$
     *   $\beta_0$: Intercept (where the line crosses the y-axis)
-    *   $\beta_i$: Coefficients (weights). *Interpretation: A 1-unit increase in $X_i$ changes $y$ by $\beta_i$, assuming all else is held constant.*
+    *   $\beta_i$: Coefficients (weights). *Interpretation: A 1-unit increase in $X_i$ changes *y* by $\beta_i$, assuming all else is held constant.*
 ![Linear Regression Best Fit and Residuals](./assets/linear_fit_residuals.png)
 *   **Algorithm (Optimization):**
     *   **Ordinary Least Squares (OLS):** Finds the exact best line mathematically by minimizing the sum of squared residuals. Good for small datasets.
@@ -69,7 +69,7 @@ Walking through the calculus step-by-step builds an incredibly strong foundation
 ```math
 J(\theta) = \frac{1}{2m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)})^2
 ```
-*Explanation of the Cost Function:* We use $m$ to represent the total number of training examples. We add a $\frac{1}{2}$ to the formula purely as a mathematical convenience—when we take the derivative, the exponent $2$ will drop down and cancel out the $\frac{1}{2}$, making the final math cleaner without changing where the global minimum is located.
+*Explanation of the Cost Function:* We use *m* to represent the total number of training examples. We add a $\frac{1}{2}$ to the formula purely as a mathematical convenience—when we take the derivative, the exponent 2 will drop down and cancel out the $\frac{1}{2}$, making the final math cleaner without changing where the global minimum is located.
 
 **Step 1: Set up the Partial Derivative**
 Our goal is to find how a tiny change in a single specific weight, $\theta_j$, impacts the overall error. We do this by taking the partial derivative of $J(\theta)$ with respect to $\theta_j$.
@@ -77,14 +77,14 @@ Our goal is to find how a tiny change in a single specific weight, $\theta_j$, i
 \frac{\partial}{\partial \theta_j} J(\theta) = \frac{\partial}{\partial \theta_j} \left[ \frac{1}{2m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)})^2 \right]
 ```
 **Step 2: Apply the Power Rule and Chain Rule**
-In calculus, the Power Rule tells us to bring the exponent $2$ down to the front. The Chain Rule tells us we then have to multiply the whole thing by the derivative of whatever was *inside* the parentheses.
+In calculus, the Power Rule tells us to bring the exponent 2 down to the front. The Chain Rule tells us we then have to multiply the whole thing by the derivative of whatever was *inside* the parentheses.
 ```math
 \frac{\partial}{\partial \theta_j} J(\theta) = \frac{1}{m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot \frac{\partial}{\partial \theta_j} (h_\theta(x^{(i)}) - y^{(i)})
 ```
-*Explanation:* Notice how the $\frac{1}{2}$ and the $2$ canceled each other out, leaving just $\frac{1}{m}$. Now, we just need to solve that lingering derivative on the far right.
+*Explanation:* Notice how the $\frac{1}{2}$ and the 2 canceled each other out, leaving just $\frac{1}{m}$. Now, we just need to solve that lingering derivative on the far right.
 
 **Step 3: Differentiate the Inside**
-Remember that our hypothesis $h_\theta(x)$ is just a sum of all weights multiplied by their features: $\theta_0x_0 + \theta_1x_1 + \dots + \theta_jx_j$. Because we are taking a *partial* derivative with respect to just $\theta_j$, every other weight acts like a constant (a flat number) and turns to $0$. The true label $y$ is also a constant, so it turns to $0$. The derivative of $\theta_jx_j$ with respect to $\theta_j$ is simply the feature $x_j$.
+Remember that our hypothesis $h_\theta(x)$ is just a sum of all weights multiplied by their features: $\theta_0x_0 + \theta_1x_1 + \dots + \theta_jx_j$. Because we are taking a *partial* derivative with respect to just $\theta_j$, every other weight acts like a constant (a flat number) and turns to 0. The true label *y* is also a constant, so it turns to 0. The derivative of $\theta_jx_j$ with respect to $\theta_j$ is simply the feature $x_j$.
 ```math
 \frac{\partial}{\partial \theta_j} (h_\theta(x^{(i)}) - y^{(i)}) = x_j^{(i)}
 ```
@@ -94,10 +94,10 @@ We substitute $x_j^{(i)}$ back into our equation from Step 2 to get the final gr
 \frac{\partial}{\partial \theta_j} J(\theta) = \frac{1}{m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) x_j^{(i)}
 ```
 ### 3. The 5 Core Assumptions (L.I.N.E. + M)
-1.  **Linearity:** Relationship between $X$ and $y$ must be linear. *(Fix: Polynomial features or log transform).*
+1.  **Linearity:** Relationship between *X* and *y* must be linear. *(Fix: Polynomial features or log transform).*
 2.  **Independence:** Observations must be independent (no autocorrelation).
 3.  **Normality of Residuals:** Errors ($\epsilon$) should be normally distributed.
-4.  **Equal Variance (Homoscedasticity):** Residuals should have a constant variance, not fanning out like a cone. *(Fix: Log transform target $y$).*
+4.  **Equal Variance (Homoscedasticity):** Residuals should have a constant variance, not fanning out like a cone. *(Fix: Log transform target *y*).*
     ![Heteroscedasticity Cone](./assets/heteroscedasticity.png)
 5.  **No Multicollinearity:** Features should not be highly correlated. *(Fix: Drop redundant features, PCA, or L1/L2 Regularization).*
 
@@ -112,11 +112,11 @@ We substitute $x_j^{(i)}$ back into our equation from Step 2 to get the final gr
 *   **MSE (Mean Squared Error):** Average squared errors. Heavily penalizes outliers.
 *   **RMSE (Root Mean Squared Error):** $\sqrt{MSE}$. Brings error back to original units.
 *   **MAE (Mean Absolute Error):** Average absolute errors. **Robust to outliers**.
-*   **$R^2$ (Coefficient of Determination):** Measures the proportion of variance in the dependent variable ($y$) that is predictable from the independent variables ($X$). **Range:** $(-\infty, 1]$.
+*   **$R^2$ (Coefficient of Determination):** Measures the proportion of variance in the dependent variable (*y*) that is predictable from the independent variables (*X*). **Range:** $(-\infty, 1]$.
     *   *Formula:* $R^2 = 1 - \frac{\text{Sum of Squared Residuals (SSR)}}{\text{Total Sum of Squares (SST)}}$
     *   *Flaw:* It assumes every independent variable in the model helps to explain variation in the dependent variable. It mathematically **never decreases** as you add more features, leading to overfitting if relied upon blindly.
 *   **Adjusted $R^2$:** 
-    *   *Formula:* $1 - [\frac{(1 - R^2)(n - 1)}{n - k - 1}]$ (where $n$ is sample size, $k$ is number of features).
+    *   *Formula:* $1 - [\frac{(1 - R^2)(n - 1)}{n - k - 1}]$ (where *n* is sample size, *k* is number of features).
     *   *Why we need it:* It penalizes the model for adding features that do not actually improve predictions. It will **decrease** if a useless feature is added. **Always use Adjusted $R^2$ when evaluating multiple linear regression.**
 
 ### 6. Linear Regression Interview Cheatsheet
@@ -138,16 +138,16 @@ We substitute $x_j^{(i)}$ back into our equation from Step 2 to get the final gr
 
 ### 1. Feature Scaling (Changes the Range, NOT the Shape)
 These techniques do not change the underlying distribution of your data; they just put all features on the same numerical playing field so the algorithm doesn't get biased by large numbers.
-*   **Standardization (Z-Score / StandardScaler):** Centers data so the mean is $0$ and the standard deviation is $1$.
+*   **Standardization (Z-Score / StandardScaler):** Centers data so the mean is 0 and the standard deviation is 1.
     *   *When to use:* This is your default choice for algorithms that use Gradient Descent (Logistic Regression, Neural Networks) or calculate distances between points (KNN, SVM). It is more robust to outliers than Min-Max scaling.
-*   **Normalization (MinMaxScaler):** Squishes all values to fit strictly between $0$ and $1$.
+*   **Normalization (MinMaxScaler):** Squishes all values to fit strictly between 0 and 1.
     *   *When to use:* When your algorithm requires a strict bounded range (e.g., image pixels from $0-255$ scaled to $0-1$).
     *   *Interview Warning:* It is extremely sensitive to outliers! A single massive outlier will crush all your normal data points down to $0.0001$.
 
 ### 2. Distribution Transformations (Changes the Shape)
 These techniques fundamentally alter the physical shape of the data curve.
 *   **Log Transformation ($\log(x)$ or $\log(x+1)$):** Heavily compresses massive numbers while slightly spreading out smaller numbers.
-    *   *When to use:* To fix **Right-Skewed data** (e.g., Income, House Prices, where a few massive values drag the tail to the right). To fix **Heteroscedasticity** (the expanding "cone" of errors in linear models) by applying it to the target variable $y$.
+    *   *When to use:* To fix **Right-Skewed data** (e.g., Income, House Prices, where a few massive values drag the tail to the right). To fix **Heteroscedasticity** (the expanding "cone" of errors in linear models) by applying it to the target variable *y*.
 *   **Square Root Transformation ($\sqrt{x}$):** A milder version of the log transform.
     *   *When to use:* Typically used for Count Data (e.g., number of customers arriving per hour, number of defects) to stabilize variance.
 *   **Box-Cox & Yeo-Johnson:** Advanced power transformations that use machine learning to automatically find the mathematically optimal exponent to make your data perfectly Normal (Gaussian).
@@ -156,7 +156,7 @@ These techniques fundamentally alter the physical shape of the data curve.
 
 ### 3. Non-Linear Transformations
 *   **Polynomial Features ($X^2, X^3$):** Squares or cubes your existing features to create brand new columns.
-    *   *When to use:* When the relationship between $X$ and $y$ is a curve, violating the Linearity assumption. It allows a linear algorithm to draw a curved line through the data.
+    *   *When to use:* When the relationship between *X* and *y* is a curve, violating the Linearity assumption. It allows a linear algorithm to draw a curved line through the data.
 
 ---
 
@@ -170,11 +170,11 @@ These techniques fundamentally alter the physical shape of the data curve.
 2. **Meaningless Bounds:** Linear regression predicts continuous values that can fall below 0 or exceed 1 (meaningless probabilities).
 
 **B. Odds vs. Probability & The Logit Function**
-*   **Probability ($p$):** Bound between $0$ and $1$.
-*   **Odds ($\frac{p}{1-p}$):** Bound between $0$ and $\infty$.
+*   **Probability (*p*):** Bound between 0 and 1.
+*   **Odds ($\frac{p}{1-p}$):** Bound between 0 and $\infty$.
 *   **The Logit Function (Log-Odds):** Taking the natural log of the odds stretches the bounds to $[-\infty, \infty]$. This allows us to map it to a linear equation:
     *   $\ln(\frac{p}{1-p}) = \beta_0 + \beta_1X$
-    *   *Interpretation:* A 1-unit increase in $X$ changes the **log-odds** of the outcome by $\beta_1$ (not the probability directly).
+    *   *Interpretation:* A 1-unit increase in *X* changes the **log-odds** of the outcome by $\beta_1$ (not the probability directly).
 
 **C. The Sigmoid Function**
 Working backward (taking the inverse of the logit) gives us the Sigmoid function. To convert log-odds back into a usable probability, we pass the linear equation ($z = \beta_0 + \beta_1X$) through it:
@@ -195,18 +195,18 @@ Working backward (taking the inverse of the logit) gives us the Sigmoid function
 ### 2.5 How We Train Logistic Regression (Gradient Descent Example)
 *The mathematical magic: Even though Log-Loss looks terrifying, its derivative simplifies to the EXACT same gradient formula as Linear Regression!*
 
-Let's do a 1-variable hand-worked example: predicting class $y$ from feature $X$.
-*   **Dataset:** $X = [1, 2]$, $y = [0, 1]$ *(Higher $X$ means class 1).*
+Let's do a 1-variable hand-worked example: predicting class *y* from feature *X*.
+*   **Dataset:** $X = [1, 2]$, $y = [0, 1]$ *(Higher *X* means class 1).*
 *   **Step 1 (Initialize):** Let's guess the weight $\beta_1 = 0$ and intercept $\beta_0 = 0$.
 *   **Step 2 (Linear Output):** Calculate $z = \beta_0 + \beta_1X$. For both data points, $z = 0$.
-*   **Step 3 (Sigmoid Probabilities):** Pass $z$ through the Sigmoid function: $p = \frac{1}{1 + e^0} = \frac{1}{1+1} = 0.5$. Our predicted probabilities $\hat{y} = [0.5, 0.5]$.
+*   **Step 3 (Sigmoid Probabilities):** Pass *z* through the Sigmoid function: $p = \frac{1}{1 + e^0} = \frac{1}{1+1} = 0.5$. Our predicted probabilities $\hat{y} = [0.5, 0.5]$.
 *   **Step 4 (Find the Gradient):** The derivative of Log-Loss simplifies beautifully to: $\text{Gradient} = \frac{1}{n} \sum X_i (\hat{y}_i - y_i)$.
     *   Gradient for $\beta_1 = \frac{1}{2} \times [ 1(0.5 - 0) + 2(0.5 - 1) ]$
     *   $= \frac{1}{2} \times [ 0.5 - 1.0 ] = -0.25$
 *   **Step 5 (Update Weight):** We move opposite to the gradient. Using learning rate $\alpha = 0.1$:
     *   $\text{New } \beta_1 = \text{Old } \beta_1 - (\alpha \times \text{Gradient})$
     *   $\text{New } \beta_1 = 0 - (0.1 \times -0.25) = 0.025$
-*   **Result:** $\beta_1$ correctly increased to a positive number! Now, higher values of $X$ will result in higher probabilities (closer to 1), moving perfectly in the right direction.
+*   **Result:** $\beta_1$ correctly increased to a positive number! Now, higher values of *X* will result in higher probabilities (closer to 1), moving perfectly in the right direction.
 
 ### 2.6 Mathematical Derivation of Log-Loss Gradient (Optional)
 **The Setup:**
@@ -227,7 +227,7 @@ When we apply the Chain Rule to take the derivative of our hypothesis with respe
 \frac{\partial}{\partial \theta_j} h_\theta(x) = h_\theta(x)(1 - h_\theta(x)) x_j
 ```
 **Step 2: Differentiate the Log Terms**
-To make the algebra easier to see, let's ignore the summation and the $-\frac{1}{m}$ for a moment and just take the derivative of a single example's loss, which we will call $L$. In calculus, the derivative of $\log(x)$ is $\frac{1}{x}$. Applying the Chain Rule to both parts of the Log-Loss equation gives us:
+To make the algebra easier to see, let's ignore the summation and the $-\frac{1}{m}$ for a moment and just take the derivative of a single example's loss, which we will call *L*. In calculus, the derivative of $\log(x)$ is $\frac{1}{x}$. Applying the Chain Rule to both parts of the Log-Loss equation gives us:
 ```math
 \frac{\partial L}{\partial \theta_j} = y \left( \frac{1}{h_\theta(x)} \right) \frac{\partial h_\theta(x)}{\partial \theta_j} + (1 - y) \left( \frac{1}{1 - h_\theta(x)} \right) (-1) \frac{\partial h_\theta(x)}{\partial \theta_j}
 ```
@@ -256,14 +256,14 @@ Finally, we bring back the summation and the $-\frac{1}{m}$ that we temporarily 
 ```math
 \frac{\partial}{\partial \theta_j} J(\theta) = -\frac{1}{m} \sum_{i=1}^{m} (y^{(i)} - h_\theta(x^{(i)})) x_j^{(i)}
 ```
-To make this match our Linear Regression formula perfectly, we distribute the negative sign into the parentheses, which flips the $y$ and the $h_\theta(x)$ around. This gives us the exact same gradient formula as Linear Regression:
+To make this match our Linear Regression formula perfectly, we distribute the negative sign into the parentheses, which flips the *y* and the $h_\theta(x)$ around. This gives us the exact same gradient formula as Linear Regression:
 ```math
 \frac{\partial}{\partial \theta_j} J(\theta) = \frac{1}{m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) x_j^{(i)}
 ```
 ### 3. The 4 Core Assumptions
 Unlike Linear Regression's L.I.N.E., remember these for Logistic Regression:
 1.  **Binary Outcome:** The target must be binary (for standard Logistic Regression).
-2.  **Linearity of Log-Odds:** The features ($X$) must have a linear relationship with the *log-odds* of the target. *(Tested via Box-Tidwell test).*
+2.  **Linearity of Log-Odds:** The features (*X*) must have a linear relationship with the *log-odds* of the target. *(Tested via Box-Tidwell test).*
 3.  **No Multicollinearity:** Independent variables should not be highly correlated. *(Fix: Remove features, L1/L2 Regularization).*
 4.  **Large Sample Size:** MLE needs more data to converge accurately compared to some algorithms like Naive Bayes or simple Decision Trees.
 
@@ -277,7 +277,7 @@ Unlike Linear Regression's L.I.N.E., remember these for Logistic Regression:
 *   **One-vs-Rest (OvR):** Trains a separate binary classifier for each class (Red vs. Not Red, Green vs. Not Green) and chooses the one with the highest probability.
 *   **Multinomial Logistic Regression (Softmax):** This is the true multi-class extension. Instead of using the Sigmoid function (which gives one probability for one class), it uses the **Softmax function**.
 *   **The Softmax Formula:** $P(y=k) = \frac{e^{z_k}}{\sum_{j=1}^{K} e^{z_j}}$
-    *   *How it works:* It takes the raw output scores (logits, $z$) for all classes, exponentiates them to make them positive, and then divides each by the sum of all exponentiated scores.
+    *   *How it works:* It takes the raw output scores (logits, *z*) for all classes, exponentiates them to make them positive, and then divides each by the sum of all exponentiated scores.
     *   *The Result:* It outputs a **Probability Distribution**. All class probabilities will be strictly between 0 and 1, and they will **sum up to exactly 1.0**. (e.g., [Red: 0.7, Green: 0.2, Blue: 0.1]).
 
 ---
@@ -331,7 +331,7 @@ For a binary classification problem (e.g., 1 = Positive/Defect, 0 = Negative/Nor
 *   **Q: Is Logistic Regression a Linear or Non-Linear classifier?**
     *   A: It is a **Linear Classifier**. Even though the output is a non-linear S-curve (Sigmoid), the underlying *decision boundary* that separates the classes in the feature space is a straight line (or flat hyperplane).
 *   **Q: What is the `C` parameter in scikit-learn's Logistic Regression?**
-    *   A: It controls Regularization (which scikit-learn applies by default!). **$C$ is the inverse of regularization strength ($\lambda$)**. Smaller $C$ = stronger penalty = simpler model (less overfitting). Larger $C$ = weaker penalty = fits training data more closely.
+    *   A: It controls Regularization (which scikit-learn applies by default!). ***C* is the inverse of regularization strength ($\lambda$)**. Smaller *C* = stronger penalty = simpler model (less overfitting). Larger *C* = weaker penalty = fits training data more closely.
 *   **Q: What is the maximum possible value for the gradient of the Sigmoid function $\sigma(z)$?**
     *   A: **0.25**. The derivative is $\sigma(z)(1-\sigma(z))$. At $z=0$, $\sigma(0)=0.5$, so the gradient is $0.5 \times 0.5 = 0.25$. This tiny maximum gradient is a primary cause of the *Vanishing Gradient Problem* in deep learning.
 
@@ -353,16 +353,16 @@ Before looking at data analogies, we must understand how SVM mathematically draw
 *   **Support Vectors:** The specific data points that physically touch these guardrails. If you delete all other data points in the dataset, the model does not change.
 
 **Why do we use exactly 1 and -1? (Scale Invariance)**
-The actual geometric street doesn't care if the boundaries are labeled $1$ and $-1$, or $100$ and $-100$. If you multiply the weights $w$ and bias $b$ by $100$, it represents the exact same geometric street, just scaled differently. To stop the math from having infinite possible answers, we mathematically force (constrain) the closest points to equal exactly $+1$ and $-1$. This locks in a single, unique mathematical solution for $w$ and $b$.
+The actual geometric street doesn't care if the boundaries are labeled 1 and $-1$, or 100 and $-100$. If you multiply the weights *w* and bias *b* by 100, it represents the exact same geometric street, just scaled differently. To stop the math from having infinite possible answers, we mathematically force (constrain) the closest points to equal exactly $+1$ and $-1$. This locks in a single, unique mathematical solution for *w* and *b*.
 
 **How Inference Works (Making Predictions):**
-The $+1$ and $-1$ gutters are *only* used during training to calculate the margin width. Once the model is trained (we found the optimal $w$ and $b$), inference is incredibly simple. We take a new, unseen data point $x_{new}$ and calculate its score:
+The $+1$ and $-1$ gutters are *only* used during training to calculate the margin width. Once the model is trained (we found the optimal *w* and *b*), inference is incredibly simple. We take a new, unseen data point $x_{new}$ and calculate its score:
 ```math
 z = w^T x_{new} + b
 ```
 *   If $z \ge 0 \implies$ Classify as **Positive (+1)**
 *   If $z < 0 \implies$ Classify as **Negative (-1)**
-*(Notice how the $\pm 1$ margins don't matter anymore for the final prediction; inference only cares which side of the $0$ hyperplane the point lands on!)*
+*(Notice how the $\pm 1$ margins don't matter anymore for the final prediction; inference only cares which side of the 0 hyperplane the point lands on!)*
 
 **The Margin Math (Core Interview Question):**
 The total width of this street (from the left guardrail to the right guardrail) is mathematically defined as:
@@ -373,11 +373,11 @@ Because SVM's primary goal is to make this street as wide as possible (maximize 
 ```math
 \frac{1}{2} ||w||^2
 ```
-**Hard Margin vs. Soft Margin (The $C$ Parameter):**
+**Hard Margin vs. Soft Margin (The *C* Parameter):**
 *   **Hard Margin (The Flawed Ideal):** A strict margin that allows absolutely zero data points inside the street or on the wrong side. If there is a single extreme outlier, a Hard Margin will severely contort the street to avoid it, leading to massive **Overfitting**.
-*   **Soft Margin (The Realistic Fix):** We allow some data points to violate the margin. We control this using the **$C$ Parameter (Cost of Misclassification)**.
-    *   **High $C$ (Strict):** The model severely penalizes mistakes. It draws a very **narrow margin** to get almost every training point correct. (Low Bias, High Variance $\rightarrow$ Overfitting).
-    *   **Low $C$ (Relaxed):** The model doesn't mind a few mistakes. It prefers to keep the **margin as wide as possible**, ignoring extreme outliers. (High Bias, Low Variance $\rightarrow$ Underfitting).
+*   **Soft Margin (The Realistic Fix):** We allow some data points to violate the margin. We control this using the ***C* Parameter (Cost of Misclassification)**.
+    *   **High *C* (Strict):** The model severely penalizes mistakes. It draws a very **narrow margin** to get almost every training point correct. (Low Bias, High Variance $\rightarrow$ Overfitting).
+    *   **Low *C* (Relaxed):** The model doesn't mind a few mistakes. It prefers to keep the **margin as wide as possible**, ignoring extreme outliers. (High Bias, Low Variance $\rightarrow$ Underfitting).
 
 ---
 
@@ -448,7 +448,7 @@ The RBF kernel uses the exponential function ($e^{- \gamma \cdot \text{distance}
 **How to Explain SVR in an Interview (The Garden Hose Analogy):**
 Imagine laying down a thick, transparent garden hose over a scatter plot of data points on the floor. Your goal is to cover as many data points as possible with the hose. 
 *   The thickness of the hose is **$\epsilon$**. 
-*   You don't care exactly where the points sit *inside* the hose; as long as they are covered, their error is completely ignored (it is precisely $0$). 
+*   You don't care exactly where the points sit *inside* the hose; as long as they are covered, their error is completely ignored (it is precisely 0). 
 *   You only penalize the points that stick out *outside* of the hose. SVR's mathematical goal is to lay the hose down in a way that minimizes the total distance of those outside points.
 
 **The Core Intuition:**
@@ -468,7 +468,7 @@ Any data point that falls *inside* the $\epsilon$-tube is considered "correct" a
 **Slack Variables & Support Vectors in SVR:**
 What happens to the points that fall *outside* the tube? 
 *   We use **Slack Variables ($\xi$)** to measure how far outside the tube these errors are. 
-*   The $C$ parameter dictates how heavily we penalize these slack variables (High $C$ = strict penalty for points outside the tube).
+*   The *C* parameter dictates how heavily we penalize these slack variables (High *C* = strict penalty for points outside the tube).
 *   *Mind-Bending Fact:* In SVR, the points that fall **outside or on the edge** of the tube are the actual **Support Vectors**! They are the only points that dictate the shape of the regression line. 
 
 **Non-Linear Regression:**
@@ -481,12 +481,12 @@ Just like classification, SVR can use the **Kernel Trick** (Polynomial or RBF ke
 To formalize the "Garden Hose" analogy, we must define the prediction function, the loss function, and the optimization objective.
 
 **1. The Prediction Function (The Center of the Tube)**
-Just like in linear regression, the SVR model predicts a continuous value $y$ by computing the dot product of the weights $w$ and the input features $x$, plus a bias term $b$:
+Just like in linear regression, the SVR model predicts a continuous value *y* by computing the dot product of the weights *w* and the input features *x*, plus a bias term *b*:
 ```math
 f(x) = w^T x + b
 ```
 **2. The $\epsilon$-Insensitive Loss Function (The Tube Walls)**
-The defining mathematical feature of SVR is its loss function. It states that if the absolute difference between the actual value $y$ and the predicted value $f(x)$ is less than $\epsilon$, the error is exactly zero. The model only incurs a penalty if the prediction falls outside this boundary:
+The defining mathematical feature of SVR is its loss function. It states that if the absolute difference between the actual value *y* and the predicted value $f(x)$ is less than $\epsilon$, the error is exactly zero. The model only incurs a penalty if the prediction falls outside this boundary:
 ```math
 L_\epsilon(y, f(x)) = \max(0, |y - f(x)| - \epsilon)
 ```
@@ -521,34 +521,34 @@ y_i - (w^T x_i + b) \leq \epsilon + \xi_i
 **How the Hyperparameters fit into the Math:**
 
 * **Minimizing $\frac{1}{2} ||w||^2$:** This flattens the function, maximizing the generalized robustness of the tube.
-* **The $C$ Parameter:** This is the trade-off multiplier attached to the sum of the slack variables $\sum (\xi_i + \xi_i^*)$. If $C$ is massive, the math heavily penalizes any $\xi$ greater than 0, forcing the model to violently contort the tube to capture outliers (Overfitting). If $C$ is small, the math allows $\xi$ to grow, creating a smoother, more generalized tube (Underfitting).
+* **The *C* Parameter:** This is the trade-off multiplier attached to the sum of the slack variables $\sum (\xi_i + \xi_i^*)$. If *C* is massive, the math heavily penalizes any $\xi$ greater than 0, forcing the model to violently contort the tube to capture outliers (Overfitting). If *C* is small, the math allows $\xi$ to grow, creating a smoother, more generalized tube (Underfitting).
 
 ---
 
 ### 6. Placement Prep: SVMs in the Real World
 
-#### A: The Visual Guide to the $C$ Parameter
-The $C$ parameter dictates how strictly the model avoids misclassifications. It physically alters both the margin width and the number of Support Vectors.
+#### A: The Visual Guide to the *C* Parameter
+The *C* parameter dictates how strictly the model avoids misclassifications. It physically alters both the margin width and the number of Support Vectors.
 
 | Parameter State | Margin Width | Number of Support Vectors | Impact on Bias/Variance |
 | :--- | :--- | :--- | :--- |
-| **Low $C$ (Relaxed)** | **Wide Margin** | **MORE Support Vectors** | High Bias, Low Variance (Underfitting risk) |
-| **High $C$ (Strict)** | **Narrow Margin** | **FEWER Support Vectors** | Low Bias, High Variance (Overfitting risk) |
+| **Low *C* (Relaxed)** | **Wide Margin** | **MORE Support Vectors** | High Bias, Low Variance (Underfitting risk) |
+| **High *C* (Strict)** | **Narrow Margin** | **FEWER Support Vectors** | Low Bias, High Variance (Overfitting risk) |
 
-*Counter-intuitive fact:* A wider margin physically covers more space, meaning more data points will fall inside of it. Therefore, a lower $C$ results in **MORE** Support Vectors!
+*Counter-intuitive fact:* A wider margin physically covers more space, meaning more data points will fall inside of it. Therefore, a lower *C* results in **MORE** Support Vectors!
 
 #### B: Solving an SVM "By Hand" (The Geometric Toy Example)
 Let's solve a 2D SVM geometrically.
 ![SVM Geometric Solution](./assets/svm_by_hand.png)
 
 **The Dataset:**
-*   **Negative Class (-1):** Point $A$ at $(1, 1)$
-*   **Positive Class (+1):** Point $B$ at $(3, 3)$
+*   **Negative Class (-1):** Point *A* at $(1, 1)$
+*   **Positive Class (+1):** Point *B* at $(3, 3)$
 
 **Step 1: Place the Hyperplane**
 The best decision boundary separates the classes perfectly in the middle. 
 *   The midpoint between $(1,1)$ and $(3,3)$ is **$(2,2)$**.
-*   The boundary must be perpendicular to the line connecting $A$ and $B$. Since the line $A \rightarrow B$ has a slope of $1$, the boundary must have a slope of $-1$. 
+*   The boundary must be perpendicular to the line connecting *A* and *B*. Since the line $A \rightarrow B$ has a slope of 1, the boundary must have a slope of $-1$. 
 *   Equation of the boundary: $y - 2 = -1(x - 2) \implies x + y = 4 \implies$ **$x + y - 4 = 0$**.
 
 **Step 2: Calculate the Margin**
@@ -556,9 +556,9 @@ The margin distance is the perpendicular distance from the midpoint $(2,2)$ to e
 *   Distance from $(2,2)$ to $(3,3)$: $\sqrt{(3-2)^2 + (3-2)^2} = \sqrt{1^2 + 1^2} =$ **$\sqrt{2}$**.
 *   Both Point A and Point B lie exactly on the margin boundaries, meaning **both A and B are Support Vectors**.
 
-**Step 3: Finding Weights ($w$) and Bias ($b$)**
+**Step 3: Finding Weights (*w*) and Bias (*b*)**
 Our SVM equations are $w^Tx + b = \pm 1$.
-*   Since the normal vector to $x + y = 4$ is $(1, 1)$, $w$ must be some scalar multiple: $w = c(1, 1)$.
+*   Since the normal vector to $x + y = 4$ is $(1, 1)$, *w* must be some scalar multiple: $w = c(1, 1)$.
 *   We know Margin Width $= \frac{2}{||w||}$.
 *   The distance from the center to one margin is $\sqrt{2}$, so the total width is $2\sqrt{2}$.
 *   $\frac{2}{||w||} = 2\sqrt{2} \implies ||w|| = \frac{1}{\sqrt{2}}$.
@@ -566,7 +566,7 @@ Our SVM equations are $w^Tx + b = \pm 1$.
 *   $c\sqrt{2} = \frac{1}{\sqrt{2}} \implies c = \frac{1}{2}$.
 *   Therefore, **$w = [\frac{1}{2}, \frac{1}{2}]$**. 
 
-To find $b$, plug $w$ and Point B $(3,3)$ into the positive margin equation:
+To find *b*, plug *w* and Point B $(3,3)$ into the positive margin equation:
 *   $w^T x_B + b = 1 \implies (\frac{1}{2} \cdot 3) + (\frac{1}{2} \cdot 3) + b = 1 \implies 3 + b = 1 \implies$ **$b = -2$**.
 
 *Final SVM Equation:* $0.5x_1 + 0.5x_2 - 2 = 0$.
@@ -575,7 +575,7 @@ To find $b$, plug $w$ and Point B $(3,3)$ into the positive margin equation:
 1.  **Q: Why do we need to scale features before applying SVM?**
     *   **A:** Because SVM relies on physical distances (margins and dot products) to draw boundaries. Unscaled features will drastically distort the geometry and ruin the margin calculation.
 2.  **Q: How does SVM handle outliers?**
-    *   **A:** Via the Soft Margin $C$ parameter. A low $C$ tells the model to ignore outliers and prioritize a wider, more generalized margin.
+    *   **A:** Via the Soft Margin *C* parameter. A low *C* tells the model to ignore outliers and prioritize a wider, more generalized margin.
 3.  **Q: What is the time complexity of training an SVM?**
     *   **A:** Roughly $O(N^2)$ to $O(N^3)$, depending on the kernel and implementation. This makes standard SVMs very bad for massive datasets.
 4.  **Q: What happens if you delete a non-support vector from the dataset and retrain?**
@@ -601,11 +601,11 @@ To decide *which* feature to split on and at *what* threshold, the tree uses a c
 ```math
 G_i = 1 - \sum_{k=1}^{n} p_{i,k}^2
 ```
-*   $n$ is the total number of classes.
-*   $p_{i,k}$ is the ratio of class $k$ instances inside that specific node $i$.
+*   *n* is the total number of classes.
+*   $p_{i,k}$ is the ratio of class *k* instances inside that specific node *i*.
 
 **Gini Extremes:**
-*   **$0$ (Perfectly Pure):** The box contains only one class. The tree stops splitting.
+*   **0 (Perfectly Pure):** The box contains only one class. The tree stops splitting.
 *   **$0.5$ (Maximum Impurity for Binary):** The box is a perfect 50/50 coin flip. The tree must split this node again.
 
 ---
@@ -636,7 +636,7 @@ Notice how the Unconstrained Tree creates jagged, unnatural slivers to capture s
 ![Decision Boundaries Comparison](./assets/Tree_Boundaries_Comparison.png)
 
 **Output 2: The Structural Map**
-Here is the actual logic that the pruned model generated to draw those boxes. Notice how the root node splits on $x_2 \le 0.177$, and how the Gini impurity drops closer to $0$ as the boxes become purer!
+Here is the actual logic that the pruned model generated to draw those boxes. Notice how the root node splits on $x_2 \le 0.177$, and how the Gini impurity drops closer to 0 as the boxes become purer!
 ![Pruned Tree Structure](./assets/Pruned_Tree_Structure.png)
 
 ---
@@ -682,12 +682,12 @@ Scikit-learn calculates feature importance by measuring how much a specific feat
 
 ### 6. Solving a Decision Tree Split "By Hand" (Categorical)
 
-To truly understand how CART builds a tree, we must freeze the algorithm and do the math by hand. We will use **Gini Impurity** ($G$) to measure node purity, and a **Weighted Cost Function** ($J$) to evaluate the quality of a split.
+To truly understand how CART builds a tree, we must freeze the algorithm and do the math by hand. We will use **Gini Impurity** (*G*) to measure node purity, and a **Weighted Cost Function** (*J*) to evaluate the quality of a split.
 
 #### 1. The Dataset
 We have $m = 5$ training instances predicting if we should "Go for a Walk":
 
-| Instance | Weather ($x_1$) | Weekend ($x_2$) | Go for a Walk ($y$) |
+| Instance | Weather ($x_1$) | Weekend ($x_2$) | Go for a Walk (*y*) |
 | :--- | :--- | :--- | :--- |
 | 1 | Sunny | Yes | **Yes** |
 | 2 | Sunny | No | **Yes** |
@@ -696,15 +696,15 @@ We have $m = 5$ training instances predicting if we should "Go for a Walk":
 | 5 | Rainy | No | **No** |
 
 #### 2. The Formula for Gini Impurity
-It measures the purity of a node ($0$ means perfectly pure, meaning all instances belong to one class).
+It measures the purity of a node (0 means perfectly pure, meaning all instances belong to one class).
 ```math
 G = 1 - \sum_{k=1}^{K} (p_k)^2
 ```
-Where $p_k$ is the ratio of instances belonging to class $k$ in that node.
+Where $p_k$ is the ratio of instances belonging to class *k* in that node.
 
 #### 3. Step 1: Calculate Total Impurity at the Root Node
 Before making any splits, let's look at all 5 target labels: `[Yes, Yes, Yes, No, No]`
-*   Total instances = $5$
+*   Total instances = 5
 *   Probability of 'Yes' ($p_1$) = $3/5 = 0.6$
 *   Probability of 'No' ($p_2$) = $2/5 = 0.4$
 ```math
@@ -722,7 +722,7 @@ J(k, t_k) = \frac{m_{left}}{m} G_{left} + \frac{m_{right}}{m} G_{right}
 *   **Right Node (Rainy):** Instances 3, 4, 5 $\rightarrow$ Labels: `[Yes, No, No]`
     *   $m_{right} = 3$
     *   $G_{right} = 1 - ((1/3)^2 + (2/3)^2) = 1 - (1/9 + 4/9) = 1 - 5/9 = 0.444$
-*   **Weighted Gini ($J$):** $(2/5 \times 0) + (3/5 \times 0.444) = 0 + 0.266 = 0.266$
+*   **Weighted Gini (*J*):** $(2/5 \times 0) + (3/5 \times 0.444) = 0 + 0.266 = 0.266$
 
 **Option B: Split by "Weekend == Yes"**
 *   **Left Node (Weekend):** Instances 1, 3 $\rightarrow$ Labels: `[Yes, Yes]`
@@ -731,7 +731,7 @@ J(k, t_k) = \frac{m_{left}}{m} G_{left} + \frac{m_{right}}{m} G_{right}
 *   **Right Node (Weekday):** Instances 2, 4, 5 $\rightarrow$ Labels: `[Yes, No, No]`
     *   $m_{right} = 3$
     *   $G_{right} = 1 - ((1/3)^2 + (2/3)^2) = 0.444$
-*   **Weighted Gini ($J$):** $(2/5 \times 0) + (3/5 \times 0.444) = 0.266$
+*   **Weighted Gini (*J*):** $(2/5 \times 0) + (3/5 \times 0.444) = 0.266$
 
 *Tie-breaker:* Both splits yield the exact same impurity reduction. Let's arbitrarily choose **Weather == Sunny** as our root split.
 
@@ -782,7 +782,7 @@ Decision Trees can also be used for **regression tasks** (predicting continuous 
 #### 1. The Core Intuition: The Step Function
 Instead of drawing a curved line through the data (like Polynomial Regression), a Decision Tree Regressor slices the input space into rectangular regions and predicts a **constant value** for each region.
 
-*   **Prediction Value ($\hat{y}_{\text{node}}$):** The predicted value for any instance falling into a leaf node is simply the **average (mean) target value ($y$)** of all training instances in that node.
+*   **Prediction Value ($\hat{y}_{\text{node}}$):** The predicted value for any instance falling into a leaf node is simply the **average (mean) target value (*y*)** of all training instances in that node.
 *   **The Curve Shape:** Geometrically, this creates a **piecewise constant step function**. 
     *   `max_depth = 2`: Slices the data into 4 coarse steps.
     *   `max_depth = 3`: Slices the data into 8 finer steps, fitting the curve much closely.
@@ -795,7 +795,7 @@ Instead of drawing a curved line through the data (like Polynomial Regression), 
 #### 2. The CART Algorithm Cost Function for Regression
 The CART algorithm works mostly the same way as in classification, except that instead of trying to split the training set to minimize Gini Impurity, **it tries to split the training set to minimize Mean Squared Error (MSE)**.
 
-To evaluate a split using feature $k$ and threshold $t_k$, CART minimizes the weighted cost function $J(k, t_k)$:
+To evaluate a split using feature *k* and threshold $t_k$, CART minimizes the weighted cost function $J(k, t_k)$:
 ```math
 J(k, t_k) = \frac{m_{\text{left}}}{m} \text{MSE}_{\text{left}} + \frac{m_{\text{right}}}{m} \text{MSE}_{\text{right}}
 ```
@@ -814,7 +814,7 @@ Where:
 
 | Feature | Classification Tree | Regression Tree |
 | :--- | :--- | :--- |
-| **Target Variable ($y$)** | Categorical (e.g., Cat vs. Dog) | Continuous (e.g., Price, Temperature) |
+| **Target Variable (*y*)** | Categorical (e.g., Cat vs. Dog) | Continuous (e.g., Price, Temperature) |
 | **Node Prediction ($\hat{y}$)** | Majority class in the leaf | Mean value of instances in the leaf |
 | **Split Criterion** | Minimizes Gini Impurity / Entropy | Minimizes Weighted MSE |
 | **Output Shape** | Axis-aligned boundary boxes | Piecewise constant step function |
@@ -844,8 +844,8 @@ Where:
 
 **6. Q: What is the time complexity of building (training) a Decision Tree vs. making predictions with it?**
 *   **A:** 
-    *   **Inference (Prediction):** Blazingly fast. Traversing a balanced binary tree takes $O(\log_2(m))$, where $m$ is the number of leaves. It is completely independent of the number of features.
-    *   **Training:** Slow. Finding the optimal split requires sorting every feature and evaluating the Gini/MSE for every possible threshold. The training complexity is $O(n \times m \log_2(m))$, where $n$ is features and $m$ is samples.
+    *   **Inference (Prediction):** Blazingly fast. Traversing a balanced binary tree takes $O(\log_2(m))$, where *m* is the number of leaves. It is completely independent of the number of features.
+    *   **Training:** Slow. Finding the optimal split requires sorting every feature and evaluating the Gini/MSE for every possible threshold. The training complexity is $O(n \times m \log_2(m))$, where *n* is features and *m* is samples.
 
 #### B. "Questions to Remember" (Flashcard Review)
 
@@ -1051,7 +1051,7 @@ w^{(i)} \leftarrow \begin{cases} w^{(i)} & \text{if } \hat{y}_j^{(i)} = y^{(i)} 
 *(If the predictor got the instance right, the weight stays the same. If it got it wrong, the weight is multiplied by $e^{\alpha_j}$, making it heavier for the next round). Then, all instance weights are normalized (divided by $\sum_{i=1}^{m} w^{(i)}$).*
 
 **Step 4: Making the Final Prediction ($\hat{y}(\mathbf{x})$)**
-To make a prediction on new data, AdaBoost computes the predictions of all $N$ predictors and weighs them by their predictor weight ($\alpha_j$). The predicted class is the one that receives the majority of the weighted votes.
+To make a prediction on new data, AdaBoost computes the predictions of all *N* predictors and weighs them by their predictor weight ($\alpha_j$). The predicted class is the one that receives the majority of the weighted votes.
 ```math
 \hat{y}(\mathbf{x}) = \underset{k}{\text{argmax}} \sum_{\substack{j=1 \\ \hat{y}_j(\mathbf{x}) = k}}^{N} \alpha_j
 ```
@@ -1091,7 +1091,7 @@ Initially, every instance is given the exact same weight: $w^{(i)} = \frac{1}{m}
 
 * **Initial Weights:** `0.2, 0.2, 0.2, 0.2, 0.2`
 
-| Instance ($i$) | True Label ($y$) | Initial Weight ($w^{(i)}$) |
+| Instance (*i*) | True Label (*y*) | Initial Weight ($w^{(i)}$) |
 | --- | --- | --- |
 | 1 | 1 | 0.2 |
 | 2 | 1 | 0.2 |
@@ -1137,7 +1137,7 @@ The bottom of Equation 7-3 tells us to divide all weights by their total sum so 
 * Normalized Correct Instances: $0.2 / 1.6 = 0.125$
 * Normalized Incorrect Instance: $0.8 / 1.6 = 0.5$
 
-| Instance ($i$) | True Label | Predictor 1 | New Weight ($w^{(i)}$) |
+| Instance (*i*) | True Label | Predictor 1 | New Weight ($w^{(i)}$) |
 | --- | --- | --- | --- |
 | 1 | 1 | Correct | 0.125 |
 | 2 | 1 | Correct | 0.125 |
@@ -1173,7 +1173,7 @@ Because its weighted error rate is lower than Predictor 1, Predictor 2 gets a la
 
 Now we have an ensemble of two predictors, and we want to evaluate our problem child: **Instance 4**.
 
-Equation 7-4 dictates that for each possible class ($k$), we sum the weights ($\alpha_j$) of the predictors that voted for that class. The class with the highest total weight wins.
+Equation 7-4 dictates that for each possible class (*k*), we sum the weights ($\alpha_j$) of the predictors that voted for that class. The class with the highest total weight wins.
 
 Let's look at how the ensemble votes on **Instance 4**:
 
@@ -1207,7 +1207,7 @@ Imagine you are playing a hole of golf:
 To get your final score (prediction), you simply add up the distances of all your individual shots.
 
 #### 2. The Math of Gradient Boosting (Regression Example)
-Let's assume we are predicting house prices ($y$) using input features ($X$).
+Let's assume we are predicting house prices (*y*) using input features (*X*).
 
 1.  **Step 1:** Train Tree 1 on the normal data to predict the target. 
     *   Tree 1 predicts: $\hat{y}_1$
@@ -1348,7 +1348,7 @@ When you are handed a dataset with 1,000 features, feeding all of them into a mo
 
 ### 1. The Engine of PCA: Singular Value Decomposition (SVD)
 
-Under the hood, PCA tears your dataset apart using a linear algebra technique called **SVD**. SVD takes your original dataset matrix ($A$) and decomposes it into three fundamental building blocks: 
+Under the hood, PCA tears your dataset apart using a linear algebra technique called **SVD**. SVD takes your original dataset matrix (*A*) and decomposes it into three fundamental building blocks: 
 ```math
 A = U \Sigma V^T
 ```
@@ -1356,7 +1356,7 @@ Here is how we solve this step-by-step for a simple 2x2 matrix:
 ```math
 A = \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix}
 ```
-#### Step 1: Find $V$ (Right Singular Vectors / Principal Components)
+#### Step 1: Find *V* (Right Singular Vectors / Principal Components)
 First, we find the absolute best directions to view our data from. We do this by calculating the eigenvectors of $A^T A$.
 
 1. **Calculate $A^T A$:**
@@ -1377,8 +1377,8 @@ A^T A = \begin{pmatrix} 2 & -1 \\ 2 & 1 \end{pmatrix} \begin{pmatrix} 2 & 2 \\ -
    * For $\lambda_1 = 8$, the normalized unit vector is $v_1 = \begin{pmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \end{pmatrix}$
    * For $\lambda_2 = 2$, the normalized unit vector is $v_2 = \begin{pmatrix} -1/\sqrt{2} \\ 1/\sqrt{2} \end{pmatrix}$
 
-4. **Construct $V$ and $V^T$:**
-   We place $v_1$ and $v_2$ as columns in $V$:
+4. **Construct *V* and $V^T$:**
+   We place $v_1$ and $v_2$ as columns in *V*:
 ```math
 V = \begin{pmatrix} 1/\sqrt{2} & -1/\sqrt{2} \\ 1/\sqrt{2} & 1/\sqrt{2} \end{pmatrix} \implies V^T = \begin{pmatrix} 1/\sqrt{2} & 1/\sqrt{2} \\ -1/\sqrt{2} & 1/\sqrt{2} \end{pmatrix}
 ```
@@ -1389,8 +1389,8 @@ Now we weigh the importance of those directions. The singular values ($\sigma$) 
 ```math
 \Sigma = \begin{pmatrix} 2\sqrt{2} & 0 \\ 0 & \sqrt{2} \end{pmatrix}
 ```
-#### Step 3: Find $U$ (Left Singular Vectors)
-Finally, we map our right singular vectors ($v$) through the original matrix $A$ and scale them down by their corresponding singular value ($\sigma$). The formula is $u_i = \frac{1}{\sigma_i} A v_i$.
+#### Step 3: Find *U* (Left Singular Vectors)
+Finally, we map our right singular vectors (*v*) through the original matrix *A* and scale them down by their corresponding singular value ($\sigma$). The formula is $u_i = \frac{1}{\sigma_i} A v_i$.
 
 1. **Calculate $u_1$:**
 ```math
@@ -1400,7 +1400,7 @@ u_1 = \frac{1}{2\sqrt{2}} \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} \begin{p
 ```math
 u_2 = \frac{1}{\sqrt{2}} \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} \begin{pmatrix} -1/\sqrt{2} \\ 1/\sqrt{2} \end{pmatrix} = \frac{1}{\sqrt{2}} \begin{pmatrix} 0 \\ 2/\sqrt{2} \end{pmatrix} = \begin{pmatrix} 0 \\ 1 \end{pmatrix}
 ```
-3. **Construct $U$:**
+3. **Construct *U*:**
 ```math
 U = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}
 ```
@@ -1439,8 +1439,8 @@ One of the best features of standard PCA is that it is easily reversible. If you
 
 ### 4. Placement Prep: PCA Flashcards
 
-**Q1: In an interview, how would you simply explain what the $V$ matrix and the $\Sigma$ matrix represent in SVD?**
-*   **Answer:** The $V$ matrix contains the Principal Components—the physical directions in which the data varies the most. The $\Sigma$ matrix contains the Singular Values, which tell us the "weight" or importance of each of those directions. We keep the directions with the highest singular values and drop the rest to compress the data.
+**Q1: In an interview, how would you simply explain what the *V* matrix and the $\Sigma$ matrix represent in SVD?**
+*   **Answer:** The *V* matrix contains the Principal Components—the physical directions in which the data varies the most. The $\Sigma$ matrix contains the Singular Values, which tell us the "weight" or importance of each of those directions. We keep the directions with the highest singular values and drop the rest to compress the data.
 
 **Q2: Why is the Kernel Trick necessary for nonlinear dimensionality reduction?**
 *   **Answer:** Standard PCA relies on linear projections. If data is highly twisted, a linear projection will crush the structure. The Kernel Trick mathematically simulates mapping the data into a higher-dimensional space where it *is* linearly flat, bypassing the impossible computational cost of actually transforming the coordinates.
@@ -1460,17 +1460,17 @@ It works in two distinct steps: first measuring how instances relate to their im
 #### Step 1: Linearly Modeling Local Relationships
 Instead of looking at the massive, global structure of the dataset, LLE zooms in on local neighborhoods.
 
-*   For each training instance $\mathbf{x}^{(i)}$, the algorithm identifies its $k$ closest neighbors.
+*   For each training instance $\mathbf{x}^{(i)}$, the algorithm identifies its *k* closest neighbors.
 *   It then attempts to reconstruct that specific instance $\mathbf{x}^{(i)}$ as a linear function of those neighbors.
 *   It does this by finding the optimal weights ($w_{i,j}$) so that the squared distance between $\mathbf{x}^{(i)}$ and its reconstructed self ($\sum_{j=1}^{m} w_{i,j} \mathbf{x}^{(j)}$) is as small as possible.
-*   **The Constraints:** If a point $\mathbf{x}^{(j)}$ is *not* one of the $k$ closest neighbors, its weight is forced to 0. Furthermore, the weights for the neighbors of each instance must be normalized (they must sum to 1).
+*   **The Constraints:** If a point $\mathbf{x}^{(j)}$ is *not* one of the *k* closest neighbors, its weight is forced to 0. Furthermore, the weights for the neighbors of each instance must be normalized (they must sum to 1).
 
 This creates our first constrained optimization problem, resulting in a weight matrix $\widehat{\mathbf{W}}$ that perfectly encodes the local linear relationships between all training instances:
 ```math
 \widehat{\mathbf{W}} = \underset{\mathbf{W}}{\text{argmin}} \sum_{i=1}^{m} \left( \mathbf{x}^{(i)} - \sum_{j=1}^{m} w_{i,j} \mathbf{x}^{(j)} \right)^2
 ```
 #### Step 2: Reducing Dimensionality While Preserving Relationships
-Now that we have a matrix ($\widehat{\mathbf{W}}$) that perfectly describes how every point relates to its neighbors, we want to map the training instances into a new $d$-dimensional space (where $d < n$). 
+Now that we have a matrix ($\widehat{\mathbf{W}}$) that perfectly describes how every point relates to its neighbors, we want to map the training instances into a new *d*-dimensional space (where $d < n$). 
 
 *   We let $\mathbf{z}^{(i)}$ represent the new image of $\mathbf{x}^{(i)}$ in this lower-dimensional space.
 *   We want the squared distance between this new point $\mathbf{z}^{(i)}$ and its reconstructed self in the new space ($\sum_{j=1}^{m} \widehat{w}_{i,j} \mathbf{z}^{(j)}$) to remain as small as possible.
@@ -1483,14 +1483,14 @@ This leads to the final unconstrained optimization problem:
 #### The Major Drawback: Computational Complexity
 While LLE is brilliant mathematically, you must be careful when using it on large datasets. `scikit-learn`'s implementation scales beautifully for finding neighbors and optimizing weights, but the final step (constructing the low-dimensional representations) has a complexity of $O(dm^2)$. 
 
-Because of that $m^2$ term (where $m$ is the number of training instances), this algorithm scales incredibly poorly to very large datasets. 
+Because of that $m^2$ term (where *m* is the number of training instances), this algorithm scales incredibly poorly to very large datasets. 
 
 ---
 
 #### 5. Placement Prep: LLE Flashcards
 
 **Q1: How does LLE differ fundamentally from standard PCA in how it reduces dimensions?**
-*   **Answer:** Standard PCA relies on finding a global hyperplane and projecting the data onto it to preserve maximum variance. LLE does not use projections. Instead, it is a manifold learning technique that measures how each data point linearly relates to its $k$-nearest neighbors, and then maps the points to a lower dimension while trying to perfectly preserve those local relationships.
+*   **Answer:** Standard PCA relies on finding a global hyperplane and projecting the data onto it to preserve maximum variance. LLE does not use projections. Instead, it is a manifold learning technique that measures how each data point linearly relates to its *k*-nearest neighbors, and then maps the points to a lower dimension while trying to perfectly preserve those local relationships.
 
 **Q2: Describe the two-step optimization process of LLE.**
 *   **Answer:** 
@@ -1509,11 +1509,11 @@ The most famous and widely used clustering algorithm is **K-Means**.
 
 ### 1. The K-Means Algorithm (Lloyd's Algorithm)
 
-The goal of K-Means is simple: group your data into $k$ distinct clusters. But because the data has no labels, the algorithm has to figure out where the center of those clusters should be entirely on its own. 
+The goal of K-Means is simple: group your data into *k* distinct clusters. But because the data has no labels, the algorithm has to figure out where the center of those clusters should be entirely on its own. 
 
 It does this through an iterative, two-step process:
-1.  **Initialization:** The algorithm randomly picks $k$ data points to act as the initial cluster centers (called **centroids**).
-2.  **Assignment Step:** It measures the Euclidean distance from every single data point to each of the $k$ centroids. It assigns each point to the centroid it is closest to.
+1.  **Initialization:** The algorithm randomly picks *k* data points to act as the initial cluster centers (called **centroids**).
+2.  **Assignment Step:** It measures the Euclidean distance from every single data point to each of the *k* centroids. It assigns each point to the centroid it is closest to.
 3.  **Update Step:** Now that the points are assigned to groups, the algorithm recalculates the actual center of each group (the mean of all points in that cluster). It moves the centroid to this new mean coordinate.
 4.  **Repeat:** It repeats the Assignment and Update steps until the centroids stop moving (convergence).
 
@@ -1523,9 +1523,9 @@ How does K-Means know if it is doing a good job? It tries to minimize a metric c
 
 Inertia calculates the squared distance between each data point and its assigned centroid, and sums them all up. A lower inertia means the points are tightly packed around their cluster centers.
 
-### 3. Finding the Optimal $k$ (Hyperparameter Tuning)
+### 3. Finding the Optimal *k* (Hyperparameter Tuning)
 
-The biggest challenge in K-Means is that you have to tell the algorithm how many clusters ($k$) to look for *before* it starts. If you guess wrong, the results are useless. There are two primary ways to mathematically determine the best $k$:
+The biggest challenge in K-Means is that you have to tell the algorithm how many clusters (*k*) to look for *before* it starts. If you guess wrong, the results are useless. There are two primary ways to mathematically determine the best *k*:
 
 #### Method A: The Elbow Method (Using Inertia)
 If you train K-Means with $k=1$, $k=2$, $k=3$, etc., and plot the Inertia, the line will always go down (because more clusters mean smaller distances). However, you are looking for the point where the drop in inertia sharply slows down, forming an "elbow."
@@ -1538,8 +1538,8 @@ In Figure 9-8, the inertia drops massively from $k=2$ to $k=3$ to $k=4$. But aft
 While the Elbow Method is a good quick visual, the **Silhouette Score** is mathematically superior and much more precise. It evaluates the quality of the clusters by measuring both cohesion and separation.
 
 For every single data point, it calculates:
-*   $a$: The mean distance to all other points in its *own* cluster (Cohesion).
-*   $b$: The mean distance to all points in the *next nearest* cluster (Separation).
+*   *a*: The mean distance to all other points in its *own* cluster (Cohesion).
+*   *b*: The mean distance to all points in the *next nearest* cluster (Separation).
 
 The Silhouette Score for a point is: 
 ```math
@@ -1549,7 +1549,7 @@ s = \frac{b - a}{\max(a, b)}
 *   **Score = 0:** The point is right on the boundary between two clusters.
 *   **Score = -1:** The point was likely assigned to the wrong cluster.
 
-To find the best $k$, you calculate the average Silhouette Score across all points for different values of $k$ and pick the $k$ that yields the highest average score (closest to +1).
+To find the best *k*, you calculate the average Silhouette Score across all points for different values of *k* and pick the *k* that yields the highest average score (closest to +1).
 
 ### 4. The Three Fatal Flaws of K-Means (Interview Gold)
 
@@ -1567,7 +1567,7 @@ Interviewers will always test if you know when *not* to use K-Means.
 ### 5. Placement Prep: K-Means Flashcards
 
 **Q1: Explain the difference between Inertia and the Silhouette Score for evaluating clusters.**
-*   **Answer:** Inertia only measures *cohesion*—how tightly packed the points are around their centroid (lower is better, but it naturally decreases as $k$ increases). The Silhouette Score measures both *cohesion* and *separation*—it evaluates how close a point is to its own cluster compared to how far it is from the next closest cluster. It scales from -1 to 1, making it an absolute metric where a higher score is definitively better.
+*   **Answer:** Inertia only measures *cohesion*—how tightly packed the points are around their centroid (lower is better, but it naturally decreases as *k* increases). The Silhouette Score measures both *cohesion* and *separation*—it evaluates how close a point is to its own cluster compared to how far it is from the next closest cluster. It scales from -1 to 1, making it an absolute metric where a higher score is definitively better.
 
 **Q2: What is K-Means++, and why is it necessary?**
 *   **Answer:** Standard K-Means initializes centroids completely at random, which can lead the algorithm to converge on a highly suboptimal local minimum. K-Means++ introduces a probabilistic initialization step where the first centroid is chosen randomly, but subsequent centroids are explicitly chosen to be as far away from the existing centroids as possible, dramatically improving convergence quality and speed.
@@ -1606,7 +1606,7 @@ Once every point is categorized, the clustering is basically a chain reaction:
 
 #### 4. Pros and Cons of DBSCAN
 **Pros:**
-*   You do **not** need to specify the number of clusters ($k$) beforehand!
+*   You do **not** need to specify the number of clusters (*k*) beforehand!
 *   It can find arbitrarily shaped clusters (moons, circles, S-shapes).
 *   It is robust to outliers (it actively identifies and ignores them, whereas K-Means gets pulled off-center by them).
 
@@ -1715,10 +1715,10 @@ z = (w_1 x_1 + w_2 x_2 + \dots + w_n x_n) + b
 ```math
 a = \text{ReLU}(z)
 ```
-This output ($a$) is then passed as the input ($x$) to the next layer. This repeats until the final prediction is made.
+This output (*a*) is then passed as the input (*x*) to the next layer. This repeats until the final prediction is made.
 
 ### 2. The Loss Function (Calculating the Error)
-Once the network makes its prediction ($\hat{y}$), we compare it to the actual true label ($y$). The mathematical formula used to measure this distance is the **Loss Function** (or Cost Function).
+Once the network makes its prediction ($\hat{y}$), we compare it to the actual true label (*y*). The mathematical formula used to measure this distance is the **Loss Function** (or Cost Function).
 
 *   **For Regression:** We usually use **Mean Squared Error (MSE)**.
 ```math
@@ -1737,10 +1737,10 @@ By applying the Chain Rule, we step backward through the network's math:
 ```
 #### The Mathematical Example (Step-by-Step)
 Imagine a tiny network with 1 input, 1 neuron, and 1 output. 
-*   **Input ($x$):** 2
-*   **Target ($y$):** 0
-*   **Current Weight ($w$):** 0.5
-*   **Current Bias ($b$):** 0
+*   **Input (*x*):** 2
+*   **Target (*y*):** 0
+*   **Current Weight (*w*):** 0.5
+*   **Current Bias (*b*):** 0
 
 **Step A: Forward Pass**
 1.  $z = w \cdot x + b \implies (0.5 \cdot 2) + 0 = 1$
@@ -1750,8 +1750,8 @@ Imagine a tiny network with 1 input, 1 neuron, and 1 output.
 **Step B: Backpropagation (Chain Rule)**
 We need to find $\frac{\partial L}{\partial w}$.
 1.  **Derivative of Loss w.r.t Activation:** $\frac{\partial L}{\partial a} = (a - y) = (1 - 0) = 1$
-2.  **Derivative of Activation w.r.t $z$:** The derivative of ReLU for a positive number is exactly $1$. So, $\frac{\partial a}{\partial z} = 1$
-3.  **Derivative of $z$ w.r.t Weight:** Since $z = wx + b$, the derivative with respect to $w$ is simply the input $x$. So, $\frac{\partial z}{\partial w} = 2$
+2.  **Derivative of Activation w.r.t *z*:** The derivative of ReLU for a positive number is exactly 1. So, $\frac{\partial a}{\partial z} = 1$
+3.  **Derivative of *z* w.r.t Weight:** Since $z = wx + b$, the derivative with respect to *w* is simply the input *x*. So, $\frac{\partial z}{\partial w} = 2$
 
 Multiply them together: $\frac{\partial L}{\partial w} = 1 \cdot 1 \cdot 2 = \mathbf{2}$
 *The gradient is 2. This means that if we increase the weight, the loss will go up. Therefore, we need to decrease the weight!*
@@ -1851,7 +1851,7 @@ m_t = \beta_1 m_{t-1} + (1 - \beta_1) \nabla_\theta J
 ```math
 v_t = \beta_2 v_{t-1} + (1 - \beta_2) (\nabla_\theta J)^2
 ```
-    3.  **Bias Correction:** Because $m$ and $v$ start at zero, they are heavily biased toward zero in the beginning. Adam applies bias correction to prevent instability during early training stages.
+    3.  **Bias Correction:** Because *m* and *v* start at zero, they are heavily biased toward zero in the beginning. Adam applies bias correction to prevent instability during early training stages.
 ```math
 \hat{m}_t = \frac{m_t}{1 - \beta_1^t} \quad \text{and} \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}
 ```
@@ -1927,7 +1927,7 @@ During every single training batch, **Dropout** literally deactivates a random p
 ```math
 W_{\text{test}} = W_{\text{train}} \times (1 - p)
 ```
-    *(Where $p$ is the dropout rate. If $p=0.5$, we multiply all weights by 0.5 during testing to perfectly balance the expected signal).*
+    *(Where *p* is the dropout rate. If $p=0.5$, we multiply all weights by 0.5 during testing to perfectly balance the expected signal).*
 
 ![How Dropout Prevents Co-adaptation](./assets/dropout_visualization.png)
 
@@ -1950,7 +1950,7 @@ If you cannot get more data, you fabricate it using **Data Augmentation**.
 ### 3. Placement Prep: Regularization Flashcards
 
 **Q1: How does L2 Regularization mathematically prevent exploding gradients and overfitting?**
-*   **Answer:** L2 Regularization adds the sum of the squared weights to the loss function. When calculating the gradient during backpropagation, the derivative of $w^2$ is $2w$. This means that in every weight update step, the network artificially subtracts a fraction of the weight's own value from itself (known as Weight Decay). This strictly prevents any single weight from growing too large and dominating the network's output.
+*   **Answer:** L2 Regularization adds the sum of the squared weights to the loss function. When calculating the gradient during backpropagation, the derivative of $w^2$ is *2w*. This means that in every weight update step, the network artificially subtracts a fraction of the weight's own value from itself (known as Weight Decay). This strictly prevents any single weight from growing too large and dominating the network's output.
 
 **Q2: What is the primary architectural difference between L1 and L2 regularization?**
 *   **Answer:** L1 drives the weights of unimportant features to exactly zero, resulting in a sparse model that inherently performs feature selection. L2 shrinks all weights proportionally toward zero but rarely reaches exact zero, resulting in a dense model where all features contribute slightly.
@@ -2033,7 +2033,7 @@ The mathematical formula to calculate the output size of a feature map (assuming
 ```math
 \text{Output Size} = n - f + 1
 ```
-*(Where $n$ is the input image size, and $f$ is the filter size).*
+*(Where *n* is the input image size, and *f* is the filter size).*
 
 For our $5 \times 5$ image with a $3 \times 3$ filter:
 ```math
@@ -2062,7 +2062,7 @@ In a standard convolution, sliding a filter over an image causes two major probl
 1.  **Shrinking Output:** Every time you pass an image through a convolutional layer, it shrinks. If you have a deep network with 50 layers, the image will mathematically shrink to nothing before it reaches the end.
 2.  **Loss of Edge Information:** The pixels in the dead center of the image are scanned multiple times by the sliding filter. The pixels on the very edges or corners are only scanned once. The network is essentially throwing away edge data.
 
-#### 1. Padding ($p$)
+#### 1. Padding (*p*)
 To solve both of these problems, we use **Padding**. Before passing the filter over the image, we artificially add a border of pixels around the outside of the original image (usually filling them with zeros, known as "Zero Padding"). 
 
 *   **Valid Padding:** This means *no padding*. The image is allowed to shrink.
@@ -2070,15 +2070,15 @@ To solve both of these problems, we use **Padding**. Before passing the filter o
 
 ![SAME Padding Visualization](./assets/padding_visual.png)
 
-By adding this artificial border of zeros, the filter is now able to slide over the true edge pixels multiple times, preserving that edge information without heavily impacting the math (because adding $0$ to the sum does not change the feature detection).
+By adding this artificial border of zeros, the filter is now able to slide over the true edge pixels multiple times, preserving that edge information without heavily impacting the math (because adding 0 to the sum does not change the feature detection).
 
-#### 2. Stride ($s$)
+#### 2. Stride (*s*)
 By default, a filter slides over by 1 pixel at a time ($s=1$). However, sometimes we *want* to aggressively shrink the image to reduce computational load. 
 
 **Stride** is the number of pixels the filter jumps when it slides. If we set the Stride to 2 ($s=2$), the filter jumps 2 pixels at a time, effectively skipping data. This cuts the spatial dimensions of the feature map roughly in half.
 
 #### 3. The Master Formula for CNN Dimensions
-This is the single most important mathematical formula to memorize for Computer Vision interviews. If you are given an Input Image of size $n \times n$, a Filter of size $f \times f$, a Padding of $p$, and a Stride of $s$, the exact spatial dimension of the output feature map is:
+This is the single most important mathematical formula to memorize for Computer Vision interviews. If you are given an Input Image of size $n \times n$, a Filter of size $f \times f$, a Padding of *p*, and a Stride of *s*, the exact spatial dimension of the output feature map is:
 ```math
 \text{Output Size} = \lfloor \frac{n + 2p - f}{s} \rfloor + 1
 ```
@@ -2219,7 +2219,7 @@ In classic models like VGG16, to transition from 3D feature maps to a 1D probabi
 To avoid this parameter explosion, modern networks use $1 \times 1$ convolutions (also called Pointwise Convolutions). 
 
 Think of a standard $3 \times 3$ convolution as a magnifying glass that looks at a spatial patch of 9 pixels. A $1 \times 1$ convolution is like a laser beam. It looks at exactly **one single pixel**, but it shines straight down through all the depth channels (colors/features) of that pixel.
-*   **Why is this useful? (The Dimensionality Bottleneck):** Imagine you have 512 channels of data. Doing a $3 \times 3$ convolution on 512 channels is computationally exhausting. Instead, you can shoot $64$ different $1 \times 1$ "lasers" at the image. They will mathematically squash those 512 channels down into just 64 channels, saving massive amounts of computational power before you do your heavy lifting. 
+*   **Why is this useful? (The Dimensionality Bottleneck):** Imagine you have 512 channels of data. Doing a $3 \times 3$ convolution on 512 channels is computationally exhausting. Instead, you can shoot 64 different $1 \times 1$ "lasers" at the image. They will mathematically squash those 512 channels down into just 64 channels, saving massive amounts of computational power before you do your heavy lifting. 
 *   **The Math:** It simply calculates the dot product of the input channels at that exact pixel with the filter weights:
 ```math
 Y_{i,j,k} = \sum_{c=1}^{C} W_{k,c} X_{i,j,c}
@@ -2243,9 +2243,9 @@ If you build a network using *only* Convolutions and GAP (a Fully Convolutional 
 ### Topic 4 Placement Prep: Elite-Level Classification Head Flashcards
 
 **Q1: Prove mathematically how $1 \times 1$ Convolutions create massive computational savings in a "Bottleneck Block" (like in ResNet-50).**
-*   **Answer:** Assume we have an input with $256$ channels, and we want to apply a $3 \times 3$ convolution and output $256$ channels. 
+*   **Answer:** Assume we have an input with 256 channels, and we want to apply a $3 \times 3$ convolution and output 256 channels. 
     *   **Standard approach:** $3 \times 3 \times 256 \times 256 = \mathbf{589,824}$ parameters.
-    *   **Bottleneck approach:** We use a $1 \times 1$ conv to squash the channels down to $64$, apply the $3 \times 3$ conv on just those $64$ channels, and then use another $1 \times 1$ conv to expand back to $256$.
+    *   **Bottleneck approach:** We use a $1 \times 1$ conv to squash the channels down to 64, apply the $3 \times 3$ conv on just those 64 channels, and then use another $1 \times 1$ conv to expand back to 256.
         *   Step 1 ($1 \times 1$ reduction): $1 \times 1 \times 256 \times 64 = 16,384$
         *   Step 2 ($3 \times 3$ spatial): $3 \times 3 \times 64 \times 64 = 36,864$
         *   Step 3 ($1 \times 1$ expansion): $1 \times 1 \times 64 \times 256 = 16,384$
@@ -2274,23 +2274,23 @@ According to the multivariate chain rule, if a single variable affects multiple 
 
 The beautiful secret of CNNs is that calculating these sums mathematically transforms into another convolution operation. There are two calculations we must perform during the backward pass: updating the weights, and passing the error to the previous layer.
 
-#### 1. Calculating the Gradient of the Weights ($dW$)
+#### 1. Calculating the Gradient of the Weights (*dW*)
 We need to know how much to tweak our filter weights to reduce the error.
-Let $X$ be our Input Image ($3 \times 3$), $W$ be our Filter ($2 \times 2$), and $dY$ be the error gradient flowing backward from the next layer ($2 \times 2$).
+Let *X* be our Input Image ($3 \times 3$), *W* be our Filter ($2 \times 2$), and *dY* be the error gradient flowing backward from the next layer ($2 \times 2$).
 
-*(Note on $dY$: Where does this error gradient actually come from? $dY$ is simply the derivative of the Loss function with respect to the output of this layer. If this convolutional layer was followed immediately by a ReLU activation, $dY$ is calculated by taking the error gradient from the layer above and zeroing out any gradients where the forward-pass pixels were zero or negative).*
+*(Note on *dY*: Where does this error gradient actually come from? *dY* is simply the derivative of the Loss function with respect to the output of this layer. If this convolutional layer was followed immediately by a ReLU activation, *dY* is calculated by taking the error gradient from the layer above and zeroing out any gradients where the forward-pass pixels were zero or negative).*
 
-**The Rule:** The gradient of the weights ($dW$) is calculated by convolving the original Input Image ($X$) with the Error Gradient ($dY$).
+**The Rule:** The gradient of the weights (*dW*) is calculated by convolving the original Input Image (*X*) with the Error Gradient (*dY*).
 ```math
 dW = X * dY
 ```
 **The Hands-on Math:**
-Assume the Input ($X$) and the Error ($dY$) are:
+Assume the Input (*X*) and the Error (*dY*) are:
 ```math
 X = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{bmatrix}, \quad dY = \begin{bmatrix} 2 & 0 \\ 0 & -1 \end{bmatrix}
 ```
 
-To find $dW$, we slide $dY$ over $X$ just like a normal filter:
+To find *dW*, we slide *dY* over *X* just like a normal filter:
 *   **Top-Left Window:** $(1 \cdot 2) + (2 \cdot 0) + (4 \cdot 0) + (5 \cdot -1) = 2 - 5 = \mathbf{-3}$
 *   **Top-Right Window:** $(2 \cdot 2) + (3 \cdot 0) + (5 \cdot 0) + (6 \cdot -1) = 4 - 6 = \mathbf{-2}$
 *   **Bottom-Left Window:** $(4 \cdot 2) + (5 \cdot 0) + (7 \cdot 0) + (8 \cdot -1) = 8 - 8 = \mathbf{0}$
@@ -2300,30 +2300,30 @@ The resulting gradient matrix for our weights is:
 ```math
 dW = \begin{bmatrix} -3 & -2 \\ 0 & 1 \end{bmatrix}
 ```
-The optimizer (like Adam or SGD) will now use this exact $dW$ matrix to update the $2 \times 2$ filter!
+The optimizer (like Adam or SGD) will now use this exact *dW* matrix to update the $2 \times 2$ filter!
 
 ![CNN Backprop Visualization](./assets/cnn_backprop_visual.png)
 
-#### 2. Passing the Error Backward ($dX$)
-Now that we updated the filter, we must pass the error backward to the previous Convolutional Layer. We need to find $dX$ (how much each pixel in the input image contributed to the overall error).
+#### 2. Passing the Error Backward (*dX*)
+Now that we updated the filter, we must pass the error backward to the previous Convolutional Layer. We need to find *dX* (how much each pixel in the input image contributed to the overall error).
 
-**The Rule:** To calculate the gradient of the input ($dX$), we must perform a **Full Convolution** of the Error Gradient ($dY$) with the flipped Filter ($W$).
+**The Rule:** To calculate the gradient of the input (*dX*), we must perform a **Full Convolution** of the Error Gradient (*dY*) with the flipped Filter (*W*).
 *   **The Flipped Filter:** We rotate the original $2 \times 2$ filter weights 180 degrees. (If top-left was $w_1$ and bottom-right was $w_4$, they swap places).
-*   **Full Padding:** We add a massive border of zeros around the $2 \times 2$ Error Gradient ($dY$).
-*   **The Convolution:** We slide the flipped filter over the heavily padded $dY$. The mathematical result will be a $3 \times 3$ matrix, which perfectly matches the dimensions of our Input Image ($X$), allowing the error to flow seamlessly into the previous layer.
+*   **Full Padding:** We add a massive border of zeros around the $2 \times 2$ Error Gradient (*dY*).
+*   **The Convolution:** We slide the flipped filter over the heavily padded *dY*. The mathematical result will be a $3 \times 3$ matrix, which perfectly matches the dimensions of our Input Image (*X*), allowing the error to flow seamlessly into the previous layer.
 
 ---
 
 ### Topic 5 Placement Prep: Elite Backprop Flashcards
 
 **Q1: In standard mathematical terms, deep learning frameworks (like PyTorch and TensorFlow) do not actually perform "Convolutions" during the forward pass. What do they perform, and why does the distinction matter during backpropagation?**
-*   **Answer:** They actually perform **Cross-Correlation**. A true mathematical convolution requires the filter matrix to be flipped 180 degrees before sliding it across the input. Deep learning frameworks skip this flipping step during the forward pass to save compute (since the network will just learn the unflipped weights anyway). However, during backpropagation, to correctly calculate the gradient of the input ($dX$), the framework must formally flip the filter to route the gradients back to the correct spatial pixels.
+*   **Answer:** They actually perform **Cross-Correlation**. A true mathematical convolution requires the filter matrix to be flipped 180 degrees before sliding it across the input. Deep learning frameworks skip this flipping step during the forward pass to save compute (since the network will just learn the unflipped weights anyway). However, during backpropagation, to correctly calculate the gradient of the input (*dX*), the framework must formally flip the filter to route the gradients back to the correct spatial pixels.
 
-**Q2: Explain why the gradient of a Convolutional Filter ($dW$) is computed by convolving the input with the output error.**
+**Q2: Explain why the gradient of a Convolutional Filter (*dW*) is computed by convolving the input with the output error.**
 *   **Answer:** Because of Weight Sharing. A single weight in a filter is multiplied against multiple different pixels in the input image as it slides across. By the multivariate chain rule, the total gradient for that single weight is the sum of all the individual local gradients it generated. Convolving the input image with the output error matrix is simply a highly optimized, vectorized way of calculating and summing those exact chain-rule products for every weight simultaneously.
 
-**Q3: If a Convolutional Layer uses a Stride of 2 during the forward pass, how is the Error Gradient ($dY$) handled during the backward pass?**
-*   **Answer:** A Stride of 2 means the forward pass actively skipped pixels. During the backward pass, we must perform a **Dilated (or Strided) Backpropagation**. The framework takes the dense Error Gradient ($dY$) and physically injects zeros between its elements (often called "fractionally striding"). This ensures that no error gradient is routed back to the pixels that were skipped and played no mathematical role in the forward pass.
+**Q3: If a Convolutional Layer uses a Stride of 2 during the forward pass, how is the Error Gradient (*dY*) handled during the backward pass?**
+*   **Answer:** A Stride of 2 means the forward pass actively skipped pixels. During the backward pass, we must perform a **Dilated (or Strided) Backpropagation**. The framework takes the dense Error Gradient (*dY*) and physically injects zeros between its elements (often called "fractionally striding"). This ensures that no error gradient is routed back to the pixels that were skipped and played no mathematical role in the forward pass.
 
 ---
 
@@ -2344,7 +2344,7 @@ We push our data from the pixels all the way to a final probability prediction.
 
 ![CNN Forward Pass](./assets/cnn_forward_pass.png)
 
-**Step 1: The Input ($X$)**
+**Step 1: The Input (*X*)**
 ```math
 X = \begin{bmatrix} 1 & 1 & 1 \\ 1 & 1 & 0 \\ 0 & 1 & 1 \end{bmatrix}
 ```
@@ -2368,7 +2368,7 @@ We apply $max(0, z)$ to zero out negative values.
 A_1 = \begin{bmatrix} 0 & 0 \\ 2 & 1 \end{bmatrix}
 ```
 
-**Step 4: Flatten ($F$)**
+**Step 4: Flatten (*F*)**
 We unravel the $2 \times 2$ matrix into a $1 \times 4$ vector. *(Imagine reading the matrix like a book, left-to-right, top-to-bottom, and writing it out as a single line).*
 ```math
 F = \begin{bmatrix} 0 & 0 & 2 & 1 \end{bmatrix}
@@ -2379,8 +2379,8 @@ We multiply by our dense weights ($W_2$) (assume Bias = 0).
 ```math
 W_2 = \begin{bmatrix} 0.1 \\ 0.2 \\ 0.3 \\ -0.4 \end{bmatrix}
 ```
-*   **Logit ($z$):** $(0 \cdot 0.1) + (0 \cdot 0.2) + (2 \cdot 0.3) + (1 \cdot -0.4) = 0.6 - 0.4 = \mathbf{0.2}$
-*   **Prediction ($p$):** We apply the Sigmoid function: $1 / (1 + e^{-0.2}) \approx \mathbf{0.55}$
+*   **Logit (*z*):** $(0 \cdot 0.1) + (0 \cdot 0.2) + (2 \cdot 0.3) + (1 \cdot -0.4) = 0.6 - 0.4 = \mathbf{0.2}$
+*   **Prediction (*p*):** We apply the Sigmoid function: $1 / (1 + e^{-0.2}) \approx \mathbf{0.55}$
 
 Our network predicts a $55\%$ probability!
 
@@ -2396,7 +2396,7 @@ Using the derivative of Binary Cross-Entropy with Sigmoid, the error gradient at
 *   $Error = 0.55 - 1.0 = \mathbf{-0.45}$
 
 **Step 2: Dense Weight Gradients ($dW_2$)**
-To update the dense weights, we multiply the Error by the inputs to that layer ($F$).
+To update the dense weights, we multiply the Error by the inputs to that layer (*F*).
 *   $dW_2 = Error \cdot F = -0.45 \cdot [0, 0, 2, 1] = \mathbf{[0, 0, -0.9, -0.45]}$
 
 **Step 3: Propagate to Flatten Layer ($dF \rightarrow dA_1$)**
@@ -2407,16 +2407,16 @@ We push the Error backward through the dense weights to find the gradient of the
 dA_1 = \begin{bmatrix} -0.045 & -0.090 \\ -0.135 & 0.180 \end{bmatrix}
 ```
 
-**Step 4: The ReLU Mask ($dY$)**
+**Step 4: The ReLU Mask (*dY*)**
 The error flows backward through the ReLU layer. ReLU acts as a valve: it only allows error to flow backward through pixels that were *positive* during the forward pass ($Z_1$).
 *   Looking back at $Z_1$, only the bottom row was positive. The top row was $\le 0$.
-*   Therefore, we zero out the top row of $dA_1$ to get our convolutional error gradient ($dY$):
+*   Therefore, we zero out the top row of $dA_1$ to get our convolutional error gradient (*dY*):
 ```math
 dY = \begin{bmatrix} 0 & 0 \\ -0.135 & 0.180 \end{bmatrix}
 ```
 
 **Step 5: Convolutional Weight Gradients ($dW_1$)**
-Finally, as learned in Topic 5, we calculate the gradient for our convolution filter by convolving the original Input ($X$) with the ReLU Error Gradient ($dY$).
+Finally, as learned in Topic 5, we calculate the gradient for our convolution filter by convolving the original Input (*X*) with the ReLU Error Gradient (*dY*).
 ```math
 dW_1 = X * dY
 ```
@@ -2444,7 +2444,7 @@ As standard networks get deeper, they suffer from the **Vanishing Gradient Probl
 ```math
 H(x) = F(x) + x
 ```
-*   **The Gradient Superhighway:** During backpropagation, the derivative of $x$ is exactly $1$. This allows the error gradient to bypass the heavy convolutions and flow straight backward through the network at full strength, allowing networks to scale to 152+ layers.
+*   **The Gradient Superhighway:** During backpropagation, the derivative of *x* is exactly 1. This allows the error gradient to bypass the heavy convolutions and flow straight backward through the network at full strength, allowing networks to scale to 152+ layers.
 
 ### 2. Depthwise Separable Convolutions (MobileNet)
 A standard convolution mixes spatial data (edges/shapes) and channel data (depth) at the exact same time. This requires an enormous amount of parameters. MobileNet splits this into two hyper-efficient steps to run on edge devices:
@@ -2474,7 +2474,7 @@ If you stack multiple convolutional layers, the receptive field grows linearly w
 
 **Why stack instead of using one big filter?**
 Two $3 \times 3$ filters have an identical receptive field to one $5 \times 5$ filter. 
-*   However, one $5 \times 5$ filter has $25$ parameters. 
+*   However, one $5 \times 5$ filter has 25 parameters. 
 *   Two $3 \times 3$ filters have $9 + 9 = 18$ parameters. 
 *   Stacking reduces parameter count by **28%** and injects *two* non-linear ReLU activations instead of one, creating a much more expressive model!
 
@@ -2511,7 +2511,7 @@ Standard augmentation rotates or flips images. Modern state-of-the-art architect
 ### Placement Prep: Elite Architecture Flashcards
 
 **Q1: Prove mathematically how a Residual (Skip) Connection prevents the Vanishing Gradient problem during backpropagation.**
-*   **Answer:** In a standard network, the gradient is strictly multiplied by the derivative of the weights ($\frac{\partial L}{\partial w}$). If these derivatives are $< 1$, the gradient multiplies down to zero (vanishes) over deep layers. A Skip connection mathematically adds the input to the output: $H(x) = F(x) + x$. During backpropagation, the derivative of addition routes the gradient through two paths. The derivative of $x$ is $1$. Therefore, even if the gradient through the convolutional block ($F(x)$) vanishes to $0$, the exact same gradient passes cleanly through the "$+ x$" path completely untouched, allowing deep layers to receive strong error signals.
+*   **Answer:** In a standard network, the gradient is strictly multiplied by the derivative of the weights ($\frac{\partial L}{\partial w}$). If these derivatives are $< 1$, the gradient multiplies down to zero (vanishes) over deep layers. A Skip connection mathematically adds the input to the output: $H(x) = F(x) + x$. During backpropagation, the derivative of addition routes the gradient through two paths. The derivative of *x* is 1. Therefore, even if the gradient through the convolutional block ($F(x)$) vanishes to 0, the exact same gradient passes cleanly through the "$+ x$" path completely untouched, allowing deep layers to receive strong error signals.
 
 **Q2: What is the primary difference in parameter allocation between an Inception Module and a Depthwise Separable Convolution?**
 *   **Answer:** An Inception module runs spatial operations ($1 \times 1$, $3 \times 3$, $5 \times 5$) in parallel to capture multi-scale features, deliberately *increasing* the architectural complexity but bottlenecking parameters via $1 \times 1$ reductions. A Depthwise Separable Convolution actively splits a standard convolution into two serial steps (Spatial filtering per-channel, then $1 \times 1$ pointwise mixing across channels) explicitly to *minimize* the parameter count and FLOPs as heavily as possible for mobile deployment.
@@ -2533,9 +2533,9 @@ Standard Feedforward Networks (MLPs and CNNs) have two fatal flaws when dealing 
 
 ### Topic 1: The Vanilla RNN Architecture & The Hidden State
 
-Instead of processing an entire sentence at once, an RNN processes it one word (time step, $t$) at a time. 
+Instead of processing an entire sentence at once, an RNN processes it one word (time step, *t*) at a time. 
 
-At time step $t$, the RNN takes two distinct inputs:
+At time step *t*, the RNN takes two distinct inputs:
 1.  **$x_t$:** The current input (e.g., the exact word we are looking at right now).
 2.  **$h_{t-1}$:** The previous hidden state (the network's mathematical summary of all the words it has seen so far).
 
@@ -2553,7 +2553,7 @@ Just as CNNs share spatial weights (sliding a filter across an image), RNNs shar
 
 ### Topic 2: The Math of the Forward Pass
 
-Let's look at the exact mathematical equations happening inside a standard Vanilla RNN at a single time step ($t$).
+Let's look at the exact mathematical equations happening inside a standard Vanilla RNN at a single time step (*t*).
 
 **Step 1: Update the Hidden State (Memory)**
 The network concatenates the current input and the past memory, multiplies them by their respective shared weight matrices, adds a bias, and passes them through a $\tanh$ activation function to keep the values constrained between -1 and 1.
@@ -2579,8 +2579,8 @@ To find out how much the weight matrix $W_{hh}$ contributed to the error at time
 This creates a massive mathematical disaster. When you backpropagate through time, you are repeatedly multiplying the error gradient by the *exact same weight matrix* ($W_{hh}$) over and over again.
 
 Imagine tracing an error backward across a 50-word sentence. You must multiply $W_{hh}$ by itself 50 times ($W_{hh}^{50}$).
-*   **Vanishing Gradients:** If the eigenvalues (values) of the $W_{hh}$ matrix are even slightly less than $1$ (e.g., $0.9$), then $0.9^{50} \approx 0.005$. The gradient vanishes to zero. The network completely forgets early words in a long sentence.
-*   **Exploding Gradients:** If the values of $W_{hh}$ are slightly greater than $1$ (e.g., $1.1$), then $1.1^{50} \approx 117$. The gradient explodes to infinity, and the network mathematically crashes (outputs `NaN`).
+*   **Vanishing Gradients:** If the eigenvalues (values) of the $W_{hh}$ matrix are even slightly less than 1 (e.g., $0.9$), then $0.9^{50} \approx 0.005$. The gradient vanishes to zero. The network completely forgets early words in a long sentence.
+*   **Exploding Gradients:** If the values of $W_{hh}$ are slightly greater than 1 (e.g., $1.1$), then $1.1^{50} \approx 117$. The gradient explodes to infinity, and the network mathematically crashes (outputs `NaN`).
 
 Because of this specific structural flaw, Vanilla RNNs are virtually useless for sequences longer than 5 to 10 time steps. 
 
@@ -2606,8 +2606,8 @@ We will trace a Mini-RNN across $t=1$ and $t=2$, predicting a single value at th
 *   **Initial Memory:** $h_0 = 0$
 *   **Input Sequence:** $x_1 = 1$, $x_2 = 2$
 *   **Target Output:** $y = 4$
-*   **Shared Weights:** $W_{hx} = 2$, $W_{hh} = 1$, $W_{yh} = 1$ (All biases are $0$).
-*   **Activation:** ReLU (Derivative is $1$ if $z > 0$, else $0$).
+*   **Shared Weights:** $W_{hx} = 2$, $W_{hh} = 1$, $W_{yh} = 1$ (All biases are 0).
+*   **Activation:** ReLU (Derivative is 1 if $z > 0$, else 0).
 
 ![RNN Forward Pass](./assets/rnn_forward_pass.png)
 
@@ -2705,7 +2705,7 @@ dW_{hh} = dW_{hh(t=2)} + dW_{hh(t=1)} = 4 + 0 = \mathbf{4}
 *   **Answer:** This is required by the Multivariate Chain Rule. Because an RNN uses *Weight Sharing*, a single weight matrix ($W_{hx}$) directly influences the hidden state at $t=1$, and again at $t=2$, and again at $t=3$. Therefore, $W_{hx}$ is responsible for the error generated at *multiple independent points* in the computational graph. To find the total derivative of the loss with respect to that shared weight, you must calculate its local gradient at each time step and sum them together.
 
 **Q2: During BPTT, what would mathematically happen to the gradient flowing backwards from $t=2$ to $t=1$ if we used a ReLU activation and the forward pass hidden state at $t=2$ was negative?**
-*   **Answer:** If the forward pass at $t=2$ resulted in a negative number, the ReLU activation would have output $0$. During BPTT, the derivative of ReLU for a negative input is $0$. Therefore, $dz_2$ would be $0$, which means $dh_1 = dz_2 \cdot W_{hh} = 0$. The error gradient would be completely killed at $t=2$, and absolutely zero error would flow backward to time step 1.
+*   **Answer:** If the forward pass at $t=2$ resulted in a negative number, the ReLU activation would have output 0. During BPTT, the derivative of ReLU for a negative input is 0. Therefore, $dz_2$ would be 0, which means $dh_1 = dz_2 \cdot W_{hh} = 0$. The error gradient would be completely killed at $t=2$, and absolutely zero error would flow backward to time step 1.
 
 **Q3: If we had a sequence length of 100 time steps instead of 2, how many times would the error gradient be multiplied by $W_{hh}$ as it travels from $t=100$ back to $t=1$? What architectural problem does this cause?**
 *   **Answer:** The gradient would be multiplied by $W_{hh}$ exactly 99 times. Because we are repeatedly multiplying by the exact same matrix, if the values of $W_{hh}$ are $< 1$, the gradient will exponentially decay to zero (Vanishing Gradient). If they are $> 1$, it will exponentially grow to infinity (Exploding Gradient). This is why Vanilla RNNs physically cannot maintain long-term dependencies.
@@ -2739,7 +2739,7 @@ A **Bidirectional RNN** solves this by running two completely separate RNNs simu
 1.  **The Forward RNN:** Reads the sequence from left-to-right (e.g., $x_1 \rightarrow x_2 \rightarrow x_3$).
 2.  **The Backward RNN:** Reads the sequence from right-to-left (e.g., $x_3 \rightarrow x_2 \rightarrow x_1$).
 
-At each time step $t$, the network takes the hidden state from the Forward RNN ($\overrightarrow{h_t}$) and concatenates it with the hidden state from the Backward RNN ($\overleftarrow{h_t}$). 
+At each time step *t*, the network takes the hidden state from the Forward RNN ($\overrightarrow{h_t}$) and concatenates it with the hidden state from the Backward RNN ($\overleftarrow{h_t}$). 
 ```math
 h_t = [\overrightarrow{h_t}, \overleftarrow{h_t}]
 ```
@@ -2763,9 +2763,9 @@ An LSTM has two distinct memory streams flowing through time:
 2.  **The Cell State ($C_t$):** The long-term "internal memory." It acts like a conveyor belt running straight down the entire chain. It undergoes very minor linear operations, making it extremely easy for information—and error gradients—to flow unchanged across thousands of time steps.
 
 ### 2. The Three Mathematical Gates
-An LSTM uses neural network layers (Gates) to protect and control the Cell State. These gates primarily use the **Sigmoid ($\sigma$)** activation function, which outputs a number between $0$ and $1$. 
-*   An output of $0$ means "delete this completely." 
-*   An output of $1$ means "let this completely through."
+An LSTM uses neural network layers (Gates) to protect and control the Cell State. These gates primarily use the **Sigmoid ($\sigma$)** activation function, which outputs a number between 0 and 1. 
+*   An output of 0 means "delete this completely." 
+*   An output of 1 means "let this completely through."
 
 **Gate 1: The Forget Gate ($f_t$)**
 Should we remember the past, or wipe the slate clean? The Forget Gate looks at the previous hidden state ($h_{t-1}$) and the current input ($x_t$), and outputs a number between 0 and 1 for each number in the Cell State.
@@ -2793,14 +2793,14 @@ In an LSTM, the long-term Cell State ($C_t$) is updated using **Addition**:
 ```math
 C_t = (f_t \cdot C_{t-1}) + (i_t \cdot \tilde{C}_t)
 ```
-Because the fundamental operation keeping the memory alive is addition ($+$) rather than matrix multiplication, the derivative flowing backward through the Cell State is $1$. The LSTM creates a "Gradient Superhighway" (conceptually identical to a ResNet Skip Connection), allowing gradients to flow backward through thousands of time steps without vanishing!
+Because the fundamental operation keeping the memory alive is addition ($+$) rather than matrix multiplication, the derivative flowing backward through the Cell State is 1. The LSTM creates a "Gradient Superhighway" (conceptually identical to a ResNet Skip Connection), allowing gradients to flow backward through thousands of time steps without vanishing!
 
 ---
 
 ### Topic 5 Placement Prep: Elite LSTM Flashcards
 
 **Q1: In an LSTM, why do the Gates use a Sigmoid ($\sigma$) activation function, but the Candidate Values ($\tilde{C}_t$) use a $\tanh$ activation function?**
-*   **Answer:** Sigmoid restricts values between $0$ and $1$. This perfectly mimics a physical "valve" or percentage—$0$ means the gate is completely closed (block the data), and $1$ means the gate is completely open (pass the data). $\tanh$ restricts values between $-1$ and $1$. This is required for candidate values because the network must be able to *subtract* (decrease) or *add* (increase) to the state. If candidate values used Sigmoid, the Cell State could only ever grow larger and would eventually explode.
+*   **Answer:** Sigmoid restricts values between 0 and 1. This perfectly mimics a physical "valve" or percentage—0 means the gate is completely closed (block the data), and 1 means the gate is completely open (pass the data). $\tanh$ restricts values between $-1$ and 1. This is required for candidate values because the network must be able to *subtract* (decrease) or *add* (increase) to the state. If candidate values used Sigmoid, the Cell State could only ever grow larger and would eventually explode.
 
 **Q2: Explain how the Forget Gate ($f_t$) physically dictates the flow of gradients during Backpropagation Through Time.**
 *   **Answer:** The Cell State update equation is $C_t = f_t \cdot C_{t-1} + \dots$. During backpropagation, the error gradient flowing back to the previous cell state ($C_{t-1}$) is directly multiplied by $f_t$. If the network learned that a piece of memory was useless and set $f_t \approx 0$, it completely shuts off the gradient flow for that path. If $f_t \approx 1$, the gradient flows perfectly backwards without vanishing. The LSTM dynamically learns exactly how far back in time the gradients should travel.
@@ -2897,7 +2897,7 @@ di_1 = dC_1 \cdot \tilde{C}_1 = 0.92 \cdot 0.96 \approx \mathbf{0.88}
 ```math
 d\tilde{C}_1 = dC_1 \cdot i_1 = 0.92 \cdot 0.88 \approx \mathbf{0.81}
 ```
-**Step 3: Calculating the Final Weight Updates ($dW$)**
+**Step 3: Calculating the Final Weight Updates (*dW*)**
 We now pass the gate errors through their respective activation function derivatives to update the actual weights. 
 *(Note: The derivative of Sigmoid is $\sigma \cdot (1 - \sigma)$).*
 ```math
@@ -2939,7 +2939,7 @@ Standard LSTMs are powerful, but they have a few architectural blind spots that 
 **The Solution:** A Bidirectional LSTM runs two completely independent LSTMs at the exact same time. 
 *   One LSTM processes the sequence forward.
 *   One LSTM processes the sequence strictly in reverse.
-*   The final output for any given time step ($t$) is the concatenation of the forward Hidden State and the backward Hidden State: 
+*   The final output for any given time step (*t*) is the concatenation of the forward Hidden State and the backward Hidden State: 
 ```math
 h_t = [\overrightarrow{h_t}, \overleftarrow{h_t}]
 ```
@@ -2995,14 +2995,14 @@ To tell the network *where* a word sits in a sentence, we generate a brand new v
 Instead of using learned weights, the authors used fixed, hardcoded Sine and Cosine waves of varying frequencies. 
 
 **The Formulas:**
-For a given position in the sentence ($pos$) and a given dimension index in the vector ($i$):
+For a given position in the sentence (*pos*) and a given dimension index in the vector (*i*):
 ```math
 PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)
 ```
 ```math
 PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)
 ```
-*   *Even dimensions ($2i$) use Sine.*
+*   *Even dimensions (*2i*) use Sine.*
 *   *Odd dimensions ($2i+1$) use Cosine.*
 
 ![Transformer Positional Encoding](./assets/transformer_pe.png)
@@ -3045,7 +3045,7 @@ The final input that gets passed into the Transformer's Attention layers is simp
 *   **Answer:** If we use raw integers, a 5,000-word document would have a final position value of 5,000. This massive number would completely dwarf the values in the word embedding (which are usually normalized around 0), destroying the word's meaning. Furthermore, sine and cosine waves are bounded strictly between -1 and 1, ensuring mathematical stability regardless of sequence length. 
 
 **Q3: What is the specific mathematical property of Sine and Cosine encodings that helps the network learn "relative" positions (e.g., understanding that Word A is exactly 3 words away from Word B)?**
-*   **Answer:** For any fixed offset $k$ (e.g., a distance of 3 words), the positional encoding at position $pos+k$ can be represented as a strict linear transformation (a rotation matrix) of the positional encoding at $pos$. Because neural networks are highly optimized for learning linear transformations, this trigonometric property makes it incredibly easy for the Attention Mechanism to learn relative distances between words.
+*   **Answer:** For any fixed offset *k* (e.g., a distance of 3 words), the positional encoding at position $pos+k$ can be represented as a strict linear transformation (a rotation matrix) of the positional encoding at *pos*. Because neural networks are highly optimized for learning linear transformations, this trigonometric property makes it incredibly easy for the Attention Mechanism to learn relative distances between words.
 
 **Q4: If you visualize a Transformer's Positional Encoding matrix as a heatmap, what distinct visual pattern emerges and what is its functional significance?**
 *   **Answer:** The visualization reveals a distinct "clock-like" pattern. The lower embedding dimensions (left side of the heatmap) oscillate very rapidly between -1 and 1, acting like the "seconds-hand" of a clock to provide fine-grained, localized position data for nearby words. The higher embedding dimensions (right side) oscillate very slowly, acting like the "hours-hand" to provide broad, global context across the entire sequence. Together, they generate a mathematically unique, continuous fingerprint for every single position.
@@ -3055,13 +3055,13 @@ The final input that gets passed into the Transformer's Attention layers is simp
 
 The absolute heart of a Transformer is the **Attention Mechanism**. In an LSTM, a word gets its context solely from the hidden state of the word immediately before it. In a Transformer, every single word looks at *every other word in the sentence simultaneously* and mathematically decides which words are most relevant to its own meaning.
 
-To do this, the network relies on the concept of **Queries ($Q$)**, **Keys ($K$)**, and **Values ($V$)**.
+To do this, the network relies on the concept of **Queries (*Q*)**, **Keys (*K*)**, and **Values (*V*)**.
 
 ### 1. The Database Analogy
 Think of a traditional library database:
-*   **Query ($Q$):** What you type into the search bar (e.g., "Machine Learning").
-*   **Key ($K$):** The titles/tags of all the books in the library (e.g., "Intro to AI", "Cooking 101").
-*   **Value ($V$):** The actual text inside the book you retrieve.
+*   **Query (*Q*):** What you type into the search bar (e.g., "Machine Learning").
+*   **Key (*K*):** The titles/tags of all the books in the library (e.g., "Intro to AI", "Cooking 101").
+*   **Value (*V*):** The actual text inside the book you retrieve.
 
 In a Transformer, *every single word* in the sentence acts as a Query, a Key, and a Value simultaneously. 
 For example, in the sentence *"The bank of the river"*, the word *"bank"* creates a Query asking: *"I am a bank, do any of you other words give me context?"* The word *"river"* has a Key that says *"I am a body of water."* The Query and Key match, so *"bank"* retrieves the Value of *"river"* to understand that it is a muddy riverbank, not a financial institution.
@@ -3079,14 +3079,14 @@ Let's break down exactly what this matrix math is doing step-by-step.
 ### 3. The Step-by-Step Matrix Calculus
 
 **Step 1: The Dot Product ($Q \cdot K^T$)**
-We take the matrix of all Queries ($Q$) and multiply it by the transposed matrix of all Keys ($K^T$). 
+We take the matrix of all Queries (*Q*) and multiply it by the transposed matrix of all Keys ($K^T$). 
 *   Mathematically, a dot product measures *similarity*. If two vectors point in the same direction, their dot product is a large positive number. 
 *   This step creates a grid of **Raw Scores**, showing exactly how much every word relates to every other word.
 
 **Step 2: The Scaling Factor ($\div \sqrt{d_k}$)**
 We divide the raw scores by the square root of the embedding dimension ($d_k$). 
 *   *Why?* If the dimensions are very large, dot products yield massive numbers (e.g., $150, 400$). 
-*   If we feed massive numbers into a Softmax function, it gets pushed into the extreme "tails" of the curve, causing the gradient to vanish to $0$ during backpropagation. Scaling keeps the numbers small and stabilizes the gradients.
+*   If we feed massive numbers into a Softmax function, it gets pushed into the extreme "tails" of the curve, causing the gradient to vanish to 0 during backpropagation. Scaling keeps the numbers small and stabilizes the gradients.
 
 **Step 3: The Softmax ($\text{softmax}$)**
 We apply a row-wise Softmax to the scaled scores. 
@@ -3094,7 +3094,7 @@ We apply a row-wise Softmax to the scaled scores.
 *   These are the **Attention Weights**. (e.g., Word 1 decides to pay 90% attention to itself, and 10% attention to Word 2).
 
 **Step 4: Contextualizing the Values ($\cdot V$)**
-Finally, we multiply our Attention Weights by the Value matrix ($V$). 
+Finally, we multiply our Attention Weights by the Value matrix (*V*). 
 *   If Word 1's attention weights are $[0.9, 0.1]$, its final output vector will physically be $90\%$ of Word 1's value added to $10\%$ of Word 2's value. 
 *   The output is a mathematically blended vector. The word has been perfectly contextualized by its surroundings!
 
@@ -3103,10 +3103,10 @@ Finally, we multiply our Attention Weights by the Value matrix ($V$).
 ### Topic 2 Placement Prep: Elite Attention Flashcards
 
 **Q1: Explain why the operation is called *Scaled* Dot-Product Attention. What specific problem does the scaling factor solve during neural network training?**
-*   **Answer:** It is scaled by dividing the dot product by $\sqrt{d_k}$ (the square root of the dimension of the key vectors). As the dimension $d_k$ grows, the dot product of $Q$ and $K$ produces exponentially larger numbers. When these large numbers are passed into the Softmax function, the Softmax becomes a "hard max" (outputting 1 for the highest value and 0 for everything else). Because the curve of Softmax is completely flat at these extremes, the derivative becomes $0$, completely killing the gradient and halting learning. Scaling stabilizes the variance to $1$, ensuring healthy gradient flow.
+*   **Answer:** It is scaled by dividing the dot product by $\sqrt{d_k}$ (the square root of the dimension of the key vectors). As the dimension $d_k$ grows, the dot product of *Q* and *K* produces exponentially larger numbers. When these large numbers are passed into the Softmax function, the Softmax becomes a "hard max" (outputting 1 for the highest value and 0 for everything else). Because the curve of Softmax is completely flat at these extremes, the derivative becomes 0, completely killing the gradient and halting learning. Scaling stabilizes the variance to 1, ensuring healthy gradient flow.
 
-**Q2: What is the computational complexity of the Self-Attention mechanism with respect to the sequence length ($N$), and why is this a massive bottleneck for Large Language Models?**
-*   **Answer:** The complexity is $O(N^2 \cdot d)$, where $N$ is the sequence length (number of words) and $d$ is the embedding dimension. Because every single word (Query) must calculate a dot product with every other word (Key), creating an $N \times N$ attention matrix, the compute and memory requirements scale quadratically. If you double the size of the context window (e.g., from 4,000 to 8,000 tokens), the computational cost quadruples. 
+**Q2: What is the computational complexity of the Self-Attention mechanism with respect to the sequence length (*N*), and why is this a massive bottleneck for Large Language Models?**
+*   **Answer:** The complexity is $O(N^2 \cdot d)$, where *N* is the sequence length (number of words) and *d* is the embedding dimension. Because every single word (Query) must calculate a dot product with every other word (Key), creating an $N \times N$ attention matrix, the compute and memory requirements scale quadratically. If you double the size of the context window (e.g., from 4,000 to 8,000 tokens), the computational cost quadruples. 
 
-**Q3: In a standard Transformer, how are the $Q$, $K$, and $V$ matrices actually created from the input embeddings?**
-*   **Answer:** The input embedding matrix ($X$) is multiplied by three separate, distinct, learnable weight matrices ($W^Q$, $W^K$, and $W^V$). So, $Q = X \cdot W^Q$, $K = X \cdot W^K$, and $V = X \cdot W^V$. The network literally learns *how* to ask questions ($W^Q$), *how* to advertise itself to other words ($W^K$), and *what* underlying meaning to provide when selected ($W^V$).
+**Q3: In a standard Transformer, how are the *Q*, *K*, and *V* matrices actually created from the input embeddings?**
+*   **Answer:** The input embedding matrix (*X*) is multiplied by three separate, distinct, learnable weight matrices ($W^Q$, $W^K$, and $W^V$). So, $Q = X \cdot W^Q$, $K = X \cdot W^K$, and $V = X \cdot W^V$. The network literally learns *how* to ask questions ($W^Q$), *how* to advertise itself to other words ($W^K$), and *what* underlying meaning to provide when selected ($W^V$).
