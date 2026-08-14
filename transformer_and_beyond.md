@@ -148,7 +148,7 @@ Let's look at the classic ambiguous word problem: *"I sat on the bank of the riv
 
 1.  **Before Attention (Raw Embeddings):** The word *"bank"* enters the network as a raw vector. Because "bank" is most commonly associated with money, its raw embedding vector will have very high values in the mathematical dimensions representing "Finance," and very low values representing "Nature." It is isolated and confused.
 2.  **The Attention Weights:** During the $Q \cdot K^T$ dot product, the network realizes that the word *"bank"* appears right next to the word *"river"*. The Softmax outputs a probability distribution dictating that *"bank"* should pay $90\%$ of its attention to *"river"*, and only $10\%$ to itself.
-3.  **After Attention (The Vector Blend):** We multiply the weights by the Value matrix. The new vector for *"bank"* becomes a literal mathematical blend: $(0.10 \times \text{Raw\_Bank}) + (0.90 \times \text{Raw\_River})$. 
+3.  **After Attention (The Vector Blend):** We multiply the weights by the Value matrix. The new vector for *"bank"* becomes a literal mathematical blend: $(0.10 \times \text{Raw-Bank}) + (0.90 \times \text{Raw-River})$. 
 
 Because $90\%$ of the *"river"* vector was poured into the *"bank"* vector, the financial dimensions of *"bank"* are mathematically crushed, and the nature dimensions are heavily amplified. The output vector exiting the Attention block is a completely new context-aware vector that definitively means *"a muddy riverbank."*
 
