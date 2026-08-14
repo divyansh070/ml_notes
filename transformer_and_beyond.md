@@ -594,7 +594,7 @@ We select the word with the highest probability (0.98): `"Bonjour"`.
 
 Assume the Decoder output `"Bonjour"`. Our French target was `"Bonjour"`. The Loss ($L$) is $0.00$.
 
-*(Insert `assets/backprop_explicit_chain_rule.png` here)*
+![Backpropagation Chain Rule Trace](./assets/backprop_explicit_chain_rule.png)
 
 But let's assume we are *training*. The error ($dL = \mathbf{2.0}$) flows backwards. The fundamental goal of Backprop is to allocate this $2.0$ penalty among all the initial shared weights ($W_Q, W_K, W_V$) in both the Encoder and Decoder. 
 
