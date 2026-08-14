@@ -2970,3 +2970,71 @@ collapses to simply $C_t = C_{t-1}$. The Cell State passes forward completely un
 h_1 = o_1 \cdot \tanh(C_1)
 ```
 By the Product Rule, the error flowing back into the Cell State is multiplied by $o_1$. If the Output Gate was partially closed (e.g., $o_1 = 0.5$), it shielded the internal Cell State from the final output, and therefore shields it from receiving the full magnitude of the resulting error.
+
+
+## Part 7: Transformers and the Attention Mechanism
+
+Recurrent Neural Networks (RNNs/LSTMs) revolutionized natural language processing, but they had a fatal bottleneck: **Sequential Processing**. To process word 100, an LSTM mathematically must process words 1 through 99 first. This means they cannot be parallelized across GPUs, making them incredibly slow to train on massive datasets.
+
+In 2017, Google published *Attention is All You Need*, introducing the **Transformer**. The Transformer completely abandons recurrence. Instead, it feeds the *entire sentence into the network at the exact same time*.
+
+---
+
+### Topic 1: Input Processing (Replacing the Sequence)
+
+Because the Transformer reads everything simultaneously, the network natively has no concept of order. To a basic Transformer, the sentence *"The dog bit the man"* and *"The man bit the dog"* look mathematically identical. We must artificially inject the concept of "time" and "order" into the data before the network reads it.
+
+#### Step 1: Tokenization and Embeddings
+First, we convert raw text into a format the network can compute.
+1.  **Tokenization:** The text is split into chunks (words or sub-words) and mapped to integer IDs based on a dictionary. (e.g., "AI" $\rightarrow$ `894`).
+2.  **Embedding:** Each integer is mapped to a massive, learnable vector (usually $d_{model} = 512$). This vector represents the semantic meaning of the word. 
+
+#### Step 2: Positional Encoding (The Mathematical Timestamp)
+To tell the network *where* a word sits in a sentence, we generate a brand new vector of the exact same size ($d_{model} = 512$) called a **Positional Encoding**. 
+
+Instead of using learned weights, the authors used fixed, hardcoded Sine and Cosine waves of varying frequencies. 
+
+**The Formulas:**
+For a given position in the sentence ($pos$) and a given dimension index in the vector ($i$):
+$$ PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right) $$
+$$ PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right) $$
+*   *Even dimensions ($2i$) use Sine.*
+*   *Odd dimensions ($2i+1$) use Cosine.*
+
+*(Insert `assets/positional_encoding_heatmap.png` here)*
+
+#### Step 3: The Hands-On Math
+Let's calculate the Positional Encoding for a tiny embedding where $d_{model} = 4$. We want the encoding for the **first word** in the sentence ($pos = 0$) and the **second word** ($pos = 1$).
+
+**For $pos = 0$ (The First Word):**
+*   Dim 0 (Even, $i=0$): $\sin(0 / 10000^0) = \sin(0) = \mathbf{0}$
+*   Dim 1 (Odd, $i=0$): $\cos(0 / 10000^0) = \cos(0) = \mathbf{1}$
+*   Dim 2 (Even, $i=1$): $\sin(0 / 10000^{2/4}) = \sin(0) = \mathbf{0}$
+*   Dim 3 (Odd, $i=1$): $\cos(0 / 10000^{2/4}) = \cos(0) = \mathbf{1}$
+*   $PE_0 = [0, 1, 0, 1]$
+
+**For $pos = 1$ (The Second Word):**
+*   Dim 0 (Even, $i=0$): $\sin(1 / 10000^0) = \sin(1) \approx \mathbf{0.84}$
+*   Dim 1 (Odd, $i=0$): $\cos(1 / 10000^0) = \cos(1) \approx \mathbf{0.54}$
+*   Dim 2 (Even, $i=1$): The denominator is $10000^{2/4} = 100$. $\sin(1 / 100) = \sin(0.01) \approx \mathbf{0.01}$
+*   Dim 3 (Odd, $i=1$): $\cos(1 / 100) = \cos(0.01) \approx \mathbf{1.00}$
+*   $PE_1 = [0.84, 0.54, 0.01, 1.00]$
+
+Notice how the lower dimensions (Dim 0 and 1) changed drastically from word 0 to word 1. However, the higher dimensions (Dim 2 and 3) barely changed at all. This acts like a clock: the lower dimensions are the fast-moving seconds hand, and the higher dimensions are the slow-moving hours hand. Every position gets a totally unique "timestamp."
+
+#### Step 4: Addition (The Final Input)
+The final input that gets passed into the Transformer's Attention layers is simply the element-wise **addition** of the Semantic Embedding and the Positional Encoding.
+$$ \text{Final Input} = \text{Embedding} + \text{Positional Encoding} $$
+
+---
+
+### Topic 1 Placement Prep: Elite Input Processing Flashcards
+
+**Q1: Why did the Transformer authors choose to add the Positional Encodings to the Word Embeddings, rather than concatenating them? Doesn't adding them destroy the semantic meaning of the word?**
+*   **Answer:** They used addition to save memory and parameters. If you concatenate a 512-dim embedding with a 512-dim positional encoding, your input suddenly becomes 1024 dimensions, which explodes the parameter count of the initial dense layers. Adding them does introduce a slight amount of "noise" to the semantic meaning, but in extremely high-dimensional space (like 512D), vectors have enough capacity to store both spatial and semantic information simultaneously without catastrophic interference. 
+
+**Q2: Why use complex Sine and Cosine waves for Positional Encoding instead of just assigning simple integers (e.g., Word 1 = 1, Word 2 = 2)?**
+*   **Answer:** If we use raw integers, a 5,000-word document would have a final position value of 5,000. This massive number would completely dwarf the values in the word embedding (which are usually normalized around 0), destroying the word's meaning. Furthermore, sine and cosine waves are bounded strictly between -1 and 1, ensuring mathematical stability regardless of sequence length. 
+
+**Q3: What is the specific mathematical property of Sine and Cosine encodings that helps the network learn "relative" positions (e.g., understanding that Word A is exactly 3 words away from Word B)?**
+*   **Answer:** For any fixed offset $k$ (e.g., a distance of 3 words), the positional encoding at position $pos+k$ can be represented as a strict linear transformation (a rotation matrix) of the positional encoding at $pos$. Because neural networks are highly optimized for learning linear transformations, this trigonometric property makes it incredibly easy for the Attention Mechanism to learn relative distances between words.
