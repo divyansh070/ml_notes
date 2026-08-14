@@ -138,3 +138,62 @@ Finally, we multiply our Attention Weights by the Value matrix (*V*).
 
 **Q3: In a standard Transformer, how are the *Q*, *K*, and *V* matrices actually created from the input embeddings?**
 *   **Answer:** The input embedding matrix (*X*) is multiplied by three separate, distinct, learnable weight matrices ($W^Q$, $W^K$, and $W^V$). So, $Q = X \cdot W^Q$, $K = X \cdot W^K$, and $V = X \cdot W^V$. The network literally learns *how* to ask questions ($W^Q$), *how* to advertise itself to other words ($W^K$), and *what* underlying meaning to provide when selected ($W^V$).
+
+
+
+## Topic 3: Multi-Head Attention
+
+Using a single Attention mechanism (Single-Head Attention) presents a major semantic bottleneck. If a word can only calculate one set of attention weights, it tends to just heavily average itself with the most dominant related word in the sentence, missing out on nuanced grammar.
+
+For example, in the sentence *"The quick brown fox jumps"*, the word *"fox"* needs to simultaneously attend to *"quick"* and *"brown"* (adjectives), as well as *"jumps"* (the verb). 
+
+To allow the network to track multiple different grammatical relationships at the exact same time, the authors introduced **Multi-Head Attention**.
+
+### 1. The Architecture of Splitting
+
+Instead of calculating one massive attention score for the entire $512$-dimensional embedding, the Transformer logically splits the embedding into multiple smaller "Heads." 
+
+If our model has $d_{model} = 512$ and uses $h = 8$ heads, the dimensionality of each individual head ($d_k$) becomes:
+
+```math
+d_k = \frac{d_{model}}{h} = \frac{512}{8} = 64
+```
+
+The network creates 8 completely independent sets of $Q$, $K$, and $V$ weight matrices. Each head projects the input down into a 64-dimensional space, and performs the Scaled Dot-Product Attention completely independently.
+
+![Multi-Head Attention](./assets/multi_head_attention.png)
+
+### 2. The Multi-Head Math
+
+Because the heads are independent, Head 1 might learn to strictly look for subject-verb relationships, while Head 2 learns to strictly look for negative modifiers (like the word "not"). 
+
+Mathematically, the output of each specific head ($i$) is calculated as:
+
+```math
+\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)
+```
+
+### 3. Concatenation and the Output Weight ($W^O$)
+
+After all 8 heads have finished their independent attention calculations, they each output a matrix of dimension $64$. 
+
+Because the next layer of the neural network strictly expects an input of dimension $512$, we simply concatenate the 8 heads back together side-by-side ($8 \times 64 = 512$). 
+
+Finally, to allow the network to blend the insights from all 8 heads together into one unified context, the concatenated matrix is multiplied by a final, learnable output weight matrix ($W^O$):
+
+```math
+\text{MultiHead}(Q, K, V) = \text{Concat}(\text{head}_1, \dots, \text{head}_h)W^O
+```
+
+---
+
+### Topic 3 Placement Prep: Elite Multi-Head Flashcards
+
+**Q1: Does using 8 heads instead of 1 head increase the computational complexity of the Attention Mechanism?**
+*   **Answer:** No, it does not. Because the embedding dimension is divided by the number of heads ($d_k = d_{model} / h$), the total amount of matrix multiplication remains exactly the same. We are simply performing 8 smaller matrix multiplications in parallel instead of 1 massive matrix multiplication. The computational cost is identical, but the semantic capacity is drastically improved.
+
+**Q2: In a standard Transformer, if we increase the number of heads from 8 to 16, what must mathematically happen to the dimension of each head ($d_k$)? What is the potential risk of doing this?**
+*   **Answer:** If $d_{model}$ remains 512, increasing to 16 heads means $d_k$ shrinks to exactly 32 ($512 / 16$). The risk is that if $d_k$ becomes too small, the representation capacity of the individual Query and Key vectors becomes too weak. A 32-dimensional vector may not have enough numerical space to accurately encode complex semantic features, causing the dot-product matching to degrade and the model's performance to drop.
+
+**Q3: Explain the role of the final Output Weight matrix ($W^O$) in Multi-Head Attention.**
+*   **Answer:** When the individual heads are concatenated back together, their features are completely isolated from one another (e.g., the first 64 dimensions only contain data from Head 1). The $W^O$ matrix acts as a linear projection that mathematically mixes and blends the dimensions across all the heads. It allows the network to synthesize the independent grammatical insights (e.g., subject-verb context combined with adjective-noun context) into a single, cohesive representation before passing it to the Feed-Forward network.
