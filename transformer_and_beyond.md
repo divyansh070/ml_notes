@@ -140,6 +140,20 @@ Finally, we multiply our Attention Weights by the Value matrix (*V*).
 *   **Answer:** The input embedding matrix (*X*) is multiplied by three separate, distinct, learnable weight matrices ($W^Q$, $W^K$, and $W^V$). So, $Q = X \cdot W^Q$, $K = X \cdot W^K$, and $V = X \cdot W^V$. The network literally learns *how* to ask questions ($W^Q$), *how* to advertise itself to other words ($W^K$), and *what* underlying meaning to provide when selected ($W^V$).
 
 
+### 4. Visualizing the Vector Transformation (Before vs. After)
+
+The true power of Attention is not just calculating percentages; it is how those percentages physically alter the semantic meaning of the embedding vectors via the Value matrix multiplication.
+
+Let's look at the classic ambiguous word problem: *"I sat on the bank of the river."*
+
+1.  **Before Attention (Raw Embeddings):** The word *"bank"* enters the network as a raw vector. Because "bank" is most commonly associated with money, its raw embedding vector will have very high values in the mathematical dimensions representing "Finance," and very low values representing "Nature." It is isolated and confused.
+2.  **The Attention Weights:** During the $Q \cdot K^T$ dot product, the network realizes that the word *"bank"* appears right next to the word *"river"*. The Softmax outputs a probability distribution dictating that *"bank"* should pay $90\%$ of its attention to *"river"*, and only $10\%$ to itself.
+3.  **After Attention (The Vector Blend):** We multiply the weights by the Value matrix. The new vector for *"bank"* becomes a literal mathematical blend: $(0.10 \times \text{Raw\_Bank}) + (0.90 \times \text{Raw\_River})$. 
+
+Because $90\%$ of the *"river"* vector was poured into the *"bank"* vector, the financial dimensions of *"bank"* are mathematically crushed, and the nature dimensions are heavily amplified. The output vector exiting the Attention block is a completely new context-aware vector that definitively means *"a muddy riverbank."*
+
+![Vector Transformation (Before vs After)](./assets/vectors_before_after_attention.png)
+
 
 ## Topic 3: Multi-Head Attention
 
@@ -326,5 +340,7 @@ In the original Transformer paper, $W_1$ expands the $512$-dimensional embedding
 
 **Q3: The parameters of the FFN account for roughly two-thirds of a Transformer's total parameter count. If Attention is the core innovation, why is the FFN so massively oversized (e.g., expanding from 512 to 2048)?**
 *   **Answer:** Research (like the "Transformer Feed-Forward Layers Are Key-Value Memories" paper) indicates that the FFN acts as a massive, un-normalized Key-Value memory database for the model's world knowledge. The expansion to 2048 dimensions gives the hidden layer enough neurons to store factual associations (e.g., if the input vector activates the pattern for "Eiffel", the expanded neurons trigger the pattern for "Tower" and "Paris"). Without an oversized FFN, the model would be excellent at grammar (via Attention) but would hallucinate facts constantly due to a lack of memory capacity.
+
+
 **Q4: The original Transformer paper used ReLU in the Feed-Forward Network, but modern models (like GPT-3, LLaMA, and ViT) almost exclusively use GeLU (Gaussian Error Linear Unit) or SwiGLU. Why?**
 *   **Answer:** ReLU is a rigid function: it strictly outputs $0$ for any negative input. This can cause the "Dying ReLU" problem, where neurons get permanently stuck outputting zero and stop updating. GeLU is a smoother, probabilistic variation of ReLU. Instead of a hard cutoff at $0$, it has a gentle, smooth curve that allows a tiny amount of negative values to pass through. This smoothness ensures that gradients never completely die, leading to much faster convergence and deeper mathematical representations during training.
