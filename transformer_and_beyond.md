@@ -140,20 +140,21 @@ Finally, we multiply our Attention Weights by the Value matrix (*V*).
 *   **Answer:** The input embedding matrix (*X*) is multiplied by three separate, distinct, learnable weight matrices ($W^Q$, $W^K$, and $W^V$). So, $Q = X \cdot W^Q$, $K = X \cdot W^K$, and $V = X \cdot W^V$. The network literally learns *how* to ask questions ($W^Q$), *how* to advertise itself to other words ($W^K$), and *what* underlying meaning to provide when selected ($W^V$).
 
 
-### 4. Visualizing the Vector Transformation (Before vs. After)
+### 4. Geometric Intuition: Moving Through Semantic Space
 
-The true power of Attention is not just calculating percentages; it is how those percentages physically alter the semantic meaning of the embedding vectors via the Value matrix multiplication.
+Instead of just looking at the math, it is incredibly helpful to visualize Self-Attention as physical movement through a 3D semantic coordinate system (as popularized by educators like CampusX).
+
+Imagine an embedding space with a **"Financial Axis"** and a **"Nature Axis"**. 
 
 Let's look at the classic ambiguous word problem: *"I sat on the bank of the river."*
 
-1.  **Before Attention (Raw Embeddings):** The word *"bank"* enters the network as a raw vector. Because "bank" is most commonly associated with money, its raw embedding vector will have very high values in the mathematical dimensions representing "Finance," and very low values representing "Nature." It is isolated and confused.
-2.  **The Attention Weights:** During the $Q \cdot K^T$ dot product, the network realizes that the word *"bank"* appears right next to the word *"river"*. The Softmax outputs a probability distribution dictating that *"bank"* should pay $90\%$ of its attention to *"river"*, and only $10\%$ to itself.
-3.  **After Attention (The Vector Blend):** We multiply the weights by the Value matrix. The new vector for *"bank"* becomes a literal mathematical blend: $(0.10 \times \text{Raw-Bank}) + (0.90 \times \text{Raw-River})$. 
+1.  **Before Attention (Raw Embeddings):** The word *"bank"* enters the network as a raw vector. Because "bank" is most commonly associated with money, its raw embedding vector sits high up on the Financial axis, far away from nature.
+2.  **The Attention Weights:** During the $Q \cdot K^T$ dot product, the network realizes that the word *"bank"* appears right next to the word *"river"*. The Softmax outputs a probability distribution dictating that *"bank"* should pay $90\%$ of its attention to *"river"*.
+3.  **After Attention (The Vector Blend):** We multiply the weights by the Value matrix. Because $90\%$ of the *"river"* vector was poured into the *"bank"* vector, the *"bank"* vector is literally **pulled through the 3D embedding space** toward *"river"*.
 
-Because $90\%$ of the *"river"* vector was poured into the *"bank"* vector, the financial dimensions of *"bank"* are mathematically crushed, and the nature dimensions are heavily amplified. The output vector exiting the Attention block is a completely new context-aware vector that definitively means *"a muddy riverbank."*
+The output vector exiting the Attention block has physically migrated away from the Financial corner and now sits closely alongside *"river"* in the Nature corner. The network now definitively knows we are talking about a muddy riverbank!
 
-![Vector Transformation (Before vs After)](./assets/vectors_before_after_attention.png)
-
+![Geometric Intuition of Attention](./assets/vectors_before_after_attention.png)
 
 ## Topic 3: Multi-Head Attention
 

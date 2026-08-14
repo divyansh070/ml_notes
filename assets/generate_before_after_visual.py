@@ -1,85 +1,54 @@
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, FancyArrowPatch
 import numpy as np
 
-# --- CONFIGURATION ---
-C_RAW = '#f9ebea'      # Light Red for Raw Embeddings
-C_WEIGHTS = '#fdf2e9'  # Light Orange for Attention Weights
-C_FINAL = '#e8f8f5'    # Light Teal for Contextualized Vectors
+fig = plt.figure(figsize=(12, 9))
+ax = fig.add_subplot(111, projection='3d')
 
-def draw_vector(ax, x, y, values, title, color):
-    """Draws a vertical vector of squares."""
-    ax.text(x + 0.5, y + len(values) + 0.3, title, ha='center', va='bottom', fontsize=11, fontweight='bold')
-    for i, val in enumerate(reversed(values)):
-        rect = Rectangle((x, y + i), 1, 1, facecolor=color, edgecolor='black', lw=1.5)
-        ax.add_patch(rect)
-        ax.text(x + 0.5, y + i + 0.5, f"{val:.1f}", ha='center', va='center', fontsize=11, fontweight='bold')
+# 1. Define the 3D Semantic Space Coordinates
+# [X (Financial), Y (Nature), Z (Neutral Dimension)]
+bank_raw = np.array([0.9, 0.1, 0.4])   # High Finance, Low Nature
+river_raw = np.array([0.1, 0.9, 0.5])  # Low Finance, High Nature
 
-def draw_arrow(ax, start, end, text=None):
-    arrow = FancyArrowPatch(start, end, arrowstyle='-|>', mutation_scale=15, color='gray', lw=2)
-    ax.add_patch(arrow)
-    if text:
-        ax.text((start[0]+end[0])/2, (start[1]+end[1])/2 + 0.2, text, ha='center', va='bottom', 
-                fontsize=10, fontweight='bold', bbox=dict(facecolor='white', edgecolor='none', alpha=0.9))
+# Attention Math: 10% self, 90% River
+bank_contextualized = (0.1 * bank_raw) + (0.9 * river_raw) 
+# Results in roughly [0.18, 0.82, 0.49] -> Pulled away from Finance, towards Nature!
 
-# ==========================================
-# BEFORE VS. AFTER ATTENTION VISUALIZER
-# ==========================================
-fig, ax = plt.subplots(figsize=(16, 7))
-ax.set_xlim(0, 18)
-ax.set_ylim(0, 7)
-ax.axis('off')
+# 2. Plot the Points
+ax.scatter(*bank_raw, color='red', s=150, edgecolor='black', label='Raw "Bank"', zorder=5)
+ax.scatter(*river_raw, color='green', s=150, edgecolor='black', label='Raw "River"', zorder=5)
+ax.scatter(*bank_contextualized, color='blue', s=150, edgecolor='black', label='New Contextualized "Bank"', zorder=5)
 
-# --- 1. RAW EMBEDDINGS (BEFORE) ---
-ax.text(3, 6, "1. Raw Embeddings (Isolated Meaning)", ha='center', fontsize=14, fontweight='bold')
-# "Bank" might have financial features (top) and nature features (bottom)
-bank_raw = [0.9, 0.8, 0.2, 0.1] 
-# "River" has strong nature features
-river_raw = [0.0, 0.1, 0.9, 0.8]
+# 3. Draw the "Pull" of Self-Attention (Quiver Arrow)
+# Calculate the direction vector from Raw Bank to Contextualized Bank
+u, v, w = bank_contextualized - bank_raw
+ax.quiver(*bank_raw, u, v, w, color='blue', arrow_length_ratio=0.1, lw=2.5, ls='--')
 
-draw_vector(ax, 1.5, 1, bank_raw, '"Bank"', C_RAW)
-draw_vector(ax, 4.5, 1, river_raw, '"River"', C_RAW)
+# 4. Text Annotations next to dots
+ax.text(bank_raw[0], bank_raw[1], bank_raw[2] + 0.05, 'Raw "Bank"\n(Financial)', color='red', fontweight='bold', ha='center')
+ax.text(river_raw[0], river_raw[1], river_raw[2] + 0.05, 'Raw "River"\n(Nature)', color='green', fontweight='bold', ha='center')
+ax.text(bank_contextualized[0], bank_contextualized[1], bank_contextualized[2] + 0.05, 'Contextualized\n"Bank"', color='blue', fontweight='bold', ha='center')
 
-ax.text(2, 0.5, "Financial\nFeatures", ha='right', fontsize=9, color='gray')
-ax.text(2, 3.5, "Nature\nFeatures", ha='right', fontsize=9, color='gray')
+# 5. Axis Labels to Define the Space
+ax.set_xlim(0, 1)
+ax.set_ylim(0, 1)
+ax.set_zlim(0, 1)
+ax.set_xlabel('Financial Meaning Axis', fontweight='bold', labelpad=10)
+ax.set_ylabel('Nature Meaning Axis', fontweight='bold', labelpad=10)
+ax.set_zlabel('Neutral/Other Dimension', fontweight='bold', labelpad=10)
 
-# --- 2. ATTENTION WEIGHTS (THE ROUTING) ---
-draw_arrow(ax, (6, 3), (7.5, 3), "Dot Product\n+ Softmax")
-
-ax.text(10, 6, "2. Attention Weights (The Matrix)", ha='center', fontsize=14, fontweight='bold')
-
-# The Attention Matrix Box
-rect = Rectangle((8, 1.5), 4, 3, facecolor=C_WEIGHTS, edgecolor='black', lw=2)
-ax.add_patch(rect)
-
-# Explicit percentages
-ax.text(10, 3.5, "How much should\n'Bank' look at 'River'?", ha='center', va='center', fontsize=11, fontweight='bold')
-ax.text(10, 2.3, "'Bank' = 10% self\n'Bank' = 90% 'River'", ha='center', va='center', fontsize=12, fontweight='bold', color='blue')
-
-# --- 3. CONTEXTUALIZED VECTORS (AFTER) ---
-draw_arrow(ax, (12.5, 3), (14, 3), "Matrix Multiply\n(Blending)")
-
-ax.text(15.5, 6, "3. Contextualized Output (Blended)", ha='center', fontsize=14, fontweight='bold')
-
-# The Math: New Bank = (0.10 * Bank_Raw) + (0.90 * River_Raw)
-# Financial: (0.1 * 0.9) + (0.9 * 0.0) = 0.09
-# Nature:    (0.1 * 0.1) + (0.9 * 0.8) = 0.73
-bank_contextualized = [0.09, 0.17, 0.83, 0.73]
-
-draw_vector(ax, 15, 1, bank_contextualized, 'New "Bank"\n(Context: Nature)', C_FINAL)
-
-# Explanation Box
+# 6. Explanatory Box
 explanation = (
-    "The Transformation of 'Bank':\n"
-    "Before Attention, 'Bank' had strong financial vector values (0.9, 0.8).\n"
-    "Because the Attention Matrix routed 90% of 'River' into 'Bank',\n"
-    "the new vector for 'Bank' is mathematically overridden by nature features.\n"
-    "The network now definitively knows we are talking about a muddy riverbank!"
+    "Self-Attention as Geometric Movement:\n"
+    "1. The raw word 'Bank' starts in the 'Financial' corner of the embedding space.\n"
+    "2. The Attention matrix calculates a 90% correlation with the word 'River'.\n"
+    "3. The Matrix Multiplication physically pulls the 'Bank' vector across the 3D space.\n"
+    "4. The new Contextualized 'Bank' vector now sits closely next to 'River' in the Nature space!"
 )
-ax.text(9, -0.5, explanation, ha='center', va='top', fontsize=12, fontweight='bold', 
-        bbox=dict(facecolor='#fcf3cf', edgecolor='orange', pad=0.8))
+ax.text2D(0.5, -0.1, explanation, transform=ax.transAxes, ha='center', va='top', 
+          fontsize=12, fontweight='bold', bbox=dict(facecolor='#e8f8f5', edgecolor='teal', pad=1))
 
-plt.suptitle("Visualizing the Change: Vectors Before vs. After Self-Attention", fontsize=20, fontweight='bold', y=1.0)
+plt.title("CampusX Style: Self-Attention in 3D Semantic Space", fontsize=18, fontweight='bold', y=1.05)
+plt.legend(loc='upper right')
 plt.savefig('assets/vectors_before_after_attention.png', dpi=300, bbox_inches='tight')
 plt.close()
 
