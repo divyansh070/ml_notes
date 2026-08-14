@@ -197,3 +197,19 @@ Finally, to allow the network to blend the insights from all 8 heads together in
 
 **Q3: Explain the role of the final Output Weight matrix ($W^O$) in Multi-Head Attention.**
 *   **Answer:** When the individual heads are concatenated back together, their features are completely isolated from one another (e.g., the first 64 dimensions only contain data from Head 1). The $W^O$ matrix acts as a linear projection that mathematically mixes and blends the dimensions across all the heads. It allows the network to synthesize the independent grammatical insights (e.g., subject-verb context combined with adjective-noun context) into a single, cohesive representation before passing it to the Feed-Forward network.
+### 4. Modern Optimization: Multi-Query (MQA) & Grouped-Query Attention (GQA)
+
+While standard Multi-Head Attention (MHA) is mathematically elegant, it creates a massive engineering bottleneck during **Inference (Text Generation)**. 
+When an LLM generates text one word at a time, it must store all previous Keys and Values in GPU RAM (this is called the **KV Cache**). In standard MHA, because every single head has its own unique $K$ and $V$ matrix, the KV Cache grows uncontrollably, quickly eating up all available GPU VRAM.
+
+To solve this, modern foundation models (like LLaMA 3, Mistral, and Gemini) alter the architecture:
+*   **Multi-Query Attention (MQA):** The network still has 8 independent Query ($Q$) heads, but they all **share a single** Key ($K$) and Value ($V$) head. This drastically shrinks the KV cache, making generation lightning fast, though it sacrifices a bit of accuracy.
+*   **Grouped-Query Attention (GQA):** The perfect middle ground. If you have 8 Query heads, you might group them into 2 Key/Value heads (4 Queries share 1 KV). This preserves the speed/memory benefits of MQA while maintaining the accuracy of MHA.
+
+---
+
+**Q4: The original Transformer paper states that Multi-Head Attention allows the model to "jointly attend to information from different representation subspaces." What exactly is a representation subspace in this context?**
+*   **Answer:** A representation subspace refers to the smaller, lower-dimensional vector space (e.g., 64 dimensions) created when the 512-dimensional embedding is projected by a specific head's weight matrix. Because each head has randomly initialized, independent weights that are learned separately via backpropagation, each head mathematically projects the data into a completely different geometric space. This allows one subspace to specialize in syntax (grammar), another in semantics (meaning), and another in temporal relationships (time/order), all without overwriting or interfering with each other.
+
+**Q5: During autoregressive generation (generating one token at a time), why does the memory requirement of Multi-Head Attention scale dynamically, and how does Multi-Query Attention (MQA) fix it?**
+*   **Answer:** Memory scales dynamically because of the **KV Cache**. To avoid recalculating attention for every previous word every time a new word is generated, the model caches the Key and Value vectors of all past tokens in GPU VRAM. In standard MHA, if you have 32 heads, you cache 32 sets of $K$ and $V$ vectors per token. MQA forces all 32 Query heads to share a single $K$ and single $V$ head. This reduces the size of the KV cache by a factor of 32, allowing the model to process much larger batch sizes and longer context windows without running out of memory.
