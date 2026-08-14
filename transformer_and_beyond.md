@@ -511,7 +511,7 @@ Word $1$ ($pos=0$): `<Start>` $\rightarrow E_0 = [1.0, 1.0]$
 Positional Encoding ($PE_0$) = $[0, 1]$.
 $Y_0 = [1.0, 1.0] + [0, 1] = \begin{bmatrix} 1.0 & 2.0 \end{bmatrix}$.
 
-*(Insert `assets/decoder_forward_scalar.png` here)*
+![Decoder Forward Pass Scalar Graph](./assets/decoder_forward_scalar.png)
 
 #### The Three Sub-Layers:
 
