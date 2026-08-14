@@ -364,14 +364,19 @@ A standard Decoder Block (like used in a neural translation system) contains **t
 
 ### 2. Modification 1: Masked Self-Attention (No Cheating!)
 
-Self-Attention ($\text{softmax}(\frac{QK^T}{\sqrt{d_k}})V$) calculates the relationship between every word. If we are *training* the model to translate English into French, and we feed the entire French target sentence into the Decoder simultaneously, the model will simply cheat. 
+**The Problem: Training vs. Inference**
+To understand *why* we need a mask, we must understand how training works differently from inference:
+*   **During Inference (Production):** The model is generating text auto-regressively. It generates Word 1, looks at Word 1 to generate Word 2, looks at Words 1 & 2 to generate Word 3. The model literally *cannot* look into the future because the future hasn't been generated yet.
+*   **During Training:** If we trained the model auto-regressively (waiting for it to guess a word, calculating loss, and then guessing the next), training a model like GPT-4 would take decades. Instead, we use **Teacher Forcing**. We feed the *entire* target sentence (e.g., *"Je suis un robot"*) into the Decoder all at once in a single massive batch. 
 
-When trying to predict Word 4, Word 4's Query will dot-product with Word 5's Key, allowing the model to look into the future and perfectly "memorize" the answer without learning how to generate it.
+**The Cheating Dilemma**
+Because we feed the entire sentence in at once during training, standard Self-Attention ($\text{softmax}(\frac{QK^T}{\sqrt{d_k}})V$) will allow the Query for Word 2 (*"suis"*) to calculate a dot product with the Key of Word 3 (*"un"*). The neural network will immediately realize that the easiest way to minimize the loss function is to just copy the future word. It will perfectly memorize the target data and learn absolutely nothing about grammar or generation.
 
-#### The Causal Masking Solution
-To fix this, we apply a mathematical **Causal Mask** to the raw attention scores ($Q \cdot K^T$).
+**The Causal Masking Solution**
+To achieve massive parallel training speeds without allowing the model to cheat, we apply a mathematical **Causal Mask** to the raw attention scores ($Q \cdot K^T$) before the Softmax.
 
-Imagine the sentence *"Je suis un robot."* During training, when the Query is for the word *"suis"* ($pos=1$), we create a Mask vector where $pos=1$ is 0, but the future words *"un"* ($pos=2$) and *"robot"* ($pos=3$) are filled with **$-\infty$** (Negative Infinity).
+Imagine predicting the next word in *"Je suis un robot."* 
+*   When calculating the attention for *"suis"* ($pos=1$), we create a Mask vector where past/current positions are 0, but the future words *"un"* ($pos=2$) and *"robot"* ($pos=3$) are filled with **$-\infty$** (Negative Infinity).
 
 ```math
 \text{Raw Attention scores } (Q \cdot K^T) \approx \begin{bmatrix} 15 & 4 & 1 & 0 \\ \mathbf{4} & \mathbf{12} & \mathbf{3} & \mathbf{2} \\ 1 & 3 & 14 & 0 \\ 0 & 2 & 0 & 13 \end{bmatrix}
@@ -383,20 +388,26 @@ Apply **Causal Mask** (Upper-Triangle set to $-\infty$):
 \text{Masked Attention scores } (Q \cdot K^T) \approx \begin{bmatrix} 15 & -\infty & -\infty & -\infty \\ \mathbf{4} & \mathbf{12} & -\infty & -\infty \\ 1 & 3 & 14 & -\infty \\ 0 & 2 & 0 & 13 \end{bmatrix}
 ```
 
-When we apply the Softmax, $e^{-\infty}$ is exactly $0$. The modeldecides to pay $0.000\%$ attention to any future words. This forces the model to generate its own contextual meaning solely from its past predictions!
+When we apply the Softmax, $e^{-\infty}$ is exactly $0$. The network is mathematically forced to assign $0.000\%$ attention to any future words. The model now acts exactly as it would during inference—it can only rely on the past to predict the future—but it can do it for all words in the sentence simultaneously in a single GPU pass!
 
-### 3. Modification 2: Cross-Attention ( Encoder-Decoder Attention)
+### 3. Modification 2: Cross-Attention (Encoder-Decoder Attention)
 
-The pure Decoder blocks used in GPT models rely *only* on Masked Self-Attention (a Decoder-only Transformer). 
+While pure generative models (like GPT-3 or LLaMA) are "Decoder-only" and use just the Masked Self-Attention, Sequence-to-Sequence models (like those used for Translation, Summarization, or Whisper Audio) use an Encoder-Decoder architecture.
 
-However, in models that translate (Sequence-to-Sequence), the Decoder must be able to "cross-examine" the output of the Encoder half to ensure its generation remains faithful to the original prompt.
+If the Decoder is generating a French sentence, it must have a way to constantly "cross-examine" the original English sentence to ensure its generation remains perfectly faithful to the prompt.
 
-This is done via the **Cross-Attention layer**. Notice how the $Q$, $K$, and $V$ matrices are sourced:
+**The Mechanics of Cross-Attention**
+In a standard Self-Attention layer, $Q$, $K$, and $V$ all come from the exact same sentence. 
+In a **Cross-Attention** layer, the inputs are split across the two halves of the network:
 
-1.  **Queries ($Q$):** The word vectors come directly up from the previous sub-layer in the **Decoder**. (*"What do I, the Decoder, want to generate next?"*)
-2.  **Keys ($K$) & Values ($V$):** The vectors are pulled directly from the output of the *FINAL* **Encoder Block**. (*"What underlying context does the original prompt contain?"*)
+1.  **Queries ($Q$) come from the Decoder:** The Query matrix is derived from the French words the Decoder has generated so far. You can think of the Query as the Decoder asking: *"Based on the French grammar I just wrote, what piece of information do I need next?"*
+2.  **Keys ($K$) & Values ($V$) come from the Encoder:** The Key and Value matrices are pulled directly from the output of the *FINAL* **Encoder Block**. The Encoder has already processed the English prompt and mapped out the perfect semantic relationships. The Keys act as tags saying: *"I have information about a verb here,"* and the Values hold the actual context.
 
-Mathematically, the Decoder words (" Je") ask queries against the prompt's context ("Bank of the river"), allowing the generative half of the network to stay grounded in the original meaning.
+**The Math in Action:**
+If the Encoder processes the English sentence *"I sat on the bank of the river"*, and the Decoder has currently generated *"Je me suis assis sur la"*, the Decoder creates a Query for the next word. 
+That Query calculates a dot product with all the Encoder's Keys. It will find a massive similarity score with the Encoder's Key for *"bank"*. It will extract the Value of the contextualized *"bank"* vector (which the Encoder already determined means a muddy riverbank, not a financial institution), and use that data to correctly predict the French word *"rive"*.
+
+Without Cross-Attention, the Decoder would just hallucinate grammatically correct French text that has nothing to do with the original English prompt.
 
 ---
 
