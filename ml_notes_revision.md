@@ -3032,6 +3032,8 @@ The final input that gets passed into the Transformer's Attention layers is simp
 \text{Final Input} = \text{Embedding} + \text{Positional Encoding}
 ```
 
+![Transformer Input Addition](./assets/transformer_input_addition.png)
+
 ---
 
 ### Topic 1 Placement Prep: Elite Input Processing Flashcards
