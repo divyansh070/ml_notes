@@ -345,3 +345,68 @@ In the original Transformer paper, $W_1$ expands the $512$-dimensional embedding
 
 **Q4: The original Transformer paper used ReLU in the Feed-Forward Network, but modern models (like GPT-3, LLaMA, and ViT) almost exclusively use GeLU (Gaussian Error Linear Unit) or SwiGLU. Why?**
 *   **Answer:** ReLU is a rigid function: it strictly outputs $0$ for any negative input. This can cause the "Dying ReLU" problem, where neurons get permanently stuck outputting zero and stop updating. GeLU is a smoother, probabilistic variation of ReLU. Instead of a hard cutoff at $0$, it has a gentle, smooth curve that allows a tiny amount of negative values to pass through. This smoothness ensures that gradients never completely die, leading to much faster convergence and deeper mathematical representations during training.
+
+
+
+## Topic 6: The Decoder Block (The Generative Engine)
+
+While the Encoder half of the Transformer reads and contextualizes (as used in BERT), the **Decoder Block** is fundamentally designed to generate new sequences. This is the exact architecture powering models like **GPT-3, GPT-4, LLaMA, and Claude**—they are essentially just stacks of many identical Decoder Blocks.
+
+The Decoder is "auto-regressive," meaning it generates one word at a time, and its output from one time step becomes its input for the next time step. The critical architectural differences from the Encoder are dedicated to controlling this generation.
+
+### 1. The Architecture of the Decoder
+A standard Decoder Block (like used in a neural translation system) contains **three** sub-layers, whereas the Encoder only had two:
+1.  **Masked Self-Attention:** Tracks relationships between generated words without "cheating."
+2.  **Cross-Attention (Encoder-Decoder Attention):** Looks back at the Encoder's output context.
+3.  **Position-wise Feed-Forward Network:** The memorization memory.
+
+![Decoder Block Architecture](./assets/decoder_block_architecture.png)
+
+### 2. Modification 1: Masked Self-Attention (No Cheating!)
+
+Self-Attention ($\text{softmax}(\frac{QK^T}{\sqrt{d_k}})V$) calculates the relationship between every word. If we are *training* the model to translate English into French, and we feed the entire French target sentence into the Decoder simultaneously, the model will simply cheat. 
+
+When trying to predict Word 4, Word 4's Query will dot-product with Word 5's Key, allowing the model to look into the future and perfectly "memorize" the answer without learning how to generate it.
+
+#### The Causal Masking Solution
+To fix this, we apply a mathematical **Causal Mask** to the raw attention scores ($Q \cdot K^T$).
+
+Imagine the sentence *"Je suis un robot."* During training, when the Query is for the word *"suis"* ($pos=1$), we create a Mask vector where $pos=1$ is 0, but the future words *"un"* ($pos=2$) and *"robot"* ($pos=3$) are filled with **$-\infty$** (Negative Infinity).
+
+```math
+\text{Raw Attention scores } (Q \cdot K^T) \approx \begin{bmatrix} 15 & 4 & 1 & 0 \\ \mathbf{4} & \mathbf{12} & \mathbf{3} & \mathbf{2} \\ 1 & 3 & 14 & 0 \\ 0 & 2 & 0 & 13 \end{bmatrix}
+```
+
+Apply **Causal Mask** (Upper-Triangle set to $-\infty$):
+
+```math
+\text{Masked Attention scores } (Q \cdot K^T) \approx \begin{bmatrix} 15 & -\infty & -\infty & -\infty \\ \mathbf{4} & \mathbf{12} & -\infty & -\infty \\ 1 & 3 & 14 & -\infty \\ 0 & 2 & 0 & 13 \end{bmatrix}
+```
+
+When we apply the Softmax, $e^{-\infty}$ is exactly $0$. The modeldecides to pay $0.000\%$ attention to any future words. This forces the model to generate its own contextual meaning solely from its past predictions!
+
+### 3. Modification 2: Cross-Attention ( Encoder-Decoder Attention)
+
+The pure Decoder blocks used in GPT models rely *only* on Masked Self-Attention (a Decoder-only Transformer). 
+
+However, in models that translate (Sequence-to-Sequence), the Decoder must be able to "cross-examine" the output of the Encoder half to ensure its generation remains faithful to the original prompt.
+
+This is done via the **Cross-Attention layer**. Notice how the $Q$, $K$, and $V$ matrices are sourced:
+
+1.  **Queries ($Q$):** The word vectors come directly up from the previous sub-layer in the **Decoder**. (*"What do I, the Decoder, want to generate next?"*)
+2.  **Keys ($K$) & Values ($V$):** The vectors are pulled directly from the output of the *FINAL* **Encoder Block**. (*"What underlying context does the original prompt contain?"*)
+
+Mathematically, the Decoder words (" Je") ask queries against the prompt's context ("Bank of the river"), allowing the generative half of the network to stay grounded in the original meaning.
+
+---
+
+### Topic 6 Placement Prep: Elite Decoder Flashcards
+
+**Q1: Contrast *Self-Attention* in the Encoder with *Masked Self-Attention* in the Decoder. Mathematically, what prevents the latter from accessing future tokens?**
+*   **Answer:** Self-Attention in the Encoder allows bidirectional context flow (e.g., Word 1 attends to Word 10, and Word 10 attends back to Word 1). In the Decoder, Masked Self-Attention applies an upper-triangular causal mask to the raw attention score matrix ($QK^T$). The elements corresponding to future positions (where target\_pos > current\_pos) are filled with $-\infty$ (negative infinity). Because $e^{-\infty} = 0$, the row-wise Softmax ensures the final attention weights for any future word are exactly $0.000\%$, mathematically blocking any context leak from the future.
+
+**Q2: What is "Sequence-to-Sequence" (Seq2Seq) modeling, and what architectural component bridges the gap between the Encoder and the Decoder in a Seq2Seq Transformer?**
+*   **Answer:** Sequence-to-Sequence modeling (like Neural Machine Translation) is the task of mapping one input sequence (e.g., English sentence) to a totally different output sequence (e.g., French sentence). The component that bridges the two halves is the **Cross-Attention** layer within the Decoder block. In this layer, the Queries ($Q$) come from the generated French output (Decoder), but the Keys ($K$) and Values ($V$) are pulled directly from the final contextualized English representation produced by the last Encoder block.
+
+**Q3: Explain the difference between training and inference (production use) for a GPT-style Decoder-only model. Why is training much more efficient?**
+*   **Answer:** Training is highly efficient because of **Teacher Forcing** and **Causal Masking**. We feed the *entire* target sentence into the model at once and use the causal mask to predict the next word for *every single position simultaneously* ($O(N^2)$ complexity). We don't wait for Word 1's output to predict Word 2. However, during Inference, we cannot use the mask because we do not know the target. The model must generate text auto-regressively, one word at a time, feeding its last prediction back as its next input. This serial dependency makes inference fundamentally $O(N)$ and impossible to parallelize, which is why text generation is slow and expensive.
