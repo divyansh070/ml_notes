@@ -2996,12 +2996,16 @@ Instead of using learned weights, the authors used fixed, hardcoded Sine and Cos
 
 **The Formulas:**
 For a given position in the sentence ($pos$) and a given dimension index in the vector ($i$):
-$$ PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right) $$
-$$ PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right) $$
+```math
+PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)
+```
+```math
+PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)
+```
 *   *Even dimensions ($2i$) use Sine.*
 *   *Odd dimensions ($2i+1$) use Cosine.*
 
-*(Insert `assets/positional_encoding_heatmap.png` here)*
+![Transformer Positional Encoding](./assets/transformer_pe.png)
 
 #### Step 3: The Hands-On Math
 Let's calculate the Positional Encoding for a tiny embedding where $d_{model} = 4$. We want the encoding for the **first word** in the sentence ($pos = 0$) and the **second word** ($pos = 1$).
@@ -3024,7 +3028,9 @@ Notice how the lower dimensions (Dim 0 and 1) changed drastically from word 0 to
 
 #### Step 4: Addition (The Final Input)
 The final input that gets passed into the Transformer's Attention layers is simply the element-wise **addition** of the Semantic Embedding and the Positional Encoding.
-$$ \text{Final Input} = \text{Embedding} + \text{Positional Encoding} $$
+```math
+\text{Final Input} = \text{Embedding} + \text{Positional Encoding}
+```
 
 ---
 
