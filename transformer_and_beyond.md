@@ -213,3 +213,60 @@ To solve this, modern foundation models (like LLaMA 3, Mistral, and Gemini) alte
 
 **Q5: During autoregressive generation (generating one token at a time), why does the memory requirement of Multi-Head Attention scale dynamically, and how does Multi-Query Attention (MQA) fix it?**
 *   **Answer:** Memory scales dynamically because of the **KV Cache**. To avoid recalculating attention for every previous word every time a new word is generated, the model caches the Key and Value vectors of all past tokens in GPU VRAM. In standard MHA, if you have 32 heads, you cache 32 sets of $K$ and $V$ vectors per token. MQA forces all 32 Query heads to share a single $K$ and single $V$ head. This reduces the size of the KV cache by a factor of 32, allowing the model to process much larger batch sizes and longer context windows without running out of memory.
+
+
+
+## Topic 4: Layer Normalization (LayerNorm vs. BatchNorm)
+
+Before passing data through the deep neural network blocks of a Transformer, we must normalize the outputs of the Attention mechanism. Normalization prevents gradients from exploding and keeps the mathematical scale of the vectors stable. 
+
+However, Transformers completely abandon **Batch Normalization (BatchNorm)** in favor of **Layer Normalization (LayerNorm)**. Understanding *why* is a highly tested concept in Deep Learning interviews.
+
+### 1. The Flaw of Batch Normalization on Text
+BatchNorm calculates the mean and variance for a single feature (e.g., Feature #5) across the *entire batch* of data. 
+This works beautifully for images (which are all identically sized, like $224 \times 224$), but it completely breaks down on text for two reasons:
+1.  **Variable Sequence Lengths:** In a batch of text, Sentence A might have 5 words, while Sentence B has 50 words. To create a mathematical matrix, we pad Sentence A with 45 "Empty/Zero" tokens. If we calculate a batch mean across these padded tokens, the statistics become completely heavily distorted by zeros, ruining the normalization.
+2.  **Batch Dependency:** During inference (running the model in production), you might only send the model one sentence at a time (Batch Size = 1). BatchNorm cannot calculate a variance on a batch of 1, forcing it to rely on frozen, inaccurate historical statistics.
+
+![LayerNorm vs BatchNorm](./assets/layernorm_vs_batchnorm.png)
+
+### 2. The LayerNorm Solution
+**Layer Normalization** ignores the batch dimension entirely. Instead of normalizing one feature across all words, LayerNorm calculates the mean and variance across **all $512$ features ($d_{model}$) for a single, individual word**.
+
+*   Because it only looks at one word at a time, it is completely immune to sequence padding.
+*   Because it doesn't look at the batch, it behaves exactly the same during training (Batch = 128) as it does in production (Batch = 1).
+
+### 3. The Explicit LayerNorm Math
+For a single word's embedding vector $x$ of length $d$ (e.g., $d = 512$):
+
+**Step 1: Calculate the Mean ($\mu$) of the word's vector:**
+
+```math
+\mu = \frac{1}{d} \sum_{j=1}^{d} x_j
+```
+
+**Step 2: Calculate the Variance ($\sigma^2$) of the word's vector:**
+
+```math
+\sigma^2 = \frac{1}{d} \sum_{j=1}^{d} (x_j - \mu)^2
+```
+
+**Step 3: Normalize and Apply Learned Parameters:**
+We subtract the mean, divide by the standard deviation (adding a tiny $\epsilon$ to prevent division by zero), and then multiply by a learned scaling parameter ($\gamma$) and add a learned shift parameter ($\beta$).
+
+```math
+\text{LayerNorm}(x) = \gamma \left( \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} \right) + \beta
+```
+
+---
+
+### Topic 4 Placement Prep: Elite LayerNorm Flashcards
+
+**Q1: In Layer Normalization, what is the exact mathematical purpose of the learned parameters $\gamma$ (gamma) and $\beta$ (beta)?**
+*   **Answer:** When you strictly normalize a vector to have a mean of 0 and a variance of 1, you permanently alter its geometric distribution, which can actually destroy valuable representational data (e.g., the network might *need* a specific word's values to be highly skewed to represent strong attention). The parameters $\gamma$ (scale) and $\beta$ (shift) are learnable weights that allow the neural network to mathematically "undo" the normalization if it decides that the original, un-normalized distribution was optimal for reducing the loss. 
+
+**Q2: Contrast how BatchNorm and LayerNorm handle a Batch Size of 1 during inference.**
+*   **Answer:** BatchNorm relies on batch statistics. With a batch size of 1, variance is mathematically undefined (you cannot calculate the variance of a single number). Therefore, during inference, BatchNorm must use a running average computed during training, which may not perfectly match the live input. LayerNorm calculates statistics across the feature dimension ($d_{model}$). Even if the batch size is 1, a single word still has 512 features, meaning LayerNorm can compute exact, live statistics for that specific word on the fly.
+
+**Q3: How does Layer Normalization specifically aid the flow of gradients in a deep, 96-layer Transformer?**
+*   **Answer:** Without normalization, the repeated matrix multiplications in the Attention and Feed-Forward layers cause the variance of the embeddings to exponentially explode, pushing the values deep into the flat regions of activation functions (like Softmax or GeLU). In these flat regions, the derivative approaches zero, killing the gradients. By repeatedly re-centering the embedding vectors back to a unit variance at every layer, LayerNorm keeps the values in the "steep" regions of the activation functions, ensuring strong, healthy gradients can backpropagate all the way to layer 1.
