@@ -901,3 +901,70 @@ We only use this simple, element-wise vector multiplication on the adjacent pair
 
 **Q3: How does RoPE enable better "extrapolation" than standard sine wave encodings? (The problem of Position 5001).**
 *   **Answer:** Standard encodings (Sine/Cosine) fail to extrapolate. If we train a model on sequence lengths up to 5000 and try to inference at position 5001, the unique sine/cosine vector for position 5001 is something the network has never optimized against. It looks like noise and causes semantic interference. RoPE only relies on hardcoded, periodic trigonometric rotation. A rotation difference between Word 1 and Word 2 ($1 \cdot \theta$) is conceptually identical to the rotation difference between Word 5001 and Word 5002 ($1 \cdot \theta$). This bounded periodicity allows RoPE to naturally extend to lengths never seen during training.
+
+## Topic 3: Vision Transformers (ViT) — An Image is Worth 16x16 Words
+
+Since their inception, Convolutional Neural Networks (CNNs) dominated Computer Vision. CNNs use a hardcoded, **local inductive bias**: they slide a small $3 \times 3$ kernel over an image, mathematically forcing the model to prioritize local features (edges, corners). They are excellent at localization but poor at global reasoning.
+
+The **Vision Transformer (ViT)** (2021) made the radical argument that this local bias is *not necessary*. It treats an image as a sequence of "visual tokens." By feeding the image into a standard Transformer Encoder, it relies on the **global self-attention mechanism** to *learn* the relevant context. ViTs can parallelize perfectly, training faster than CNNs on massive datasets, and they exhibit strong *global* understanding (e.g., relating the bottom-left corner to the top-right corner instantly).
+
+### 1. The ViT Architecture: Processing Pixels as Tokens
+
+We cannot just feed $224 \times 224$ pixels (150,000+ dimensions) into a Transformer; the quadratic complexity ($N^2$) would explode. ViT uses a mathematical preprocessing pipeline to turn pixels into standard tokens.
+
+![ViT Architecture vs CNN](assets/vit_vs_cnn_architecture.png)
+
+#### The Input Pipeline (Tracing the Red Path in the Diagram):
+
+**Step 1: Divide into Patches**
+We take the input image (e.g., $224 \times 224 \times 3$ channels) and divide it into an explicit grid of $N$ square patches.
+A standard patch size is $P=16 \times 16$.
+Total patches: $N = (\frac{224}{16}) \times (\frac{224}{16}) = 14 \times 14 = \mathbf{196}$.
+These $196$ patches act like our sentence sequence length.
+
+**Step 2: Flatten & Linearly Embed (The Learnable Patch E)**
+Each $16 \times 16 \times 3$ patch is flattened into a single, massive 768-dimensional vector ($16 \cdot 16 \cdot 3 = 768$). This vector is just raw pixels.
+We multiply this raw vector by a **learnable Patch Embedding Matrix (E)** of dimension $768 \times d_{model}$. If our model uses $d=768$:
+
+$$
+\text{Patch Token Vector} = \text{Flattened Patch} \cdot E
+$$
+
+This projects the raw pixels into the exact same deep semantic embedding space used by text transformers!
+
+**Step 3: The `[CLS]` Token & Positional Encodings**
+Similar to BERT, we insert a special, learned **`[CLS]` (Classification) Token** vector to the start of the sequence. (Sequence length is now $196+1 = 197$).
+Because the patches are processed in parallel, we must add **Trigonometric Positional Encodings ($PE$)** to inject the grid coordinates ($x, y$) into the vectors.
+
+#### Step 4: The Transformer Encoder
+
+This sequence of $197 \times 768$ vectors is passed through a stack of standard Transformer Encoder blocks (identical to the ones we just derived). They perform Multi-Head Self-Attention, allowing every visual token to attend to every other visual token globally across the entire image.
+
+Finally, the output vector of the special `[CLS]` token is passed through a standard Multi-Layer Perceptron (MLP) for classification:
+
+$$
+\text{Output} = \text{softmax}(\text{MLP}(h_{CLS}^{(L)}))
+$$
+
+### 2. Hands-on Math Trace: Global Receptive Field vs. CNN
+
+Let's look at the Red backpropagation path in the bottom of the diagram, where the error for the classification output `"Cat: 98%"` is reverse-allocated.
+
+**CNN Limitations:** The $3 \times 3$ CNN only slides locally. Its receptive field grows very slowly. It takes dozens of layers to see the whole image. The gradients are always restricted to the fixed local grid.
+
+**ViT Global Attention:** During BPTT, the error hits the $QK^T$ attention matrix of the special `[CLS]` token. This matrix shows the entire image at once. The error ($dL$) is reverse-calculated and allocated backward into the learnable weight matrices ($W_Q, W_K, W_V$) of the *original patch embedding layers*. The error from predicting "Cat" instantly updates the mathematical meaning of the *pixels* of both the 'Tail Patch' and the 'Ear Patch', because they were connected globally in Step 1.
+
+This global connectivity allows ViTs to excel at tasks requiring high-level semantic understanding, while CNNs continue to lead at tasks requiring precise local segmentation or detection.
+
+---
+
+### Topic 3 Placement Prep: Elite ViT Flashcards
+
+**Q1: Explain the main differences between how a standard CNN uses local receptive fields and how a Vision Transformer uses global receptive fields to process an image.**
+*   **Answer:** CNNs have a hardcoded **local inductive bias**. Their fundamental operation (3x3 Convolution) slides locally, forcing the network to prioritize local grid connectivity. A CNN must stack many layers before a single pixel in the bottom-left can "see" a pixel in the top-right. Transformers have no fixed local grid; they rely on **Global Self-Attention**. In the very first layer of a ViT, the Special `[CLS]` token (Query) can dot-product with the Key of a corner patch, allowing information to travel across the entire image instantly ($O(1)$ relationship distance). ViTs don't assume locality; they *learn* it dynamically from the data.
+
+**Q2: Describe the Vision Transformer's complete Input Processing pipeline (how pixels are formatted for the Encoder). List three major operations.**
+*   **Answer:** The input (e.g., $224 \times 224$ image) is: (1) Divided into an explicit grid of $N$ fixed patches (e.g., 16x16 pixels). (2) These patches are flattened into vectors and passed through a learnable **Linear Patch Embedding matrix ($E$)**, which projects the raw pixel values into the deep embedding dimension (e.g., $d=768$). (3) A special **learnable Classification `[CLS]` token** is inserted at the start, and **Trigonometric Positional Encodings** are added to inject grid coordinates into all vectors before they enter the Encoder.
+
+**Q3: ViTs are often noted to require *much* larger datasets (like JFT-300M or ImageNet-21k) to reach peak performance compared to standard CNNs (like ResNet). Why is this mathematically the case?**
+*   **Answer:** CNNs have a strong local inductive bias hardcoded into their mathematics: they slide a fixed local grid, assuming that adjacent pixels are related. This bias acts like a mathematical "shortcut," allowing CNNs to achieve high accuracy with less data because the core rule of vision is pre-programmed. ViTs completely abandon this bias in favor of universal attention (everything can attend to everything). Without the shortcut, the ViT must literally *learn* from scratch that "Adjacent pixels are related" by observing millions of images. This is computationally expensive, but once it has enough data, the global flexibility allows ViTs to achieve superior accuracy and generalization on complex, SOTA tasks.
