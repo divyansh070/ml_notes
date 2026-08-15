@@ -946,7 +946,60 @@ $$
 \text{Output} = \text{softmax}(\text{MLP}(h_{CLS}^{(L)}))
 $$
 
-### 2. Hands-on Math Trace: Global Receptive Field vs. CNN
+### 2. Hands-On Math Trace: A Mini-ViT (d=2)
+
+Let's trace the exact mathematical journey of an image through a simplified Vision Transformer.
+
+**Setup:**
+*   **Image:** A tiny grayscale image, $2 \times 4$ pixels.
+*   **Patch Size:** $2 \times 2$ pixels ($P=2$).
+*   **Total Patches:** $N = 2$ patches (Left patch and Right patch).
+*   **Embedding Dimension:** $d_{model} = 2$.
+
+**Step 1: Extract and Flatten Patches**
+Assume our image has a dark edge on the left and is bright on the right.
+*   **Patch 1 (Left):** $\begin{bmatrix} 0.1 & 0.1 \\ 0.2 & 0.1 \end{bmatrix}$ $\rightarrow$ Flattens to $x_1 = \begin{bmatrix} 0.1 & 0.1 & 0.2 & 0.1 \end{bmatrix}$
+*   **Patch 2 (Right):** $\begin{bmatrix} 0.9 & 0.8 \\ 0.9 & 0.9 \end{bmatrix}$ $\rightarrow$ Flattens to $x_2 = \begin{bmatrix} 0.9 & 0.8 & 0.9 & 0.9 \end{bmatrix}$
+
+**Step 2: Linear Patch Embedding**
+We project the 4-dimensional raw pixels into our $d=2$ embedding space using a learnable weight matrix $E$ ($4 \times 2$). Let's assume the network has learned a generic projection matrix:
+
+$$
+E = \begin{bmatrix} 1.0 & -1.0 \\ 1.0 & -1.0 \\ -1.0 & 1.0 \\ -1.0 & 1.0 \end{bmatrix}
+$$
+
+Multiply the patches by $E$:
+*   **Token 1:** $t_1 = x_1 \cdot E = \begin{bmatrix} 0.1(1) + 0.1(1) + 0.2(-1) + 0.1(-1) & 0.1(-1) + 0.1(-1) + 0.2(1) + 0.1(1) \end{bmatrix} = \begin{bmatrix} -0.1 & 0.1 \end{bmatrix}$
+*   **Token 2:** $t_2 = x_2 \cdot E = \begin{bmatrix} 0.9(1) + 0.8(1) + 0.9(-1) + 0.9(-1) & 0.9(-1) + 0.8(-1) + 0.9(1) + 0.9(1) \end{bmatrix} = \begin{bmatrix} -0.1 & 0.1 \end{bmatrix}$
+
+*(Notice how raw pixel grids have now become abstract mathematical semantic tokens, exactly like word embeddings in an LLM).*
+
+**Step 3: `[CLS]` Token and Positional Encoding**
+We prepend a learnable `[CLS]` token (e.g., $t_{cls} = \begin{bmatrix} 0.5 & 0.5 \end{bmatrix}$) and add fixed positional encodings to inject location data back into the flattened sequence.
+
+*   $PE_{cls} = \begin{bmatrix} 0.0 & 0.0 \end{bmatrix}$
+*   $PE_{1} = \begin{bmatrix} 0.0 & 1.0 \end{bmatrix}$ (Position 1 encoding)
+*   $PE_{2} = \begin{bmatrix} 0.8 & 0.5 \end{bmatrix}$ (Position 2 encoding)
+
+**Final Input Sequence Matrix ($X$):**
+*   $X_{cls} = t_{cls} + PE_{cls} = \begin{bmatrix} 0.5 & 0.5 \end{bmatrix}$
+*   $X_1 = t_1 + PE_1 = \begin{bmatrix} -0.1 & 1.1 \end{bmatrix}$
+*   $X_2 = t_2 + PE_2 = \begin{bmatrix} 0.7 & 0.6 \end{bmatrix}$
+
+**Step 4: Global Self-Attention in the Encoder**
+The sequence $X$ enters the Transformer Encoder. Let's look exclusively at how the `[CLS]` token makes its decision by calculating the dot-product of its Query ($Q_{cls}$) with the Keys ($K$) of the image patches. Assume $W_Q$ and $W_K$ are Identity matrices ($I$) for simplicity.
+
+*   $Q_{cls} = X_{cls} = \begin{bmatrix} 0.5 & 0.5 \end{bmatrix}$
+*   $K_1 = X_1 = \begin{bmatrix} -0.1 & 1.1 \end{bmatrix}$
+*   $K_2 = X_2 = \begin{bmatrix} 0.7 & 0.6 \end{bmatrix}$
+
+Calculate Raw Attention Scores:
+*   $\text{Score}(cls \rightarrow \text{Patch 1}) = Q_{cls} \cdot K_1^T = (0.5)(-0.1) + (0.5)(1.1) = -0.05 + 0.55 = \mathbf{0.50}$
+*   $\text{Score}(cls \rightarrow \text{Patch 2}) = Q_{cls} \cdot K_2^T = (0.5)(0.7) + (0.5)(0.6) = 0.35 + 0.30 = \mathbf{0.65}$
+
+After applying Softmax to these scores, the `[CLS]` token will dynamically pull more $V$ (Value) data from Patch 2 than Patch 1 to formulate its final classification output. This proves that the `[CLS]` token has immediate, $O(1)$ global access to the entire image.
+
+### 3. Backpropagation: Global Receptive Field vs. CNN
 
 Let's look at the Red backpropagation path in the bottom of the diagram, where the error for the classification output `"Cat: 98%"` is reverse-allocated.
 
