@@ -770,3 +770,134 @@ Where:
 
 **Q5: Why can't BERT generate text, and why can't GPT perform bidirectional understanding as well as BERT?**
 *   **Answer:** BERT cannot generate text because it has no causal mask and no auto-regressive mechanism. It processes the entire input simultaneously and outputs contextual embeddings — it has no iterative "predict next token" loop. GPT cannot match BERT's understanding because the Causal Mask prevents any token from attending to future tokens. When GPT processes the prompt *"The bank of the river"*, the word *"bank"* at position 2 can only see *"The"* — it cannot look ahead to *"river"* to disambiguate. BERT sees the entire sentence bidirectionally, giving it strictly richer contextual representations for understanding tasks.
+
+
+## Topic 2: Rotary Positional Embeddings (RoPE)
+
+**Why we replaced sine waves:** The classic sine/cosine method only tells the model the absolute position of a word (e.g., "Good morning," where "morning" is Word 2). In extremely long contexts (LLMs like Claude or GPT-4 need 128,000+ words), standard sine waves degrade. The model completely loses track of relative distance—it cannot figure out that Word 10,000 is exactly 10,000 words away from Word 1. This quadratic amnesia breaks the attention mechanism.
+
+We use **Rotary Positional Embeddings (RoPE)** (introduced by Su et al. in the RoFormer paper and now standard in LLaMA, GPT-NeoX, and PaLM) because RoPE injects relative positional information directly into the dot product calculation of self-attention. It is the mathematical key to infinite context windows.
+
+In standard positional encodings, we add a position vector to the semantic embedding.
+
+$$
+\text{Final Input} = \text{Embedding} + \text{Positional Vector}
+$$
+
+In RoPE, we do not add. Instead, we mathematically **rotate** the Query ($Q$) and Key ($K$) vectors in the embedding space based on their position.
+
+### 1. The Core Geometric Idea (Intuition)
+
+Instead of a standard coordinate grid, think of the embedding space as a set of concentric circles. If we have a $d_{model}=2$ dimensional embedding vector, it is a point on a 2D plane.
+
+*   When applying RoPE to Word 1 ($pos=0$), we don't rotate it.
+*   When applying RoPE to Word 2 ($pos=1$), we rotate its vector by a fixed base angle $\theta$ (e.g., 30 degrees).
+*   When applying RoPE to Word 100 ($pos=99$), we rotate it by $99 \times \theta$ degrees (acting like the fast-moving seconds-hand on a clock).
+
+We rotate different dimensions at different base speeds, which acts like a multi-level clock (seconds-hand, minutes-hand, hours-hand), giving every token a unique "trigonometric time-stamp."
+
+### 2. The Key Proof: The Relative Dot Product
+
+The absolute stroke of genius in RoPE is that it ensures that when two rotated vectors ($Q_m$ from word $m$ and $K_n$ from word $n$) calculate their dot product, the result mathematically depends *only* on the relative distance ($m-n$).
+
+$$
+\text{DotProduct}(\text{RoPE}(q_m, m), \text{RoPE}(k_n, n)) = \text{DotProduct}(q, k) \cdot \cos((m-n)\theta) + \dots
+$$
+
+The network doesn't just know that Word $n$ is Word $n$; it immediately knows exactly how far Word $m$ is from Word $n$ via a simple rotation difference. This trigonometric decay naturally guides the attention mechanism to prioritize local context over far-away context, curing the amnesia problem.
+
+### 3. Hands-On Math: Scalar (d=2) RoPE Trace
+
+Let's calculate the RoPE-rotated vectors for two words.
+*   **Embedding Dimension:** $d_{model} = 2$. (One Head).
+*   **Base Angle:** $\theta_0 = 1$ radian (simplified for tracing).
+
+**Token 1 (Input for Query Path):** Word "Cat" at Position 0 ($m=0$).
+Embedding for "Cat": $q_0 = \begin{bmatrix} 0.8 & -0.6 \end{bmatrix}$.
+
+**Token 2 (Input for Key Path):** Word "Eats" at Position 2 ($n=2$).
+Embedding for "Eats": $k_2 = \begin{bmatrix} -0.1 & 0.9 \end{bmatrix}$.
+
+#### Step 1: Calculate Rotation Matrices
+
+The 2D rotation matrix for a given position ($pos$) and angle ($\theta$):
+
+$$
+R_{(pos \cdot \theta)} = \begin{bmatrix} \cos(pos \cdot \theta) & -\sin(pos \cdot \theta) \\ \sin(pos \cdot \theta) & \cos(pos \cdot \theta) \end{bmatrix}
+$$
+
+For "Cat" (pos=0):
+
+$$
+R_0 = R_{(0 \cdot 1)} = \begin{bmatrix} \cos(0) & -\sin(0) \\ \sin(0) & \cos(0) \end{bmatrix} = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} \text{ (No Rotation)}
+$$
+
+For "Eats" (pos=2):
+*(Note: $\cos(2) \approx -0.42$, $\sin(2) \approx 0.91$)*
+
+$$
+R_2 = R_{(2 \cdot 1)} = \begin{bmatrix} -0.42 & -0.91 \\ 0.91 & -0.42 \end{bmatrix}
+$$
+
+#### Step 2: Apply RoPE via Matrix Multiplication
+
+We apply the rotation to the Query ($Q$) and Key ($K$).
+
+Rotate "Cat" Query ($q_0'$):
+
+$$
+q_0' = q_0 \cdot R_0 = \begin{bmatrix} 0.8 & -0.6 \end{bmatrix} \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 0.8 & -0.6 \end{bmatrix}
+$$
+
+Rotate "Eats" Key ($k_2'$):
+
+$$
+k_2' = k_2 \cdot R_2 = \begin{bmatrix} -0.1 & 0.9 \end{bmatrix} \begin{bmatrix} -0.42 & -0.91 \\ 0.91 & -0.42 \end{bmatrix}
+$$
+
+$$
+k_2' = \begin{bmatrix} (-0.1)(-0.42) + (0.9)(0.91) \\ (-0.1)(-0.91) + (0.9)(-0.42) \end{bmatrix}^T
+$$
+
+$$
+k_2' = \begin{bmatrix} 0.042 + 0.819 \\ 0.091 - 0.378 \end{bmatrix}^T \approx \begin{bmatrix} \mathbf{0.86} & \mathbf{-0.29} \end{bmatrix}
+$$
+
+#### Step 3: Calculate the New Attention Score
+
+We now calculate the final attention score in the $QK^T$ path using our newly rotated vectors. The relative distance between words is $m-n = 0-2 = -2$.
+
+$$
+\text{Raw Score}(0 \cdot 2) = \text{DotProduct}(q_0', k_2') = (0.8 \cdot 0.86) + (-0.6 \cdot -0.29)
+$$
+
+$$
+\text{Raw Score}(0 \cdot 2) = 0.688 + 0.174 = \mathbf{0.86}
+$$
+
+*(Compare this to the un-rotated score: $q_0 \cdot k_2 = (0.8 \cdot -0.1) + (-0.6 \cdot 0.9) = -0.08 - 0.54 = -0.62$. RoPE radically altered the similarity based on the rotation difference of 2 radians).*
+
+### 4. Advanced Insight: Efficient Implementation in LLMs
+
+If you have a 4096-dimensional embedding, creating a $4096 \times 4096$ rotation matrix for every token in a batch is computationally impossible.
+
+We optimize this in models like LLaMA. A standard 2D rotation of vector $[x, y]$ can be rewritten as:
+
+$$
+\begin{bmatrix} x \\ y \end{bmatrix} \cdot R_\theta = \begin{bmatrix} x\cos\theta - y\sin\theta \\ x\sin\theta + y\cos\theta \end{bmatrix}
+$$
+
+We only use this simple, element-wise vector multiplication on the adjacent pairs of dimensions (Dim 0&1, Dim 2&3, etc.) of the Query/Key vectors. We never draw a massive 4096-dim rotation matrix.
+
+---
+
+### Topic 2 Placement Prep: Elite RoPE Flashcards
+
+**Q1: Contrast how standard Positional Encodings (sine waves) and Rotary Positional Encodings (RoPE) physically inject positional information into the Transformer input.**
+*   **Answer:** Standard positional encodings are absolute and additive. We generate a sine wave vector for position $n$ and physically add it element-wise to the word embedding. RoPE is relative and multiplicative. Instead of addition, RoPE treats the Query/Key vectors as complex numbers and performs a hardcoded rotation of the vector in the embedding space based on the token's position, ensuring that the dot-product result depends solely on the relative distance between words.
+
+**Q2: What is the "decay property" of RoPE and how does it benefit Large Language Models during inference?**
+*   **Answer:** Because the rotation difference ($\theta(m) - \theta(n)$) in the dot product relies on sine and cosine waves, the interaction naturally "decays" or oscillates and gets smaller as the relative distance between words ($m-n$) grows very large. This naturally enforces the common linguistic pattern where local words are more relevant to meaning than far-away words, vastly improving the mathematical stability and reasoning capability of LLMs processing massive, 128k context windows.
+
+**Q3: How does RoPE enable better "extrapolation" than standard sine wave encodings? (The problem of Position 5001).**
+*   **Answer:** Standard encodings (Sine/Cosine) fail to extrapolate. If we train a model on sequence lengths up to 5000 and try to inference at position 5001, the unique sine/cosine vector for position 5001 is something the network has never optimized against. It looks like noise and causes semantic interference. RoPE only relies on hardcoded, periodic trigonometric rotation. A rotation difference between Word 1 and Word 2 ($1 \cdot \theta$) is conceptually identical to the rotation difference between Word 5001 and Word 5002 ($1 \cdot \theta$). This bounded periodicity allows RoPE to naturally extend to lengths never seen during training.
