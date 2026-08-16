@@ -2,6 +2,7 @@
 
 
 
+
 **Table of Contents:**
 
 - [Part 1: Linear Regression & Regularization](#part-1-linear-regression--regularization)
@@ -131,18 +132,20 @@
 - [Topic 5: Long Short-Term Memory (LSTMs) & The Cure for Amnesia](#topic-5-long-short-term-memory-lstms--the-cure-for-amnesia)
   - [1. The Two Memory States](#1-the-two-memory-states)
   - [2. The Three Mathematical Gates](#2-the-three-mathematical-gates)
-  - [3. StatQuest Visual Walkthrough: The LSTM Gates](#3-statquest-visual-walkthrough-the-lstm-gates)
   - [4. Why LSTMs Fix the Vanishing Gradient](#4-why-lstms-fix-the-vanishing-gradient)
   - [Topic 5 Placement Prep: Elite LSTM Flashcards](#topic-5-placement-prep-elite-lstm-flashcards)
-- [Topic 6: End-to-End LSTM Math Walkthrough (Scalar Mini-LSTM)](#topic-6-end-to-end-lstm-math-walkthrough-scalar-mini-lstm)
-  - [1. The Forward Pass (Calculating the Memory)](#1-the-forward-pass-calculating-the-memory)
-  - [2. The Backward Pass (Routing the Gradients)](#2-the-backward-pass-routing-the-gradients)
+- [Topic 6: End-to-End LSTM Math Walkthrough (StatQuest Style)](#topic-6-end-to-end-lstm-math-walkthrough-statquest-style)
+  - [Stage 1: The Forget Gate (What % of long-term memory is remembered?)](#stage-1-the-forget-gate-what--of-long-term-memory-is-remembered)
+  - [Stage 2: The Input Gate (Creating and Adding Potential Memory)](#stage-2-the-input-gate-creating-and-adding-potential-memory)
+  - [Stage 3: The Output Gate (Updating the Short-Term Memory)](#stage-3-the-output-gate-updating-the-short-term-memory)
+- [Topic 7: The Backward Pass (Calculus Trace)](#topic-7-the-backward-pass-calculus-trace)
 - [Topic 7: Modern LSTM Architectural Variants](#topic-7-modern-lstm-architectural-variants)
   - [1. Bidirectional LSTMs (BiLSTMs)](#1-bidirectional-lstms-bilstms)
   - [2. Peephole Connections](#2-peephole-connections)
   - [Placement Prep: Elite LSTM Flashcards](#placement-prep-elite-lstm-flashcards)
 
 ---
+
 
 
 
@@ -2911,32 +2914,6 @@ We use a Sigmoid gate ($o_t$) to decide what parts of the Cell State are current
 h_t = o_t \cdot \tanh(C_t)
 ```
 
-### 3. StatQuest Visual Walkthrough: The LSTM Gates
-
-Let's visualize exactly how an LSTM processes a new input (e.g., $1.0$), using the values from the StatQuest diagram below.
-
-![StatQuest LSTM Forward Pass](./assets/statquest_lstm_forward.png)
-
-#### Stage 1: The Forget Gate (What % to remember?)
-The network first decides what information in the Long-Term memory is no longer relevant and should be thrown away.
-*   **Input:** It takes the *current input* (1.0) and the *previous short-term memory* (1.0).
-*   **Math:** It passes them through a linear layer and applies a **Sigmoid** activation function. Sigmoid squishes numbers between 0 and 1 (representing a percentage).
-*   **Result:** It outputs $0.997$. It then multiplies the Long-Term memory (2.0) by $0.997$, keeping $99.7\%$ of it ($1.99$).
-
-#### Stage 2: The Input Gate (What new info to add?)
-Next, the network decides what new information from the current step is worth saving to the Long-Term memory.
-*   **Create Potential Memory (Tanh):** It creates a candidate vector using the **Tanh** activation function, squishing values between -1 and 1. (Output: $0.97$).
-*   **Percentage to Add (Sigmoid):** It creates another filter using Sigmoid to decide exactly what percentage of the potential memory to actually let through. (Output: $1.0$, meaning keep 100%).
-*   **Math:** It multiplies the Potential Memory by the Percentage ($0.97 \cdot 1.0 = 0.97$).
-*   **Result:** It *adds* this new value ($0.97$) to the Long-Term memory highway. ($1.99 + 0.97 = \mathbf{2.96}$). This is the new Long-Term Memory ($C_t$)!
-
-#### Stage 3: The Output Gate (Update Short-Term Memory)
-Finally, the network decides what the new Short-Term memory (and the actual output prediction) should be.
-*   **Filter the Long-Term:** It takes the brand new Long-Term memory (2.96) and passes it through a **Tanh** function to squish it back between -1 and 1. (Output: $0.99$).
-*   **Percentage to Pass On (Sigmoid):** It creates a final Sigmoid filter based on the current input and previous short-term memory. (Output: $0.99$).
-*   **Result:** It multiplies them together ($0.99 \cdot 0.99 = \mathbf{0.98}$). This $0.98$ is the new Short-Term memory ($h_t$), which is passed to the next time step, and also used as the prediction for the current step.
-
-*(BAM!!! The LSTM has successfully maintained long-term context while updating its short-term awareness).*
 
 ### 4. Why LSTMs Fix the Vanishing Gradient
 In a Vanilla RNN, the hidden state is updated using matrix multiplication: $h_t = \tanh(W_{hh}h_{t-1} + \dots)$. During BPTT, this requires multiplying by $W_{hh}$ repeatedly.
@@ -2961,57 +2938,74 @@ Because the fundamental operation keeping the memory alive is addition ($+$) rat
 *   **Answer:** A GRU is a streamlined, more computationally efficient version of an LSTM. The primary difference is that a GRU completely removes the separate Cell State ($C_t$) and relies strictly on the Hidden State ($h_t$) to transfer memory. Furthermore, it merges the Forget and Input gates into a single "Update Gate." It achieves similar performance to an LSTM on many tasks, but requires significantly fewer weights/parameters, making it faster to train.
 
 
-## Topic 6: End-to-End LSTM Math Walkthrough (Scalar Mini-LSTM)
+## Topic 6: End-to-End LSTM Math Walkthrough (StatQuest Style)
 
-To prove how an LSTM cures the Vanishing Gradient problem and controls the flow of memory, we will hand-trace the calculus for a simplified, 1-Dimensional LSTM cell at a single time step ($t=1$). 
+To truly understand how LSTMs solve the vanishing gradient problem, we must abandon abstract algebra and run actual numbers through the network. As explained in Josh Starmer's famous *StatQuest*, the secret is that an LSTM splits memory into two completely separate paths.
 
-**Initial Parameters:**
-*   **Time Step:** $t = 1$
-*   **Current Input:** $x_1 = 2$
-*   **Previous States:** $h_0 = 0$, $C_0 = 0$
-*   **Shared Weights:** $W_f = 1$, $W_i = 1$, $W_c = 1$, $W_o = 1$. (Biases = 0).
+1.  **The Cell State (Long-Term Memory):** The green line across the top. It has no weights that directly modify it, allowing memories to flow through without exploding or vanishing.
+2.  **The Hidden State (Short-Term Memory):** The pink line across the bottom. This is actively manipulated by weights and acts as the network's immediate prediction.
 
-![LSTM Forward Pass](./assets/lstm_template_forward.png)
+Let's do the math for a single time step. 
+*   **Previous Long-Term Memory:** $2.0$
+*   **Previous Short-Term Memory:** $1.0$
+*   **Current Input Data:** $1.0$
 
-### 1. The Forward Pass (Calculating the Memory)
+![StatQuest LSTM Forward Pass](./assets/statquest_lstm_forward.png)
 
-**Step 1: The Forget Gate ($f_1$)**
-The network decides what to forget from the previous cell state.
-```math
-z_f = W_f \cdot x_1 = 1 \cdot 2 = 2
-```
-```math
-f_1 = \sigma(2) \approx \mathbf{0.88}
-```
-**Step 2: The Input Gate & Candidate ($\tilde{C}_1$)**
-The network decides what new data to add. (Note: $\tanh(2) \approx 0.96$).
-```math
-i_1 = \sigma(W_i \cdot x_1) = \sigma(2) \approx \mathbf{0.88}
-```
-```math
-\tilde{C}_1 = \tanh(W_c \cdot x_1) = \tanh(2) \approx \mathbf{0.96}
-```
-**Step 3: Update the Cell State ($C_1$)**
-We multiply the old state by the forget gate, and add the new information.
-```math
-C_1 = (f_1 \cdot C_0) + (i_1 \cdot \tilde{C}_1)
-```
-```math
-C_1 = (0.88 \cdot 0) + (0.88 \cdot 0.96) \approx \mathbf{0.84}
-```
-**Step 4: The Output Gate & Hidden State ($h_1$)**
-We decide what part of the internal cell state to reveal to the outside world.
-```math
-o_1 = \sigma(W_o \cdot x_1) = \sigma(2) \approx \mathbf{0.88}
-```
-```math
-h_1 = o_1 \cdot \tanh(C_1) = 0.88 \cdot \tanh(0.84) = 0.88 \cdot 0.69 \approx \mathbf{0.61}
-```
+### Stage 1: The Forget Gate (What % of long-term memory is remembered?)
+*Terminology Alert! Even though this determines what is remembered, it is called the Forget Gate.*
+
+We use a **Sigmoid** activation function to turn our inputs into a percentage (a number between 0 and 1). We multiply the Short-Term memory and Input by their weights, and add a bias.
+*   **Math:** $(1.0 \times 2.70) + (1.0 \times 1.63) + 1.62 = \mathbf{5.95}$
+*   **Sigmoid(5.95) = 0.997**
+
+We take this percentage and multiply it against the Long-Term Memory line:
+$$ 2.0 \times 0.997 = \mathbf{1.99} $$
+*(The network decided to remember 99.7% of the past!)*
+
+---
+
+### Stage 2: The Input Gate (Creating and Adding Potential Memory)
+In a nutshell, the block on the right creates a *potential* new long-term memory, and the block on the left decides what *percentage* of it to actually save.
+
+**Part A: The Potential Memory (Tanh)**
+We use a **Tanh** function (which bounds values between -1 and 1) to create new candidate data based on our short-term memory and input.
+*   **Math:** $(1.0 \times 1.41) + (1.0 \times 0.94) - 0.32 = \mathbf{2.03}$
+*   **Tanh(2.03) = 0.97** (This is our potential memory).
+
+**Part B: The Percentage to Add (Sigmoid)**
+We use another Sigmoid function to decide how much of the $0.97$ we want to keep.
+*   **Math:** $(1.0 \times 2.00) + (1.0 \times 1.65) + 0.62 = \mathbf{4.27}$
+*   **Sigmoid(4.27) = 1.0** (The network decided to keep 100% of the potential memory).
+
+**Part C: Update the Long-Term Line**
+We multiply the percentage by the potential memory ($1.0 \times 0.97 = 0.97$), and then simply **ADD** it to our Long-Term Memory line.
+$$ 1.99 + 0.97 = \mathbf{2.96} $$
+**Double BAM!** We have successfully updated the long-term memory.
+
+---
+
+### Stage 3: The Output Gate (Updating the Short-Term Memory)
+This final stage creates the new short-term memory, which will also be the actual output prediction of the unit.
+
+First, we squeeze our brand new Long-Term Memory through a Tanh function to bound it between -1 and 1.
+*   **Tanh(2.96) = 0.99**
+
+Next, we use our final **Sigmoid** function to decide what percentage of this bounded long-term memory we want to pass down to the short-term line.
+*   **Math:** $(1.0 \times 4.38) + (1.0 \times -0.19) + 0.59 = \mathbf{4.78}$
+*   **Sigmoid(4.78) = 0.99**
+
+Finally, we multiply them together:
+$$ 0.99 \times 0.99 = \mathbf{0.98} $$
+
+**Triple BAM!!!** The number **$0.98$** is the final output of the LSTM for this time step, and it is passed forward as the Short-Term Memory for the next time step.
 ---
 
 ![LSTM Backward Pass](./assets/lstm_template_backward.png)
 
-### 2. The Backward Pass (Routing the Gradients)
+## Topic 7: The Backward Pass (Calculus Trace)
+
+*(Note: To demonstrate the Calculus and Backpropagation Through Time (BPTT), we switch to a simplified scalar LSTM where $x_1 = 2$, $h_0=0$, and $C_0=0$. This resulted in $h_1 = 0.61$ and $C_1 = 0.84$.)*
 
 Assume the loss function sends an error gradient of **$dh_1 = 2$** backward into our cell. We must use the Product Rule and Chain Rule to split this error and route it to our four weights.
 
