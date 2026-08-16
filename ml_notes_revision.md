@@ -1,6 +1,7 @@
 # Machine Learning & Deep Learning Placement Master Notes
 
 
+
 **Table of Contents:**
 
 - [Part 1: Linear Regression & Regularization](#part-1-linear-regression--regularization)
@@ -130,7 +131,8 @@
 - [Topic 5: Long Short-Term Memory (LSTMs) & The Cure for Amnesia](#topic-5-long-short-term-memory-lstms--the-cure-for-amnesia)
   - [1. The Two Memory States](#1-the-two-memory-states)
   - [2. The Three Mathematical Gates](#2-the-three-mathematical-gates)
-  - [3. Why LSTMs Fix the Vanishing Gradient](#3-why-lstms-fix-the-vanishing-gradient)
+  - [3. StatQuest Visual Walkthrough: The LSTM Gates](#3-statquest-visual-walkthrough-the-lstm-gates)
+  - [4. Why LSTMs Fix the Vanishing Gradient](#4-why-lstms-fix-the-vanishing-gradient)
   - [Topic 5 Placement Prep: Elite LSTM Flashcards](#topic-5-placement-prep-elite-lstm-flashcards)
 - [Topic 6: End-to-End LSTM Math Walkthrough (Scalar Mini-LSTM)](#topic-6-end-to-end-lstm-math-walkthrough-scalar-mini-lstm)
   - [1. The Forward Pass (Calculating the Memory)](#1-the-forward-pass-calculating-the-memory)
@@ -141,6 +143,7 @@
   - [Placement Prep: Elite LSTM Flashcards](#placement-prep-elite-lstm-flashcards)
 
 ---
+
 
 
 ## Part 1: Linear Regression & Regularization
@@ -2907,7 +2910,35 @@ We use a Sigmoid gate ($o_t$) to decide what parts of the Cell State are current
 ```math
 h_t = o_t \cdot \tanh(C_t)
 ```
-### 3. Why LSTMs Fix the Vanishing Gradient
+
+### 3. StatQuest Visual Walkthrough: The LSTM Gates
+
+Let's visualize exactly how an LSTM processes a new input (e.g., $1.0$), using the values from the StatQuest diagram below.
+
+![StatQuest LSTM Forward Pass](./assets/statquest_lstm_forward.png)
+
+#### Stage 1: The Forget Gate (What % to remember?)
+The network first decides what information in the Long-Term memory is no longer relevant and should be thrown away.
+*   **Input:** It takes the *current input* (1.0) and the *previous short-term memory* (1.0).
+*   **Math:** It passes them through a linear layer and applies a **Sigmoid** activation function. Sigmoid squishes numbers between 0 and 1 (representing a percentage).
+*   **Result:** It outputs $0.997$. It then multiplies the Long-Term memory (2.0) by $0.997$, keeping $99.7\%$ of it ($1.99$).
+
+#### Stage 2: The Input Gate (What new info to add?)
+Next, the network decides what new information from the current step is worth saving to the Long-Term memory.
+*   **Create Potential Memory (Tanh):** It creates a candidate vector using the **Tanh** activation function, squishing values between -1 and 1. (Output: $0.97$).
+*   **Percentage to Add (Sigmoid):** It creates another filter using Sigmoid to decide exactly what percentage of the potential memory to actually let through. (Output: $1.0$, meaning keep 100%).
+*   **Math:** It multiplies the Potential Memory by the Percentage ($0.97 \cdot 1.0 = 0.97$).
+*   **Result:** It *adds* this new value ($0.97$) to the Long-Term memory highway. ($1.99 + 0.97 = \mathbf{2.96}$). This is the new Long-Term Memory ($C_t$)!
+
+#### Stage 3: The Output Gate (Update Short-Term Memory)
+Finally, the network decides what the new Short-Term memory (and the actual output prediction) should be.
+*   **Filter the Long-Term:** It takes the brand new Long-Term memory (2.96) and passes it through a **Tanh** function to squish it back between -1 and 1. (Output: $0.99$).
+*   **Percentage to Pass On (Sigmoid):** It creates a final Sigmoid filter based on the current input and previous short-term memory. (Output: $0.99$).
+*   **Result:** It multiplies them together ($0.99 \cdot 0.99 = \mathbf{0.98}$). This $0.98$ is the new Short-Term memory ($h_t$), which is passed to the next time step, and also used as the prediction for the current step.
+
+*(BAM!!! The LSTM has successfully maintained long-term context while updating its short-term awareness).*
+
+### 4. Why LSTMs Fix the Vanishing Gradient
 In a Vanilla RNN, the hidden state is updated using matrix multiplication: $h_t = \tanh(W_{hh}h_{t-1} + \dots)$. During BPTT, this requires multiplying by $W_{hh}$ repeatedly.
 
 In an LSTM, the long-term Cell State ($C_t$) is updated using **Addition**: 

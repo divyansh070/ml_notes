@@ -1,10 +1,8 @@
 # Advanced AI: Transformers, Foundation Models, & Beyond
 
+
 **Table of Contents:**
 
-- [Part 7: Transformers and the Attention Mechanism](#part-7-transformers-and-the-attention-mechanism)
-  - [Topic 1: Input Processing (Replacing the Sequence)](#topic-1-input-processing-replacing-the-sequence)
-  - [Topic 1 Placement Prep: Elite Input Processing Flashcards](#topic-1-placement-prep-elite-input-processing-flashcards)
 - [Topic 2: The Core Engine — Scaled Dot-Product Attention](#topic-2-the-core-engine--scaled-dot-product-attention)
   - [1. The Database Analogy](#1-the-database-analogy)
   - [2. The Formula](#2-the-formula)
@@ -59,68 +57,6 @@
 
 ---
 
-
-Recurrent Neural Networks (RNNs/LSTMs) revolutionized natural language processing, but they had a fatal bottleneck: **Sequential Processing**. To process word 100, an LSTM mathematically must process words 1 through 99 first. This means they cannot be parallelized across GPUs, making them incredibly slow to train on massive datasets.
-
-In 2017, Google published *Attention is All You Need*, introducing the **Transformer**. The Transformer completely abandons recurrence. Instead, it feeds the *entire sentence into the network at the exact same time*.
-
----
-
-### Topic 1: Input Processing (Replacing the Sequence)
-
-Because the Transformer reads everything simultaneously, the network natively has no concept of order. To a basic Transformer, the sentence *"The dog bit the man"* and *"The man bit the dog"* look mathematically identical. We must artificially inject the concept of "time" and "order" into the data before the network reads it.
-
-#### Step 1: Tokenization and Embeddings
-First, we convert raw text into a format the network can compute.
-1.  **Tokenization:** The text is split into chunks (words or sub-words) and mapped to integer IDs based on a dictionary. (e.g., "AI" $\rightarrow$ `894`).
-2.  **Embedding:** Each integer is mapped to a massive, learnable vector (usually $d_{model} = 512$). This vector represents the semantic meaning of the word. 
-
-#### Step 2: Positional Encoding (The Mathematical Timestamp)
-To tell the network *where* a word sits in a sentence, we generate a brand new vector of the exact same size ($d_{model} = 512$) called a **Positional Encoding**. 
-
-Instead of using learned weights, the authors used fixed, hardcoded Sine and Cosine waves of varying frequencies. 
-
-**The Formulas:**
-For a given position in the sentence (*pos*) and a given dimension index in the vector (*i*):
-$$
-PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)
-$$
-$$
-PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)
-$$
-*   *Even dimensions (*2i*) use Sine.*
-*   *Odd dimensions ($2i+1$) use Cosine.*
-
-![Transformer Positional Encoding](./assets/transformer_pe.png)
-
-#### Step 3: The Hands-On Math
-Let's calculate the Positional Encoding for a tiny embedding where $d_{model} = 4$. We want the encoding for the **first word** in the sentence ($pos = 0$) and the **second word** ($pos = 1$).
-
-**For $pos = 0$ (The First Word):**
-*   Dim 0 (Even, $i=0$): $\sin(0 / 10000^0) = \sin(0) = \mathbf{0}$
-*   Dim 1 (Odd, $i=0$): $\cos(0 / 10000^0) = \cos(0) = \mathbf{1}$
-*   Dim 2 (Even, $i=1$): $\sin(0 / 10000^{2/4}) = \sin(0) = \mathbf{0}$
-*   Dim 3 (Odd, $i=1$): $\cos(0 / 10000^{2/4}) = \cos(0) = \mathbf{1}$
-*   $PE_0 = [0, 1, 0, 1]$
-
-**For $pos = 1$ (The Second Word):**
-*   Dim 0 (Even, $i=0$): $\sin(1 / 10000^0) = \sin(1) \approx \mathbf{0.84}$
-*   Dim 1 (Odd, $i=0$): $\cos(1 / 10000^0) = \cos(1) \approx \mathbf{0.54}$
-*   Dim 2 (Even, $i=1$): The denominator is $10000^{2/4} = 100$. $\sin(1 / 100) = \sin(0.01) \approx \mathbf{0.01}$
-*   Dim 3 (Odd, $i=1$): $\cos(1 / 100) = \cos(0.01) \approx \mathbf{1.00}$
-*   $PE_1 = [0.84, 0.54, 0.01, 1.00]$
-
-Notice how the lower dimensions (Dim 0 and 1) changed drastically from word 0 to word 1. However, the higher dimensions (Dim 2 and 3) barely changed at all. This acts like a clock: the lower dimensions are the fast-moving seconds hand, and the higher dimensions are the slow-moving hours hand. Every position gets a totally unique "timestamp."
-
-#### Step 4: Addition (The Final Input)
-The final input that gets passed into the Transformer's Attention layers is simply the element-wise **addition** of the Semantic Embedding and the Positional Encoding.
-$$
-\text{Final Input} = \text{Embedding} + \text{Positional Encoding}
-$$
-
-![Transformer Input Addition](./assets/transformer_input_addition.png)
-
----
 
 ### Topic 1 Placement Prep: Elite Input Processing Flashcards
 
