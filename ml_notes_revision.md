@@ -4,6 +4,7 @@
 
 
 
+
 **Table of Contents:**
 
 - [Part 1: Linear Regression & Regularization](#part-1-linear-regression--regularization)
@@ -31,6 +32,7 @@
   - [2. Core Metrics](#2-core-metrics)
   - [3. ROC Curve & PR Curve](#3-roc-curve--pr-curve)
   - [4. Classification & Logistic Regression Interview Cheatsheet](#4-classification--logistic-regression-interview-cheatsheet)
+  - [5. Interview Trap: R-Squared ($R^2$) Score](#5-interview-trap-r-squared-r2-score)
 - [Part 4: Support Vector Machines (SVM)](#part-4-support-vector-machines-svm)
   - [1. The Geometry & Math of the Margin](#1-the-geometry--math-of-the-margin)
   - [2. The Main Idea: Maximal Margin & Soft Margins (The Mice Analogy)](#2-the-main-idea-maximal-margin--soft-margins-the-mice-analogy)
@@ -149,6 +151,7 @@
   - [2. The Information Bottleneck (Fixed-Length Vector)](#2-the-information-bottleneck-fixed-length-vector)
 
 ---
+
 
 
 
@@ -466,6 +469,26 @@ For a binary classification problem (e.g., 1 = Positive/Defect, 0 = Negative/Nor
     *   A: It controls Regularization (which scikit-learn applies by default!). ***C* is the inverse of regularization strength ($\lambda$)**. Smaller *C* = stronger penalty = simpler model (less overfitting). Larger *C* = weaker penalty = fits training data more closely.
 *   **Q: What is the maximum possible value for the gradient of the Sigmoid function $\sigma(z)$?**
     *   A: **0.25**. The derivative is $\sigma(z)(1-\sigma(z))$. At $z=0$, $\sigma(0)=0.5$, so the gradient is $0.5 \times 0.5 = 0.25$. This tiny maximum gradient is a primary cause of the *Vanishing Gradient Problem* in deep learning.
+
+### 5. Interview Trap: R-Squared ($R^2$) Score
+*(Note: $R^2$ is technically a **Regression** metric, not a Classification metric. However, it is highly likely to come up alongside classification metrics as a trick question during interviews, or disguised as McFadden's Pseudo-$R^2$ for Logistic Regression).*
+
+The $R^2$ score (Coefficient of Determination) measures how much better your model is compared to a completely naive "baseline" model. 
+
+![R2 Score Visual](./assets/r2_score_visual.png)
+
+#### The Standard Formula (Using the Mean)
+By default, the naive "baseline model" just predicts the **Mean** of the target variable for every single point (the blue line in the graph above).
+$$ R^2 = 1 - \frac{\text{Sum of Squared Residuals (SSR)}}{\text{Total Sum of Squares (SST)}} $$
+*   **SSR (Red):** The squared errors of your actual regression line.
+*   **SST (Blue):** The squared errors of the naive *Mean* line.
+*   *Interpretation:* If $R^2 = 0.80$, your model explains 80% of the variance that the naive mean model couldn't.
+
+#### Robust R-Squared (Using the Median)
+Sometimes, your data has massive outliers. Because standard $R^2$ uses squared errors against the Mean, these outliers will severely distort the Total Sum of Squares (SST). 
+To fix this, we can calculate a **Robust $R^2$**. Instead of the *Mean*, the baseline model predicts the **Median**. 
+*   **Why the Median?** The median is mathematically the optimal constant prediction to minimize Mean Absolute Error (MAE), whereas the mean is optimal for Mean Squared Error (MSE). 
+*   By replacing the Mean with the Median in the baseline, and replacing Squared errors with Absolute errors, we create a robust metric (sometimes called $R^2_{MAD}$ or similar variants) that prevents extreme outliers from falsely inflating or destroying our model's perceived performance.
 
 ---
 
