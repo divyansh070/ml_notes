@@ -106,7 +106,7 @@ $$PE_{(pos, 2i+1)} = \cos(pos / 10000^{2i/d_{model}})$$
 
 To give the network a sense of "time" and "order," the Transformer constructs **Positional Encodings** dynamically using continuous wave functions. Let's break down exactly how these values are generated from thin air and merged with our raw embeddings.
 
-![Generating Positional Encodings](./assets/generating_positional_encoding.png)
+![Generating Positional Encodings](./assets/generating_positional_encoding_v2.png)
 
 #### Step 1: The Continuous Wave Functions (The Clock Analogy)
 
