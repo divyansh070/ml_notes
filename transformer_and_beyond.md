@@ -5,6 +5,7 @@
 
 
 
+
 **Table of Contents:**
 
 - [Topic 2: The Core Engine — Scaled Dot-Product Attention](#topic-2-the-core-engine--scaled-dot-product-attention)
@@ -60,6 +61,7 @@
   - [Topic 3 Placement Prep: Elite ViT Flashcards](#topic-3-placement-prep-elite-vit-flashcards)
 
 ---
+
 
 
 

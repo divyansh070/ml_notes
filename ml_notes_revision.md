@@ -6,6 +6,7 @@
 
 
 
+
 **Table of Contents:**
 
 - [Part 1: Linear Regression & Regularization](#part-1-linear-regression--regularization)
@@ -152,6 +153,7 @@
   - [2. The Information Bottleneck (Fixed-Length Vector)](#2-the-information-bottleneck-fixed-length-vector)
 
 ---
+
 
 
 
@@ -1774,20 +1776,39 @@ Once Cluster 1 can't grow anymore, we move to the next unassigned Core Point and
 
 Eventually, all Core Points will be assigned to a cluster. Any remaining Non-Core points that are not close to *any* cluster are left out in the cold. These are completely unassigned and officially classified as **Outliers** (or Noise).
 
-**Triple BAM!!!** We successfully identified nested clusters and isolated the outliers without breaking a sweat!
+**Triple BAM!!!** We successfully identified nested clusters and isolated the outliers.
+
+#### 5. Pros and Cons of DBSCAN
+**Pros:**
+*   You do **not** need to specify the number of clusters (*k*) beforehand!
+*   It can find arbitrarily shaped clusters (moons, circles, S-shapes).
+*   It is robust to outliers (it actively identifies and ignores them, whereas K-Means gets pulled off-center by them).
+
+**Cons:**
+*   **Varying Densities:** If your dataset has one cluster that is extremely dense and another cluster that is very sparse, DBSCAN will fail. You can only pick one `eps` radius. If you make it too small, the sparse cluster becomes "noise." If you make it too big, the dense clusters merge together.
+*   **High Dimensions:** Because it relies on Euclidean distance to draw its `eps` circles, DBSCAN suffers heavily from the Curse of Dimensionality.
 
 ---
 
-#### Placement Prep: Elite DBSCAN Flashcards
+#### 6. Placement Prep: Elite DBSCAN Flashcards
 
-**Q1: How does DBSCAN inherently determine the number of clusters ($k$), and how does this contrast with K-Means?**
+**Q1: In an interview, how would you explain the difference between a Core Point, a Border Point, and a Noise Point in DBSCAN?**
+*   **Answer:** A Core Point is in a dense region, meaning it has at least `min_samples` neighbors within a radius of `eps`. A Border Point is in a sparse region (fewer than `min_samples`), but it sits just inside the radius of a Core Point. A Noise Point is completely isolated; it is neither a Core Point nor close to one.
+
+**Q2: What is the single biggest advantage DBSCAN has over K-Means?**
+*   **Answer:** DBSCAN can identify clusters of arbitrary, non-linear shapes (like nested rings or crescent moons) because it links points based on continuous local density. K-Means assumes clusters are convex and spherical, causing it to fail on complex geometries. Additionally, DBSCAN naturally identifies and isolates outliers, whereas K-Means forces every outlier into a cluster, skewing the centroids.
+
+**Q3: How does DBSCAN inherently determine the number of clusters ($k$), and how does this contrast with K-Means?**
 *   **Answer:** Unlike K-Means, which requires the user to explicitly define $k$ before training, DBSCAN determines the number of clusters dynamically. It simply counts how many separated, contiguous regions of high density exist in the data based on the provided $\epsilon$ and MinPts parameters.
 
-**Q2: What is the main computational bottleneck of DBSCAN, and what is its Big-O complexity?**
+**Q4: What is the main computational bottleneck of DBSCAN, and what is its Big-O complexity?**
 *   **Answer:** The primary bottleneck is the neighborhood search (finding all points within the Orange Circle for every single point). A naive implementation calculates the distance between all pairs of points, resulting in a computational complexity of $O(N^2)$. However, this can be optimized to $O(N \log N)$ by using spatial indexing structures like KD-Trees or Ball-Trees to dramatically speed up the radius queries.
 
-**Q3: Can standard DBSCAN cluster data where the different clusters have vastly different densities?**
+**Q5: Can standard DBSCAN cluster data where the different clusters have vastly different densities?**
 *   **Answer:** No, this is DBSCAN's fundamental weakness. Because DBSCAN applies a single, global $\epsilon$ radius and MinPts threshold across the entire dataset, it struggles if Cluster A is extremely dense but Cluster B is very sparse. If you set $\epsilon$ small enough to capture Cluster A cleanly, Cluster B might be entirely discarded as outliers. To solve this, you would need to upgrade to **HDBSCAN** (Hierarchical DBSCAN), which mathematically handles varying densities across the dataset.
+
+**Q6: A Border point sits exactly halfway between a Core Point in Cluster A and a Core Point in Cluster B. Which cluster does the Border point join?**
+*   **Answer:** DBSCAN builds clusters sequentially. The Border point will be assigned to whichever cluster the algorithm happens to build *first*. Once a point is assigned to a cluster, it cannot be reassigned.
 
 
 
