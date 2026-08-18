@@ -1202,7 +1202,7 @@ OpenAI's CLIP fundamentally changed multimodal AI by proving that models trained
 #### 1. Architecture and The InfoNCE Loss
 CLIP relies on a strict **Dual-Encoder Architecture**. It passes text through a Text Encoder (Transformer) and images through an Image Encoder (e.g., ViT-B/32, where the image is chopped into $32 \times 32$ patches). The two modalities never interact until the very end, where they are mapped to a shared linear projection space.
 
-![CLIP Architecture Diagram](./assets/clip_architecture.png)
+![CLIP Architecture Diagram](https://raw.githubusercontent.com/openai/CLIP/main/CLIP.png)
 
 The model is optimized using the symmetric **InfoNCE (Softmax Contrastive) Loss**. For a batch of $N$ image-text pairs, the network calculates an $N \times N$ matrix of cosine similarities. 
 
@@ -1249,7 +1249,7 @@ ViLT operates on the hypothesis that the self-attention mechanism is powerful en
 *   **The Single Transformer:** Both the text embeddings and the visual patch embeddings are concatenated into one long sequence and fed directly into a single, unified Transformer encoder.
 *   **Modal-Type Embeddings:** To help the model distinguish between a word and a pixel, a special learnable "Modal-Type" vector (0 for text, 1 for image) is added to every token in the sequence.
 
-![ViLT Architecture Diagram](./assets/vilt_architecture.png)
+![ViLT Architecture Diagram](https://raw.githubusercontent.com/dandelin/ViLT/master/assets/vilt.png)
 
 #### 2. The Speed vs. Performance Trade-off
 What makes ViLT unique is its extreme **inference speed**. By eliminating the heavy unimodal encoders, ViLT is significantly faster and lighter than its predecessors. However, because it lacks dedicated towers to pre-process complex visual structures, it historically struggles to match the peak accuracy of heavier dual-encoder models on complex diagnostic tasks.
@@ -1277,6 +1277,8 @@ BLIP structurally modifies the BERT architecture so it can operate in three dist
 1.  **Image-Text Contrastive (ITC):** A unimodal text encoder aligns the global visual and textual embedding spaces, similar to CLIP. 
 2.  **Image-Text Matching (ITM):** An image-grounded text encoder applies **Cross-Attention** to the visual tokens. It solves a binary classification task to predict if an image-text pair is a true match, forcing the model to learn fine-grained spatial alignments between specific words and specific image patches.
 3.  **Language Modeling (LM):** An image-grounded text decoder auto-regressively generates a caption token-by-token. 
+
+![BLIP Architecture Diagram](https://raw.githubusercontent.com/salesforce/BLIP/main/image/model_architecture.png)
 
 #### 2. CapFilt: Data Bootstrapping
 A major limitation of models like CLIP is their reliance on noisy web-crawled data (e.g., ALT text like "IMG_1234.jpg"). BLIP introduced **CapFilt (Captioning and Filtering)**:
@@ -1309,6 +1311,8 @@ In deep learning, the standard assumption is that larger models (more parameters
 SmolVLM contains only **256M parameters** (compared to BLIP's 385M or OpenCLIP's massive variants). It introduces radical image compression: regardless of the original image resolution, large image patches are heavily compressed and encoded into exactly **81 visual tokens** per image. 
 
 These 81 tokens are treated mathematically identically to text tokens, allowing them to be arbitrarily interleaved within a sequence (e.g., `Text -> Image 1 (81 tokens) -> Text -> Image 2 (81 tokens)`). This creates an ultra-efficient, fully generative model capable of multi-image storytelling, VQA, and classification on edge devices without exploding the KV Cache.
+
+![SmolVLM Architecture Diagram](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/smolvlm/smolvlm_architecture.png)
 
 #### 2. Multiscale Diagnostics: The Scale-Invariant King
 When tested on multiscale diagnostics across varied datasets, SmolVLM represents an absolute architectural breakthrough. 
