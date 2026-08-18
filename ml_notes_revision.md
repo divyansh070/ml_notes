@@ -7,6 +7,7 @@
 
 
 
+
 **Table of Contents:**
 
 - [Part 1: Linear Regression & Regularization](#part-1-linear-regression--regularization)
@@ -153,6 +154,7 @@
   - [2. The Information Bottleneck (Fixed-Length Vector)](#2-the-information-bottleneck-fixed-length-vector)
 
 ---
+
 
 
 
@@ -1778,7 +1780,27 @@ Eventually, all Core Points will be assigned to a cluster. Any remaining Non-Cor
 
 **Triple BAM!!!** We successfully identified nested clusters and isolated the outliers.
 
-#### 5. Pros and Cons of DBSCAN
+#### 5. How to Choose Hyperparameters (The K-Distance Graph)
+While you don't have to guess the number of clusters $k$, you *do* have to find the perfect value for Epsilon ($\epsilon$). Guessing $\epsilon$ randomly is a terrible idea. Instead, we use the **K-Distance Graph** (also called the Knee Method):
+
+1. **Set MinPts:** A standard rule of thumb is $MinPts = 2 \times D$ (where $D$ is the number of dimensions/features). So for a 2D dataset, $MinPts = 4$.
+2. **Calculate Distances:** For every single point in your dataset, calculate the distance to its $k$-th nearest neighbor (e.g., its 4th nearest neighbor).
+3. **Sort and Plot:** Sort those distances from smallest to largest and plot them on a line graph.
+4. **Find the Knee:** Look for the point of maximum curvature (the "knee" or "elbow"). The distance value at this exact inflection point is your optimal $\epsilon$!
+
+![K-Distance Graph for DBSCAN](./assets/dbscan_kdistance_knee.png)
+
+#### 6. K-Means vs. DBSCAN (The Ultimate Cheatsheet)
+
+| Feature | K-Means | DBSCAN |
+| :--- | :--- | :--- |
+| **Shape Assumption** | Assumes clusters are convex/spherical. | Handles arbitrarily shaped/nested clusters. |
+| **Outliers** | Forces all outliers into a cluster, skewing centroids. | Actively identifies and isolates outliers as Noise. |
+| **Hyperparameters** | Requires $k$ (number of clusters). | Requires $\epsilon$ (radius) and MinPts. |
+| **Cluster Densities** | Handles varying densities well. | **Fails** if clusters have vastly different densities. |
+| **Speed** | Extremely fast ($O(N)$). | Slower ($O(N \log N)$ or worse with naive implementation). |
+
+#### 7. Pros and Cons of DBSCAN
 **Pros:**
 *   You do **not** need to specify the number of clusters (*k*) beforehand!
 *   It can find arbitrarily shaped clusters (moons, circles, S-shapes).
@@ -1790,7 +1812,7 @@ Eventually, all Core Points will be assigned to a cluster. Any remaining Non-Cor
 
 ---
 
-#### 6. Placement Prep: Elite DBSCAN Flashcards
+#### 8. Placement Prep: Elite DBSCAN Flashcards
 
 **Q1: In an interview, how would you explain the difference between a Core Point, a Border Point, and a Noise Point in DBSCAN?**
 *   **Answer:** A Core Point is in a dense region, meaning it has at least `min_samples` neighbors within a radius of `eps`. A Border Point is in a sparse region (fewer than `min_samples`), but it sits just inside the radius of a Core Point. A Noise Point is completely isolated; it is neither a Core Point nor close to one.
