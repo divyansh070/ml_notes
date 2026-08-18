@@ -1,12 +1,13 @@
 # Agentic AI & Advanced Topics
 
+
 **Table of Contents:**
 
-- [Topic 1: The Agentic AI Loop (ReAct Framework)](#topic-1-the-agentic-ai-loop-react-framework)
   - [The Core Components of the Loop](#the-core-components-of-the-loop)
   - [Closing the Loop](#closing-the-loop)
 
 ---
+
 
 
 Agentic AI represents a massive shift from "passive" LLMs (which just answer questions based on their static training data) to "active" agents that can reason about a problem and autonomously use external tools to solve it. 
