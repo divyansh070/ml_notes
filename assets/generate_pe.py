@@ -60,6 +60,8 @@ ax2.grid(True, alpha=0.3)
 # BOTTOM: Vector Addition for Word 1 (pos = 1)
 # -----------------------------------------------------
 ax3 = fig.add_axes([0.1, 0.0, 0.8, 0.45])
+ax3.set_xlim(0, 18)
+ax3.set_ylim(0, 6)
 ax3.axis('off')
 
 def draw_vector(ax, start_x, start_y, values, title, bg_color):
