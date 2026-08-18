@@ -1239,6 +1239,35 @@ When evaluated on datasets requiring local precision like PASCAL VOC, CLIP exhib
 *   **Answer:** $\tau$ controls the sharpness of the softmax distribution. A lower $\tau$ makes the loss function penalize hard negative examples much more aggressively, helping the model learn fine-grained distinctions between highly similar incorrect pairs. In CLIP, $\tau$ is a learnable parameter that optimizes itself during training to dynamically adjust the penalty scale.
 
 
+### Topic 13.1: ViLT (Vision-and-Language Transformer)
+
+Before ViLT, models like CLIP relied on massive, computationally expensive deep visual encoders (like a heavy ViT or ResNet) and deep text encoders before fusing the features. **ViLT (Vision-and-Language Transformer)** took a radically minimalist approach: it threw away the deep independent encoders entirely.
+
+#### 1. The Monolithic Architecture
+ViLT operates on the hypothesis that the self-attention mechanism is powerful enough to handle raw multimodal fusion from the very first layer. 
+*   **Minimal Feature Extraction:** Text is converted to word embeddings. Images are simply chopped into patches and passed through a shallow linear projection.
+*   **The Single Transformer:** Both the text embeddings and the visual patch embeddings are concatenated into one long sequence and fed directly into a single, unified Transformer encoder.
+*   **Modal-Type Embeddings:** To help the model distinguish between a word and a pixel, a special learnable "Modal-Type" vector (0 for text, 1 for image) is added to every token in the sequence.
+
+![ViLT Architecture Diagram](./assets/vilt_architecture.png)
+
+#### 2. The Speed vs. Performance Trade-off
+What makes ViLT unique is its extreme **inference speed**. By eliminating the heavy unimodal encoders, ViLT is significantly faster and lighter than its predecessors. However, because it lacks dedicated towers to pre-process complex visual structures, it historically struggles to match the peak accuracy of heavier dual-encoder models on complex diagnostic tasks.
+
+---
+
+### Topic 13.1 Placement Prep: Elite ViLT Flashcards
+
+**Q1: What is the primary architectural difference between ViLT and traditional VLMs like CLIP?**
+*   **Answer:** CLIP uses a "heavy" dual-encoder architecture, meaning text and images go through deep, separate transformers before interacting. ViLT uses a "monolithic" architecture: it applies shallow linear projections to patches and words, concatenates them immediately, and uses a single transformer to process both modalities simultaneously from layer 1.
+
+**Q2: Since ViLT processes text and images in the exact same transformer pipeline, how does it know which tokens are words and which are pixels?**
+*   **Answer:** Alongside positional encodings (to denote sequence order), ViLT adds a learnable "Modal-Type Embedding" to every token. It adds vector `A` to all text tokens and vector `B` to all visual tokens, allowing the attention mechanism to distinguish the source modality.
+
+**Q3: What is the main advantage and main disadvantage of the ViLT architecture?**
+*   **Answer:** **Advantage:** Blistering inference speed and computational efficiency, as it drops the heavy, independent visual backbone (like ResNet or deep ViT). **Disadvantage:** A lower performance ceiling. Without a dedicated deep visual encoder to extract complex hierarchical image features first, it struggles to match the accuracy of heavier models on difficult spatial tasks.
+
+
 ### Topic 13.2: BLIP (Generative Spatial Reasoning)
 
 Standard contrastive models can match images to text, but they cannot generate text. **BLIP** solves this using a Multimodal Mixture of Encoder-Decoder (MED) architecture[cite: 1, 2].
