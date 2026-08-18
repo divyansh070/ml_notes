@@ -82,3 +82,4 @@ def update_file_toc(filepath):
 
 update_file_toc('/Users/divyanshverma/Desktop/ml_interview_questions/ml_notes_revision.md')
 update_file_toc('/Users/divyanshverma/Desktop/ml_interview_questions/transformer_and_beyond.md')
+update_file_toc('/Users/divyanshverma/Desktop/ml_interview_questions/agentic_and_other.md')

@@ -8,6 +8,7 @@
 
 
 
+
 **Table of Contents:**
 
 - [Part 1: Linear Regression & Regularization](#part-1-linear-regression--regularization)
@@ -154,6 +155,7 @@
   - [2. The Information Bottleneck (Fixed-Length Vector)](#2-the-information-bottleneck-fixed-length-vector)
 
 ---
+
 
 
 
