@@ -1202,7 +1202,7 @@ OpenAI's CLIP fundamentally changed multimodal AI by proving that models trained
 #### 1. Architecture and The InfoNCE Loss
 CLIP relies on a strict **Dual-Encoder Architecture**. It passes text through a Text Encoder (Transformer) and images through an Image Encoder (e.g., ViT-B/32, where the image is chopped into $32 \times 32$ patches). The two modalities never interact until the very end, where they are mapped to a shared linear projection space.
 
-![CLIP Architecture Diagram](./assets/clip_architecture_diagram.jpg)
+![CLIP Architecture Diagram](./assets/clip_architecture.png)
 
 The model is optimized using the symmetric **InfoNCE (Softmax Contrastive) Loss**. For a batch of $N$ image-text pairs, the network calculates an $N \times N$ matrix of cosine similarities. 
 
@@ -1237,3 +1237,65 @@ When evaluated on datasets requiring local precision like PASCAL VOC, CLIP exhib
 
 **Q3: Explain the role of the temperature parameter ($\tau$) in the InfoNCE loss formula.**
 *   **Answer:** $\tau$ controls the sharpness of the softmax distribution. A lower $\tau$ makes the loss function penalize hard negative examples much more aggressively, helping the model learn fine-grained distinctions between highly similar incorrect pairs. In CLIP, $\tau$ is a learnable parameter that optimizes itself during training to dynamically adjust the penalty scale.
+
+
+### Topic 13.2: BLIP (Generative Spatial Reasoning)
+
+Standard contrastive models can match images to text, but they cannot generate text. **BLIP** solves this using a Multimodal Mixture of Encoder-Decoder (MED) architecture[cite: 1, 2].
+
+#### 1. The Multimodal Mixture of Encoder-Decoder (MED)
+BLIP structurally modifies the BERT architecture so it can operate in three distinct modes, using shared weights to maximize efficiency. It trains on three specific losses simultaneously:
+1.  **Image-Text Contrastive (ITC):** A unimodal text encoder aligns the global visual and textual embedding spaces, similar to CLIP. 
+2.  **Image-Text Matching (ITM):** An image-grounded text encoder applies **Cross-Attention** to the visual tokens. It solves a binary classification task to predict if an image-text pair is a true match, forcing the model to learn fine-grained spatial alignments between specific words and specific image patches.
+3.  **Language Modeling (LM):** An image-grounded text decoder auto-regressively generates a caption token-by-token. 
+
+#### 2. CapFilt: Data Bootstrapping
+A major limitation of models like CLIP is their reliance on noisy web-crawled data (e.g., ALT text like "IMG_1234.jpg"). BLIP introduced **CapFilt (Captioning and Filtering)**:
+*   The model uses its LM decoder to generate synthetic, highly descriptive captions for web images.
+*   The model uses its ITM encoder to score and filter out noisy or inaccurate original web captions.
+Training on this bootstrapped, high-quality dataset leads to massive zero-shot performance gains.
+
+#### 3. Multiscale Diagnostics: The Generative Advantage
+Because BLIP is forced to *generate* text (LM loss) and map specific words to specific visual tokens via cross-attention (ITM loss), it is forced to learn fine-grained spatial reasoning. 
+As a result, BLIP achieves **53.4% accuracy on tiny objects** in PASCAL VOC (destroying CLIP's 18.9%), and successfully scales up to **95.7% on huge objects**. The cross-attention mechanism proves that deep generative interactions adapt far better to small-object recognition than global contrastive loss.
+
+---
+
+### Topic 13.2 Placement Prep: Elite BLIP Flashcards
+
+**Q1: How does BLIP's Multimodal Mixture of Encoder-Decoder (MED) architecture differ from a standard dual-encoder like CLIP?**
+*   **Answer:** While CLIP isolates the image and text encoders entirely until the final global projection, BLIP allows deep multimodal interaction via Cross-Attention. Its text transformer is flexible: it acts as a unimodal text encoder (for contrastive loss), an image-grounded text encoder (for binary matching), and an auto-regressive image-grounded text decoder (for caption generation).
+
+**Q2: Why does the Image-Text Matching (ITM) loss improve fine-grained spatial reasoning over the standard Contrastive (ITC) loss?**
+*   **Answer:** The ITC loss only aligns the overall global representation of the image and text (dot product of two vectors). The ITM loss is applied *after* cross-attention, forcing the network to look at specific visual patches alongside specific words. This determines if the text accurately describes the structural details within the image, rather than just recognizing dominant global objects.
+
+**Q3: Explain the purpose of "CapFilt" (Captioning and Filtering) in BLIP's training methodology.**
+*   **Answer:** Web-crawled image-text datasets are extremely noisy. BLIP uses a "Filter" (driven by its ITM head) to remove bad image-text pairs from the web data, and uses its generative "Captioner" (driven by its LM head) to synthesize new, highly descriptive captions for images. Training on this synthetic, high-quality data drastically improves downstream performance compared to raw web data.
+
+### Topic 13.3: SmolVLM (Architectural Efficiency > Parameter Count)
+
+In deep learning, the standard assumption is that larger models (more parameters) yield better performance. **SmolVLM** shatters this assumption, proving that architectural design principles supersede raw parameter count[cite: 2].
+
+#### 1. Lightweight Visual Encoding & Interleaved Processing
+SmolVLM contains only **256M parameters** (compared to BLIP's 385M or OpenCLIP's massive variants). It introduces radical image compression: regardless of the original image resolution, large image patches are heavily compressed and encoded into exactly **81 visual tokens** per image. 
+
+These 81 tokens are treated mathematically identically to text tokens, allowing them to be arbitrarily interleaved within a sequence (e.g., `Text -> Image 1 (81 tokens) -> Text -> Image 2 (81 tokens)`). This creates an ultra-efficient, fully generative model capable of multi-image storytelling, VQA, and classification on edge devices without exploding the KV Cache.
+
+#### 2. Multiscale Diagnostics: The Scale-Invariant King
+When tested on multiscale diagnostics across varied datasets, SmolVLM represents an absolute architectural breakthrough. 
+It achieves a virtually flat, near-ceiling performance curve: **98.5% to 99.7% accuracy** across *all* object size categories (from tiny to huge) on both the complex PASCAL VOC dataset and the African Wildlife dataset. 
+
+The fact that a 256M parameter model exhibits almost zero degradation between a $1\%$ tiny bounding box and a $40\%$ huge bounding box proves that efficient, token-compressed generative architectures are capable of outperforming massive models via superior architectural design.
+
+---
+
+### Topic 13.3 Placement Prep: Elite SmolVLM Flashcards
+
+**Q1: How does SmolVLM handle multimodal inputs more efficiently than standard Vision-Language Models?**
+*   **Answer:** SmolVLM radically compresses visual information. Instead of letting sequence lengths explode with high-resolution image patches, it heavily compresses images into exactly 81 visual tokens. This drastically reduces the $O(N^2)$ attention computation and KV Cache memory footprint, allowing it to run efficiently on edge devices (like smartphones) with only 256M total parameters.
+
+**Q2: What is "arbitrary interleaving," and why is it important for models like SmolVLM?**
+*   **Answer:** Because the visual information is compressed into standard tokens (just like text), the model can process sequences that alternate between text and images fluidly (e.g., "Look at [Image 1] and compare it to [Image 2]"). This is critical for complex tasks like multi-image reasoning, video frame analysis, or multimodal storytelling, which rigid dual-encoders cannot handle.
+
+**Q3: How does SmolVLM challenge the standard "scaling law" assumption in Deep Learning?**
+*   **Answer:** The standard assumption is that larger parameter counts inherently yield better performance (especially for fine-grained tasks). SmolVLM shatters this by achieving a nearly flat 98-99% accuracy curve across both tiny and huge objects on complex datasets, outperforming much larger models. It proves that architectural efficiency (token compression and generative interleaving) can supersede raw parameter count for real-world robustness.
