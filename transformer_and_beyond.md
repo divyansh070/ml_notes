@@ -106,9 +106,18 @@ $$PE_{(pos, 2i+1)} = \cos(pos / 10000^{2i/d_{model}})$$
 
 Instead of concatenating the Positional Encoding vector to the Word Embedding vector (which would double the size to 1024 dimensions and explode the parameter count), the Transformer simply **adds** them together element-wise.
 
+![Positional Encoding Vector Addition](./assets/transformer_pe.png)
+
 $$Final\_Input = Word\_Embedding + Positional\_Encoding$$
 
-This slightly "pollutes" the semantic meaning of the word with spatial data, but in a 512-dimensional space, the neural network has more than enough capacity to disentangle the two signals.
+**Visual Math Example (Mini-Vector):**
+Let's assume our word embedding for "Queen" at Position 4 is a 3-dimensional vector, and the Positional Encoding (PE) for Position 4 generates another 3-dimensional vector. They are simply added together:
+
+*   **Embedding ("Queen"):** `[0.85, -0.42, 0.99]`
+*   **PE (Position 4):** `[0.10,  0.88, -0.54]`
+*   **Final Input Vector:** `[0.95,  0.46, 0.45]`
+
+This slightly "pollutes" the semantic meaning of the word with spatial data, but in a massive 512-dimensional space, the neural network has more than enough capacity to disentangle the two signals.
 
 ---
 
