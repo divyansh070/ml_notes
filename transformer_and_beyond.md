@@ -75,7 +75,7 @@
 
 ## Topic 1: Input Processing & Positional Encoding
 
-Before the Transformer can work its magic with Attention, it must convert raw text into a mathematical format it can understand. Unlike Recurrent Neural Networks (RNNs) which read text one word at a time sequentially, a Transformer reads the **entire sentence simultaneously**. This parallel processing is why Transformers are so fast, but it introduces a massive problem: the model has no inherent way to know the order of the words!
+Before the Transformer can work its magic with Attention, it must convert raw text into a mathematical format it can understand. Unlike Recurrent Neural Networks (RNNs) which read text one word at a time sequentially, a Transformer reads the **entire sentence simultaneously**. This parallel processing is why Transformers are so fast, but it introduces a massive problem: Self-attention by itself is permutation-equivariant, so without positional information the model has no information that distinguishes one ordering of the same tokens from another.
 
 To solve this, Input Processing consists of three distinct steps: Tokenization, Dense Embedding, and Positional Encoding.
 
@@ -91,7 +91,7 @@ At this point, we have a $N \times d$ matrix (where $N$ is sequence length and $
 
 To inject the concept of "time" or "order" into the model, the original *Attention Is All You Need* paper introduced **Sinusoidal Positional Encodings**.
 
-The authors designed a mathematical formula using Sine and Cosine waves to generate a unique 512-dimensional vector for every absolute position (Position 1, Position 2, etc.).
+The authors designed a mathematical formula using Sine and Cosine waves to generate a vector for every absolute position (Position 1, Position 2, etc.). The combination of sine and cosine functions produces a distinctive positional representation for each position, with different frequencies capturing both local and long-range positional patterns.
 
 For a given position $pos$ and dimension index $i$:
 $$PE_{(pos, 2i)} = \sin(pos / 10000^{2i/d_{model}})$$
@@ -145,7 +145,7 @@ This final blended vector is passed directly into the first Multi-Head Self-Atte
 
 ### 3. The Final Input Vector
 
-Instead of concatenating the Positional Encoding vector to the Word Embedding vector, the Transformer simply **adds** them together element-wise. Addition is attractive because it keeps the dimensionality strictly at $d_{model}$, requires no extra projection layers, is computationally simple, and allows semantic and positional information to coexist in the same representation space.
+Instead of concatenating the positional encoding with the word embedding, the original Transformer adds them element-wise. Addition preserves the model dimension $d_{model}$, so the subsequent Transformer layers do not need an additional projection just to reduce the dimensionality back to $d_{model}$. The resulting representation intentionally contains both semantic and positional information.
 
 ![Positional Encoding Vector Addition](./assets/transformer_pe.png)
 
@@ -165,7 +165,7 @@ The representation now intentionally contains both token identity and position, 
 ### Topic 1 Placement Prep: Elite Input Processing Flashcards
 
 **Q1: Why did the Transformer authors choose to add the Positional Encodings to the Word Embeddings, rather than concatenating them?**
-*   **Answer:** If you concatenate a 512-dim embedding with a 512-dim positional encoding, you would have a 1024-dimensional vector and would need to project the representation back down to 512 dimensions, adding unnecessary parameters. Addition is attractive because it keeps the dimensionality at $d_{model}$, requires no extra projections, and is computationally simple. Positional information isn't "noise" that destroys meaning; the network is specifically optimized so that both token identity and position can coexist cleanly in the same high-dimensional representation space. 
+*   **Answer:** Instead of concatenating the positional encoding with the word embedding, the original Transformer adds them element-wise. Addition preserves the model dimension $d_{model}$, so the subsequent Transformer layers do not need an additional projection just to reduce the dimensionality back to $d_{model}$. The resulting representation intentionally contains both semantic and positional information.
 
 **Q2: Why use complex Sine and Cosine waves for Positional Encoding instead of just assigning simple integers (e.g., Word 1 = 1, Word 2 = 2)?**
 *   **Answer:** If we use raw integers, a 5,000-word document would have a final position value of 5,000. This massive number would completely dwarf the values in the word embedding (which are usually normalized around 0), destroying the word's meaning. Furthermore, sine and cosine waves are bounded strictly between -1 and 1, ensuring mathematical stability regardless of sequence length. 
@@ -174,12 +174,12 @@ The representation now intentionally contains both token identity and position, 
 *   **Answer:** The trigonometric identities of sine and cosine guarantee that for any fixed offset $k$ (e.g., a distance of 3 words), the positional encoding at position $pos+k$ can be represented as a strict linear transformation of the positional encoding at $pos$. Because neural networks are fundamentally built to apply and learn linear transformations (weight matrices), this geometric property allows the Attention Mechanism to easily model relative distances.
 
 **Q4: If you visualize a Transformer's Positional Encoding matrix as a heatmap, what distinct visual pattern emerges and what is its functional significance?**
-*   **Answer:** The visualization reveals a distinct "clock-like" pattern. The lower embedding dimensions (left side of the heatmap) oscillate very rapidly between -1 and 1, acting like the "seconds-hand" of a clock to provide fine-grained, localized position data for nearby words. The higher embedding dimensions (right side) oscillate very slowly, acting like the "hours-hand" to provide broad, global context across the entire sequence. Together, they generate a continuous positional pattern that differentiates positions across practical sequence lengths.
+*   **Answer:** The visualization reveals a distinct "clock-like" pattern. The lower embedding dimensions (left side of the heatmap) oscillate very rapidly between -1 and 1, acting like the "seconds-hand" of a clock to provide fine-grained, localized position data for nearby words. The higher embedding dimensions (right side) oscillate very slowly, acting like the "hours-hand" to provide broad, global context across the entire sequence. The combination of sine and cosine functions produces a distinctive positional representation for each position, with different frequencies capturing both local and long-range positional patterns.
 
 
 ## Topic 2: The Core Engine — Scaled Dot-Product Attention
 
-The absolute heart of a Transformer is the **Attention Mechanism**. In an LSTM, information from previous tokens is propagated sequentially through recurrent hidden states. In a Transformer, every token can directly attend to every other token in the sequence simultaneously, mathematically deciding which words are most relevant to its own meaning.
+The absolute heart of a Transformer is the **Attention Mechanism**. In an LSTM, information from previous tokens is propagated sequentially through recurrent hidden and cell states. In a Transformer, each token can directly attend to every other token in the sequence.
 
 To do this, the network relies on the concept of **Queries (*Q*)**, **Keys (*K*)**, and **Values (*V*)**.
 
@@ -206,7 +206,7 @@ Let's break down exactly what this matrix math is doing step-by-step.
 
 **Step 1: The Dot Product ($Q \cdot K^T$)**
 We take the matrix of all Queries (*Q*) and multiply it by the transposed matrix of all Keys ($K^T$). 
-*   **The Math:** Mathematically, the dot product measures alignment between vectors (though note that its magnitude also depends on vector norms, unlike pure cosine similarity). A larger positive dot product means the vectors are more strongly aligned, while a negative value indicates opposing directions. 
+*   **The Math:** The dot product measures alignment between vectors. For vectors with comparable norms, a larger positive dot product generally indicates stronger alignment.
 *   This step creates a grid of **Raw Scores**, showing exactly how much every word relates to every other word.
 
 **Step 2: The Scaling Factor ($\div \sqrt{d_k}$)**
@@ -229,7 +229,7 @@ Finally, we multiply our Attention Weights by the Value matrix (*V*).
 ### Topic 2 Placement Prep: Elite Attention Flashcards
 
 **Q1: Explain why the operation is called *Scaled* Dot-Product Attention. What specific problem does the scaling factor solve during neural network training?**
-*   **Answer:** It is scaled by dividing the dot product by $\sqrt{d_k}$ (the square root of the dimension of the key vectors). As the dimension $d_k$ grows, the dot product of *Q* and *K* produces exponentially larger numbers. When these large numbers are passed into the Softmax function, the Softmax becomes a "hard max" (outputting 1 for the highest value and 0 for everything else). Because the curve of Softmax is completely flat at these extremes, the derivative becomes 0, completely killing the gradient and halting learning. Scaling stabilizes the variance to 1, ensuring healthy gradient flow.
+*   **Answer:** If the components of $Q$ and $K$ have zero mean and unit variance, the variance of their dot product grows approximately with $d_k$. Dividing by $\sqrt{d_k}$ keeps the variance of the scaled scores approximately constant, preventing the Softmax inputs from becoming unnecessarily large and saturated.
 
 **Q2: What is the computational complexity of the Self-Attention mechanism with respect to the sequence length (*N*), and why is this a massive bottleneck for Large Language Models?**
 *   **Answer:** The complexity is $O(N^2 \cdot d)$, where *N* is the sequence length (number of words) and *d* is the embedding dimension. Because every single word (Query) must calculate a dot product with every other word (Key), creating an $N \times N$ attention matrix, the compute and memory requirements scale quadratically. If you double the size of the context window (e.g., from 4,000 to 8,000 tokens), the computational cost quadruples. 
@@ -331,15 +331,10 @@ To solve this, modern foundation models (like LLaMA 3, Mistral, and Gemini) alte
 
 ## Topic 4: Layer Normalization (LayerNorm vs. BatchNorm)
 
-Before passing data through the deep neural network blocks of a Transformer, we must normalize the outputs of the Attention mechanism. LayerNorm stabilizes the scale of representations at each layer, which makes optimization easier and helps maintain stable gradient propagation through deep networks. 
-
-However, Transformers completely abandon **Batch Normalization (BatchNorm)** in favor of **Layer Normalization (LayerNorm)**. Understanding *why* is a highly tested concept in Deep Learning interviews.
+Normalization helps stabilize the scale of activations and can make optimization and gradient propagation more stable. Transformers traditionally use LayerNorm rather than BatchNorm because LayerNorm normalizes each token independently across its hidden dimensions and does not depend on batch statistics.
 
 ### 1. The Flaw of Batch Normalization on Text
-BatchNorm calculates the mean and variance for a single feature (e.g., Feature #5) across the *entire batch* of data. 
-This works beautifully for images, but it is inconvenient for standard Transformer NLP architectures for two reasons:
-1.  **Variable Sequence Lengths:** In a batch of text, Sentence A might have 5 words, while Sentence B has 50 words. To create a mathematical matrix, we pad Sentence A with 45 "Empty/Zero" tokens. If we calculate a batch mean across these padded tokens, the statistics become completely heavily distorted by zeros, ruining the normalization.
-2.  **Batch Dependency:** During inference (running the model in production), you might only send the model one sentence at a time (Batch Size = 1). BatchNorm cannot calculate a variance on a batch of 1, forcing it to rely on frozen, inaccurate historical statistics.
+BatchNorm is less convenient for standard Transformer architectures because its statistics are computed across batch-related dimensions, while NLP sequences can have variable lengths and padding. LayerNorm avoids this dependency by computing statistics independently for each token across its feature dimensions.
 
 ![LayerNorm vs BatchNorm](./assets/layernorm_vs_batchnorm.png)
 
@@ -379,10 +374,10 @@ $$
 *   **Answer:** When you strictly normalize a vector to have a mean of 0 and a variance of 1, you permanently alter its geometric distribution, which can actually destroy valuable representational data (e.g., the network might *need* a specific word's values to be highly skewed to represent strong attention). The parameters $\gamma$ (scale) and $\beta$ (shift) are learnable weights that allow the neural network to mathematically "undo" the normalization if it decides that the original, un-normalized distribution was optimal for reducing the loss. 
 
 **Q2: Why does the standard Transformer architecture use LayerNorm instead of BatchNorm?**
-*   **Answer:** BatchNorm relies on statistics aggregated over the batch (and, depending on the implementation, spatial dimensions). Because NLP sentences have variable lengths, padded elements complicate these batch statistics. Furthermore, training vs inference behavior in BatchNorm depends on batch composition. LayerNorm, however, computes statistics independently for each token across its hidden dimensions. Therefore, LayerNorm does not depend on batch composition and behaves consistently between training and inference, making it much more robust for standard NLP tasks.
+*   **Answer:** During inference, BatchNorm uses running statistics accumulated during training rather than statistics from the current batch. LayerNorm instead computes statistics directly from each individual token’s hidden features, so its behavior does not depend on batch size.
 
 **Q3: How does Layer Normalization specifically aid the flow of gradients in a deep, 96-layer Transformer?**
-*   **Answer:** LayerNorm stabilizes the scale of representations at each layer. Without it, the repeated matrix multiplications and residual connections can cause the variance of the hidden states to grow unmanageably. By maintaining a stable scale, LayerNorm makes optimization much easier and helps maintain stable gradient propagation backward through deep networks.
+*   **Answer:** LayerNorm helps keep the scale of representations controlled throughout a deep network, which can improve optimization and gradient propagation.
 
 
 ## Topic 5: The Encoder Block (Understanding Context)
@@ -465,7 +460,10 @@ A standard Decoder Block (like used in a neural translation system) contains **t
 **The Problem: Training vs. Inference**
 To understand *why* we need a mask, we must understand how training works differently from inference:
 *   **During Inference (Production):** The model is generating text auto-regressively. It generates Word 1, looks at Word 1 to generate Word 2, looks at Words 1 & 2 to generate Word 3. The model literally *cannot* look into the future because the future hasn't been generated yet.
-*   **During Training:** If we trained the model auto-regressively (waiting for it to guess a word, calculating loss, and then guessing the next), training a model like GPT-4 would take decades. Instead, we use **Teacher Forcing**. We feed the *entire* target sentence (e.g., *"Je suis un robot"*) into the Decoder all at once in a single massive batch. 
+*   **During Training:** If we trained the model auto-regressively, it would take decades. Instead, we use **Teacher Forcing**. The decoder does not receive the exact target sequence as its input.
+    *   **Decoder input:** `<BOS> Je suis un`
+    *   **Target:** `Je suis un robot`
+    The target is shifted right by one position. At each position, the model predicts the next token.
 
 **The Cheating Dilemma**
 Because we feed the sequence in during training, standard Self-Attention ($\text{softmax}(\frac{QK^T}{\sqrt{d_k}})V$) will allow the Query for Word 2 (*"suis"*) to calculate a dot product with the Key of Word 3 (*"un"*). To train autoregressively, the decoder receives the target sequence shifted right:
@@ -511,9 +509,9 @@ In a **Cross-Attention** layer, the inputs are split across the two halves of th
 
 **The Math in Action:**
 If the Encoder processes the English sentence *"I sat on the bank of the river"*, and the Decoder has currently generated *"Je me suis assis sur la"*, the Decoder creates a Query for the next word. 
-That Query calculates a dot product with all the Encoder's Keys. It will find a strong alignment score with the Encoder's Key for *"bank"*. Because the encoder representation of *"bank"* has been influenced by surrounding words such as *"river"*, the decoder can learn to attend strongly to that contextualized representation. It extracts this Value data to correctly predict the French word *"rive"*.
+That Query calculates a dot product with all the Encoder's Keys. Because the encoder representation associated with 'bank' has been contextualized by surrounding words such as 'river', the decoder can learn to assign higher attention to that representation when generating the appropriate translation. It extracts this Value data to correctly predict the French word *"rive"*.
 
-Without Cross-Attention, the Decoder would just hallucinate grammatically correct French text that has nothing to do with the original English prompt.
+Without Cross-Attention, the Decoder would lack the direct mechanism used by the original encoder-decoder architecture to condition each generated token on the encoded source sequence.
 
 ---
 
@@ -704,7 +702,7 @@ Assume the Decoder output `"Bonjour"`. Our French target was `"Bonjour"`. The Lo
 
 But let's assume we are *training*. The error ($dL = \mathbf{2.0}$) flows backwards. The fundamental goal of Backprop is to allocate this $2.0$ penalty among all the initial shared weights ($W_Q, W_K, W_V$) in both the Encoder and Decoder. 
 
-We will trace a **simplified local derivative** for allocating the gradient within the Encoder Dot Product path. 
+This is a simplified local gradient trace through the $QK^T$ path; a complete attention backward pass also includes gradients through the Softmax, scaling factor, $V$, and the $Q$ path. We will trace a **simplified local derivative** for allocating the gradient within the Encoder Dot Product path.
 *(Note: A full attention backpropagation involves passing the gradient through the Softmax output $A$, the values $V$, and the scaling factor. For educational intuition, this trace bypasses those steps to focus purely on how gradients flow from a raw score $S$ into $Q, K$, and ultimately $W_Q, W_K$.)*
 
 #### Allocating the Error at the Dot Product
@@ -718,7 +716,7 @@ $$
 Recall from Step A1 that $K_0$ was generated via a learned weight matrix: $K_0 = X_0 \cdot W_K = \begin{bmatrix} 0.56 & 1.04 \end{bmatrix}$. 
 We know $Q_0 = [0.8, 0.8]$ and $Score(0 \cdot 0) = 1.28$.
 
-The optimizer reverse-calculates how much $K_0$ *contributed* to that $1.28$ score. The formula for the score is $S = Q_0 \cdot K_0$. By the Matrix Derivative / Chain Rule:
+The optimizer reverse-calculates how much $K_0$ *contributed* to that $1.28$ score. The formula for the score is $S = Q_0 \cdot K_0$. Using the matrix derivative and chain rule:
 
 $$
 \frac{\partial S_{(0\cdot 0)}}{\partial K_{0}} = Q_0^T = \begin{bmatrix} 0.8 \\ 0.8 \end{bmatrix}
@@ -737,7 +735,7 @@ $$
 The final shared weights $W_K$ were used to create $K_0$ *and* $K_1$ across multiple tokens (Sequence length = 2). The core rule of RNNs and Transformers is that shared weights **sum their local gradients.**
 
 We must calculate the local gradient contribution for $W_K$ from Word 1 ($K_0$) and Word 2 ($K_1$).
-The formula was $K = X \cdot W_K$. By the Matrix Derivative / Chain Rule:
+The formula was $K = X \cdot W_K$. Using the matrix derivative and chain rule:
 
 $$
 \frac{\partial K}{\partial W_K} = X^T
@@ -795,17 +793,11 @@ The original Transformer Decoder had **three** sub-layers per block. A GPT-style
 
 #### The KV Cache: Why LLM Inference is Actually Fast
 
-During auto-regressive generation, the model generates tokens one at a time. Without optimization, at step $t$, we would need to recompute the $Q$, $K$, and $V$ projections for all $t$ tokens — an $O(t^2)$ operation at every single step, making total generation $O(N^3)$.
+During auto-regressive generation, the model generates tokens one at a time. Without KV caching, each generation step recomputes the keys and values for all previous tokens and performs attention over the entire prefix. The attention computation at step $t$ is $O(t^2d)$, and repeating this for $N$ generated tokens gives a naive $O(N^3d)$ attention cost.
 
-The **KV Cache** eliminates this redundancy. The key insight: the $K$ and $V$ vectors for tokens $1$ through $t-1$ are identical to what we computed in the previous step. Only token $t$ produces a new $K_t$ and $V_t$.
+With KV caching, the previous $K$ and $V$ tensors are reused. The new token computes only $Q_t, K_t, V_t$, and $Q_t$ attends to the cached $K,V$. The attention computation for one step becomes $O(td)$, giving $O(N^2d)$ total attention work over $N$ generated tokens.
 
-**How it works:**
-- At step $t$, we compute $Q_t$, $K_t$, $V_t$ for **only the new token**.
-- We append $K_t$ and $V_t$ to the cached $K_{1:t-1}$ and $V_{1:t-1}$ from all previous steps.
-- We compute attention: $\text{Attention}(Q_t, K_{1:t}, V_{1:t})$ — a single query vector against the full cached context.
-- This reduces each generation step from $O(t^2)$ to $O(t)$, and total generation from $O(N^3)$ to $O(N^2)$.
-
-**Memory Cost:** The KV Cache stores $2 \times L \times h \times d_k \times t$ floating-point numbers (2 for K and V, $L$ layers, $h$ heads, $d_k$ head dimension, $t$ tokens generated so far). For GPT-3 (96 layers, 96 heads, $d_k = 128$), generating 2048 tokens requires approximately **12 GB** of KV Cache memory alone — this is why long-context models are so memory-hungry.
+**Memory Cost:** The KV Cache stores $2 \times L \times h \times d_k \times t$ floating-point numbers (2 for K and V, $L$ layers, $h$ heads, $d_k$ head dimension, $t$ tokens generated so far). For GPT-3’s 96 layers, 96 attention heads, and $d_k=128$, a 2048-token KV cache contains about 4.83 billion FP16 values, requiring roughly 9.7 GB of memory (ignoring implementation overhead).
 
 ### 2. BERT: The Bidirectional Encoder (Encoder-only)
 
@@ -860,16 +852,16 @@ Where:
 - $A, B, \alpha, \beta$ = Empirically fitted constants
 - $L_{\infty}$ = Irreducible loss (entropy of natural language itself)
 
-**The Chinchilla Insight:** For a fixed training-compute budget, Chinchilla showed that many large language models of the time (like GPT-3, which used 175B parameters but only 300B tokens) were under-trained relative to their parameter count. The study demonstrated that allocating substantially more compute to training data could produce better loss than spending the same compute primarily on additional parameters.
+**The Chinchilla Insight:** The Chinchilla result showed that, under its compute-optimal training assumptions, many large language models were under-trained relative to their parameter count. For a fixed compute budget, substantially more training tokens should be allocated alongside model scaling rather than spending most of the compute on increasing parameter count alone.
 
-**Practical Implication:** This is why LLaMA-2 (70B) trained on 2T tokens matches or beats GPT-3 (175B) trained on 300B tokens. Architecture matters far less than the compute-optimal balance of size and data.
+**Practical Implication:** This is why LLaMA-2 (70B) trained on 2T tokens matches or beats GPT-3 (175B) trained on 300B tokens. The result emphasizes the importance of balancing model size and training data under a fixed compute budget; architecture and data quality still matter substantially.
 
 ---
 
 ### Topic 8 Placement Prep: Elite LLM Flashcards
 
 **Q1: In an elite engineering interview, you are asked: "Why are current state-of-the-art LLMs (like GPT-4 and LLaMA) Decoder-only architectures, rather than Encoder-Decoder, even though the original paper used both?" Provide the computational answer.**
-*   **Answer:** While Encoder-Decoder models are mathematically powerful for strict input-to-output mapping (like translation), many modern generative LLMs, including GPT-style and LLaMA-style models, use decoder-only Transformer architectures to optimize for generation. In a Decoder-only model, the user prompt and the model response are treated as a single continuous sequence processed by the same attention mechanism. The model reads the prompt through its own Masked Self-Attention and seamlessly transitions to generation. This removes the encoder stack and cross-attention sublayer, substantially simplifying the architecture and inference pipeline. Combined with the KV Cache, this makes Decoder-only models highly efficient for interactive, long-form generation.
+*   **Answer:** While Encoder-Decoder models are mathematically powerful for strict input-to-output mapping (like translation), many modern generative LLMs, including GPT-style and LLaMA-style models, use decoder-only Transformer architectures to optimize for generation. In a Decoder-only model, the user prompt and the model response are treated as a single continuous sequence processed by the same attention mechanism. The model reads the prompt through its own Masked Self-Attention and seamlessly transitions to generation. This removes the cross-attention sublayer from each block and eliminates the separate encoder stack, simplifying the architecture and reducing computation and parameters. Combined with the KV Cache, this makes Decoder-only models highly efficient for interactive, long-form generation.
 
 **Q2: Contrast the training methodology of an LLM (Generative Pre-Training) with BERT (Masked Language Modeling).**
 *   **Answer:** LLMs (Decoder-only) are trained on the **Causal (Auto-Regressive) Task**. They read a text sequence sequentially and, at every single token position, use only the past context (strictly enforced by the Causal Mask) to predict the next token via Teacher Forcing. BERT (Encoder-only) is trained on the **Masked Language Modeling (MLM) Task**. It is bidirectional and sees the entire sentence. We randomly hide 15% of the input tokens (e.g., with `[MASK]`) and force the Encoder to reconstruct those specific tokens using the deep, bidirectional context provided by all non-hidden words.
@@ -1063,13 +1055,13 @@ $$
 Before the math trace, we must understand *why* the architecture is built this way.
 
 **Why Patches instead of Pixels? (The $N^2$ Problem)**
-Standard attention has an $O(N^2)$ time and memory complexity. A $224 \times 224$ image has $50,176$ pixels. If each pixel was a token, the attention matrix would be $50,176 \times 50,176 \approx 2.5$ billion operations per layer, which is impossible to compute. Grouping pixels into $16 \times 16$ patches reduces the sequence length $N$ down to a highly manageable $196$ tokens.
+Standard attention has an $O(N^2)$ time and memory complexity. A $224 \times 224$ image contains 50,176 pixel tokens. The attention matrix alone would contain about 2.5 billion entries before accounting for the vector operations needed to compute them, making pixel-level full attention prohibitively expensive. Grouping pixels into $16 \times 16$ patches reduces the sequence length $N$ down to a highly manageable $196$ tokens.
 
 **The Magic of the `[CLS]` Token**
-The original ViT uses a learned `[CLS]` token as a global representation for classification. By prepending this blank, learnable token to the sequence, we provide a dedicated "aggregator" that interacts equally with all image patches. An alternative to the `[CLS]` token is to simply pool the patch representations, such as mean pooling, which is also a valid and commonly used approach.
+The original ViT uses a learnable `[CLS]` token as a dedicated global representation for classification. Mean pooling or other pooling strategies can also be used; `[CLS]` is an architectural choice rather than a requirement.
 
 **Positional Encodings (1D vs 2D)**
-Even though the image is a 2D grid, the original ViT flattens the patches into a 1D sequence ($1, 2, \dots, 196$) and adds learned positional embeddings. These positional embeddings allow the model to distinguish patch locations even though the sequence representation itself is one-dimensional (note that later ViT variants do explicitly use relative or 2D positional representations).
+Although the image is naturally a 2D grid, the original ViT represents the patches as a 1D sequence and adds learned positional embeddings. The model can therefore distinguish patches based on their positions in the sequence. This is a simpler representation than explicitly encoding 2D coordinates, although later vision-transformer variants have explored relative and explicitly 2D positional representations.
 
 ### 3. Hands-On Math Trace: A Mini-ViT (d=2)
 
@@ -1117,7 +1109,7 @@ $$
 t_2 = x_2 \cdot E = \begin{bmatrix} 0.9(1) + 0.8(1) + 0.9(-1) + 0.9(-1) & 0.9(-1) + 0.8(-1) + 0.9(1) + 0.9(1) \end{bmatrix} = \begin{bmatrix} -0.1 & 0.1 \end{bmatrix}
 $$
 
-*(Notice that this particular toy projection maps both visually distinct patches to the exact same vector $[-0.1, 0.1]$, demonstrating that a learned projection can mathematically discard information. In a real ViT, the embedding dimension and learned weights are chosen so that useful visual information is retained.)*
+Notice that this toy projection maps two visually different patches to the same embedding. This is possible because the projection reduces a 4-dimensional input to 2 dimensions. A real ViT learns a projection that preserves the visual information useful for the downstream task.
 
 **Step 3: `[CLS]` Token and Positional Encoding**
 We prepend a learnable `[CLS]` token ($t_{cls} = \begin{bmatrix} 0.5 & 0.5 \end{bmatrix}$) and add fixed positional encodings to inject location data back into the flattened sequence.
@@ -1177,7 +1169,7 @@ $$
 \text{Score}(cls \rightarrow \text{Patch 2}) = Q_{cls} \cdot K_2^T = (0.5)(0.7) + (0.5)(0.6) = 0.35 + 0.30 = \mathbf{0.65}
 $$
 
-After applying Softmax to these scores, the `[CLS]` token will dynamically pull more $V$ (Value) data from Patch 2 than Patch 1 to formulate its final classification output. Unlike a convolutional layer, the `[CLS]` token can directly attend to every patch in a single self-attention layer.
+After applying Softmax to these scores, the `[CLS]` token will dynamically pull more $V$ (Value) data from Patch 2 than Patch 1 to formulate its final classification output. The `[CLS]` token can directly attend to every patch in a single self-attention layer, giving it a global receptive field after one attention operation.
 
 ### 4. Backpropagation: Global Receptive Field vs. CNN
 
@@ -1185,7 +1177,7 @@ Let's look at the Red backpropagation path in the bottom of the diagram, where t
 
 **CNN Limitations:** The $3 \times 3$ CNN only slides locally. Its receptive field grows very slowly. It takes dozens of layers to see the whole image. The gradients are always restricted to the fixed local grid.
 
-**ViT Global Attention:** During BPTT, the error hits the $QK^T$ attention matrix of the special `[CLS]` token. This matrix shows the entire image at once. The error ($dL$) is reverse-calculated and allocated backward into the learnable weight matrices ($W_Q, W_K, W_V$) of the *original patch embedding layers*. The error from predicting "Cat" instantly updates the mathematical meaning of the *pixels* of both the 'Tail Patch' and the 'Ear Patch', because they were connected globally in Step 1.
+**ViT Global Attention:** During backpropagation, the error hits the $QK^T$ attention matrix of the special `[CLS]` token. This matrix shows the entire image at once. The error ($dL$) is reverse-calculated and allocated backward into the learnable weight matrices ($W_Q, W_K, W_V$) of the *original patch embedding layers*. The error from predicting "Cat" instantly updates the mathematical meaning of the *pixels* of both the 'Tail Patch' and the 'Ear Patch', because they were connected globally in Step 1.
 
 This global connectivity allows ViTs to excel at tasks requiring high-level semantic understanding, while CNNs continue to lead at tasks requiring precise local segmentation or detection.
 
