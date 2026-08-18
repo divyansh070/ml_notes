@@ -102,6 +102,47 @@ $$PE_{(pos, 2i+1)} = \cos(pos / 10000^{2i/d_{model}})$$
 *   **Bounded Values:** Unlike integers (1, 2, 3...) which grow endlessly and would eventually dwarf the actual word embeddings, Sine and Cosine are strictly bounded between $[-1, 1]$. This keeps the neural network mathematically stable regardless of how long the sentence is.
 *   **Relative Distance:** Because of trigonometric identities, for any fixed offset $k$, the encoding at position $pos+k$ can be expressed as a linear transformation of the encoding at $pos$. This makes it easier for the attention mechanism to learn relative distances.
 
+### Visualizing Generation: The Positional Encoding Mechanics
+
+To give the network a sense of "time" and "order," the Transformer constructs **Positional Encodings** dynamically using continuous wave functions. Let's break down exactly how these values are generated from thin air and merged with our raw embeddings.
+
+![Generating Positional Encodings](./assets/generating_positional_encoding.png)
+
+#### Step 1: The Continuous Wave Functions (The Clock Analogy)
+
+Instead of hardcoding a single incrementing number, the Transformer generates multiple distinct continuous sine and cosine waves across the dimensions of the embedding vector. 
+
+For an embedding dimension $d_{model}$ and dimension index $i$, the wavelength changes drastically based on the index:
+
+$$
+PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)
+$$
+
+$$
+PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)
+$$
+
+*   **Low Dimensions (e.g., Dim 0 & 1):** The denominator is extremely small, causing the sine and cosine waves to oscillate rapidly. This acts like the **seconds hand** on a clock, tracking immediate changes between adjacent words.
+*   **High Dimensions (e.g., Dim 2 & 3):** The denominator is extremely large ($10000^{2/4}$ in our toy model), causing the wave to oscillate incredibly slowly. This acts like the **hours hand**, tracking the word's general location within a massive document.
+
+#### Step 2: Sampling the Vector 
+
+When a word enters the network at a specific position (for example, the word `"Dog"` at **$pos=1$**), the network does not use the entire wave. 
+
+It takes a vertical "slice" across all continuous wave graphs exactly at $x = 1$.
+*   From Dim 0 (Sine), the wave's value at $x=1$ is **$0.84$**.
+*   From Dim 1 (Cosine), the wave's value at $x=1$ is **$0.54$**.
+*   From Dim 2 (Sine), the slow wave's value at $x=1$ is **$0.01$**.
+*   From Dim 3 (Cosine), the slow wave's value at $x=1$ is **$1.00$**.
+
+By concatenating these extracted points, the model generates a precise 1D array: `[0.84, 0.54, 0.01, 1.00]`. This is the exact Positional Encoding vector for position 1. Because of the varying wave frequencies, no two positions in the entire sequence will ever generate the same exact vector. 
+
+#### Step 3: The Final Element-Wise Addition
+
+Finally, this geometric timestamp is fused with the actual semantic meaning of the word. The raw Semantic Embedding vector for the word `"Dog"` (e.g., `[-0.1, 0.9, 0.4, -0.5]`) is added **element-wise** to the newly generated Positional Encoding vector.
+
+This final blended vector is passed directly into the first Multi-Head Self-Attention block.
+
 ### 3. The Final Input Vector
 
 Instead of concatenating the Positional Encoding vector to the Word Embedding vector, the Transformer simply **adds** them together element-wise. Addition is attractive because it keeps the dimensionality strictly at $d_{model}$, requires no extra projection layers, is computationally simple, and allows semantic and positional information to coexist in the same representation space.
