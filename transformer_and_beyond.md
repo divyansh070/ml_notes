@@ -1193,3 +1193,47 @@ This global connectivity allows ViTs to excel at tasks requiring high-level sema
 
 **Q3: ViTs are often noted to require *much* larger datasets (like JFT-300M or ImageNet-21k) to reach peak performance compared to standard CNNs (like ResNet). Why is this mathematically the case?**
 *   **Answer:** CNNs have a strong local inductive bias hardcoded into their mathematics: they slide a fixed local grid, assuming that adjacent pixels are related. This bias acts like a mathematical "shortcut," allowing CNNs to achieve high accuracy with less data because the core rule of vision is pre-programmed. ViTs completely abandon this bias in favor of universal attention (everything can attend to everything). Without the shortcut, the ViT must literally *learn* from scratch that "Adjacent pixels are related" by observing millions of images. This is computationally expensive, but once it has enough data, the global flexibility allows ViTs to achieve superior accuracy and generalization on complex, SOTA tasks.
+
+
+### Topic 12.1: OpenAI CLIP (The Baseline Contrastive VLM)
+
+OpenAI's CLIP fundamentally changed multimodal AI by proving that models trained on massive, noisy web-crawled image-text pairs (400M pairs) could learn highly transferable, zero-shot representations. 
+
+#### 1. Architecture and The InfoNCE Loss
+CLIP relies on a strict **Dual-Encoder Architecture**. It passes text through a Text Encoder (Transformer) and images through an Image Encoder (e.g., ViT-B/32, where the image is chopped into $32 \times 32$ patches). The two modalities never interact until the very end, where they are mapped to a shared linear projection space.
+
+![CLIP Architecture Diagram](./assets/clip_architecture_diagram.jpg)
+
+The model is optimized using the symmetric **InfoNCE (Softmax Contrastive) Loss**. For a batch of $N$ image-text pairs, the network calculates an $N \times N$ matrix of cosine similarities. 
+
+$$
+\mathcal{L} = -\frac{1}{N} \sum_{i=1}^{N} \log \frac{\exp(\text{sim}(I_i, T_i) / \tau)}{\sum_{j=1}^{N} \exp(\text{sim}(I_i, T_j) / \tau)}
+$$
+
+*The network minimizes the loss by maximizing the cosine similarity of the $N$ true pairs (the highlighted diagonal of the matrix) while minimizing the similarity of the $N^2 - N$ incorrect pairs (the off-diagonal cells).*
+
+#### 2. Zero-Shot Inference Mechanism
+Because CLIP maps images and text into the same mathematical space, it can perform "Zero-Shot" classification on datasets it has never explicitly trained on.
+*   **Step 1:** Define the target classes (e.g., "dog", "cat", "car").
+*   **Step 2:** Convert them into full sentences using a prompt template (e.g., *"A photo of a dog"*, *"A photo of a cat"*).
+*   **Step 3:** Pass all $K$ text prompts through the Text Encoder to get $K$ text embeddings.
+*   **Step 4:** Pass the target image through the Image Encoder to get 1 image embedding.
+*   **Step 5:** Calculate the cosine similarity between the image embedding and all $K$ text embeddings. The text with the highest score is the predicted class.
+
+#### 3. Multiscale Diagnostics: The Global Feature Bias
+Because CLIP's loss function only cares about aligning the *global* image representation (often just the `[CLS]` token) with a *global* text snippet, it completely ignores fine-grained local details. 
+
+When evaluated on datasets requiring local precision like PASCAL VOC, CLIP exhibits catastrophic scale sensitivity. Its zero-shot accuracy plummets from **81.5% on huge objects** to a devastatingly low **18.9% on tiny objects**. It is heavily biased towards large, visually dominant objects that drive the global embedding, making it poor at tasks like counting, precise localization, or detecting small anomalies.
+
+---
+
+### Topic 12.1 Placement Prep: Elite CLIP Flashcards
+
+**Q1: How does CLIP perform zero-shot classification on a new dataset (like CIFAR-10) without any fine-tuning?**
+*   **Answer:** CLIP frames classification as an image-text matching retrieval task. It takes all possible class labels (e.g., "A photo of a dog", "A photo of a cat"), passes them through the text encoder to get $N$ text embeddings, passes the target image through the vision encoder to get $1$ image embedding, and calculates cosine similarity. The label with the highest similarity is the predicted class.
+
+**Q2: Why does CLIP struggle with tasks like counting, object localization, or fine-grained details?**
+*   **Answer:** Because it uses a global contrastive objective. The InfoNCE loss only aligns the overall representation of the image (often just the `[CLS]` token) with the overall text. It lacks pixel-level or patch-level alignment, making it heavily biased towards dominant global features rather than local structures or tiny objects.
+
+**Q3: Explain the role of the temperature parameter ($\tau$) in the InfoNCE loss formula.**
+*   **Answer:** $\tau$ controls the sharpness of the softmax distribution. A lower $\tau$ makes the loss function penalize hard negative examples much more aggressively, helping the model learn fine-grained distinctions between highly similar incorrect pairs. In CLIP, $\tau$ is a learnable parameter that optimizes itself during training to dynamically adjust the penalty scale.
