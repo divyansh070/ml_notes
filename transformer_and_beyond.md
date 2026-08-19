@@ -948,26 +948,26 @@ $$
 
 #### Step 2: Apply RoPE via Matrix Multiplication
 
-We apply the rotation to the Query ($Q$) and Key ($K$).
+We apply the rotation to the Query ($Q$) and Key ($K$) by treating them as column vectors.
 
 Rotate "Cat" Query ($q_0'$):
 
 $$
-q_0' = q_0 \cdot R_0 = \begin{bmatrix} 0.8 & -0.6 \end{bmatrix} \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 0.8 & -0.6 \end{bmatrix}
+q_0' = R_0 \cdot q_0^T = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} \begin{bmatrix} 0.8 \\ -0.6 \end{bmatrix} = \begin{bmatrix} 0.8 \\ -0.6 \end{bmatrix}
 $$
 
 Rotate "Eats" Key ($k_2'$):
 
 $$
-k_2' = k_2 \cdot R_2 = \begin{bmatrix} -0.1 & 0.9 \end{bmatrix} \begin{bmatrix} -0.42 & -0.91 \\ 0.91 & -0.42 \end{bmatrix}
+k_2' = R_2 \cdot k_2^T = \begin{bmatrix} -0.42 & -0.91 \\ 0.91 & -0.42 \end{bmatrix} \begin{bmatrix} -0.1 \\ 0.9 \end{bmatrix}
 $$
 
 $$
-k_2' = \begin{bmatrix} (-0.1)(-0.42) + (0.9)(0.91) \\ (-0.1)(-0.91) + (0.9)(-0.42) \end{bmatrix}^T
+k_2' = \begin{bmatrix} (-0.42)(-0.1) + (-0.91)(0.9) \\ (0.91)(-0.1) + (-0.42)(0.9) \end{bmatrix}
 $$
 
 $$
-k_2' = \begin{bmatrix} 0.042 + 0.819 \\ 0.091 - 0.378 \end{bmatrix}^T \approx \begin{bmatrix} \mathbf{0.86} & \mathbf{-0.29} \end{bmatrix}
+k_2' = \begin{bmatrix} 0.042 - 0.819 \\ -0.091 - 0.378 \end{bmatrix} = \begin{bmatrix} \mathbf{-0.777} \\ \mathbf{-0.469} \end{bmatrix}
 $$
 
 #### Step 3: Calculate the New Attention Score
@@ -975,11 +975,11 @@ $$
 We now calculate the final attention score in the $QK^T$ path using our newly rotated vectors. The relative distance between words is $m-n = 0-2 = -2$.
 
 $$
-\text{Raw Score}(0 \cdot 2) = \text{DotProduct}(q_0', k_2') = (0.8 \cdot 0.86) + (-0.6 \cdot -0.29)
+\text{Raw Score}(0 \cdot 2) = \text{DotProduct}(q_0', k_2') = (0.8 \cdot -0.777) + (-0.6 \cdot -0.469)
 $$
 
 $$
-\text{Raw Score}(0 \cdot 2) = 0.688 + 0.174 = \mathbf{0.86}
+\text{Raw Score}(0 \cdot 2) = -0.6216 + 0.2814 \approx \mathbf{-0.34}
 $$
 
 *(Compare this to the un-rotated score: $q_0 \cdot k_2 = (0.8 \cdot -0.1) + (-0.6 \cdot 0.9) = -0.08 - 0.54 = -0.62$. RoPE radically altered the similarity based on the rotation difference of 2 radians).*
@@ -991,7 +991,7 @@ If you have a 4096-dimensional embedding, creating a $4096 \times 4096$ rotation
 We optimize this in models like LLaMA. A standard 2D rotation of vector $[x, y]$ can be rewritten as:
 
 $$
-\begin{bmatrix} x \\ y \end{bmatrix} \cdot R_\theta = \begin{bmatrix} x\cos\theta - y\sin\theta \\ x\sin\theta + y\cos\theta \end{bmatrix}
+R_\theta \begin{bmatrix} x \\ y \end{bmatrix} = \begin{bmatrix} x\cos\theta - y\sin\theta \\ x\sin\theta + y\cos\theta \end{bmatrix}
 $$
 
 We only use this simple, element-wise vector multiplication on the adjacent pairs of dimensions (Dim 0&1, Dim 2&3, etc.) of the Query/Key vectors. We never draw a massive 4096-dim rotation matrix.
