@@ -261,7 +261,9 @@ Using a single Attention mechanism (Single-Head Attention) presents a major sema
 
 For example, in the sentence *"The quick brown fox jumps"*, the word *"fox"* needs to simultaneously attend to *"quick"* and *"brown"* (adjectives), as well as *"jumps"* (the verb). 
 
-To allow the network to track multiple different grammatical relationships at the exact same time, the authors introduced **Multi-Head Attention**.
+Furthermore, a single sentence can have multiple ambiguous meanings. Consider the classic syntactic ambiguity: *"I saw a goat with a telescope."* This can mean either "I used a telescope to see the goat" or "The goat was holding a telescope." Multi-Head Attention allows different heads to track these distinct semantic interpretations simultaneously until deeper layers resolve the true context.
+
+To allow the network to track multiple different grammatical relationships and ambiguous meanings at the exact same time, the authors introduced **Multi-Head Attention**.
 
 ### 1. The Architecture of Splitting
 
@@ -411,7 +413,7 @@ $$
 
 While the Attention mechanism is famous, it does virtually no "thinking" or "remembering." Attention is strictly a **routing mechanism**—it just moves data from one word to another. 
 
-The actual memorization of world knowledge (e.g., knowing that "Paris" is the capital of "France") happens entirely inside the **Position-wise Feed-Forward Network (FFN)**. 
+The actual memorization of world knowledge (e.g., knowing that "Paris" is the capital of "France") happens entirely inside the **Position-wise Feed-Forward Network (FFN)**. Furthermore, the Attention mechanism is fundamentally just a series of linear transformations (weighted sums of values). Without the FFN, the entire Transformer block would be entirely linear and incapable of learning complex patterns. The FFN injects the critical **non-linearity** required to act as a universal function approximator.
 
 Every single word vector (dimension $512$) is passed independently through a massive, two-layer Multi-Layer Perceptron (MLP):
 
