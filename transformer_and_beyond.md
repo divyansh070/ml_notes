@@ -142,7 +142,11 @@ By concatenating these extracted points, the model generates a precise 1D array:
 
 Finally, this geometric timestamp is fused with the actual semantic meaning of the word. The raw Semantic Embedding vector for the word `"Dog"` (e.g., `[-0.1, 0.9, 0.4, -0.5]`) is added **element-wise** to the newly generated Positional Encoding vector.
 
-This final blended vector is passed directly into the first Multi-Head Self-Attention block.
+$$
+X_1 = E_1 + PE_1 = \begin{bmatrix} -0.1 \\ 0.9 \\ 0.4 \\ -0.5 \end{bmatrix} + \begin{bmatrix} 0.84 \\ 0.54 \\ 0.01 \\ 1.00 \end{bmatrix} = \begin{bmatrix} 0.74 \\ 1.44 \\ 0.41 \\ 0.50 \end{bmatrix}
+$$
+
+This final blended vector ($X_1$) now contains both the semantic "dog" meaning and the "position 1" geometric timestamp. It is passed directly into the first Multi-Head Self-Attention block.
 
 ### 3. The Final Input Vector
 
@@ -528,21 +532,22 @@ Without Cross-Attention, the Decoder would lack the direct mechanism used by the
 
 We will now perform a rigorous, element-by-element trace of a complete Transformer Forward and Backward Pass.
 
-### The Scalar Model:
-To make this trace mathematically visible, we are using a **Scalar Transformer Model** ($d_{model} = 2$, $h = 1$). Full matrices will become visually manageable.
-
-**Problem Statement:** Translate English to French.
-**Encoder Input (X):** `["Good", "morning"]` ($N=2$ tokens)
-**Decoder Input (Target Y):** `["Bonjour"]` ($M=1$ token, with an implied `<Start>` token)
+> [!NOTE] 
+> **The Toy Scalar Model**
+> To make this trace mathematically visible, we use a simplified model where $d_{model} = 2$ and heads $h = 1$. This makes the massive matrices small enough to calculate by hand.
+> *   **Task:** Translate English to French.
+> *   **Encoder Input (X):** `["Good", "morning"]` ($N=2$ tokens)
+> *   **Decoder Input (Y):** `["Bonjour"]` ($M=1$ token, prepended with a `<Start>` token)
 
 ### Step 1: Input Processing (Both Tracks)
 
 We map the text into initial embedding vectors and add the trigonometric positional encodings.
 
 **Input Sequence for Encoder (X):**
-Word $1$ ($pos=0$): "Good" $\rightarrow E_0 = [0.8, -0.2]$
-Word $2$ ($pos=1$): "morning" $\rightarrow E_1 = [-0.1, 0.9]$
-*Note: We assume a simplified fixed semantic embedding.*
+*   **Word 1 ($pos=0$):** `"Good"` $\rightarrow E_0 = [0.8, -0.2]$
+*   **Word 2 ($pos=1$):** `"morning"` $\rightarrow E_1 = [-0.1, 0.9]$
+
+*(Note: We assume a simplified fixed semantic embedding space).*
 
 We add the **Positional Encodings** (calculated for $pos \in \{0, 1\}$ and $i \in \{0, 1\}$ with $d=2$):
 $PE_0 = [\sin(0), \cos(0)] = [0, 1]$
