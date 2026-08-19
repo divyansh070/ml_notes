@@ -579,40 +579,49 @@ Word 1 ($X_0 = [0.8, 0.8]$) must look at Word 1 and Word 2.
 **Step A1 — Generate Queries, Keys, Values (Q, K, V):**
 
 $$
-Q_0 = X_0 \cdot W_Q = [0.8, 0.8] \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix}
+Q_0 = X_0 \cdot W_Q = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix} \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix}
 $$
 
 $$
-K_0 = X_0 \cdot W_K = [0.8, 0.8] \begin{bmatrix} 0.5 & 0.5 \\ 0.2 & 0.8 \end{bmatrix} = \begin{bmatrix} 0.56 & 1.04 \end{bmatrix}
+K_0 = X_0 \cdot W_K = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix} \begin{bmatrix} 0.5 & 0.5 \\ 0.2 & 0.8 \end{bmatrix} = \begin{bmatrix} 0.56 & 1.04 \end{bmatrix}
 $$
 
 $$
-K_1 = X_1 \cdot W_K = [0.74, 1.44] \begin{bmatrix} 0.5 & 0.5 \\ 0.2 & 0.8 \end{bmatrix} = \begin{bmatrix} 0.66 & 1.52 \end{bmatrix}
+K_1 = X_1 \cdot W_K = \begin{bmatrix} 0.74 & 1.44 \end{bmatrix} \begin{bmatrix} 0.5 & 0.5 \\ 0.2 & 0.8 \end{bmatrix} = \begin{bmatrix} 0.66 & 1.52 \end{bmatrix}
 $$
 
 **Step A2 — Calculate Raw Attention Scores (Dot Products):**
 
-$Score(0 \cdot 0) = Q_0 \cdot K_0 = (0.8 \cdot 0.56) + (0.8 \cdot 1.04) = 0.448 + 0.832 = 1.28$
+$$
+\text{Score}(0 \rightarrow 0) = Q_0 \cdot K_0^T = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix} \begin{bmatrix} 0.56 \\ 1.04 \end{bmatrix} = 1.28
+$$
 
-$Score(0 \cdot 1) = Q_0 \cdot K_1 = (0.8 \cdot 0.66) + (0.8 \cdot 1.52) = 0.528 + 1.216 = 1.74$
+$$
+\text{Score}(0 \rightarrow 1) = Q_0 \cdot K_1^T = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix} \begin{bmatrix} 0.66 \\ 1.52 \end{bmatrix} = 1.74
+$$
 
 **Step A3 — Scale and Softmax:**
 
-$d_k = 2$, so $\sqrt{d_k} \approx 1.41$. We scale the scores:
-Scaled Scores = $[1.28/1.41, 1.74/1.41] = [0.91, 1.23]$. Apply row-wise Softmax:
+$d_k = 2$, so we scale the scores by $\sqrt{d_k} \approx 1.41$:
 
 $$
-\text{softmax}([0.91, 1.23]) \approx \begin{bmatrix} 0.42 & 0.58 \end{bmatrix}
+\text{Scaled Scores} = \begin{bmatrix} \frac{1.28}{1.41} & \frac{1.74}{1.41} \end{bmatrix} = \begin{bmatrix} 0.91 & 1.23 \end{bmatrix}
+$$
+
+Apply row-wise Softmax:
+
+$$
+\text{Softmax}\left(\begin{bmatrix} 0.91 & 1.23 \end{bmatrix}\right) \approx \begin{bmatrix} 0.42 & 0.58 \end{bmatrix}
 $$
 
 *Word 1 decides to pay 42% attention to itself and 58% to Word 2.*
 
 **Step A4 — Multiply by V (The final blend for Word 1):**
 
-The values are $V_0 = X_0 W_V = [1.6, 1.6]$ and $V_1 = X_1 W_V = [1.48, 2.88]$.
+The values are $V_0 = X_0 W_V = \begin{bmatrix} 1.6 & 1.6 \end{bmatrix}$ and $V_1 = X_1 W_V = \begin{bmatrix} 1.48 & 2.88 \end{bmatrix}$.
 
 $$
-Z_0 = (0.42 \cdot V_0) + (0.58 \cdot V_1) \approx \begin{bmatrix} 1.53 & 2.34 \end{bmatrix}
+Z_0 = 0.42 \begin{bmatrix} 1.6 & 1.6 \end{bmatrix} + 0.58 \begin{bmatrix} 1.48 & 2.88 \end{bmatrix} \approx \begin{bmatrix} 1.53 & 2.34 \end{bmatrix}
 $$
 
 This blended vector ($Z_0$) is now fully aware of both "Good" and "morning." The process repeats for all tokens.
