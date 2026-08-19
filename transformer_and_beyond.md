@@ -413,7 +413,7 @@ $$
 
 While the Attention mechanism is famous, it does virtually no "thinking" or "remembering." Attention is strictly a **routing mechanism**—it just moves data from one word to another. 
 
-The actual memorization of world knowledge (e.g., knowing that "Paris" is the capital of "France") happens entirely inside the **Position-wise Feed-Forward Network (FFN)**. Furthermore, the Attention mechanism is fundamentally just a series of linear transformations (weighted sums of values). Without the FFN, the entire Transformer block would be entirely linear and incapable of learning complex patterns. The FFN injects the critical **non-linearity** required to act as a universal function approximator.
+The actual memorization of world knowledge (e.g., knowing that "Paris" is the capital of "France") happens entirely inside the **Position-wise Feed-Forward Network (FFN)**. Furthermore, while the Softmax function in Attention provides non-linear routing, the output is ultimately just a weighted linear combination of Value vectors. Without the FFN's activation functions (like ReLU or GELU), the Transformer would lack the deep, per-token non-linear feature transformations required to act as a universal function approximator. The FFN does the heavy mathematical lifting for complex pattern recognition.
 
 Every single word vector (dimension $512$) is passed independently through a massive, two-layer Multi-Layer Perceptron (MLP):
 
