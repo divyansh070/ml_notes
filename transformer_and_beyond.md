@@ -572,69 +572,82 @@ The input matrix ($X$) is contextualized by 1 Head ($h=1$) and 1 Layer. We defin
 
 ![Encoder Forward Pass Scalar Graph](./assets/encoder_forward_scalar.png)
 
-**Part A: Self-Attention mechanism (Tracing Word 1 "Good")**
+**Part A: Full Matrix Self-Attention (Tracing the entire sequence simultaneously)**
 
-Word 1 ($X_0 = [0.8, 0.8]$) must look at Word 1 and Word 2.
+In practice, GPUs do not trace one word at a time; they multiply the entire sequence matrix at once.
 
-**Step A1 — Generate Queries, Keys, Values (Q, K, V):**
-
-$$
-Q_0 = X_0 \cdot W_Q = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix} \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix}
-$$
+**Step A1 — Generate Query, Key, and Value Matrices ($Q, K, V$):**
 
 $$
-K_0 = X_0 \cdot W_K = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix} \begin{bmatrix} 0.5 & 0.5 \\ 0.2 & 0.8 \end{bmatrix} = \begin{bmatrix} 0.56 & 1.04 \end{bmatrix}
+Q = X \cdot W_Q = \begin{bmatrix} 0.8 & 0.8 \\ 0.74 & 1.44 \end{bmatrix} \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 0.80 & 0.80 \\ 0.74 & 1.44 \end{bmatrix}
 $$
 
 $$
-K_1 = X_1 \cdot W_K = \begin{bmatrix} 0.74 & 1.44 \end{bmatrix} \begin{bmatrix} 0.5 & 0.5 \\ 0.2 & 0.8 \end{bmatrix} = \begin{bmatrix} 0.66 & 1.52 \end{bmatrix}
-$$
-
-**Step A2 — Calculate Raw Attention Scores (Dot Products):**
-
-$$
-\text{Score}(0 \rightarrow 0) = Q_0 \cdot K_0^T = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix} \begin{bmatrix} 0.56 \\ 1.04 \end{bmatrix} = 1.28
+K = X \cdot W_K = \begin{bmatrix} 0.8 & 0.8 \\ 0.74 & 1.44 \end{bmatrix} \begin{bmatrix} 0.5 & 0.5 \\ 0.2 & 0.8 \end{bmatrix} = \begin{bmatrix} 0.56 & 1.04 \\ 0.66 & 1.52 \end{bmatrix}
 $$
 
 $$
-\text{Score}(0 \rightarrow 1) = Q_0 \cdot K_1^T = \begin{bmatrix} 0.8 & 0.8 \end{bmatrix} \begin{bmatrix} 0.66 \\ 1.52 \end{bmatrix} = 1.74
+V = X \cdot W_V = \begin{bmatrix} 0.8 & 0.8 \\ 0.74 & 1.44 \end{bmatrix} \begin{bmatrix} 2 & 0 \\ 0 & 2 \end{bmatrix} = \begin{bmatrix} 1.60 & 1.60 \\ 1.48 & 2.88 \end{bmatrix}
+$$
+
+**Step A2 — Calculate Raw Attention Scores ($Q \cdot K^T$):**
+
+We multiply $Q$ by the transpose of $K$ ($K^T$):
+
+$$
+\text{Raw Scores} = Q \cdot K^T = \begin{bmatrix} 0.80 & 0.80 \\ 0.74 & 1.44 \end{bmatrix} \begin{bmatrix} 0.56 & 0.66 \\ 1.04 & 1.52 \end{bmatrix} = \begin{bmatrix} 1.28 & 1.74 \\ 1.91 & 2.68 \end{bmatrix}
 $$
 
 **Step A3 — Scale and Softmax:**
 
-$d_k = 2$, so we scale the scores by $\sqrt{d_k} \approx 1.41$:
+We scale the entire score matrix by $\sqrt{d_k} = \sqrt{2} \approx 1.41$:
 
 $$
-\text{Scaled Scores} = \begin{bmatrix} \frac{1.28}{1.41} & \frac{1.74}{1.41} \end{bmatrix} = \begin{bmatrix} 0.91 & 1.23 \end{bmatrix}
+\text{Scaled Scores} = \begin{bmatrix} 1.28/1.41 & 1.74/1.41 \\ 1.91/1.41 & 2.68/1.41 \end{bmatrix} = \begin{bmatrix} 0.91 & 1.23 \\ 1.35 & 1.90 \end{bmatrix}
 $$
 
-Apply row-wise Softmax:
+Apply row-wise Softmax to convert the scores into percentages:
 
 $$
-\text{Softmax}\left(\begin{bmatrix} 0.91 & 1.23 \end{bmatrix}\right) \approx \begin{bmatrix} 0.42 & 0.58 \end{bmatrix}
+\text{Attention Weights} = \text{Softmax}\left(\begin{bmatrix} 0.91 & 1.23 \\ 1.35 & 1.90 \end{bmatrix}\right) \approx \begin{bmatrix} 0.42 & 0.58 \\ 0.18 & 0.82 \end{bmatrix}
 $$
 
-*Word 1 decides to pay 42% attention to itself and 58% to Word 2.*
+*Row 1 (Word 1) decides to pay 42% attention to itself and 58% to Word 2.*
+*Row 2 (Word 2) decides to pay 18% attention to Word 1 and 82% to itself.*
 
-**Step A4 — Multiply by V (The final blend for Word 1):**
-
-The values are $V_0 = X_0 W_V = \begin{bmatrix} 1.6 & 1.6 \end{bmatrix}$ and $V_1 = X_1 W_V = \begin{bmatrix} 1.48 & 2.88 \end{bmatrix}$.
+**Step A4 — Multiply by V (The final Contextualized Matrix $Z$):**
 
 $$
-Z_0 = 0.42 \begin{bmatrix} 1.6 & 1.6 \end{bmatrix} + 0.58 \begin{bmatrix} 1.48 & 2.88 \end{bmatrix} \approx \begin{bmatrix} 1.53 & 2.34 \end{bmatrix}
+Z = \text{Attention Weights} \cdot V = \begin{bmatrix} 0.42 & 0.58 \\ 0.18 & 0.82 \end{bmatrix} \begin{bmatrix} 1.60 & 1.60 \\ 1.48 & 2.88 \end{bmatrix} \approx \begin{bmatrix} 1.53 & 2.34 \\ 1.50 & 2.65 \end{bmatrix}
 $$
 
-This blended vector ($Z_0$) is now fully aware of both "Good" and "morning." The process repeats for all tokens.
+Every row in $Z$ is now a context-aware blend of the entire sentence!
 
 **Part B: Add & Norm, FFN (Trace to final Blueprint H)**
 
-The contextualized matrix ($Z$) is combined with the original input via the Residual connection ($X$), passed through LayerNorm, expanded to a massive $2 \times 4$ hidden space inside the FFN, compressed back to $2 \times 2$, and another Add&Norm layer applied.
-
-The final output is a $2 \times 2$ matrix, the **English Blueprint H**, where every row is a deep, context-aware representation.
-
+**1. Add & Norm (Residual + LayerNorm):**
+We add the original input $X$ to our attention output $Z$:
 $$
-\text{English Blueprint (Encoder Output H)} = \begin{bmatrix} 1.1 & -0.9 \\ -1.1 & 1.3 \end{bmatrix}
+X + Z = \begin{bmatrix} 0.80 & 0.80 \\ 0.74 & 1.44 \end{bmatrix} + \begin{bmatrix} 1.53 & 2.34 \\ 1.50 & 2.65 \end{bmatrix} = \begin{bmatrix} 2.33 & 3.14 \\ 2.24 & 4.09 \end{bmatrix}
 $$
+After applying LayerNorm (normalizing each row to mean 0, std 1, and applying learned $\gamma/\beta$), we get $Z'$:
+$$
+Z' = \text{LayerNorm}(X + Z) \approx \begin{bmatrix} 1.00 & -1.00 \\ -1.00 & 1.00 \end{bmatrix}
+$$
+
+**2. Feed-Forward Network (FFN):**
+$Z'$ is projected into a larger hidden space (e.g., $2 \rightarrow 8$ dims), passed through a ReLU activation, and projected back down to $2$ dims.
+$$
+\text{FFN Output} = \text{FFN}(Z') \approx \begin{bmatrix} 3.00 & 3.00 \\ -1.00 & 2.00 \end{bmatrix}
+$$
+
+**3. Final Add & Norm:**
+We add the residual $Z'$ to the FFN output and apply a final LayerNorm to produce the final Encoder Output ($H$).
+$$
+\text{English Blueprint (Encoder Output H)} = \text{LayerNorm}(Z' + \text{FFN}(Z')) \approx \begin{bmatrix} 1.10 & -0.90 \\ -1.10 & 1.30 \end{bmatrix}
+$$
+
+This $2 \times 2$ matrix $H$ is the final contextualized blueprint of our sentence! Every single row is a deep, context-aware representation that the Decoder will use.
 
 ### Step 3: Decoder Block Forward Pass
 
