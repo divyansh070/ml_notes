@@ -485,15 +485,7 @@ Imagine predicting the next word in *"Je suis un robot."*
     *   **Target:** `Je`, `suis`, `un`, `robot`
 *   When calculating the attention for *"suis"* (Input Position 2), we create a Mask vector where past/current positions (0, 1, 2) are 0, but the future position (3, corresponding to *"un"*) is filled with **$-\infty$** (Negative Infinity).
 
-$$
-\text{Raw Attention scores } (Q \cdot K^T) \approx \begin{bmatrix} 15 & 4 & 1 & 0 \\ \mathbf{4} & \mathbf{12} & \mathbf{3} & \mathbf{2} \\ 1 & 3 & 14 & 0 \\ 0 & 2 & 0 & 13 \end{bmatrix}
-$$
-
-Apply **Causal Mask** (Upper-Triangle set to $-\infty$):
-
-$$
-\text{Masked Attention scores } (Q \cdot K^T) \approx \begin{bmatrix} 15 & -\infty & -\infty & -\infty \\ \mathbf{4} & \mathbf{12} & -\infty & -\infty \\ 1 & 3 & 14 & -\infty \\ 0 & 2 & 0 & 13 \end{bmatrix}
-$$
+![Causal Mask Visualization](./assets/causal_mask_visualization.png)
 
 When we apply the Softmax, $e^{-\infty}$ is exactly $0$. The network is mathematically forced to assign $0.000\%$ attention to any future words. The model now acts exactly as it would during inference—it can only rely on the past to predict the future—but it can do it for all words in the sentence simultaneously in a single GPU pass!
 
