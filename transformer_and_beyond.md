@@ -495,22 +495,32 @@ When we apply the Softmax, $e^{-\infty}$ is exactly $0$. The network is mathemat
 
 ### 3. Modification 2: Cross-Attention (Encoder-Decoder Attention)
 
-While pure generative models (like GPT-3 or LLaMA) are "Decoder-only" and use just the Masked Self-Attention, Sequence-to-Sequence models (like those used for Translation, Summarization, or Whisper Audio) use an Encoder-Decoder architecture.
+While pure generative models (like GPT-3 or LLaMA) are "Decoder-only" and use just Masked Self-Attention, Sequence-to-Sequence models (like those used for Translation, Summarization, or Whisper Audio) use a full Encoder-Decoder architecture.
 
-If the Decoder is generating a French sentence, it must have a way to constantly "cross-examine" the original English sentence to ensure its generation remains perfectly faithful to the prompt.
+If the Decoder is generating a French sentence from an English prompt, it must have a way to constantly "cross-examine" the original English sentence to ensure its generation remains perfectly faithful to the source material.
+
+**Why is Cross-Attention Important? (The Alignment Problem)**
+In older, pre-Transformer sequence models (like standard RNNs), the entire English input sentence had to be compressed into a single, fixed-size vector before the French translation could begin. This caused a massive "bottleneck"—the model would literally forget the start of a long sentence by the time it finished reading it. 
+
+Furthermore, language is rarely a simple 1-to-1 word mapping. For example, the English phrase `"European Economic Area"` translates to French as `"Zone Économique Européenne"`. The order of the adjectives is completely reversed! 
+
+**Cross-Attention** solves this bottleneck and alignment problem entirely. Instead of relying on a single compressed memory vector, Cross-Attention allows the Decoder to look at *all* the individual words in the original English sentence at *every single generation step*, dynamically deciding which specific English words are relevant to the specific French word it is currently writing.
+
+![Cross Attention Heatmap](./assets/cross_attention_heatmap.png)
+*Notice how Cross-Attention automatically learns complex grammar re-orderings. When generating the French word "Zone" (Query), it dynamically routes its attention (85%) to the English Key for "Area", completely ignoring the sequential word order!*
 
 **The Mechanics of Cross-Attention**
 In a standard Self-Attention layer, $Q$, $K$, and $V$ all come from the exact same sentence. 
 In a **Cross-Attention** layer, the inputs are split across the two halves of the network:
 
 1.  **Queries ($Q$) come from the Decoder:** The Query matrix is derived from the French words the Decoder has generated so far. You can think of the Query as the Decoder asking: *"Based on the French grammar I just wrote, what piece of information do I need next?"*
-2.  **Keys ($K$) & Values ($V$) come from the Encoder:** The Key and Value matrices are pulled directly from the output of the *FINAL* **Encoder Block**. The Encoder has already processed the English prompt and mapped out the perfect semantic relationships. The Keys act as tags saying: *"I have information about a verb here,"* and the Values hold the actual context.
+2.  **Keys ($K$) & Values ($V$) come from the Encoder:** The Key and Value matrices are pulled directly from the output of the *FINAL* **Encoder Block**. The Encoder has already processed the English prompt and mapped out the perfect semantic relationships. The Keys act as tags saying: *"I have information about an economic zone here,"* and the Values hold the actual context.
 
 **The Math in Action:**
 If the Encoder processes the English sentence *"I sat on the bank of the river"*, and the Decoder has currently generated *"Je me suis assis sur la"*, the Decoder creates a Query for the next word. 
 That Query calculates a dot product with all the Encoder's Keys. Because the encoder representation associated with 'bank' has been contextualized by surrounding words such as 'river', the decoder can learn to assign higher attention to that representation when generating the appropriate translation. It extracts this Value data to correctly predict the French word *"rive"*.
 
-Without Cross-Attention, the Decoder would lack the direct mechanism used by the original encoder-decoder architecture to condition each generated token on the encoded source sequence.
+Without Cross-Attention, the Decoder would simply hallucinate text based on its own past generations, lacking the direct conditioning mechanism necessary to faithfully map the source sequence.
 
 ---
 
