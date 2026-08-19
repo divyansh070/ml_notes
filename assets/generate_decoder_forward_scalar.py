@@ -33,10 +33,11 @@ def draw_box(ax, x, y, w, h, text, bg, fontsize=12):
 Y_in = np.array([[1.00, 2.00]])
 H_enc = np.array([[1.10, -0.90], [-1.10, 1.30]])
 Masked_W = np.array([[1.00]])
-Z_masked = np.array([[2.00, 4.00]])
-Z_norm1 = np.array([[-1.00, 1.00]])
-Cross_W = np.array([[0.04, 0.96]])
-Z_cross = np.array([[-1.01, 1.21]])
+Z_masked = np.array([[1.50, 1.50]])
+Z_add1 = np.array([[2.50, 3.50]])
+Z_norm1 = np.array([[1.00, 1.00]])
+Cross_W = np.array([[0.17, 0.83]])
+Z_cross = np.array([[-0.10, 0.50]])
 Prediction = np.array([[0.01, 0.98]])
 
 # --- FIGURE: Clean vertical flow ---
@@ -84,7 +85,7 @@ draw_box(ax, cx-1.5, 7.5, 5.5, 1.3, "Cross-Attention\n(Q=Decoder, K,V=Encoder)",
 # Cross-Attention Weights
 draw_arrow(ax, (cx+4, 8.0), (12, 7.5), text="")
 draw_matrix(ax, 12, 6.5, Cross_W, "Cross-Attn\nWeights", bg='#fcf3cf')
-ax.text(13.2, 6.3, "4% Good, 96% morning", fontsize=9, ha='center', color='gray')
+ax.text(13.2, 6.3, "17% Good, 83% morning", fontsize=9, ha='center', color='gray')
 
 draw_arrow(ax, (cx+1.2, 7.5), (cx+1.2, 6.5))
 draw_matrix(ax, cx, 5.5, Z_cross, "Cross-Attn Output", bg='#fcf3cf')
