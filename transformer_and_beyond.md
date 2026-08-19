@@ -674,80 +674,53 @@ $Y_0 = [1.0, 1.0] + [0, 1] = \begin{bmatrix} 1.0 & 2.0 \end{bmatrix}$.
 
 **Sub-Layer 1 — Masked Self-Attention (Hiding the future):**
 
-Because we only have one input token (`<Start>`), masking is mathematically trivial: Word 1 only dot-products with itself.
-Assuming $W_Q=I$, $W_K=I$, and $W_V=2I$:
-
-$$
-Q_{masked} = \begin{bmatrix} 1.0 & 2.0 \end{bmatrix}, \quad K_{masked} = \begin{bmatrix} 1.0 & 2.0 \end{bmatrix}, \quad V_{masked} = \begin{bmatrix} 2.0 & 4.0 \end{bmatrix}
-$$
-
-The single attention score normalizes to $1.0$ (100% attention to itself). The output of this layer ($Z_{masked}$) is just $1.0 \cdot V_{masked}$:
-
-$$
-Z_{masked} = \begin{bmatrix} 2.0 & 4.0 \end{bmatrix}
-$$
-
-*(In a full translation with multiple generated words, the Causal Mask forces upper-triangle scores to $-\infty$ to prevent looking at future generated words).*
-
-**Add & Norm 1:**
-We add the Residual ($Y_0$) and apply LayerNorm (normalizing to mean 0, std 1):
-
-$$
-Z'_{masked} = \text{LayerNorm}\left( \begin{bmatrix} 1.0 & 2.0 \end{bmatrix} + \begin{bmatrix} 2.0 & 4.0 \end{bmatrix} \right) = \text{LayerNorm}\left(\begin{bmatrix} 3.0 & 6.0 \end{bmatrix}\right) = \begin{bmatrix} -1.0 & 1.0 \end{bmatrix}
-$$
+Because we only have one input token (`<Start>`), masking is mathematically trivial: Word 1 only dot-products with itself. The output of this layer ($Z_{dec}$) is just Word 1's value.
+*(In a full 10-word translation, Word 5's scores would use $-\infty$ on words 6-10, preventing context leakage)*.
 
 **Sub-Layer 2 — Cross-Attention (The English $\leftrightarrow$ French Bridge):**
 
-This is the most important generative step. The generated output so far must "cross-examine" the Encoder context.
+This is the most important generative step. The generated output so far (`<Start>`) must "cross-examine" the Encoder context.
 
-We source $Q$ from the Decoder, and $K, V$ from the **FINAL Encoder Output ($H_{enc}$)**:
-
-$$
-Q_{cross} = Z'_{masked} \cdot W_Q^{cross} = \begin{bmatrix} -1.0 & 1.0 \end{bmatrix}
-$$
+We source $Q, K, V$:
 
 $$
-K_{enc} = V_{enc} = H_{enc} \cdot W_K^{cross} = \begin{bmatrix} 1.10 & -0.90 \\ -1.10 & 1.30 \end{bmatrix}
+Q_{dec} = Y_0 \cdot W_Q^{cross} = \begin{bmatrix} 1.0 & 2.0 \end{bmatrix}
 $$
 
-*(Assuming $W_Q^{cross}, W_K^{cross}, W_V^{cross} = I$ for simplicity).*
-
-**Calculate Cross-Attention Scores (Blended context):**
-
 $$
-\text{Raw Scores} = Q_{cross} \cdot K_{enc}^T = \begin{bmatrix} -1.0 & 1.0 \end{bmatrix} \begin{bmatrix} 1.10 & -1.10 \\ -0.90 & 1.30 \end{bmatrix} = \begin{bmatrix} -2.0 & 2.4 \end{bmatrix}
+K_{enc} = H_{enc} \cdot W_K^{cross} = \begin{bmatrix} 1.10 & -0.90 \\ -1.10 & 1.30 \end{bmatrix}
 $$
 
-We divide by $\sqrt{d_k} \approx 1.41$:
+*(We assume simplified projections where $W_Q=I$ and $W_K=I$ for cross).*
+
+**Calculate Attention Scores (Blended context):**
 
 $$
-\text{Scaled Scores} = \begin{bmatrix} \frac{-2.0}{1.41} & \frac{2.4}{1.41} \end{bmatrix} \approx \begin{bmatrix} -1.42 & 1.70 \end{bmatrix}
+\text{Score}(Dec0 \rightarrow Enc0) = Q_{dec} \cdot K_{word0}^T = \begin{bmatrix} 1.0 & 2.0 \end{bmatrix} \begin{bmatrix} 1.10 \\ -0.90 \end{bmatrix} = 1.1 - 1.8 = -0.7
 $$
 
-Apply Softmax:
-
 $$
-\text{Attention Weights} = \text{Softmax}\left(\begin{bmatrix} -1.42 & 1.70 \end{bmatrix}\right) \approx \begin{bmatrix} 0.04 & 0.96 \end{bmatrix}
+\text{Score}(Dec0 \rightarrow Enc1) = Q_{dec} \cdot K_{word1}^T = \begin{bmatrix} 1.0 & 2.0 \end{bmatrix} \begin{bmatrix} -1.10 \\ 1.30 \end{bmatrix} = -1.1 + 2.6 = 1.5
 $$
 
-*The Decoder decides to pay 4% attention to "Good" and 96% attention to "morning."*
-
-**Multiply by V ($V_{enc}$):**
+We divide by $\sqrt{d_k}$ and apply Softmax:
 
 $$
-Z_{cross} = \text{Attention Weights} \cdot V_{enc} = \begin{bmatrix} 0.04 & 0.96 \end{bmatrix} \begin{bmatrix} 1.10 & -0.90 \\ -1.10 & 1.30 \end{bmatrix} \approx \begin{bmatrix} -1.01 & 1.21 \end{bmatrix}
+\text{Softmax}\left(\begin{bmatrix} \frac{-0.7}{1.41} & \frac{1.5}{1.41} \end{bmatrix}\right) \approx \text{Softmax}\left(\begin{bmatrix} -0.5 & 1.06 \end{bmatrix}\right) \approx \begin{bmatrix} 0.17 & 0.83 \end{bmatrix}
 $$
+
+*The generated token decides to pay 17% attention to "Good" and 83% attention to "morning."*
 
 This creates the blended contextualized French vector ($Z_{cross}$), ensuring the Decoder is generating text based *only* on the English blueprint.
 
 **Sub-Layer 3 — Add & Norm, FFN (Trace to final generation):**
 
-$Z_{cross}$ is added with the previous Residual ($Z'_{masked}$), passed through LayerNorm, expanded in the FFN (projecting context into factual memory space), compressed back, and passed through a final Add&Norm layer.
+$Z_{cross}$ is added with the previous Residual, passed through LayerNorm, expanded in the FFN (projecting context into factual memory space), compressed back, and passed through a final Add&Norm layer.
 
-The final Decoder output vector is passed through a Linear layer and a Softmax, yielding a probability distribution across the entire French vocabulary:
+The final Decoder output vector ($h_{dec}$) is passed through a Linear layer and a Softmax, yielding a probability distribution across the entire French vocabulary:
 
 $$
-\text{Prediction Distribution} = \begin{bmatrix} 0.01 & 0.98 & \dots \end{bmatrix}
+\text{Prediction} = [0.01, 0.98, \dots]
 $$
 
 We select the word with the highest probability (0.98): `"Bonjour"`.
