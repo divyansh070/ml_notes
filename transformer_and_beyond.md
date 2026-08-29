@@ -67,6 +67,15 @@
   - [3. Hands-On Math Trace: A Mini-ViT (d=2)](#3-hands-on-math-trace-a-mini-vit-d2)
   - [4. Backpropagation: Global Receptive Field vs. CNN](#4-backpropagation-global-receptive-field-vs-cnn)
   - [Topic 10 Placement Prep: Elite ViT Flashcards](#topic-10-placement-prep-elite-vit-flashcards)
+- [Topic 11: Vision-Language Models](#topic-11-vision-language-models)
+  - [Topic 11.1: OpenAI CLIP (The Baseline Contrastive VLM)](#topic-111-openai-clip-the-baseline-contrastive-vlm)
+    - [Topic 11.1 Placement Prep: Elite CLIP Flashcards](#topic-111-placement-prep-elite-clip-flashcards)
+  - [Topic 11.2: ViLT (Vision-and-Language Transformer)](#topic-112-vilt-vision-and-language-transformer)
+    - [Topic 11.2 Placement Prep: Elite ViLT Flashcards](#topic-112-placement-prep-elite-vilt-flashcards)
+  - [Topic 11.3: BLIP (Generative Spatial Reasoning)](#topic-113-blip-generative-spatial-reasoning)
+    - [Topic 11.3 Placement Prep: Elite BLIP Flashcards](#topic-113-placement-prep-elite-blip-flashcards)
+  - [Topic 11.4: SmolVLM (Architectural Efficiency > Parameter Count)](#topic-114-smolvlm-architectural-efficiency--parameter-count)
+    - [Topic 11.4 Placement Prep: Elite SmolVLM Flashcards](#topic-114-placement-prep-elite-smolvlm-flashcards)
 
 ---
 
@@ -89,88 +98,54 @@ At this point, we have a $N \times d$ matrix (where $N$ is sequence length and $
 
 ### 2. The Positional Encoding Solution
 
-To inject the concept of "time" or "order" into the model, the original *Attention Is All You Need* paper introduced **Sinusoidal Positional Encodings**.
-
-The authors designed a mathematical formula using Sine and Cosine waves to generate a vector for every absolute position (Position 1, Position 2, etc.). The combination of sine and cosine functions produces a distinctive positional representation for each position, with different frequencies capturing both local and long-range positional patterns.
+To inject the concept of "time" or "order" into the model, the original *Attention Is All You Need* paper introduced **Sinusoidal Positional Encodings**: one fixed vector per absolute position, generated from a family of sine and cosine waves of different frequencies.
 
 For a given position $pos$ and dimension index $i$:
 $$PE_{(pos, 2i)} = \sin(pos / 10000^{2i/d_{model}})$$
 $$PE_{(pos, 2i+1)} = \cos(pos / 10000^{2i/d_{model}})$$
 
 **Why Sine and Cosine?**
-*   **Unique Fingerprint:** The sinusoidal encoding gives different positional patterns over practical sequence lengths of interest (though they are periodic).
 *   **Bounded Values:** Unlike integers (1, 2, 3...) which grow endlessly and would eventually dwarf the actual word embeddings, Sine and Cosine are strictly bounded between $[-1, 1]$. This keeps the neural network mathematically stable regardless of how long the sentence is.
+*   **Unique Fingerprint:** Because each dimension uses a different frequency, every position produces a distinctive pattern over any practical sequence length. (The individual functions are periodic, but the combination across all dimensions is effectively never repeated.)
 *   **Relative Distance:** Because of trigonometric identities, for any fixed offset $k$, the encoding at position $pos+k$ can be expressed as a linear transformation of the encoding at $pos$. This makes it easier for the attention mechanism to learn relative distances.
 
-### Visualizing Generation: The Positional Encoding Mechanics
+**The Clock Analogy.** The frequency changes drastically with the dimension index $i$. Low dimensions (e.g., Dim 0 & 1) have a tiny denominator, so their waves oscillate rapidly — the **seconds hand**, tracking immediate changes between adjacent words. High dimensions (e.g., Dim 2 & 3) have a huge denominator ($10000^{2/4}$ in our toy model), so their waves oscillate slowly — the **hours hand**, tracking a word's general location within a long document.
 
-To give the network a sense of "time" and "order," the Transformer constructs **Positional Encodings** dynamically using continuous wave functions. Let's break down exactly how these values are generated from thin air and merged with our raw embeddings.
+### Visualizing Generation: Sampling One Position's Vector
 
 ![Generating Positional Encodings](./assets/generating_positional_encoding_v2.png)
 ![CampusX Positional Encoding](./assets/campusx_positional_encoding.png)
 
-#### Step 1: The Continuous Wave Functions (The Clock Analogy)
+When a word enters the network at position $pos$, the model does not use the whole wave — it takes a vertical "slice" through every wave function exactly at $x = pos$. For the word `"Dog"` at **$pos=1$** in a toy $d=4$ model:
+*   Dim 0 (fast sine): $\sin(1) \approx 0.84$
+*   Dim 1 (fast cosine): $\cos(1) \approx 0.54$
+*   Dim 2 (slow sine): $\approx 0.01$
+*   Dim 3 (slow cosine): $\approx 1.00$
 
-Instead of hardcoding a single incrementing number, the Transformer generates multiple distinct continuous sine and cosine waves across the dimensions of the embedding vector. 
-
-For an embedding dimension $d_{model}$ and dimension index $i$, the wavelength changes drastically based on the index:
-
-$$
-PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)
-$$
-
-$$
-PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)
-$$
-
-*   **Low Dimensions (e.g., Dim 0 & 1):** The denominator is extremely small, causing the sine and cosine waves to oscillate rapidly. This acts like the **seconds hand** on a clock, tracking immediate changes between adjacent words.
-*   **High Dimensions (e.g., Dim 2 & 3):** The denominator is extremely large ($10000^{2/4}$ in our toy model), causing the wave to oscillate incredibly slowly. This acts like the **hours hand**, tracking the word's general location within a massive document.
-
-#### Step 2: Sampling the Vector 
-
-When a word enters the network at a specific position (for example, the word `"Dog"` at **$pos=1$**), the network does not use the entire wave. 
-
-It takes a vertical "slice" across all continuous wave graphs exactly at $x = 1$.
-*   From Dim 0 (Sine), the wave's value at $x=1$ is **$0.84$**.
-*   From Dim 1 (Cosine), the wave's value at $x=1$ is **$0.54$**.
-*   From Dim 2 (Sine), the slow wave's value at $x=1$ is **$0.01$**.
-*   From Dim 3 (Cosine), the slow wave's value at $x=1$ is **$1.00$**.
-
-By concatenating these extracted points, the model generates a precise 1D array: `[0.84, 0.54, 0.01, 1.00]`. This is the exact Positional Encoding vector for position 1. Because of the varying wave frequencies, no two positions in the entire sequence will ever generate the same exact vector. 
-
-#### Step 3: The Final Element-Wise Addition
-
-Finally, this geometric timestamp is fused with the actual semantic meaning of the word. The raw Semantic Embedding vector for the word `"Dog"` (e.g., `[-0.1, 0.9, 0.4, -0.5]`) is added **element-wise** to the newly generated Positional Encoding vector.
-
-$$
-X_1 = E_1 + PE_1 = \begin{bmatrix} -0.1 \\ 0.9 \\ 0.4 \\ -0.5 \end{bmatrix} + \begin{bmatrix} 0.84 \\ 0.54 \\ 0.01 \\ 1.00 \end{bmatrix} = \begin{bmatrix} 0.74 \\ 1.44 \\ 0.41 \\ 0.50 \end{bmatrix}
-$$
-
-This final blended vector ($X_1$) now contains both the semantic "dog" meaning and the "position 1" geometric timestamp. It is passed directly into the first Multi-Head Self-Attention block.
+Concatenating these points gives the Positional Encoding vector for position 1: `[0.84, 0.54, 0.01, 1.00]`. Because the frequencies differ across dimensions, no two positions in the sequence ever generate the same exact vector.
 
 ### 3. The Final Input Vector
 
-Instead of concatenating the positional encoding with the word embedding, the original Transformer adds them element-wise. Addition preserves the model dimension $d_{model}$, so the subsequent Transformer layers do not need an additional projection just to reduce the dimensionality back to $d_{model}$. The resulting representation intentionally contains both semantic and positional information.
+The original Transformer **adds** the positional encoding to the word embedding element-wise rather than concatenating it. Addition preserves the model dimension $d_{model}$, so the later layers need no extra projection to shrink the vector back down, and in a 512-dimensional space the network has ample capacity to disentangle the semantic and positional signals that were summed together.
 
 ![Positional Encoding Vector Addition](./assets/transformer_pe.png)
 
 $$Final\_Input = Word\_Embedding + Positional\_Encoding$$
 
-**Visual Math Example (Mini-Vector):**
-Let's assume our word embedding for "Queen" at Position 4 is a 3-dimensional vector, and the Positional Encoding (PE) for Position 4 generates another 3-dimensional vector. They are simply added together:
+Continuing the `"Dog"` example from above, with a raw semantic embedding of `[-0.1, 0.9, 0.4, -0.5]`:
 
-*   **Embedding ("Queen"):** `[0.85, -0.42, 0.99]`
-*   **PE (Position 4):** `[0.10,  0.88, -0.54]`
-*   **Final Input Vector:** `[0.95,  0.46, 0.45]`
+$$
+X_1 = E_1 + PE_1 = \begin{bmatrix} -0.1 \\ 0.9 \\ 0.4 \\ -0.5 \end{bmatrix} + \begin{bmatrix} 0.84 \\ 0.54 \\ 0.01 \\ 1.00 \end{bmatrix} = \begin{bmatrix} 0.74 \\ 1.44 \\ 0.41 \\ 0.50 \end{bmatrix}
+$$
 
-The representation now intentionally contains both token identity and position, and in a massive 512-dimensional space, the neural network has more than enough capacity to utilize both signals effectively.
+This blended vector $X_1$ now carries both the meaning of "dog" and the "position 1" timestamp, and is passed directly into the first Multi-Head Self-Attention block.
 
 ---
 
 ### Topic 1 Placement Prep: Elite Input Processing Flashcards
 
 **Q1: Why did the Transformer authors choose to add the Positional Encodings to the Word Embeddings, rather than concatenating them?**
-*   **Answer:** Instead of concatenating the positional encoding with the word embedding, the original Transformer adds them element-wise. Addition preserves the model dimension $d_{model}$, so the subsequent Transformer layers do not need an additional projection just to reduce the dimensionality back to $d_{model}$. The resulting representation intentionally contains both semantic and positional information.
+*   **Answer:** Addition keeps the combined vector at $d_{model}$, so no extra projection layer (and no extra parameters) is needed to undo the dimensionality increase that concatenation would cause. Empirically it works just as well: a high-dimensional embedding space has more than enough room for the network to separate the semantic and positional components that were summed.
 
 **Q2: Why use complex Sine and Cosine waves for Positional Encoding instead of just assigning simple integers (e.g., Word 1 = 1, Word 2 = 2)?**
 *   **Answer:** If we use raw integers, a 5,000-word document would have a final position value of 5,000. This massive number would completely dwarf the values in the word embedding (which are usually normalized around 0), destroying the word's meaning. Furthermore, sine and cosine waves are bounded strictly between -1 and 1, ensuring mathematical stability regardless of sequence length. 
@@ -536,8 +511,6 @@ Without Cross-Attention, the Decoder would simply hallucinate text based on its 
 *   **Answer:** Training is efficient because of **Teacher Forcing** and **Causal Masking**. We feed the right-shifted target sequence into the model and use the causal mask to compute predictions for *every single position simultaneously* in parallel. The attention computation is $O(N^2 d)$. However, during Inference, we must generate text autoregressively, one word at a time. Without KV caching, recomputing attention over all $t$ tokens at step $t$ costs $O(t^2 d)$, making the total generation cost $O(N^3)$. With KV caching, each step attends to $O(t)$ previous tokens, making the total attention decoding cost $O(N^2 d)$. The true bottleneck of inference is this sequential dependence, not simply that it is "$O(N)$".
 
 
-# Module 4: Standard Deep Learning (Synthesis Block)
-
 ## Topic 7: Complete Encoder-Decoder Hands-on Trace
 
 We will now perform a rigorous, element-by-element trace of a complete Transformer Forward and Backward Pass.
@@ -619,16 +592,16 @@ $$
 Apply row-wise Softmax to convert the scores into percentages:
 
 $$
-\text{Attention Weights} = \text{Softmax}\left(\begin{bmatrix} 0.91 & 1.23 \\ 1.35 & 1.90 \end{bmatrix}\right) \approx \begin{bmatrix} 0.42 & 0.58 \\ 0.18 & 0.82 \end{bmatrix}
+\text{Attention Weights} = \text{Softmax}\left(\begin{bmatrix} 0.91 & 1.23 \\ 1.35 & 1.90 \end{bmatrix}\right) \approx \begin{bmatrix} 0.42 & 0.58 \\ 0.37 & 0.63 \end{bmatrix}
 $$
 
 *Row 1 (Word 1) decides to pay 42% attention to itself and 58% to Word 2.*
-*Row 2 (Word 2) decides to pay 18% attention to Word 1 and 82% to itself.*
+*Row 2 (Word 2) decides to pay 37% attention to Word 1 and 63% to itself.*
 
 **Step A4 — Multiply by V (The final Contextualized Matrix $Z$):**
 
 $$
-Z = \text{Attention Weights} \cdot V = \begin{bmatrix} 0.42 & 0.58 \\ 0.18 & 0.82 \end{bmatrix} \begin{bmatrix} 1.60 & 1.60 \\ 1.48 & 2.88 \end{bmatrix} \approx \begin{bmatrix} 1.53 & 2.34 \\ 1.50 & 2.65 \end{bmatrix}
+Z = \text{Attention Weights} \cdot V = \begin{bmatrix} 0.42 & 0.58 \\ 0.37 & 0.63 \end{bmatrix} \begin{bmatrix} 1.60 & 1.60 \\ 1.48 & 2.88 \end{bmatrix} \approx \begin{bmatrix} 1.53 & 2.34 \\ 1.52 & 2.41 \end{bmatrix}
 $$
 
 Every row in $Z$ is now a context-aware blend of the entire sentence!
@@ -638,12 +611,14 @@ Every row in $Z$ is now a context-aware blend of the entire sentence!
 **1. Add & Norm (Residual + LayerNorm):**
 We add the original input $X$ to our attention output $Z$:
 $$
-X + Z = \begin{bmatrix} 0.80 & 0.80 \\ 0.74 & 1.44 \end{bmatrix} + \begin{bmatrix} 1.53 & 2.34 \\ 1.50 & 2.65 \end{bmatrix} = \begin{bmatrix} 2.33 & 3.14 \\ 2.24 & 4.09 \end{bmatrix}
+X + Z = \begin{bmatrix} 0.80 & 0.80 \\ 0.74 & 1.44 \end{bmatrix} + \begin{bmatrix} 1.53 & 2.34 \\ 1.52 & 2.41 \end{bmatrix} = \begin{bmatrix} 2.33 & 3.14 \\ 2.26 & 3.85 \end{bmatrix}
 $$
 After applying LayerNorm (normalizing each row to mean 0, std 1, and applying learned $\gamma/\beta$), we get $Z'$:
 $$
 Z' = \text{LayerNorm}(X + Z) \approx \begin{bmatrix} 1.00 & -1.00 \\ -1.00 & 1.00 \end{bmatrix}
 $$
+
+> **Note:** From here on, the LayerNorm $\gamma/\beta$ and the FFN weights are not specified numerically, so the $Z'$, FFN, and $H$ matrices below are **illustrative approximations** (hence the $\approx$), chosen only to keep the trace readable. They are consistent with — but not uniquely determined by — the corrected attention output above.
 
 **2. Feed-Forward Network (FFN):**
 $Z'$ is projected into a larger hidden space (e.g., $2 \rightarrow 8$ dims), passed through a ReLU activation, and projected back down to $2$ dims.
@@ -728,11 +703,11 @@ We select the word with the highest probability (0.98): `"Bonjour"`.
 
 ### Step 4: End-to-End Backpropagation (Calculus Trace)
 
-Assume the Decoder output `"Bonjour"`. Our French target was `"Bonjour"`. The Loss ($L$) is $0.00$.
+In the forward pass above the model already predicted `"Bonjour"` correctly. A fully converged model would have a loss near $0$ and essentially nothing to backpropagate — so to *illustrate* the backward pass we rewind to an **earlier point in training**, before convergence, when the same prediction still carries a real error signal. (This is a separate pedagogical snapshot, not a continuation of the converged example above.)
 
 ![Backpropagation Chain Rule Trace](./assets/backprop_explicit_chain_rule.png)
 
-But let's assume we are *training*. The error ($dL = \mathbf{2.0}$) flows backwards. The fundamental goal of Backprop is to allocate this $2.0$ penalty among all the initial shared weights ($W_Q, W_K, W_V$) in both the Encoder and Decoder. 
+At that earlier point, suppose the gradient of the loss with respect to the output score is $dL = \mathbf{2.0}$. This error flows backwards, and the fundamental goal of Backprop is to allocate this $2.0$ penalty among all the initial shared weights ($W_Q, W_K, W_V$) in both the Encoder and Decoder. 
 
 This is a simplified local gradient trace through the $QK^T$ path; a complete attention backward pass also includes gradients through the Softmax, scaling factor, $V$, and the $Q$ path. We will trace a **simplified local derivative** for allocating the gradient within the Encoder Dot Product path.
 *(Note: A full attention backpropagation involves passing the gradient through the Softmax output $A$, the values $V$, and the scaling factor. For educational intuition, this trace bypasses those steps to focus purely on how gradients flow from a raw score $S$ into $Q, K$, and ultimately $W_Q, W_K$.)*
@@ -789,17 +764,11 @@ $$
 
 The optimizer now knows exactly how to adjust $W_K$ to create better Keys in the next epoch. The same matrix-blending logic applies to the other 4 weight paths (Add&Norm, FFN, Attention Q/V).
 
-
-
-# Module 5: Modern Deep Learning & Elite Placement Prep
-
-The deep learning world changed forever when we realized that the Transformer architecture did not just outperform other models—it scaled almost linearly with computational power and data. We have moved past training small, task-specific networks to training massive, general-purpose **Foundation Models**.
-
-These massive models are generally just vast stacks of the Encoder or Decoder blocks we just derived.
-
 ---
 
 # Part 2: Modern LLMs and Beyond
+
+The deep learning world changed forever when we realized that the Transformer architecture did not just outperform other models—it scaled almost linearly with computational power and data. We have moved past training small, task-specific networks to training massive, general-purpose **Foundation Models**. These massive models are generally just vast stacks of the Encoder or Decoder blocks we just derived.
 
 ## Topic 8: Foundation Models & LLM Architecture
 
@@ -1227,14 +1196,18 @@ This global connectivity allows ViTs to excel at tasks requiring high-level sema
 *   **Answer:** CNNs have a strong local inductive bias hardcoded into their mathematics: they slide a fixed local grid, assuming that adjacent pixels are related. This bias acts like a mathematical "shortcut," allowing CNNs to achieve high accuracy with less data because the core rule of vision is pre-programmed. ViTs completely abandon this bias in favor of universal attention (everything can attend to everything). Without the shortcut, the ViT must literally *learn* from scratch that "Adjacent pixels are related" by observing millions of images. This is computationally expensive, but once it has enough data, the global flexibility allows ViTs to achieve superior accuracy and generalization on complex, SOTA tasks.
 
 
-### Topic 12.1: OpenAI CLIP (The Baseline Contrastive VLM)
+## Topic 11: Vision-Language Models
+
+The Vision Transformer showed that a pure Transformer can *see*. The natural next step is to make one model handle images **and** text together. This topic walks through four milestones: CLIP (contrastive dual-encoder), ViLT (minimalist single-transformer fusion), BLIP (generative encoder-decoder), and SmolVLM (compression-first efficiency).
+
+### Topic 11.1: OpenAI CLIP (The Baseline Contrastive VLM)
 
 OpenAI's CLIP fundamentally changed multimodal AI by proving that models trained on massive, noisy web-crawled image-text pairs (400M pairs) could learn highly transferable, zero-shot representations. 
 
 #### 1. Architecture and The InfoNCE Loss
 CLIP relies on a strict **Dual-Encoder Architecture**. It passes text through a Text Encoder (Transformer) and images through an Image Encoder (e.g., ViT-B/32, where the image is chopped into $32 \times 32$ patches). The two modalities never interact until the very end, where they are mapped to a shared linear projection space.
 
-![CLIP Architecture Diagram](https://raw.githubusercontent.com/openai/CLIP/main/CLIP.png)
+![CLIP Architecture Diagram](./assets/clip_architecture.png)
 
 The model is optimized using the symmetric **InfoNCE (Softmax Contrastive) Loss**. For a batch of $N$ image-text pairs, the network calculates an $N \times N$ matrix of cosine similarities. 
 
@@ -1259,7 +1232,7 @@ When evaluated on datasets requiring local precision like PASCAL VOC, CLIP exhib
 
 ---
 
-### Topic 12.1 Placement Prep: Elite CLIP Flashcards
+### Topic 11.1 Placement Prep: Elite CLIP Flashcards
 
 **Q1: How does CLIP perform zero-shot classification on a new dataset (like CIFAR-10) without any fine-tuning?**
 *   **Answer:** CLIP frames classification as an image-text matching retrieval task. It takes all possible class labels (e.g., "A photo of a dog", "A photo of a cat"), passes them through the text encoder to get $N$ text embeddings, passes the target image through the vision encoder to get $1$ image embedding, and calculates cosine similarity. The label with the highest similarity is the predicted class.
@@ -1271,7 +1244,7 @@ When evaluated on datasets requiring local precision like PASCAL VOC, CLIP exhib
 *   **Answer:** $\tau$ controls the sharpness of the softmax distribution. A lower $\tau$ makes the loss function penalize hard negative examples much more aggressively, helping the model learn fine-grained distinctions between highly similar incorrect pairs. In CLIP, $\tau$ is a learnable parameter that optimizes itself during training to dynamically adjust the penalty scale.
 
 
-### Topic 13.1: ViLT (Vision-and-Language Transformer)
+### Topic 11.2: ViLT (Vision-and-Language Transformer)
 
 Before ViLT, models like CLIP relied on massive, computationally expensive deep visual encoders (like a heavy ViT or ResNet) and deep text encoders before fusing the features. **ViLT (Vision-and-Language Transformer)** took a radically minimalist approach: it threw away the deep independent encoders entirely.
 
@@ -1281,14 +1254,14 @@ ViLT operates on the hypothesis that the self-attention mechanism is powerful en
 *   **The Single Transformer:** Both the text embeddings and the visual patch embeddings are concatenated into one long sequence and fed directly into a single, unified Transformer encoder.
 *   **Modal-Type Embeddings:** To help the model distinguish between a word and a pixel, a special learnable "Modal-Type" vector (0 for text, 1 for image) is added to every token in the sequence.
 
-![ViLT Architecture Diagram](https://raw.githubusercontent.com/dandelin/ViLT/master/assets/vilt.png)
+![ViLT Architecture Diagram](./assets/vilt_architecture.png)
 
 #### 2. The Speed vs. Performance Trade-off
 What makes ViLT unique is its extreme **inference speed**. By eliminating the heavy unimodal encoders, ViLT is significantly faster and lighter than its predecessors. However, because it lacks dedicated towers to pre-process complex visual structures, it historically struggles to match the peak accuracy of heavier dual-encoder models on complex diagnostic tasks.
 
 ---
 
-### Topic 13.1 Placement Prep: Elite ViLT Flashcards
+### Topic 11.2 Placement Prep: Elite ViLT Flashcards
 
 **Q1: What is the primary architectural difference between ViLT and traditional VLMs like CLIP?**
 *   **Answer:** CLIP uses a "heavy" dual-encoder architecture, meaning text and images go through deep, separate transformers before interacting. ViLT uses a "monolithic" architecture: it applies shallow linear projections to patches and words, concatenates them immediately, and uses a single transformer to process both modalities simultaneously from layer 1.
@@ -1300,9 +1273,9 @@ What makes ViLT unique is its extreme **inference speed**. By eliminating the he
 *   **Answer:** **Advantage:** Blistering inference speed and computational efficiency, as it drops the heavy, independent visual backbone (like ResNet or deep ViT). **Disadvantage:** A lower performance ceiling. Without a dedicated deep visual encoder to extract complex hierarchical image features first, it struggles to match the accuracy of heavier models on difficult spatial tasks.
 
 
-### Topic 13.2: BLIP (Generative Spatial Reasoning)
+### Topic 11.3: BLIP (Generative Spatial Reasoning)
 
-Standard contrastive models can match images to text, but they cannot generate text. **BLIP** solves this using a Multimodal Mixture of Encoder-Decoder (MED) architecture[cite: 1, 2].
+Standard contrastive models can match images to text, but they cannot generate text. **BLIP** solves this using a Multimodal Mixture of Encoder-Decoder (MED) architecture.
 
 #### 1. The Multimodal Mixture of Encoder-Decoder (MED)
 BLIP structurally modifies the BERT architecture so it can operate in three distinct modes, using shared weights to maximize efficiency. It trains on three specific losses simultaneously:
@@ -1310,7 +1283,7 @@ BLIP structurally modifies the BERT architecture so it can operate in three dist
 2.  **Image-Text Matching (ITM):** An image-grounded text encoder applies **Cross-Attention** to the visual tokens. It solves a binary classification task to predict if an image-text pair is a true match, forcing the model to learn fine-grained spatial alignments between specific words and specific image patches.
 3.  **Language Modeling (LM):** An image-grounded text decoder auto-regressively generates a caption token-by-token. 
 
-![BLIP Architecture Diagram](https://raw.githubusercontent.com/salesforce/BLIP/main/image/model_architecture.png)
+![BLIP Architecture Diagram](./assets/blip_architecture.gif)
 
 #### 2. CapFilt: Data Bootstrapping
 A major limitation of models like CLIP is their reliance on noisy web-crawled data (e.g., ALT text like "IMG_1234.jpg"). BLIP introduced **CapFilt (Captioning and Filtering)**:
@@ -1324,7 +1297,7 @@ As a result, BLIP achieves **53.4% accuracy on tiny objects** in PASCAL VOC (des
 
 ---
 
-### Topic 13.2 Placement Prep: Elite BLIP Flashcards
+### Topic 11.3 Placement Prep: Elite BLIP Flashcards
 
 **Q1: How does BLIP's Multimodal Mixture of Encoder-Decoder (MED) architecture differ from a standard dual-encoder like CLIP?**
 *   **Answer:** While CLIP isolates the image and text encoders entirely until the final global projection, BLIP allows deep multimodal interaction via Cross-Attention. Its text transformer is flexible: it acts as a unimodal text encoder (for contrastive loss), an image-grounded text encoder (for binary matching), and an auto-regressive image-grounded text decoder (for caption generation).
@@ -1335,16 +1308,16 @@ As a result, BLIP achieves **53.4% accuracy on tiny objects** in PASCAL VOC (des
 **Q3: Explain the purpose of "CapFilt" (Captioning and Filtering) in BLIP's training methodology.**
 *   **Answer:** Web-crawled image-text datasets are extremely noisy. BLIP uses a "Filter" (driven by its ITM head) to remove bad image-text pairs from the web data, and uses its generative "Captioner" (driven by its LM head) to synthesize new, highly descriptive captions for images. Training on this synthetic, high-quality data drastically improves downstream performance compared to raw web data.
 
-### Topic 13.3: SmolVLM (Architectural Efficiency > Parameter Count)
+### Topic 11.4: SmolVLM (Architectural Efficiency > Parameter Count)
 
-In deep learning, the standard assumption is that larger models (more parameters) yield better performance. **SmolVLM** shatters this assumption, proving that architectural design principles supersede raw parameter count[cite: 2].
+In deep learning, the standard assumption is that larger models (more parameters) yield better performance. **SmolVLM** shatters this assumption, proving that architectural design principles supersede raw parameter count.
 
 #### 1. Lightweight Visual Encoding & Interleaved Processing
 SmolVLM contains only **256M parameters** (compared to BLIP's 385M or OpenCLIP's massive variants). It introduces radical image compression: regardless of the original image resolution, large image patches are heavily compressed and encoded into exactly **81 visual tokens** per image. 
 
 These 81 tokens are treated mathematically identically to text tokens, allowing them to be arbitrarily interleaved within a sequence (e.g., `Text -> Image 1 (81 tokens) -> Text -> Image 2 (81 tokens)`). This creates an ultra-efficient, fully generative model capable of multi-image storytelling, VQA, and classification on edge devices without exploding the KV Cache.
 
-![SmolVLM Architecture Diagram](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/smolvlm/smolvlm_architecture.png)
+![SmolVLM Architecture Diagram](./assets/smolvlm_architecture.png)
 
 #### 2. Multiscale Diagnostics: The Scale-Invariant King
 When tested on multiscale diagnostics across varied datasets, SmolVLM represents an absolute architectural breakthrough. 
@@ -1354,7 +1327,7 @@ The fact that a 256M parameter model exhibits almost zero degradation between a 
 
 ---
 
-### Topic 13.3 Placement Prep: Elite SmolVLM Flashcards
+### Topic 11.4 Placement Prep: Elite SmolVLM Flashcards
 
 **Q1: How does SmolVLM handle multimodal inputs more efficiently than standard Vision-Language Models?**
 *   **Answer:** SmolVLM radically compresses visual information. Instead of letting sequence lengths explode with high-resolution image patches, it heavily compresses images into exactly 81 visual tokens. This drastically reduces the $O(N^2)$ attention computation and KV Cache memory footprint, allowing it to run efficiently on edge devices (like smartphones) with only 256M total parameters.
