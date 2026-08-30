@@ -1,95 +1,152 @@
 # Machine Learning & Deep Learning Placement Master Notes
 
-
-
-
-
-
-
-
-
-
-
 **Table of Contents:**
 
-- [Part 1: Linear Regression & Regularization](#part-1-linear-regression--regularization)
+- [Part 1: Linear Regression & Regularization](#part-1-linear-regression-regularization)
   - [1. Core Concept of Linear Regression](#1-core-concept-of-linear-regression)
   - [2. How We Train Linear Regression (Optimization Methods)](#2-how-we-train-linear-regression-optimization-methods)
   - [2.6 Mathematical Derivation of the Gradient (Optional but highly recommended)](#26-mathematical-derivation-of-the-gradient-optional-but-highly-recommended)
-  - [3. The 5 Core Assumptions (L.I.N.E. + M)](#3-the-5-core-assumptions-line--m)
+  - [3. The 5 Core Assumptions (L.I.N.E. + M)](#3-the-5-core-assumptions-line-m)
   - [4. Regularization: Ridge (L2) vs. Lasso (L1)](#4-regularization-ridge-l2-vs-lasso-l1)
   - [5. Regression Evaluation Metrics](#5-regression-evaluation-metrics)
   - [6. Linear Regression Interview Cheatsheet](#6-linear-regression-interview-cheatsheet)
-- [Part 1.5: Data Transformations & Feature Scaling](#part-15-data-transformations--feature-scaling)
+- [Part 1.5: Data Transformations & Feature Scaling](#part-15-data-transformations-feature-scaling)
   - [1. Feature Scaling (Changes the Range, NOT the Shape)](#1-feature-scaling-changes-the-range-not-the-shape)
   - [2. Distribution Transformations (Changes the Shape)](#2-distribution-transformations-changes-the-shape)
   - [3. Non-Linear Transformations](#3-non-linear-transformations)
 - [Part 2: Logistic Regression (Classification Baseline)](#part-2-logistic-regression-classification-baseline)
   - [1. The Core Mathematical Intuition](#1-the-core-mathematical-intuition)
-  - [2. The Cost Function (Log-Loss / Cross-Entropy)](#2-the-cost-function-log-loss--cross-entropy)
+  - [2. The Cost Function (Log-Loss / Cross-Entropy)](#2-the-cost-function-log-loss-cross-entropy)
   - [2.5 How We Train Logistic Regression (Gradient Descent Example)](#25-how-we-train-logistic-regression-gradient-descent-example)
   - [2.6 Mathematical Derivation of Log-Loss Gradient (Optional)](#26-mathematical-derivation-of-log-loss-gradient-optional)
   - [3. The 4 Core Assumptions](#3-the-4-core-assumptions)
-  - [4. Thresholding & Business Context](#4-thresholding--business-context)
-  - [5. Multiclass Classification & The Softmax Function](#5-multiclass-classification--the-softmax-function)
+  - [4. Thresholding & Business Context](#4-thresholding-business-context)
+  - [5. Multiclass Classification & The Softmax Function](#5-multiclass-classification-the-softmax-function)
 - [Part 3: Classification Evaluation Metrics](#part-3-classification-evaluation-metrics)
   - [1. The Confusion Matrix](#1-the-confusion-matrix)
   - [2. Core Metrics](#2-core-metrics)
-  - [3. ROC Curve & PR Curve](#3-roc-curve--pr-curve)
-  - [4. Classification & Logistic Regression Interview Cheatsheet](#4-classification--logistic-regression-interview-cheatsheet)
+  - [3. ROC Curve & PR Curve](#3-roc-curve-pr-curve)
+  - [4. Classification & Logistic Regression Interview Cheatsheet](#4-classification-logistic-regression-interview-cheatsheet)
   - [5. Interview Trap: R-Squared ($R^2$) Score](#5-interview-trap-r-squared-r2-score)
+    - [The Standard Formula (Using the Mean)](#the-standard-formula-using-the-mean)
+    - [Robust R-Squared (Using the Median)](#robust-r-squared-using-the-median)
 - [Part 4: Support Vector Machines (SVM)](#part-4-support-vector-machines-svm)
-  - [1. The Geometry & Math of the Margin](#1-the-geometry--math-of-the-margin)
-  - [2. The Main Idea: Maximal Margin & Soft Margins (The Mice Analogy)](#2-the-main-idea-maximal-margin--soft-margins-the-mice-analogy)
+  - [1. The Geometry & Math of the Margin](#1-the-geometry-math-of-the-margin)
+  - [2. The Main Idea: Maximal Margin & Soft Margins (The Mice Analogy)](#2-the-main-idea-maximal-margin-soft-margins-the-mice-analogy)
   - [3. The Polynomial Kernel (The Drug Dosage Analogy)](#3-the-polynomial-kernel-the-drug-dosage-analogy)
   - [4. The Radial Basis Function (RBF) Kernel](#4-the-radial-basis-function-rbf-kernel)
   - [5. Support Vector Regression (SVR): Flipping the Goal](#5-support-vector-regression-svr-flipping-the-goal)
+    - [The Mathematics of Support Vector Regression (SVR)](#the-mathematics-of-support-vector-regression-svr)
   - [6. Placement Prep: SVMs in the Real World](#6-placement-prep-svms-in-the-real-world)
+    - [A: The Visual Guide to the *C* Parameter](#a-the-visual-guide-to-the-c-parameter)
+    - [B: Solving an SVM "By Hand" (The Geometric Toy Example)](#b-solving-an-svm-by-hand-the-geometric-toy-example)
+    - [C: Top 5 OA & Interview Questions](#c-top-5-oa-interview-questions)
 - [Part 5: Decision Trees (Classification)](#part-5-decision-trees-classification)
   - [1. The Core Intuition: Slicing the Space](#1-the-core-intuition-slicing-the-space)
   - [2. The Math of the Split: Gini Impurity](#2-the-math-of-the-split-gini-impurity)
-  - [3. The Overfitting Trap & Pruning](#3-the-overfitting-trap--pruning)
-  - [4. Visualizing the Tree & Pruning in Python](#4-visualizing-the-tree--pruning-in-python)
-  - [5. Placement Prep: Top Decision Tree Interview Questions & Must-Knows](#5-placement-prep-top-decision-tree-interview-questions--must-knows)
+  - [3. The Overfitting Trap & Pruning](#3-the-overfitting-trap-pruning)
+  - [4. Visualizing the Tree & Pruning in Python](#4-visualizing-the-tree-pruning-in-python)
+  - [5. Placement Prep: Top Decision Tree Interview Questions & Must-Knows](#5-placement-prep-top-decision-tree-interview-questions-must-knows)
+    - [A. The Advantages vs. Disadvantages (The "Trade-off" Question)](#a-the-advantages-vs-disadvantages-the-trade-off-question)
+    - [B. Entropy vs. Gini Impurity](#b-entropy-vs-gini-impurity)
+    - [C. Feature Importance](#c-feature-importance)
+    - [D. Top 7 Interview Questions](#d-top-7-interview-questions)
   - [6. Solving a Decision Tree Split "By Hand" (Categorical)](#6-solving-a-decision-tree-split-by-hand-categorical)
+    - [1. The Dataset](#1-the-dataset)
+    - [2. The Formula for Gini Impurity](#2-the-formula-for-gini-impurity)
+    - [3. Step 1: Calculate Total Impurity at the Root Node](#3-step-1-calculate-total-impurity-at-the-root-node)
+    - [4. Step 2: Evaluate Potential Splits](#4-step-2-evaluate-potential-splits)
+    - [5. Step 3: Build the Next Level of the Tree](#5-step-3-build-the-next-level-of-the-tree)
+    - [Final Trained Tree Structure](#final-trained-tree-structure)
   - [7. Decision Tree Regression](#7-decision-tree-regression)
-  - [8. Ultimate Decision Tree Interview & OA Question Bank](#8-ultimate-decision-tree-interview--oa-question-bank)
+    - [1. The Core Intuition: The Step Function](#1-the-core-intuition-the-step-function)
+    - [2. The CART Algorithm Cost Function for Regression](#2-the-cart-algorithm-cost-function-for-regression)
+    - [3. Classification vs. Regression Trees (Quick Summary)](#3-classification-vs-regression-trees-quick-summary)
+  - [8. Ultimate Decision Tree Interview & OA Question Bank](#8-ultimate-decision-tree-interview-oa-question-bank)
+    - [A. Technical Interview & OA Questions (With In-Depth Answers)](#a-technical-interview-oa-questions-with-in-depth-answers)
+    - [B. "Questions to Remember" (Flashcard Review)](#b-questions-to-remember-flashcard-review)
 - [Part 6: Ensemble Learning](#part-6-ensemble-learning)
   - [1. Voting Classifiers](#1-voting-classifiers)
   - [2. Visualizing Voting Classifiers in Python](#2-visualizing-voting-classifiers-in-python)
   - [3. Why Ensembles Work: The Law of Large Numbers](#3-why-ensembles-work-the-law-of-large-numbers)
   - [4. Bagging and Pasting](#4-bagging-and-pasting)
-  - [5. Visualizing Bagging & OOB Evaluation in Python](#5-visualizing-bagging--oob-evaluation-in-python)
-  - [6. Placement Prep: Voting Classifiers & Bagging (Flashcards)](#6-placement-prep-voting-classifiers--bagging-flashcards)
+    - [A. The Core Concepts: Bagging vs. Pasting](#a-the-core-concepts-bagging-vs-pasting)
+    - [B. Why Bagging Reduces Overfitting (Variance)](#b-why-bagging-reduces-overfitting-variance)
+    - [C. Out-of-Bag (OOB) Evaluation (The "Free" Validation Set)](#c-out-of-bag-oob-evaluation-the-free-validation-set)
+  - [5. Visualizing Bagging & OOB Evaluation in Python](#5-visualizing-bagging-oob-evaluation-in-python)
+  - [6. Placement Prep: Voting Classifiers & Bagging (Flashcards)](#6-placement-prep-voting-classifiers-bagging-flashcards)
   - [7. Random Forests](#7-random-forests)
+    - [1. The Magic of Random Subspaces (Feature Sampling)](#1-the-magic-of-random-subspaces-feature-sampling)
+    - [2. Extremely Randomized Trees (Extra-Trees)](#2-extremely-randomized-trees-extra-trees)
+    - [3. Feature Importance (The White-Box Superpower)](#3-feature-importance-the-white-box-superpower)
   - [8. AdaBoost (Adaptive Boosting)](#8-adaboost-adaptive-boosting)
+    - [1. The Core Intuition: Weighting the Mistakes](#1-the-core-intuition-weighting-the-mistakes)
+    - [2. The Math of AdaBoost (Step-by-Step)](#2-the-math-of-adaboost-step-by-step)
+    - [3. The One Major Trade-off: No Parallelization](#3-the-one-major-trade-off-no-parallelization)
+    - [4. Placement Prep: AdaBoost (Flashcards)](#4-placement-prep-adaboost-flashcards)
   - [9. Solving AdaBoost "By Hand" (Step-by-Step Example)](#9-solving-adaboost-by-hand-step-by-step-example)
-  - [6. Gradient Boosting (GBM)](#6-gradient-boosting-gbm)
-  - [7. The Titans of Tabular Data: XGBoost & LightGBM](#7-the-titans-of-tabular-data-xgboost--lightgbm)
+    - [The Setup](#the-setup)
+    - [Round 1: Training the First Predictor ($j = 1$)](#round-1-training-the-first-predictor-j-1)
+    - [Round 2: Training the Second Predictor ($j = 2$)](#round-2-training-the-second-predictor-j-2)
+    - [Making the Final Prediction (Equation 7-4)](#making-the-final-prediction-equation-7-4)
+  - [10. Gradient Boosting (GBM)](#10-gradient-boosting-gbm)
+    - [1. The Core Intuition: The Golf Analogy](#1-the-core-intuition-the-golf-analogy)
+    - [2. The Math of Gradient Boosting (Regression Example)](#2-the-math-of-gradient-boosting-regression-example)
+    - [3. Shrinkage (The Learning Rate)](#3-shrinkage-the-learning-rate)
+    - [4. Placement Prep: Gradient Boosting (Flashcards)](#4-placement-prep-gradient-boosting-flashcards)
+    - [5. Visualizing the Sequential Residuals](#5-visualizing-the-sequential-residuals)
+    - [6. The Overfitting Trap (`n_estimators` vs. `learning_rate`)](#6-the-overfitting-trap-nestimators-vs-learningrate)
+    - [7. Stochastic Gradient Boosting (The Variance Fix)](#7-stochastic-gradient-boosting-the-variance-fix)
+  - [11. The Titans of Tabular Data: XGBoost & LightGBM](#11-the-titans-of-tabular-data-xgboost-lightgbm)
+    - [1. XGBoost (Extreme Gradient Boosting)](#1-xgboost-extreme-gradient-boosting)
+    - [2. LightGBM (Light Gradient Boosting Machine)](#2-lightgbm-light-gradient-boosting-machine)
+    - [3. XGBoost vs. LightGBM (Quick Comparison)](#3-xgboost-vs-lightgbm-quick-comparison)
+    - [4. The Algorithmic Secrets (For Top-Tier Interviews)](#4-the-algorithmic-secrets-for-top-tier-interviews)
+    - [5. Placement Prep: Expanded XGBoost & LightGBM Question Bank](#5-placement-prep-expanded-xgboost-lightgbm-question-bank)
 - [Part 7: Principal Component Analysis (PCA)](#part-7-principal-component-analysis-pca)
   - [1. The Engine of PCA: Singular Value Decomposition (SVD)](#1-the-engine-of-pca-singular-value-decomposition-svd)
+    - [Step 1: Find *V* (Right Singular Vectors / Principal Components)](#step-1-find-v-right-singular-vectors-principal-components)
+    - [Step 2: Find $\Sigma$ (Singular Values)](#step-2-find-sigma-singular-values)
+    - [Step 3: Find *U* (Left Singular Vectors)](#step-3-find-u-left-singular-vectors)
   - [2. Kernel PCA (kPCA) and The Kernel Trick](#2-kernel-pca-kpca-and-the-kernel-trick)
   - [3. The Reversal Problem: Pre-Image Error](#3-the-reversal-problem-pre-image-error)
   - [4. Placement Prep: PCA Flashcards](#4-placement-prep-pca-flashcards)
   - [5. Locally Linear Embedding (LLE)](#5-locally-linear-embedding-lle)
-- [Part 8: Unsupervised Learning — Clustering](#part-8-unsupervised-learning--clustering)
+    - [Step 1: Linearly Modeling Local Relationships](#step-1-linearly-modeling-local-relationships)
+    - [Step 2: Reducing Dimensionality While Preserving Relationships](#step-2-reducing-dimensionality-while-preserving-relationships)
+    - [The Major Drawback: Computational Complexity](#the-major-drawback-computational-complexity)
+    - [5. Placement Prep: LLE Flashcards](#5-placement-prep-lle-flashcards)
+- [Part 8: Unsupervised Learning — Clustering](#part-8-unsupervised-learning-clustering)
   - [1. The K-Means Algorithm (Lloyd's Algorithm)](#1-the-k-means-algorithm-lloyds-algorithm)
   - [2. The Objective Function: Inertia (WCSS)](#2-the-objective-function-inertia-wcss)
   - [3. Finding the Optimal *k* (Hyperparameter Tuning)](#3-finding-the-optimal-k-hyperparameter-tuning)
+    - [Method A: The Elbow Method (Using Inertia)](#method-a-the-elbow-method-using-inertia)
+    - [Method B: The Silhouette Score (The Superior Metric)](#method-b-the-silhouette-score-the-superior-metric)
   - [4. The Three Fatal Flaws of K-Means (Interview Gold)](#4-the-three-fatal-flaws-of-k-means-interview-gold)
   - [5. Placement Prep: K-Means Flashcards](#5-placement-prep-k-means-flashcards)
-  - [2. DBSCAN (Density-Based Spatial Clustering of Applications with Noise)](#2-dbscan-density-based-spatial-clustering-of-applications-with-noise)
-- [Deep Learning Part 1: Multi-Layer Perceptrons (MLPs) & Non-Linearity](#deep-learning-part-1-multi-layer-perceptrons-mlps--non-linearity)
+  - [6. DBSCAN (Density-Based Spatial Clustering of Applications with Noise)](#6-dbscan-density-based-spatial-clustering-of-applications-with-noise)
+    - [The Two Rules of DBSCAN](#the-two-rules-of-dbscan)
+    - [Step 1: The Orange Circle and Core Points](#step-1-the-orange-circle-and-core-points)
+    - [Step 2: Building the First Cluster](#step-2-building-the-first-cluster)
+    - [Step 3: Handling Non-Core Points](#step-3-handling-non-core-points)
+    - [Step 4: Final Clusters and Outliers](#step-4-final-clusters-and-outliers)
+    - [5. How to Choose Hyperparameters (The K-Distance Graph)](#5-how-to-choose-hyperparameters-the-k-distance-graph)
+    - [6. K-Means vs. DBSCAN (The Ultimate Cheatsheet)](#6-k-means-vs-dbscan-the-ultimate-cheatsheet)
+    - [7. Pros and Cons of DBSCAN](#7-pros-and-cons-of-dbscan)
+    - [8. Placement Prep: Elite DBSCAN Flashcards](#8-placement-prep-elite-dbscan-flashcards)
+- [Deep Learning Part 1: Multi-Layer Perceptrons (MLPs) & Non-Linearity](#deep-learning-part-1-multi-layer-perceptrons-mlps-non-linearity)
   - [1. The Architecture of an MLP](#1-the-architecture-of-an-mlp)
   - [2. The Secret Sauce: Activation Functions](#2-the-secret-sauce-activation-functions)
+    - [The Big Three Activation Functions:](#the-big-three-activation-functions)
   - [3. Placement Prep: MLP Flashcards](#3-placement-prep-mlp-flashcards)
-- [Part 2: How Neural Networks Learn (Forward & Backpropagation)](#part-2-how-neural-networks-learn-forward--backpropagation)
+- [Part 2: How Neural Networks Learn (Forward & Backpropagation)](#part-2-how-neural-networks-learn-forward-backpropagation)
   - [1. Forward Propagation (Making the Guess)](#1-forward-propagation-making-the-guess)
   - [2. The Loss Function (Calculating the Error)](#2-the-loss-function-calculating-the-error)
   - [3. Backpropagation (The Engine of Learning)](#3-backpropagation-the-engine-of-learning)
+    - [The Mathematical Example (Step-by-Step)](#the-mathematical-example-step-by-step)
   - [4. Gradient Descent (The Weight Update)](#4-gradient-descent-the-weight-update)
-  - [5. Placement Prep: Forward & Backprop Flashcards](#5-placement-prep-forward--backprop-flashcards)
-- [Part 3: The Engine of Learning — Optimizers](#part-3-the-engine-of-learning--optimizers)
+  - [5. Placement Prep: Forward & Backprop Flashcards](#5-placement-prep-forward-backprop-flashcards)
+- [Part 3: The Engine of Learning — Optimizers](#part-3-the-engine-of-learning-optimizers)
   - [1. The Flaw of SGD: Pathological Curvature](#1-the-flaw-of-sgd-pathological-curvature)
   - [2. SGD with Momentum](#2-sgd-with-momentum)
   - [3. AdaGrad (Adaptive Gradient Algorithm)](#3-adagrad-adaptive-gradient-algorithm)
@@ -98,20 +155,43 @@
   - [6. Placement Prep: Optimizers Flashcards](#6-placement-prep-optimizers-flashcards)
 - [Part 4: Regularization (Preventing Memorization)](#part-4-regularization-preventing-memorization)
   - [1. Mathematical Weight Penalties (L1 and L2)](#1-mathematical-weight-penalties-l1-and-l2)
+    - [L1 Regularization (Lasso / Sparsity)](#l1-regularization-lasso-sparsity)
+    - [L2 Regularization (Ridge / Weight Decay)](#l2-regularization-ridge-weight-decay)
+    - [L1 vs. L2 Quick Comparison:](#l1-vs-l2-quick-comparison)
   - [2. Architectural Regularization Techniques](#2-architectural-regularization-techniques)
+    - [Dropout](#dropout)
+    - [Early Stopping](#early-stopping)
+    - [Data Augmentation](#data-augmentation)
   - [3. Placement Prep: Regularization Flashcards](#3-placement-prep-regularization-flashcards)
-- [Part 5: Computer Vision — Convolutional Neural Networks (CNNs)](#part-5-computer-vision--convolutional-neural-networks-cnns)
-  - [Topic 1: The Convolution Operation (Kernels & Feature Maps)](#topic-1-the-convolution-operation-kernels--feature-maps)
+- [Part 5: Computer Vision — Convolutional Neural Networks (CNNs)](#part-5-computer-vision-convolutional-neural-networks-cnns)
+  - [Topic 1: The Convolution Operation (Kernels & Feature Maps)](#topic-1-the-convolution-operation-kernels-feature-maps)
+    - [1. How the "Flashlight" Works](#1-how-the-flashlight-works)
+    - [2. The Mathematical Example (Solved)](#2-the-mathematical-example-solved)
+    - [3. Output Dimension Formula (Without Padding)](#3-output-dimension-formula-without-padding)
   - [Topic 1 Placement Prep: Convolution Flashcards](#topic-1-placement-prep-convolution-flashcards)
-  - [Topic 2: Padding & Stride (Controlling Dimensions)](#topic-2-padding--stride-controlling-dimensions)
-  - [Topic 2 Placement Prep: Padding & Stride Flashcards](#topic-2-placement-prep-padding--stride-flashcards)
-  - [Topic 2 Placement Prep: Advanced Padding & Stride Flashcards](#topic-2-placement-prep-advanced-padding--stride-flashcards)
-  - [Topic 2 Placement Prep: Senior-Level Padding & Stride Flashcards](#topic-2-placement-prep-senior-level-padding--stride-flashcards)
-  - [Topic 3: Pooling Layers (Downsampling, Invariance, & Receptive Fields)](#topic-3-pooling-layers-downsampling-invariance--receptive-fields)
+  - [Topic 2: Padding & Stride (Controlling Dimensions)](#topic-2-padding-stride-controlling-dimensions)
+    - [1. Padding (*p*)](#1-padding-p)
+    - [2. Stride (*s*)](#2-stride-s)
+    - [3. The Master Formula for CNN Dimensions](#3-the-master-formula-for-cnn-dimensions)
+  - [Topic 2 Placement Prep: Padding & Stride Flashcards](#topic-2-placement-prep-padding-stride-flashcards)
+  - [Topic 2 Placement Prep: Advanced Padding & Stride Flashcards](#topic-2-placement-prep-advanced-padding-stride-flashcards)
+  - [Topic 2 Placement Prep: Senior-Level Padding & Stride Flashcards](#topic-2-placement-prep-senior-level-padding-stride-flashcards)
+  - [Topic 3: Pooling Layers (Downsampling, Invariance, & Receptive Fields)](#topic-3-pooling-layers-downsampling-invariance-receptive-fields)
+    - [1. The Core Operations](#1-the-core-operations)
+    - [2. Equivariance vs. Invariance (Crucial Distinction)](#2-equivariance-vs-invariance-crucial-distinction)
+    - [3. Receptive Field Expansion](#3-receptive-field-expansion)
+    - [4. Overlapping Pooling](#4-overlapping-pooling)
+    - [5. Global Average Pooling (GAP)](#5-global-average-pooling-gap)
   - [Topic 3 Placement Prep: Senior-Level Pooling Flashcards](#topic-3-placement-prep-senior-level-pooling-flashcards)
-- [Topic 4: The Classification Head & Dimensionality Manipulation](#topic-4-the-classification-head--dimensionality-manipulation)
+- [Topic 4: The Classification Head & Dimensionality Manipulation](#topic-4-the-classification-head-dimensionality-manipulation)
+    - [1. The Old Way: Flattening & Dense Layers (The Parameter Explosion)](#1-the-old-way-flattening-dense-layers-the-parameter-explosion)
+    - [2. The Modern Magic Wand: $1 \times 1$ Convolutions](#2-the-modern-magic-wand-1-times-1-convolutions)
+    - [3. The Modern Finisher: Global Average Pooling (GAP)](#3-the-modern-finisher-global-average-pooling-gap)
+    - [4. Fully Convolutional Networks (FCNs): Agnostic to Size](#4-fully-convolutional-networks-fcns-agnostic-to-size)
   - [Topic 4 Placement Prep: Elite-Level Classification Head Flashcards](#topic-4-placement-prep-elite-level-classification-head-flashcards)
 - [Topic 5: The Math of CNN Backpropagation](#topic-5-the-math-of-cnn-backpropagation)
+    - [1. Calculating the Gradient of the Weights (*dW*)](#1-calculating-the-gradient-of-the-weights-dw)
+    - [2. Passing the Error Backward (*dX*)](#2-passing-the-error-backward-dx)
   - [Topic 5 Placement Prep: Elite Backprop Flashcards](#topic-5-placement-prep-elite-backprop-flashcards)
 - [Topic 6: Complete CNN End-to-End Math Walkthrough](#topic-6-complete-cnn-end-to-end-math-walkthrough)
   - [Part 1: The Forward Pass](#part-1-the-forward-pass)
@@ -124,12 +204,14 @@
 - [Topic 9: Spatial Batch Normalization (BatchNorm2d)](#topic-9-spatial-batch-normalization-batchnorm2d)
 - [Topic 10: CNN-Specific Regularization](#topic-10-cnn-specific-regularization)
   - [1. Spatial Dropout](#1-spatial-dropout)
-  - [2. Modern Augmentation (Mixup & CutMix)](#2-modern-augmentation-mixup--cutmix)
+  - [2. Modern Augmentation (Mixup & CutMix)](#2-modern-augmentation-mixup-cutmix)
   - [Placement Prep: Elite Architecture Flashcards](#placement-prep-elite-architecture-flashcards)
-- [Part 6: Sequential Data — Recurrent Neural Networks (RNNs)](#part-6-sequential-data--recurrent-neural-networks-rnns)
-  - [Topic 1: The Vanilla RNN Architecture & The Hidden State](#topic-1-the-vanilla-rnn-architecture--the-hidden-state)
+- [Part 6: Sequential Data — Recurrent Neural Networks (RNNs)](#part-6-sequential-data-recurrent-neural-networks-rnns)
+  - [Topic 1: The Vanilla RNN Architecture & The Hidden State](#topic-1-the-vanilla-rnn-architecture-the-hidden-state)
+    - [Temporal Weight Sharing](#temporal-weight-sharing)
   - [Topic 2: The Math of the Forward Pass](#topic-2-the-math-of-the-forward-pass)
-  - [Topic 3: Backpropagation Through Time (BPTT) & The Fatal Flaw](#topic-3-backpropagation-through-time-bptt--the-fatal-flaw)
+  - [Topic 3: Backpropagation Through Time (BPTT) & The Fatal Flaw](#topic-3-backpropagation-through-time-bptt-the-fatal-flaw)
+    - [The Fatal Flaw: The Vanishing & Exploding Gradient](#the-fatal-flaw-the-vanishing-exploding-gradient)
   - [Topic 3 Placement Prep: Elite RNN Flashcards](#topic-3-placement-prep-elite-rnn-flashcards)
 - [Topic 4: Complete End-to-End RNN Math Walkthrough (BPTT)](#topic-4-complete-end-to-end-rnn-math-walkthrough-bptt)
   - [1. The Forward Pass (Unrolling Through Time)](#1-the-forward-pass-unrolling-through-time)
@@ -137,34 +219,25 @@
   - [Topic 4 Placement Prep: BPTT Flashcards](#topic-4-placement-prep-bptt-flashcards)
 - [Topic 5: Different Types of RNN Architectures](#topic-5-different-types-of-rnn-architectures)
 - [Topic 6: Bidirectional RNNs (BiRNN)](#topic-6-bidirectional-rnns-birnn)
-- [Topic 5: Long Short-Term Memory (LSTMs) & The Cure for Amnesia](#topic-5-long-short-term-memory-lstms--the-cure-for-amnesia)
+- [Topic 7: Long Short-Term Memory (LSTMs) & The Cure for Amnesia](#topic-7-long-short-term-memory-lstms-the-cure-for-amnesia)
   - [1. The Two Memory States](#1-the-two-memory-states)
   - [2. The Three Mathematical Gates](#2-the-three-mathematical-gates)
   - [4. Why LSTMs Fix the Vanishing Gradient](#4-why-lstms-fix-the-vanishing-gradient)
-  - [Topic 5 Placement Prep: Elite LSTM Flashcards](#topic-5-placement-prep-elite-lstm-flashcards)
-- [Topic 6: End-to-End LSTM Math Walkthrough (StatQuest Style)](#topic-6-end-to-end-lstm-math-walkthrough-statquest-style)
-  - [Stage 1: The Forget Gate (What % of long-term memory is remembered?)](#stage-1-the-forget-gate-what--of-long-term-memory-is-remembered)
+  - [Topic 7 Placement Prep: Elite LSTM Flashcards](#topic-7-placement-prep-elite-lstm-flashcards)
+- [Topic 8: End-to-End LSTM Math Walkthrough (StatQuest Style)](#topic-8-end-to-end-lstm-math-walkthrough-statquest-style)
+  - [Stage 1: The Forget Gate (What % of long-term memory is remembered?)](#stage-1-the-forget-gate-what-of-long-term-memory-is-remembered)
   - [Stage 2: The Input Gate (Creating and Adding Potential Memory)](#stage-2-the-input-gate-creating-and-adding-potential-memory)
   - [Stage 3: The Output Gate (Updating the Short-Term Memory)](#stage-3-the-output-gate-updating-the-short-term-memory)
-- [Topic 7: The Backward Pass (Calculus Trace)](#topic-7-the-backward-pass-calculus-trace)
-- [Topic 8: Modern LSTM Architectural Variants](#topic-8-modern-lstm-architectural-variants)
+- [Topic 9: The Backward Pass (Calculus Trace)](#topic-9-the-backward-pass-calculus-trace)
+- [Topic 10: Modern LSTM Architectural Variants](#topic-10-modern-lstm-architectural-variants)
   - [1. Bidirectional LSTMs (BiLSTMs)](#1-bidirectional-lstms-bilstms)
   - [2. Peephole Connections](#2-peephole-connections)
   - [Placement Prep: Elite LSTM Flashcards](#placement-prep-elite-lstm-flashcards)
-- [Topic 9: The Fall of the LSTM (Why we needed Transformers)](#topic-9-the-fall-of-the-lstm-why-we-needed-transformers)
+- [Topic 11: The Fall of the LSTM (Why we needed Transformers)](#topic-11-the-fall-of-the-lstm-why-we-needed-transformers)
   - [1. The Sequential Bottleneck (No Parallelization)](#1-the-sequential-bottleneck-no-parallelization)
   - [2. The Information Bottleneck (Fixed-Length Vector)](#2-the-information-bottleneck-fixed-length-vector)
 
 ---
-
-
-
-
-
-
-
-
-
 
 
 ## Part 1: Linear Regression & Regularization
@@ -211,33 +284,43 @@ Walking through the calculus step-by-step builds an incredibly strong foundation
 **The Setup:**
 * **Hypothesis (Prediction):** $h_\theta(x) = \theta^T x$
 * **Cost Function (MSE):**
-```math
+
+$$
 J(\theta) = \frac{1}{2m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)})^2
-```
+$$
+
 *Explanation of the Cost Function:* We use *m* to represent the total number of training examples. We add a $\frac{1}{2}$ to the formula purely as a mathematical convenience—when we take the derivative, the exponent 2 will drop down and cancel out the $\frac{1}{2}$, making the final math cleaner without changing where the global minimum is located.
 
 **Step 1: Set up the Partial Derivative**
 Our goal is to find how a tiny change in a single specific weight, $\theta_j$, impacts the overall error. We do this by taking the partial derivative of $J(\theta)$ with respect to $\theta_j$.
-```math
+
+$$
 \frac{\partial}{\partial \theta_j} J(\theta) = \frac{\partial}{\partial \theta_j} \left[ \frac{1}{2m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)})^2 \right]
-```
+$$
+
 **Step 2: Apply the Power Rule and Chain Rule**
 In calculus, the Power Rule tells us to bring the exponent 2 down to the front. The Chain Rule tells us we then have to multiply the whole thing by the derivative of whatever was *inside* the parentheses.
-```math
+
+$$
 \frac{\partial}{\partial \theta_j} J(\theta) = \frac{1}{m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot \frac{\partial}{\partial \theta_j} (h_\theta(x^{(i)}) - y^{(i)})
-```
+$$
+
 *Explanation:* Notice how the $\frac{1}{2}$ and the 2 canceled each other out, leaving just $\frac{1}{m}$. Now, we just need to solve that lingering derivative on the far right.
 
 **Step 3: Differentiate the Inside**
 Remember that our hypothesis $h_\theta(x)$ is just a sum of all weights multiplied by their features: $\theta_0x_0 + \theta_1x_1 + \dots + \theta_jx_j$. Because we are taking a *partial* derivative with respect to just $\theta_j$, every other weight acts like a constant (a flat number) and turns to 0. The true label *y* is also a constant, so it turns to 0. The derivative of $\theta_jx_j$ with respect to $\theta_j$ is simply the feature $x_j$.
-```math
+
+$$
 \frac{\partial}{\partial \theta_j} (h_\theta(x^{(i)}) - y^{(i)}) = x_j^{(i)}
-```
+$$
+
 **Step 4: The Final Gradient**
 We substitute $x_j^{(i)}$ back into our equation from Step 2 to get the final gradient.
-```math
+
+$$
 \frac{\partial}{\partial \theta_j} J(\theta) = \frac{1}{m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) x_j^{(i)}
-```
+$$
+
 ### 3. The 5 Core Assumptions (L.I.N.E. + M)
 1.  **Linearity:** Relationship between *X* and *y* must be linear. *(Fix: Polynomial features or log transform).*
 2.  **Independence:** Observations must be independent (no autocorrelation).
@@ -357,54 +440,74 @@ Let's do a 1-variable hand-worked example: predicting class *y* from feature *X*
 **The Setup:**
 * **Hypothesis:** $h_\theta(x) = \sigma(\theta^T x) = \frac{1}{1 + e^{-\theta^T x}}$
 * **Cost Function (Log-Loss):**
-```math
+
+$$
 J(\theta) = -\frac{1}{m} \sum_{i=1}^{m} \left[ y^{(i)} \log(h_\theta(x^{(i)})) + (1 - y^{(i)}) \log(1 - h_\theta(x^{(i)})) \right]
-```
+$$
+
 **Step 1: The Prerequisite Sigmoid Derivative**
 Because the math gets messy, we first need to know the derivative of the Sigmoid function itself. A known property of the Sigmoid function $\sigma(z)$ is that its derivative is the function multiplied by one minus the function:
-```math
+
+$$
 \frac{\partial}{\partial z} \sigma(z) = \sigma(z)(1 - \sigma(z))
-```
+$$
+
 *   **Crucial Interview Fact:** What is the maximum possible value for the gradient of the Sigmoid function? **0.25**. At $z=0$, $\sigma(0)=0.5$, so the gradient is $0.5 \times (1-0.5) = 0.25$. This tiny maximum gradient is the primary cause of the *Vanishing Gradient Problem* in deep neural networks!
 
 When we apply the Chain Rule to take the derivative of our hypothesis with respect to our specific weight $\theta_j$, we get the Sigmoid derivative multiplied by the feature $x_j$:
-```math
+
+$$
 \frac{\partial}{\partial \theta_j} h_\theta(x) = h_\theta(x)(1 - h_\theta(x)) x_j
-```
+$$
+
 **Step 2: Differentiate the Log Terms**
 To make the algebra easier to see, let's ignore the summation and the $-\frac{1}{m}$ for a moment and just take the derivative of a single example's loss, which we will call *L*. In calculus, the derivative of $\log(x)$ is $\frac{1}{x}$. Applying the Chain Rule to both parts of the Log-Loss equation gives us:
-```math
+
+$$
 \frac{\partial L}{\partial \theta_j} = y \left( \frac{1}{h_\theta(x)} \right) \frac{\partial h_\theta(x)}{\partial \theta_j} + (1 - y) \left( \frac{1}{1 - h_\theta(x)} \right) (-1) \frac{\partial h_\theta(x)}{\partial \theta_j}
-```
+$$
+
 *Explanation:* The $(-1)$ in the second term is incredibly important. It comes from applying the Chain Rule to the $(1 - h_\theta(x))$ part inside the second log.
 
 **Step 3: Factor and Find a Common Denominator**
 Let's factor out the $\frac{\partial h_\theta(x)}{\partial \theta_j}$ term that is shared by both sides, and combine the fractions by finding a common denominator of $h_\theta(x)(1 - h_\theta(x))$.
-```math
+
+$$
 \frac{\partial L}{\partial \theta_j} = \left( \frac{y(1 - h_\theta(x)) - (1 - y)h_\theta(x)}{h_\theta(x)(1 - h_\theta(x))} \right) \frac{\partial h_\theta(x)}{\partial \theta_j}
-```
+$$
+
 If you expand the numerator ($y - y \cdot h_\theta(x) - h_\theta(x) + y \cdot h_\theta(x)$), the $y \cdot h_\theta(x)$ terms cancel out, leaving just:
-```math
+
+$$
 \frac{\partial L}{\partial \theta_j} = \left( \frac{y - h_\theta(x)}{h_\theta(x)(1 - h_\theta(x))} \right) \frac{\partial h_\theta(x)}{\partial \theta_j}
-```
+$$
+
 **Step 4: The Beautiful Cancellation**
 Now, substitute the Sigmoid derivative we calculated in Step 1 back into the equation.
-```math
+
+$$
 \frac{\partial L}{\partial \theta_j} = \left( \frac{y - h_\theta(x)}{h_\theta(x)(1 - h_\theta(x))} \right) \left[ h_\theta(x)(1 - h_\theta(x)) x_j \right]
-```
+$$
+
 *Explanation:* Look closely! The denominator of our fraction is perfectly identical to the first half of the Sigmoid derivative. They completely cancel each other out. This reduces the massive equation down to:
-```math
+
+$$
 \frac{\partial L}{\partial \theta_j} = (y - h_\theta(x)) x_j
-```
+$$
+
 **Step 5: Final Assembly**
 Finally, we bring back the summation and the $-\frac{1}{m}$ that we temporarily dropped from the very beginning.
-```math
+
+$$
 \frac{\partial}{\partial \theta_j} J(\theta) = -\frac{1}{m} \sum_{i=1}^{m} (y^{(i)} - h_\theta(x^{(i)})) x_j^{(i)}
-```
+$$
+
 To make this match our Linear Regression formula perfectly, we distribute the negative sign into the parentheses, which flips the *y* and the $h_\theta(x)$ around. This gives us the exact same gradient formula as Linear Regression:
-```math
+
+$$
 \frac{\partial}{\partial \theta_j} J(\theta) = \frac{1}{m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) x_j^{(i)}
-```
+$$
+
 ### 3. The 4 Core Assumptions
 Unlike Linear Regression's L.I.N.E., remember these for Logistic Regression:
 1.  **Binary Outcome:** The target must be binary (for standard Logistic Regression).
@@ -489,7 +592,11 @@ The $R^2$ score (Coefficient of Determination) measures how much better your mod
 
 #### The Standard Formula (Using the Mean)
 By default, the naive "baseline model" just predicts the **Mean** of the target variable for every single point (the blue line in the graph above).
-$$ R^2 = 1 - \frac{\text{Sum of Squared Residuals (SSR)}}{\text{Total Sum of Squares (SST)}} $$
+
+$$
+R^2 = 1 - \frac{\text{Sum of Squared Residuals (SSR)}}{\text{Total Sum of Squares (SST)}}
+$$
+
 *   **SSR (Red):** The squared errors of your actual regression line.
 *   **SST (Blue):** The squared errors of the naive *Mean* line.
 *   *Interpretation:* If $R^2 = 0.80$, your model explains 80% of the variance that the naive mean model couldn't.
@@ -522,22 +629,28 @@ The actual geometric street doesn't care if the boundaries are labeled 1 and $-1
 
 **How Inference Works (Making Predictions):**
 The $+1$ and $-1$ gutters are *only* used during training to calculate the margin width. Once the model is trained (we found the optimal *w* and *b*), inference is incredibly simple. We take a new, unseen data point $x_{new}$ and calculate its score:
-```math
+
+$$
 z = w^T x_{new} + b
-```
+$$
+
 *   If $z \ge 0 \implies$ Classify as **Positive (+1)**
 *   If $z < 0 \implies$ Classify as **Negative (-1)**
 *(Notice how the $\pm 1$ margins don't matter anymore for the final prediction; inference only cares which side of the 0 hyperplane the point lands on!)*
 
 **The Margin Math (Core Interview Question):**
 The total width of this street (from the left guardrail to the right guardrail) is mathematically defined as:
-```math
+
+$$
 \text{Margin Width} = \frac{2}{||w||}
-```
+$$
+
 Because SVM's primary goal is to make this street as wide as possible (maximize the margin), the optimization algorithm must do the exact mathematical opposite to the denominator. Therefore, the core optimization goal of SVM is to **minimize**:
-```math
+
+$$
 \frac{1}{2} ||w||^2
-```
+$$
+
 **Hard Margin vs. Soft Margin (The *C* Parameter):**
 *   **Hard Margin (The Flawed Ideal):** A strict margin that allows absolutely zero data points inside the street or on the wrong side. If there is a single extreme outlier, a Hard Margin will severely contort the street to avoid it, leading to massive **Overfitting**.
 *   **Soft Margin (The Realistic Fix):** We allow some data points to violate the margin. We control this using the ***C* Parameter (Cost of Misclassification)**.
@@ -647,14 +760,18 @@ To formalize the "Garden Hose" analogy, we must define the prediction function, 
 
 **1. The Prediction Function (The Center of the Tube)**
 Just like in linear regression, the SVR model predicts a continuous value *y* by computing the dot product of the weights *w* and the input features *x*, plus a bias term *b*:
-```math
+
+$$
 f(x) = w^T x + b
-```
+$$
+
 **2. The $\epsilon$-Insensitive Loss Function (The Tube Walls)**
 The defining mathematical feature of SVR is its loss function. It states that if the absolute difference between the actual value *y* and the predicted value $f(x)$ is less than $\epsilon$, the error is exactly zero. The model only incurs a penalty if the prediction falls outside this boundary:
-```math
+
+$$
 L_\epsilon(y, f(x)) = \max(0, |y - f(x)| - \epsilon)
-```
+$$
+
 **3. The Optimization Objective (Soft Margin SVR)**
 In reality, it is rarely possible to fit every single data point perfectly inside the $\epsilon$-tube. We must allow some points to exist outside the tube while still trying to keep the tube as flat and robust as possible.
 
@@ -666,23 +783,31 @@ To do this, we introduce **Slack Variables** ($\xi$ and $\xi^*$):
 The goal of SVR is to keep the weights as small as possible (to keep the model simple and flat) while minimizing the sum of these slack variables (the errors outside the tube).
 
 **The Core SVR Cost Function:**
-```math
+
+$$
 \min_{w, b, \xi, \xi^*} \frac{1}{2} ||w||^2 + C \sum_{i=1}^{m} (\xi_i + \xi_i^*)
-```
+$$
+
 **Subject to the following constraints:**
 
 1. The upper boundary constraint (points cannot be too high above the tube):
-```math
+
+$$
 y_i - (w^T x_i + b) \leq \epsilon + \xi_i
-```
+$$
+
 2. The lower boundary constraint (points cannot be too far below the tube):
-```math
+
+$$
 (w^T x_i + b) - y_i \leq \epsilon + \xi_i^*
-```
+$$
+
 3. Slack variables must be non-negative (distance cannot be negative):
-```math
+
+$$
 \xi_i, \xi_i^* \geq 0
-```
+$$
+
 **How the Hyperparameters fit into the Math:**
 
 * **Minimizing $\frac{1}{2} ||w||^2$:** This flattens the function, maximizing the generalized robustness of the tube.
@@ -763,9 +888,11 @@ A Decision Tree splits the dataset into smaller and smaller orthogonal (axis-par
 
 ### 2. The Math of the Split: Gini Impurity
 To decide *which* feature to split on and at *what* threshold, the tree uses a cost function called **Gini Impurity** to measure how "mixed" a node is. The algorithm desperately wants to minimize this impurity.
-```math
+
+$$
 G_i = 1 - \sum_{k=1}^{n} p_{i,k}^2
-```
+$$
+
 *   *n* is the total number of classes.
 *   $p_{i,k}$ is the ratio of class *k* instances inside that specific node *i*.
 
@@ -862,9 +989,11 @@ We have $m = 5$ training instances predicting if we should "Go for a Walk":
 
 #### 2. The Formula for Gini Impurity
 It measures the purity of a node (0 means perfectly pure, meaning all instances belong to one class).
-```math
+
+$$
 G = 1 - \sum_{k=1}^{K} (p_k)^2
-```
+$$
+
 Where $p_k$ is the ratio of instances belonging to class *k* in that node.
 
 #### 3. Step 1: Calculate Total Impurity at the Root Node
@@ -872,14 +1001,18 @@ Before making any splits, let's look at all 5 target labels: `[Yes, Yes, Yes, No
 *   Total instances = 5
 *   Probability of 'Yes' ($p_1$) = $3/5 = 0.6$
 *   Probability of 'No' ($p_2$) = $2/5 = 0.4$
-```math
+
+$$
 G_{root} = 1 - (0.6^2 + 0.4^2) = 1 - (0.36 + 0.16) = 0.48
-```
+$$
+
 #### 4. Step 2: Evaluate Potential Splits
 We evaluate the cost function for both features to see which one provides the lowest weighted Gini impurity for the child nodes. The weighted cost function is:
-```math
+
+$$
 J(k, t_k) = \frac{m_{left}}{m} G_{left} + \frac{m_{right}}{m} G_{right}
-```
+$$
+
 **Option A: Split by "Weather == Sunny"**
 *   **Left Node (Sunny):** Instances 1, 2 $\rightarrow$ Labels: `[Yes, Yes]`
     *   $m_{left} = 2$
@@ -961,18 +1094,24 @@ Instead of drawing a curved line through the data (like Polynomial Regression), 
 The CART algorithm works mostly the same way as in classification, except that instead of trying to split the training set to minimize Gini Impurity, **it tries to split the training set to minimize Mean Squared Error (MSE)**.
 
 To evaluate a split using feature *k* and threshold $t_k$, CART minimizes the weighted cost function $J(k, t_k)$:
-```math
+
+$$
 J(k, t_k) = \frac{m_{\text{left}}}{m} \text{MSE}_{\text{left}} + \frac{m_{\text{right}}}{m} \text{MSE}_{\text{right}}
-```
+$$
+
 Where:
 1.  **Node Prediction ($\hat{y}_{\text{node}}$):** The mean target value of instances in the node.
-```math
+
+$$
 \hat{y}_{\text{node}} = \frac{1}{m_{\text{node}}} \sum_{i \in \text{node}} y^{(i)}
-```
+$$
+
 2.  **Node Squared Error ($\text{MSE}_{\text{node}}$):** The total error/variance of instances relative to that node's mean prediction.
-```math
+
+$$
 \text{MSE}_{\text{node}} = \sum_{i \in \text{node}} \left( \hat{y}_{\text{node}} - y^{(i)} \right)^2
-```
+$$
+
 ---
 
 #### 3. Classification vs. Regression Trees (Quick Summary)
@@ -1196,30 +1335,38 @@ To truly understand AdaBoost for high-level interviews, you need to know how it 
 
 **Step 1: Calculate the Weighted Error Rate ($r_j$)**
 For the $j^{th}$ predictor, we calculate its error rate by summing the weights of all the instances it got wrong, divided by the total sum of all weights.
-```math
+
+$$
 r_j = \frac{\sum_{\substack{i=1 \\ \hat{y}_j^{(i)} \ne y^{(i)}}}^{m} w^{(i)}}{\sum_{i=1}^{m} w^{(i)}}
-```
+$$
+
 *(Where $\hat{y}_j^{(i)}$ is the $j^{th}$ predictor's prediction for the $i^{th}$ instance).*
 
 **Step 2: Calculate the Predictor's Voting Weight ($\alpha_j$)**
 Based on its error rate, we determine how much "say" this predictor gets in the final vote. 
-```math
+
+$$
 \alpha_j = \eta \log \frac{1 - r_j}{r_j}
-```
+$$
+
 *(Where $\eta$ is the learning rate hyperparameter. If a predictor is highly accurate, its error rate $r_j$ is close to 0, making its weight $\alpha_j$ very high. If it is just guessing randomly, its weight will be close to 0).*
 
 **Step 3: The Weight Update Rule ($w^{(i)}$)**
 Now, we update the weights of the individual training instances for the *next* predictor to use.
-```math
+
+$$
 w^{(i)} \leftarrow \begin{cases} w^{(i)} & \text{if } \hat{y}_j^{(i)} = y^{(i)} \\ w^{(i)} \exp(\alpha_j) & \text{if } \hat{y}_j^{(i)} \ne y^{(i)} \end{cases}
-```
+$$
+
 *(If the predictor got the instance right, the weight stays the same. If it got it wrong, the weight is multiplied by $e^{\alpha_j}$, making it heavier for the next round). Then, all instance weights are normalized (divided by $\sum_{i=1}^{m} w^{(i)}$).*
 
 **Step 4: Making the Final Prediction ($\hat{y}(\mathbf{x})$)**
 To make a prediction on new data, AdaBoost computes the predictions of all *N* predictors and weighs them by their predictor weight ($\alpha_j$). The predicted class is the one that receives the majority of the weighted votes.
-```math
+
+$$
 \hat{y}(\mathbf{x}) = \underset{k}{\text{argmax}} \sum_{\substack{j=1 \\ \hat{y}_j(\mathbf{x}) = k}}^{N} \alpha_j
-```
+$$
+
 ---
 
 #### 3. The One Major Trade-off: No Parallelization
@@ -1279,22 +1426,28 @@ Using **Equation 7-1**, we sum the weights of all the incorrect predictions and 
 
 * Sum of all weights = $1.0$
 * Incorrect instance: Instance 4 (weight = 0.2)
-```math
+
+$$
 r_1 = \frac{0.2}{1.0} = 0.2
-```
+$$
+
 **Step 2: Calculate the Predictor Weight ($\alpha_1$)**
 Using **Equation 7-2**, we calculate how much "say" this predictor gets in the final vote. A lower error rate means a higher weight.
-```math
+
+$$
 \alpha_1 = 1 \cdot \log \left( \frac{1 - 0.2}{0.2} \right) = \log(4) \approx 1.386
-```
+$$
+
 **Step 3: Update Instance Weights ($w^{(i)}$)**
 Using **Equation 7-3**, we increase the weight of the instance our model got wrong so the next model pays more attention to it.
 
 * **For correct instances (1, 2, 3, 5):** The weight stays the same (before normalization). $w^{(i)} = 0.2$
 * **For the incorrect instance (4):** We multiply its weight by $\exp(\alpha_1)$.
-```math
+
+$$
 w^{(4)} = 0.2 \times \exp(1.386) = 0.2 \times 4 = 0.8
-```
+$$
+
 **Step 4: Normalize the Weights**
 The bottom of Equation 7-3 tells us to divide all weights by their total sum so they add up to 1 again.
 
@@ -1322,14 +1475,18 @@ When we train Predictor 2, the algorithm is heavily penalized if it gets Instanc
 
 **Step 1: Calculate the Error Rate ($r_2$)**
 It only got Instance 2 wrong. Look at the table above: the current weight of Instance 2 is 0.125.
-```math
+
+$$
 r_2 = \frac{0.125}{1.0} = 0.125
-```
+$$
+
 **Step 2: Calculate the Predictor Weight ($\alpha_2$)**
 Because its weighted error rate is lower than Predictor 1, Predictor 2 gets a larger say in the final ensemble.
-```math
+
+$$
 \alpha_2 = 1 \cdot \log \left( \frac{1 - 0.125}{0.125} \right) = \log(7) \approx 1.946
-```
+$$
+
 *(We would then update and normalize the instance weights again for a 3rd predictor, but let's stop here and see how they vote together).*
 
 ---
@@ -1356,7 +1513,7 @@ The `argmax` (the highest value) belongs to **Class 0**. Even though Predictor 1
 
 
 
-### 6. Gradient Boosting (GBM)
+### 10. Gradient Boosting (GBM)
 
 Just like AdaBoost, Gradient Boosting works sequentially by building a relay team of trees where each new tree tries to fix the mistakes of the previous one. However, **how** it fixes those mistakes is fundamentally different.
 
@@ -1386,16 +1543,20 @@ Let's assume we are predicting house prices (*y*) using input features (*X*).
 
 **Making the Final Prediction:**
 When a new data point ($\mathbf{x}$) comes in, you pass it through all the trees and simply sum their predictions:
-```math
+
+$$
 \hat{y}_{\text{final}} = \text{Tree}_1(\mathbf{x}) + \text{Tree}_2(\mathbf{x}) + \text{Tree}_3(\mathbf{x}) + \dots
-```
+$$
+
 #### 3. Shrinkage (The Learning Rate)
 If we just add up the raw predictions of 100 trees, the model will quickly overfit and memorize the noise in the training data. To prevent this, Gradient Boosting uses a regularization technique called **Shrinkage** via a learning rate hyperparameter ($\eta$).
 
 Instead of adding the full prediction of a tree, we multiply it by a small learning rate (e.g., $0.1$):
-```math
+
+$$
 \hat{y}_{\text{final}} = \text{Tree}_1(\mathbf{x}) + \eta \text{Tree}_2(\mathbf{x}) + \eta \text{Tree}_3(\mathbf{x}) + \dots
-```
+$$
+
 *   **The Trade-off:** A lower learning rate means the algorithm will need more trees (`n_estimators`) to fit the training set, but the resulting model will usually generalize much better to unseen data.
 
 ---
@@ -1439,7 +1600,7 @@ To prevent the severe overfitting shown above and speed up the sequential traini
 
 
 
-### 7. The Titans of Tabular Data: XGBoost & LightGBM
+### 11. The Titans of Tabular Data: XGBoost & LightGBM
 
 While standard Gradient Boosting is mathematically brilliant, its standard `scikit-learn` implementation is slow on massive datasets and prone to overfitting. To solve this, researchers built independent, hyper-optimized libraries that have become the industry standard for tabular data.
 
@@ -1514,68 +1675,90 @@ When you are handed a dataset with 1,000 features, feeding all of them into a mo
 ### 1. The Engine of PCA: Singular Value Decomposition (SVD)
 
 Under the hood, PCA tears your dataset apart using a linear algebra technique called **SVD**. SVD takes your original dataset matrix (*A*) and decomposes it into three fundamental building blocks: 
-```math
+
+$$
 A = U \Sigma V^T
-```
+$$
+
 Here is how we solve this step-by-step for a simple 2x2 matrix:
-```math
+
+$$
 A = \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix}
-```
+$$
+
 #### Step 1: Find *V* (Right Singular Vectors / Principal Components)
 First, we find the absolute best directions to view our data from. We do this by calculating the eigenvectors of $A^T A$.
 
 1. **Calculate $A^T A$:**
-```math
+
+$$
 A^T A = \begin{pmatrix} 2 & -1 \\ 2 & 1 \end{pmatrix} \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} = \begin{pmatrix} 5 & 3 \\ 3 & 5 \end{pmatrix}
-```
+$$
+
 2. **Find the Eigenvalues ($\lambda$):** 
    We solve the characteristic equation $\det(A^T A - \lambda I) = 0$:
-```math
+
+$$
 \det \begin{pmatrix} 5 - \lambda & 3 \\ 3 & 5 - \lambda \end{pmatrix} = (5 - \lambda)^2 - 9 = 0
-```
-```math
+$$
+
+$$
 \lambda^2 - 10\lambda + 16 = 0 \implies (\lambda - 8)(\lambda - 2) = 0
-```
+$$
+
    The eigenvalues are $\lambda_1 = 8$ and $\lambda_2 = 2$.
 
 3. **Find the Eigenvectors (and normalize them):**
-   * For $\lambda_1 = 8$, the normalized unit vector is $v_1 = \begin{pmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \end{pmatrix}$
-   * For $\lambda_2 = 2$, the normalized unit vector is $v_2 = \begin{pmatrix} -1/\sqrt{2} \\ 1/\sqrt{2} \end{pmatrix}$
+   * For $\lambda_1 = 8$, the normalized unit vector is $v_1 = [1/\sqrt{2}, 1/\sqrt{2}]^T$
+   * For $\lambda_2 = 2$, the normalized unit vector is $v_2 = [-1/\sqrt{2}, 1/\sqrt{2}]^T$
 
 4. **Construct *V* and $V^T$:**
    We place $v_1$ and $v_2$ as columns in *V*:
-```math
+
+$$
 V = \begin{pmatrix} 1/\sqrt{2} & -1/\sqrt{2} \\ 1/\sqrt{2} & 1/\sqrt{2} \end{pmatrix} \implies V^T = \begin{pmatrix} 1/\sqrt{2} & 1/\sqrt{2} \\ -1/\sqrt{2} & 1/\sqrt{2} \end{pmatrix}
-```
+$$
+
 #### Step 2: Find $\Sigma$ (Singular Values)
 Now we weigh the importance of those directions. The singular values ($\sigma$) are simply the square roots of our eigenvalues, placed on the diagonal of a matrix in descending order.
 * $\sigma_1 = \sqrt{8} = 2\sqrt{2}$
 * $\sigma_2 = \sqrt{2}$
-```math
+
+$$
 \Sigma = \begin{pmatrix} 2\sqrt{2} & 0 \\ 0 & \sqrt{2} \end{pmatrix}
-```
+$$
+
 #### Step 3: Find *U* (Left Singular Vectors)
 Finally, we map our right singular vectors (*v*) through the original matrix *A* and scale them down by their corresponding singular value ($\sigma$). The formula is $u_i = \frac{1}{\sigma_i} A v_i$.
 
 1. **Calculate $u_1$:**
-```math
+
+$$
 u_1 = \frac{1}{2\sqrt{2}} \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} \begin{pmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \end{pmatrix} = \frac{1}{2\sqrt{2}} \begin{pmatrix} 4/\sqrt{2} \\ 0 \end{pmatrix} = \begin{pmatrix} 1 \\ 0 \end{pmatrix}
-```
+$$
+
 2. **Calculate $u_2$:**
-```math
+
+$$
 u_2 = \frac{1}{\sqrt{2}} \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} \begin{pmatrix} -1/\sqrt{2} \\ 1/\sqrt{2} \end{pmatrix} = \frac{1}{\sqrt{2}} \begin{pmatrix} 0 \\ 2/\sqrt{2} \end{pmatrix} = \begin{pmatrix} 0 \\ 1 \end{pmatrix}
-```
+$$
+
 3. **Construct *U*:**
-```math
+
+$$
 U = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}
-```
+$$
+
 **The Final Result:** We have successfully decomposed the matrix! 
-```math
+
+$$
 A = U \Sigma V^T
-```
-```math
+$$
+
+$$
 \begin{pmatrix} 2 & 2 \\ -1 & 1 \end{pmatrix} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix} \begin{pmatrix} 2\sqrt{2} & 0 \\ 0 & \sqrt{2} \end{pmatrix} \begin{pmatrix} 1/\sqrt{2} & 1/\sqrt{2} \\ -1/\sqrt{2} & 1/\sqrt{2} \end{pmatrix}
-```
+$$
+
 ---
 
 ### 2. Kernel PCA (kPCA) and The Kernel Trick
@@ -1593,8 +1776,6 @@ To fix this, we use **Kernel PCA**. It uses the exact same "Kernel Trick" shortc
 ### 3. The Reversal Problem: Pre-Image Error
 
 One of the best features of standard PCA is that it is easily reversible. If you compress 3D data down to a flat 2D plane, you can just run the math in reverse to pop it back out into 3D. With Kernel PCA, this reversal is incredibly difficult.
-
-*(Insert `image_e71e65.jpg` and `image_e71e5e.jpg` side-by-side or stacked here)*
 
 *   **The Problem:** Because kPCA used a mathematical shortcut to skip the infinite-dimensional space, we don't have the exact coordinates to run the math in reverse. We cannot easily go backward from the 2D Reduced Space to the 3D Original Space.
 *   **The Pre-image:** To solve this, the algorithm has to *guess* (approximate) what the original 3D point looked like based on its 2D coordinates. This approximation is called the "pre-image".
@@ -1631,9 +1812,11 @@ Instead of looking at the massive, global structure of the dataset, LLE zooms in
 *   **The Constraints:** If a point $\mathbf{x}^{(j)}$ is *not* one of the *k* closest neighbors, its weight is forced to 0. Furthermore, the weights for the neighbors of each instance must be normalized (they must sum to 1).
 
 This creates our first constrained optimization problem, resulting in a weight matrix $\widehat{\mathbf{W}}$ that perfectly encodes the local linear relationships between all training instances:
-```math
+
+$$
 \widehat{\mathbf{W}} = \underset{\mathbf{W}}{\text{argmin}} \sum_{i=1}^{m} \left( \mathbf{x}^{(i)} - \sum_{j=1}^{m} w_{i,j} \mathbf{x}^{(j)} \right)^2
-```
+$$
+
 #### Step 2: Reducing Dimensionality While Preserving Relationships
 Now that we have a matrix ($\widehat{\mathbf{W}}$) that perfectly describes how every point relates to its neighbors, we want to map the training instances into a new *d*-dimensional space (where $d < n$). 
 
@@ -1642,9 +1825,11 @@ Now that we have a matrix ($\widehat{\mathbf{W}}$) that perfectly describes how 
 *   **The Reversal:** This looks identical to Step 1, but we flip the variables. Instead of keeping the instances fixed and searching for optimal weights, we now keep the weights fixed ($\widehat{w}_{i,j}$) and search for the optimal physical positions of the new instances ($\mathbf{Z}$) in the low-dimensional space.
 
 This leads to the final unconstrained optimization problem:
-```math
+
+$$
 \widehat{\mathbf{Z}} = \underset{\mathbf{Z}}{\text{argmin}} \sum_{i=1}^{m} \left( \mathbf{z}^{(i)} - \sum_{j=1}^{m} \widehat{w}_{i,j} \mathbf{z}^{(j)} \right)^2
-```
+$$
+
 #### The Major Drawback: Computational Complexity
 While LLE is brilliant mathematically, you must be careful when using it on large datasets. `scikit-learn`'s implementation scales beautifully for finding neighbors and optimizing weights, but the final step (constructing the low-dimensional representations) has a complexity of $O(dm^2)$. 
 
@@ -1707,9 +1892,11 @@ For every single data point, it calculates:
 *   *b*: The mean distance to all points in the *next nearest* cluster (Separation).
 
 The Silhouette Score for a point is: 
-```math
+
+$$
 s = \frac{b - a}{\max(a, b)}
-```
+$$
+
 *   **Score = +1:** The point is perfectly inside its own cluster and far from others. (Excellent)
 *   **Score = 0:** The point is right on the boundary between two clusters.
 *   **Score = -1:** The point was likely assigned to the wrong cluster.
@@ -1744,7 +1931,7 @@ Interviewers will always test if you know when *not* to use K-Means.
 *   **Answer:** Yes, it is absolutely required. K-Means calculates the Euclidean distance between points. If one feature ranges from 0 to 100,000 and another ranges from 0 to 1, the algorithm will mathematically treat the larger feature as exponentially more important, completely ignoring the structural variance of the smaller feature.
 
 
-### 2. DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
+### 6. DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
 
 Imagine we collected weight and height measurements from a bunch of people. By eye, it is very easy to spot two clusters if the points are packed tightly together in high-density regions. 
 
@@ -1841,9 +2028,11 @@ While you don't have to guess the number of clusters $k$, you *do* have to find 
 
 <br><br>
 
-# ==========================================
+---
+
 # 🧠 WELCOME TO DEEP LEARNING 🧠
-# ==========================================
+
+---
 
 ## Deep Learning Part 1: Multi-Layer Perceptrons (MLPs) & Non-Linearity
 
@@ -1868,13 +2057,17 @@ To solve complex problems, we must inject **non-linearity** into the network. We
 
 #### The Big Three Activation Functions:
 1.  **ReLU (Rectified Linear Unit):** The undisputed default for Hidden Layers. It simply outputs the input directly if it is positive; otherwise, it outputs zero. It is computationally incredibly fast and solves major mathematical issues during training.
-```math
+
+$$
 \text{ReLU}(x) = \max(0, x)
-```
+$$
+
 2.  **Sigmoid:** Squashes any number into a range between 0 and 1. It is almost exclusively used in the **Output Layer** for binary classification (e.g., Is this spam? 0.99 = Yes). It is rarely used in hidden layers today because it causes the network to stop learning (the Vanishing Gradient problem).
-```math
+
+$$
 \sigma(x) = \frac{1}{1 + e^{-x}}
-```
+$$
+
 3.  **Softmax:** Used exclusively in the **Output Layer** for Multi-Class Classification (e.g., Is this a cat, dog, or bird?). It takes a vector of raw scores and turns them into a list of probabilities that perfectly sum to 1.
 
 ---
@@ -1905,23 +2098,29 @@ Forward propagation is simply the process of passing data from the input layer, 
 
 For a single artificial neuron, the math is a two-step process:
 1.  **The Linear Combination:** Multiply the inputs by their weights and add the bias.
-```math
+
+$$
 z = (w_1 x_1 + w_2 x_2 + \dots + w_n x_n) + b
-```
+$$
+
     *(In linear algebra terms for a whole layer: $\mathbf{z} = \mathbf{W}\mathbf{x} + \mathbf{b}$)*
 2.  **The Activation:** Pass that result through an activation function (like ReLU) to introduce non-linearity.
-```math
+
+$$
 a = \text{ReLU}(z)
-```
+$$
+
 This output (*a*) is then passed as the input (*x*) to the next layer. This repeats until the final prediction is made.
 
 ### 2. The Loss Function (Calculating the Error)
 Once the network makes its prediction ($\hat{y}$), we compare it to the actual true label (*y*). The mathematical formula used to measure this distance is the **Loss Function** (or Cost Function).
 
 *   **For Regression:** We usually use **Mean Squared Error (MSE)**.
-```math
+
+$$
 L = \frac{1}{2}(y - \hat{y})^2
-```
+$$
+
 *   **For Classification:** We use **Cross-Entropy Loss** (Log Loss), which heavily penalizes the network if it is highly confident in the wrong answer.
 
 ### 3. Backpropagation (The Engine of Learning)
@@ -1930,9 +2129,11 @@ Backpropagation is short for "backward propagation of errors." It is the algorit
 It does this using the **Chain Rule of Calculus**. We want to find the partial derivative of the Loss with respect to a specific weight ($\frac{\partial L}{\partial w}$). In plain English: *"If I tweak this specific weight by a tiny amount, exactly how much will the final error change?"*
 
 By applying the Chain Rule, we step backward through the network's math:
-```math
+
+$$
 \frac{\partial L}{\partial w} = \frac{\partial L}{\partial a} \cdot \frac{\partial a}{\partial z} \cdot \frac{\partial z}{\partial w}
-```
+$$
+
 #### The Mathematical Example (Step-by-Step)
 Imagine a tiny network with 1 input, 1 neuron, and 1 output. 
 *   **Input (*x*):** 2
@@ -1958,13 +2159,17 @@ Multiply them together: $\frac{\partial L}{\partial w} = 1 \cdot 1 \cdot 2 = \ma
 Now that Backpropagation has given us the gradient (the slope of the error), we use an optimizer algorithm called **Gradient Descent** to physically update the weight.
 
 We update the old weight by subtracting the gradient, scaled by a hyperparameter called the **Learning Rate** ($\alpha$):
-```math
+
+$$
 w_{\text{new}} = w_{\text{old}} - \alpha \left( \frac{\partial L}{\partial w} \right)
-```
+$$
+
 If our learning rate $\alpha = 0.1$:
-```math
+
+$$
 w_{\text{new}} = 0.5 - 0.1(2) = 0.3
-```
+$$
+
 The weight has been updated from 0.5 to 0.3. The next time the network makes a guess, its error will be smaller!
 
 ![Gradient Descent 3D Surface](./assets/gradient_descent_3d.png)
@@ -2004,12 +2209,15 @@ Momentum accelerates gradient descent by using a moving average of past gradient
 
 *   **The Intuition:** It behaves like a heavy ball rolling down a hill. The momentum term increases updates for dimensions whose gradients point in the same directions and reduces updates for dimensions whose gradients change directions.
 *   **The Math:** It uses an exponentially moving average to store trend information about a set of previous gradient values.
-```math
+
+$$
 v_t = \beta \cdot v_{t-1} + (1 - \beta) \cdot \nabla_\theta J(\theta)
-```
-```math
+$$
+
+$$
 \theta_{t+1} = \theta_t - \alpha \cdot v_t
-```
+$$
+
     *(Where $v_t$ is the velocity/running average, $\beta$ is the momentum term typically set close to 0.9, and $\alpha$ is the learning rate).*
 
 ### 3. AdaGrad (Adaptive Gradient Algorithm)
@@ -2017,9 +2225,11 @@ Standard algorithms keep the learning rate constant throughout the training, whi
 
 *   **The Intuition:** If a weight has been having very huge updates, the learning rate for that specific weight will decrease. Inversely, for smaller gradients, the learning rate will be bigger. This way, Adagrad deals with vanishing and exploding gradient problems.
 *   **The Math:** It achieves this by storing the sum of squared historical gradients for each parameter.
-```math
+
+$$
 \theta_{t+1} = \theta_t - \frac{\alpha}{\sqrt{G_{diag} + \epsilon}} \cdot \nabla_\theta J(\theta)
-```
+$$
+
     *(Where $G_{diag}$ is a diagonal matrix containing the sum of past squared gradients, and $\epsilon$ is a very small value to ensure division by zero does not occur).*
 *   **The Fatal Flaw:** Because it accumulates squared gradients, the denominator always grows. A limitation of AdaGrad is that it tends to overly decrease the learning rate over time. This causes the algorithm to tend to converge slowly during the last iterations where it becomes very low.
 
@@ -2028,12 +2238,15 @@ RMSprop was devised by the legendary Geoffrey Hinton to specifically fix AdaGrad
 
 *   **The Intuition:** Instead of keeping a sum of all past squared gradients, RMSProp uses an exponentially weighted moving average of squared gradients. This puts more emphasis on recent gradient values rather than equally distributing importance.
 *   **The Math:**
-```math
+
+$$
 S_t = \beta S_{t-1} + (1 - \beta) (\nabla_\theta J)^2
-```
-```math
+$$
+
+$$
 \theta_{t+1} = \theta_t - \frac{\alpha}{\sqrt{S_t} + \epsilon} \cdot \nabla_\theta J
-```
+$$
+
     *(By prioritizing recent gradients, RMSProp automatically will decrease the size of the gradient steps towards minima when the steps are too large, making the algorithm less prone to overshooting without causing the learning rate to decay to zero).*
 
 ### 5. Adam (Adaptive Moment Estimation)
@@ -2042,21 +2255,29 @@ Adam is currently the most famous optimization algorithm in deep learning. Adam 
 *   **The Intuition:** It keeps track of the exponentially moving averages for computed gradients (Momentum) and squared gradients (RMSProp) respectively. It works well with large datasets and complex models because it uses memory efficiently and adapts the learning rate for each parameter automatically.
 *   **The Math:**
     1.  **Calculate Momentum (First Moment):**
-```math
+
+$$
 m_t = \beta_1 m_{t-1} + (1 - \beta_1) \nabla_\theta J
-```
+$$
+
     2.  **Calculate RMSProp (Second Moment):**
-```math
+
+$$
 v_t = \beta_2 v_{t-1} + (1 - \beta_2) (\nabla_\theta J)^2
-```
+$$
+
     3.  **Bias Correction:** Because *m* and *v* start at zero, they are heavily biased toward zero in the beginning. Adam applies bias correction to prevent instability during early training stages.
-```math
+
+$$
 \hat{m}_t = \frac{m_t}{1 - \beta_1^t} \quad \text{and} \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}
-```
+$$
+
     4.  **Final Update:**
-```math
+
+$$
 \theta_{t+1} = \theta_t - \frac{\alpha \hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
-```
+$$
+
 ---
 
 ### 6. Placement Prep: Optimizers Flashcards
@@ -2082,23 +2303,29 @@ Regularization is a set of techniques used to artificially constrain the network
 
 ### 1. Mathematical Weight Penalties (L1 and L2)
 The most fundamental way to constrain a network is to alter its Loss Function. We add a "penalty term" ($\Omega$) to the loss function that mathematically punishes the network for having large weights.
-```math
+
+$$
 L_{\text{total}} = L_{\text{data}} + \Omega(w)
-```
+$$
+
 *(Where $L_{\text{data}}$ is your standard loss like MSE or Cross-Entropy, and $\Omega(w)$ is the penalty applied to the weights).*
 
 #### L1 Regularization (Lasso / Sparsity)
 L1 adds the sum of the absolute values of the weights to the loss function.
-```math
-\Omega(w) = \lambda \sum \vert{}w_i\vert{}
-```
+
+$$
+\Omega(w) = \lambda \sum |w_i|
+$$
+
 *   **The Effect:** L1 calculates the derivative of an absolute value, which is a constant (either +1 or -1). This physically forces the weights of less important features down to exactly zero. It acts as a built-in feature selection tool, leaving a "sparse" network where only the most critical connections survive.
 
 #### L2 Regularization (Ridge / Weight Decay)
 L2 adds the sum of the squared values of the weights to the loss function.
-```math
+
+$$
 \Omega(w) = \frac{\lambda}{2} \sum w_i^2
-```
+$$
+
 *   **The Effect:** Because it squares the weights, L2 heavily penalizes outlier weights that are extremely large, but the penalty approaches zero as the weight gets smaller. It smoothly shrinks all weights toward zero, but rarely pushes them to exactly zero. It forces the network to rely on all features a little bit, rather than heavily relying on just one feature.
 
 ![How Regularization Constrains Neural Network Weights](./assets/regularization_weights.png)
@@ -2122,9 +2349,11 @@ During every single training batch, **Dropout** literally deactivates a random p
 *   **The Effect:** Because a neuron never knows if its neighboring "super neuron" will be active or dead on any given batch, it cannot rely on it. It is forced to independently learn useful features from the data.
 *   **The Result:** The network distributes the learning across the entire architecture, creating a highly robust, ensemble-like model.
 *   **Crucial Note:** Dropout is *strictly* turned off during inference/testing. During testing, all neurons are active. However, because a neuron is now receiving 100% of its inputs (instead of, say, 50% during training), the final signal will be twice as large as the network expects, blowing up the activations. To fix this, the outgoing weights are mathematically scaled down by the probability of the neuron being active:
-```math
+
+$$
 W_{\text{test}} = W_{\text{train}} \times (1 - p)
-```
+$$
+
     *(Where *p* is the dropout rate. If $p=0.5$, we multiply all weights by 0.5 during testing to perfectly balance the expected signal).*
 
 ![How Dropout Prevents Co-adaptation](./assets/dropout_visualization.png)
@@ -2193,31 +2422,35 @@ Imagine a 5x5 pixel image and a 3x3 Filter designed to detect vertical edges.
 Let's look at the exact math for the very first step of a convolution.
 
 **Input Image Patch ($3 \times 3$)**:
-```math
+
+$$
 \begin{bmatrix} 
 1 & 1 & 0 \\ 
 1 & 1 & 0 \\ 
 1 & 1 & 0 
 \end{bmatrix}
-```
+$$
 
 **Vertical Edge Filter ($3 \times 3$)**:
-```math
+
+$$
 \begin{bmatrix} 
 1 & 0 & -1 \\ 
 1 & 0 & -1 \\ 
 1 & 0 & -1 
 \end{bmatrix}
-```
+$$
 
 **The Operation:** We multiply each corresponding cell and sum them up.
-```math
+
+$$
 \begin{aligned}
 (1 \cdot 1) + (1 \cdot 0) + (0 \cdot -1) &= 1 \\
 (1 \cdot 1) + (1 \cdot 0) + (0 \cdot -1) &= 1 \\
 (1 \cdot 1) + (1 \cdot 0) + (0 \cdot -1) &= 1
 \end{aligned}
-```
+$$
+
 **Sum = 3**. 
 
 The number **3** becomes the very first pixel in the top-left corner of the new Feature Map. Because the number is highly positive, the network knows it just found a strong vertical edge!
@@ -2228,15 +2461,19 @@ The number **3** becomes the very first pixel in the top-left corner of the new 
 When you slide a $3 \times 3$ filter over a $5 \times 5$ image, the filter cannot scan the very edges without falling off the image. Therefore, the resulting Feature Map is smaller than the input. 
 
 The mathematical formula to calculate the output size of a feature map (assuming a stride of 1 and no padding) is:
-```math
+
+$$
 \text{Output Size} = n - f + 1
-```
+$$
+
 *(Where *n* is the input image size, and *f* is the filter size).*
 
 For our $5 \times 5$ image with a $3 \times 3$ filter:
-```math
+
+$$
 \text{Output Size} = 5 - 3 + 1 = 3
-```
+$$
+
 The resulting Feature Map will be a $3 \times 3$ matrix.
 
 ---
@@ -2277,9 +2514,11 @@ By default, a filter slides over by 1 pixel at a time ($s=1$). However, sometime
 
 #### 3. The Master Formula for CNN Dimensions
 This is the single most important mathematical formula to memorize for Computer Vision interviews. If you are given an Input Image of size $n \times n$, a Filter of size $f \times f$, a Padding of *p*, and a Stride of *s*, the exact spatial dimension of the output feature map is:
-```math
+
+$$
 \text{Output Size} = \lfloor \frac{n + 2p - f}{s} \rfloor + 1
-```
+$$
+
 *(Note: $\lfloor \dots \rfloor$ means you round down/floor the result if it is a decimal).*
 
 **The Math Example:**
@@ -2288,15 +2527,19 @@ You have a $7 \times 7$ input image. You apply a $3 \times 3$ filter. You use a 
 *   $f = 3$
 *   $p = 1$
 *   $s = 2$
-```math
+
+$$
 \text{Output Size} = \lfloor \frac{7 + 2(1) - 3}{2} \rfloor + 1
-```
-```math
+$$
+
+$$
 \text{Output Size} = \lfloor \frac{7 + 2 - 3}{2} \rfloor + 1
-```
-```math
+$$
+
+$$
 \text{Output Size} = \lfloor \frac{6}{2} \rfloor + 1 = 3 + 1 = \mathbf{4}
-```
+$$
+
 The output feature map will be exactly **$4 \times 4$**.
 
 ---
@@ -2419,9 +2662,11 @@ To avoid this parameter explosion, modern networks use $1 \times 1$ convolutions
 Think of a standard $3 \times 3$ convolution as a magnifying glass that looks at a spatial patch of 9 pixels. A $1 \times 1$ convolution is like a laser beam. It looks at exactly **one single pixel**, but it shines straight down through all the depth channels (colors/features) of that pixel.
 *   **Why is this useful? (The Dimensionality Bottleneck):** Imagine you have 512 channels of data. Doing a $3 \times 3$ convolution on 512 channels is computationally exhausting. Instead, you can shoot 64 different $1 \times 1$ "lasers" at the image. They will mathematically squash those 512 channels down into just 64 channels, saving massive amounts of computational power before you do your heavy lifting. 
 *   **The Math:** It simply calculates the dot product of the input channels at that exact pixel with the filter weights:
-```math
+
+$$
 Y_{i,j,k} = \sum_{c=1}^{C} W_{k,c} X_{i,j,c}
-```
+$$
+
 ![1x1 Convolution Visualization](./assets/pointwise_visual.png)
 
 #### 3. The Modern Finisher: Global Average Pooling (GAP)
@@ -2479,14 +2724,17 @@ Let *X* be our Input Image ($3 \times 3$), *W* be our Filter ($2 \times 2$), and
 *(Note on *dY*: Where does this error gradient actually come from? *dY* is simply the derivative of the Loss function with respect to the output of this layer. If this convolutional layer was followed immediately by a ReLU activation, *dY* is calculated by taking the error gradient from the layer above and zeroing out any gradients where the forward-pass pixels were zero or negative).*
 
 **The Rule:** The gradient of the weights (*dW*) is calculated by convolving the original Input Image (*X*) with the Error Gradient (*dY*).
-```math
+
+$$
 dW = X * dY
-```
+$$
+
 **The Hands-on Math:**
 Assume the Input (*X*) and the Error (*dY*) are:
-```math
+
+$$
 X = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{bmatrix}, \quad dY = \begin{bmatrix} 2 & 0 \\ 0 & -1 \end{bmatrix}
-```
+$$
 
 To find *dW*, we slide *dY* over *X* just like a normal filter:
 *   **Top-Left Window:** $(1 \cdot 2) + (2 \cdot 0) + (4 \cdot 0) + (5 \cdot -1) = 2 - 5 = \mathbf{-3}$
@@ -2495,9 +2743,11 @@ To find *dW*, we slide *dY* over *X* just like a normal filter:
 *   **Bottom-Right Window:** $(5 \cdot 2) + (6 \cdot 0) + (8 \cdot 0) + (9 \cdot -1) = 10 - 9 = \mathbf{1}$
 
 The resulting gradient matrix for our weights is:
-```math
+
+$$
 dW = \begin{bmatrix} -3 & -2 \\ 0 & 1 \end{bmatrix}
-```
+$$
+
 The optimizer (like Adam or SGD) will now use this exact *dW* matrix to update the $2 \times 2$ filter!
 
 ![CNN Backprop Visualization](./assets/cnn_backprop_visual.png)
@@ -2543,40 +2793,48 @@ We push our data from the pixels all the way to a final probability prediction.
 ![CNN Forward Pass](./assets/cnn_forward_pass.png)
 
 **Step 1: The Input (*X*)**
-```math
+
+$$
 X = \begin{bmatrix} 1 & 1 & 1 \\ 1 & 1 & 0 \\ 0 & 1 & 1 \end{bmatrix}
-```
+$$
 
 **Step 2: Convolution ($W_1 \rightarrow Z_1$)**
 We slide a $2 \times 2$ filter ($W_1$) over the input.
-```math
+
+$$
 W_1 = \begin{bmatrix} 1 & -1 \\ -1 & 1 \end{bmatrix}
-```
+$$
+
 *   **Top-Left:** $(1 \cdot 1) + (1 \cdot -1) + (1 \cdot -1) + (1 \cdot 1) = \mathbf{0}$
 *   **Top-Right:** $(1 \cdot 1) + (1 \cdot -1) + (1 \cdot -1) + (0 \cdot 1) = \mathbf{-1}$
 *   **Bottom-Left:** $(1 \cdot 1) + (1 \cdot -1) + (0 \cdot -1) + (1 \cdot 1) = \mathbf{2}$
 *   **Bottom-Right:** $(1 \cdot 1) + (0 \cdot -1) + (1 \cdot -1) + (1 \cdot 1) = \mathbf{1}$
-```math
+
+$$
 Z_1 = \begin{bmatrix} 0 & -1 \\ 2 & 1 \end{bmatrix}
-```
+$$
 
 **Step 3: ReLU Activation ($A_1$)**
 We apply $max(0, z)$ to zero out negative values.
-```math
+
+$$
 A_1 = \begin{bmatrix} 0 & 0 \\ 2 & 1 \end{bmatrix}
-```
+$$
 
 **Step 4: Flatten (*F*)**
 We unravel the $2 \times 2$ matrix into a $1 \times 4$ vector. *(Imagine reading the matrix like a book, left-to-right, top-to-bottom, and writing it out as a single line).*
-```math
+
+$$
 F = \begin{bmatrix} 0 & 0 & 2 & 1 \end{bmatrix}
-```
+$$
 
 **Step 5: Dense Layer & Prediction**
 We multiply by our dense weights ($W_2$) (assume Bias = 0).
-```math
+
+$$
 W_2 = \begin{bmatrix} 0.1 \\ 0.2 \\ 0.3 \\ -0.4 \end{bmatrix}
-```
+$$
+
 *   **Logit (*z*):** $(0 \cdot 0.1) + (0 \cdot 0.2) + (2 \cdot 0.3) + (1 \cdot -0.4) = 0.6 - 0.4 = \mathbf{0.2}$
 *   **Prediction (*p*):** We apply the Sigmoid function: $1 / (1 + e^{-0.2}) \approx \mathbf{0.55}$
 
@@ -2601,31 +2859,35 @@ To update the dense weights, we multiply the Error by the inputs to that layer (
 We push the Error backward through the dense weights to find the gradient of the flattened vector.
 *   $dF = Error \cdot W_2 = -0.45 \cdot [0.1, 0.2, 0.3, -0.4] = \mathbf{[-0.045, -0.090, -0.135, 0.180]}$
 *   **Unflatten ($dA_1$):** We reshape this $1 \times 4$ gradient back into a $2 \times 2$ matrix. Because we "flattened" by reading left-to-right, we "unflatten" by simply putting the 4 error numbers back into their original $2 \times 2$ grid positions:
-```math
+
+$$
 dA_1 = \begin{bmatrix} -0.045 & -0.090 \\ -0.135 & 0.180 \end{bmatrix}
-```
+$$
 
 **Step 4: The ReLU Mask (*dY*)**
 The error flows backward through the ReLU layer. ReLU acts as a valve: it only allows error to flow backward through pixels that were *positive* during the forward pass ($Z_1$).
 *   Looking back at $Z_1$, only the bottom row was positive. The top row was $\le 0$.
 *   Therefore, we zero out the top row of $dA_1$ to get our convolutional error gradient (*dY*):
-```math
+
+$$
 dY = \begin{bmatrix} 0 & 0 \\ -0.135 & 0.180 \end{bmatrix}
-```
+$$
 
 **Step 5: Convolutional Weight Gradients ($dW_1$)**
 Finally, as learned in Topic 5, we calculate the gradient for our convolution filter by convolving the original Input (*X*) with the ReLU Error Gradient (*dY*).
-```math
+
+$$
 dW_1 = X * dY
-```
+$$
+
 *   **Top-Left:** $(1 \cdot 0) + (1 \cdot 0) + (1 \cdot -0.135) + (1 \cdot 0.180) = \mathbf{0.045}$
 *   **Top-Right:** $(1 \cdot 0) + (1 \cdot 0) + (1 \cdot -0.135) + (0 \cdot 0.180) = \mathbf{-0.135}$
 *   **Bottom-Left:** $(1 \cdot 0) + (1 \cdot 0) + (0 \cdot -0.135) + (1 \cdot 0.180) = \mathbf{0.180}$
 *   **Bottom-Right:** $(1 \cdot 0) + (0 \cdot 0) + (1 \cdot -0.135) + (1 \cdot 0.180) = \mathbf{0.045}$
 
-```math
+$$
 dW_1 = \begin{bmatrix} 0.045 & -0.135 \\ 0.180 & 0.045 \end{bmatrix}
-```
+$$
 
 **Conclusion:**
 We have successfully calculated exactly how much every single weight in both the Dense Layer ($dW_2$) and the Convolutional Filter ($dW_1$) needs to change to reduce the error for this specific image!
@@ -2639,9 +2901,11 @@ Classic CNNs simply stacked Conv $\rightarrow$ ReLU $\rightarrow$ Pool in a stra
 ### 1. Residual Connections (ResNet)
 As standard networks get deeper, they suffer from the **Vanishing Gradient Problem**. By the time the error gradient propagates backward through 50 activation functions, it multiplies down to zero, and early layers stop learning entirely.
 *   **The Fix:** ResNet introduced the "Skip Connection" (or Shortcut Connection). Instead of strictly mapping an input through a convolution to get an output ($F(x)$), ResNet physically adds the original input back to the output before the final activation: 
-```math
+
+$$
 H(x) = F(x) + x
-```
+$$
+
 *   **The Gradient Superhighway:** During backpropagation, the derivative of *x* is exactly 1. This allows the error gradient to bypass the heavy convolutions and flow straight backward through the network at full strength, allowing networks to scale to 152+ layers.
 
 ### 2. Depthwise Separable Convolutions (MobileNet)
@@ -2755,14 +3019,18 @@ Let's look at the exact mathematical equations happening inside a standard Vanil
 
 **Step 1: Update the Hidden State (Memory)**
 The network concatenates the current input and the past memory, multiplies them by their respective shared weight matrices, adds a bias, and passes them through a $\tanh$ activation function to keep the values constrained between -1 and 1.
-```math
+
+$$
 h_t = \tanh(W_{hx} x_t + W_{hh} h_{t-1} + b_h)
-```
+$$
+
 **Step 2: Calculate the Output (Prediction)**
 Once the new hidden state ($h_t$) is calculated, we use it to make a prediction for that specific time step (e.g., "What is the next word in the sentence?"). 
-```math
+
+$$
 y_t = \text{Softmax}(W_{yh} h_t + b_y)
-```
+$$
+
 *Note: The initial hidden state at $t=0$ ($h_0$) is usually initialized as a matrix of pure zeros, because the network hasn't seen any past data yet!*
 
 ---
@@ -2813,32 +3081,43 @@ We will trace a Mini-RNN across $t=1$ and $t=2$, predicting a single value at th
 
 **Time Step 1 ($t=1$):**
 The network looks at the first input ($x_1$) and combines it with its initial memory ($h_0$).
-```math
+
+$$
 z_1 = (W_{hx} \cdot x_1) + (W_{hh} \cdot h_0)
-```
-```math
+$$
+
+$$
 z_1 = (2 \cdot 1) + (1 \cdot 0) = \mathbf{2}
-```
+$$
+
 We pass $z_1$ through the ReLU activation to get our first hidden state:
-```math
+
+$$
 h_1 = \text{ReLU}(2) = \mathbf{2}
-```
+$$
+
 **Time Step 2 ($t=2$):**
 The network looks at the second input ($x_2$) and combines it with the memory of the first step ($h_1$).
-```math
+
+$$
 z_2 = (W_{hx} \cdot x_2) + (W_{hh} \cdot h_1)
-```
-```math
+$$
+
+$$
 z_2 = (2 \cdot 2) + (1 \cdot 2) = 4 + 2 = \mathbf{6}
-```
-```math
+$$
+
+$$
 h_2 = \text{ReLU}(6) = \mathbf{6}
-```
+$$
+
 **The Final Prediction (Output):**
 Using the final hidden state ($h_2$), we calculate our prediction ($\hat{y}$).
-```math
+
+$$
 \hat{y} = W_{yh} \cdot h_2 = 1 \cdot 6 = \mathbf{6}
-```
+$$
+
 ---
 
 ![RNN Backward Pass](./assets/rnn_backward_pass.png)
@@ -2846,53 +3125,73 @@ Using the final hidden state ($h_2$), we calculate our prediction ($\hat{y}$).
 ### 2. Backpropagation Through Time (BPTT)
 
 The network predicted 6. The target was 4. Using Mean Squared Error $L = \frac{1}{2}(\hat{y} - y)^2$, the derivative of the loss with respect to our prediction is:
-```math
+
+$$
 d\hat{y} = \hat{y} - y = 6 - 4 = \mathbf{2}
-```
+$$
+
 **Step 1: Gradients at the Output**
 First, we find the gradient for the output weight ($dW_{yh}$) and pass the error back into the final hidden state ($dh_2$).
-```math
+
+$$
 dW_{yh} = d\hat{y} \cdot h_2 = 2 \cdot 6 = \mathbf{12}
-```
-```math
+$$
+
+$$
 dh_2 = d\hat{y} \cdot W_{yh} = 2 \cdot 1 = \mathbf{2}
-```
+$$
+
 **Step 2: Gradients at $t=2$**
 The error ($dh_2 = 2$) has entered the unrolled network. First, we pass it backward through the ReLU activation to get $dz_2$. (Since $z_2 = 6 > 0$, the derivative of ReLU is 1).
-```math
+
+$$
 dz_2 = dh_2 \cdot 1 = \mathbf{2}
-```
+$$
+
 Now, we calculate how much the weights contributed to the error *at this specific time step*:
-```math
+
+$$
 dW_{hx(t=2)} = dz_2 \cdot x_2 = 2 \cdot 2 = \mathbf{4}
-```
-```math
+$$
+
+$$
 dW_{hh(t=2)} = dz_2 \cdot h_1 = 2 \cdot 2 = \mathbf{4}
-```
+$$
+
 Finally, we pass the error **backward through time** to the previous hidden state ($dh_1$):
-```math
+
+$$
 dh_1 = dz_2 \cdot W_{hh} = 2 \cdot 1 = \mathbf{2}
-```
+$$
+
 **Step 3: Gradients at $t=1$**
 The error ($dh_1 = 2$) has successfully traveled back in time to the first step. We pass it through ReLU (since $z_1 = 2 > 0$, derivative is 1).
-```math
+
+$$
 dz_1 = dh_1 \cdot 1 = \mathbf{2}
-```
+$$
+
 We calculate how much the weights contributed to the error *at this earlier time step*:
-```math
+
+$$
 dW_{hx(t=1)} = dz_1 \cdot x_1 = 2 \cdot 1 = \mathbf{2}
-```
-```math
+$$
+
+$$
 dW_{hh(t=1)} = dz_1 \cdot h_0 = 2 \cdot 0 = \mathbf{0}
-```
+$$
+
 **Step 4: Gradient Accumulation (The Core Rule of RNNs)**
 Because $W_{hx}$ and $W_{hh}$ are global shared weights used at both $t=1$ and $t=2$, we must **sum** their local gradients to find the true, final gradient for the optimizer to use.
-```math
+
+$$
 dW_{hx} = dW_{hx(t=2)} + dW_{hx(t=1)} = 4 + 2 = \mathbf{6}
-```
-```math
+$$
+
+$$
 dW_{hh} = dW_{hh(t=2)} + dW_{hh(t=1)} = 4 + 0 = \mathbf{4}
-```
+$$
+
 *(The optimizer will now use $dW_{hx}=6$, $dW_{hh}=4$, and $dW_{yh}=12$ to update the weights!)*
 
 ---
@@ -2938,16 +3237,18 @@ A **Bidirectional RNN** solves this by running two completely separate RNNs simu
 2.  **The Backward RNN:** Reads the sequence from right-to-left (e.g., $x_3 \rightarrow x_2 \rightarrow x_1$).
 
 At each time step *t*, the network takes the hidden state from the Forward RNN ($\overrightarrow{h_t}$) and concatenates it with the hidden state from the Backward RNN ($\overleftarrow{h_t}$). 
-```math
+
+$$
 h_t = [\overrightarrow{h_t}, \overleftarrow{h_t}]
-```
+$$
+
 This combined hidden state now contains complete context from both the past *and* the future, allowing the network to make a highly informed prediction ($y_t$) for that specific word.
 
 *(Note: BiRNNs can only be used when the entire sequence is available at once, like processing a whole document. They cannot be used for real-time forecasting where the future data hasn't happened yet).*
 
 
 
-## Topic 5: Long Short-Term Memory (LSTMs) & The Cure for Amnesia
+## Topic 7: Long Short-Term Memory (LSTMs) & The Cure for Amnesia
 
 Vanilla RNNs fail on long sequences because Backpropagation Through Time (BPTT) repeatedly multiplies the gradient by the same weight matrix, causing it to vanish to zero. 
 
@@ -2967,9 +3268,11 @@ An LSTM uses neural network layers (Gates) to protect and control the Cell State
 
 **Gate 1: The Forget Gate ($f_t$)**
 Should we remember the past, or wipe the slate clean? The Forget Gate looks at the previous hidden state ($h_{t-1}$) and the current input ($x_t$), and outputs a number between 0 and 1 for each number in the Cell State.
-```math
+
+$$
 f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)
-```
+$$
+
 *(If $f_t = 0$, the LSTM literally erases that piece of memory from the Cell State).*
 
 **Gate 2: The Input Gate ($i_t$ and $\tilde{C}_t$)**
@@ -2981,23 +3284,26 @@ We multiply these together to scale the new information, and then **add** it to 
 **Gate 3: The Output Gate ($o_t$)**
 What parts of the long-term Cell State should we expose as our new short-term Hidden State ($h_t$)? 
 We use a Sigmoid gate ($o_t$) to decide what parts of the Cell State are currently relevant. We then push the Cell State through a $\tanh$ (to push the values between -1 and 1) and multiply it by our gate.
-```math
+
+$$
 h_t = o_t \cdot \tanh(C_t)
-```
+$$
 
 
 ### 4. Why LSTMs Fix the Vanishing Gradient
 In a Vanilla RNN, the hidden state is updated using matrix multiplication: $h_t = \tanh(W_{hh}h_{t-1} + \dots)$. During BPTT, this requires multiplying by $W_{hh}$ repeatedly.
 
 In an LSTM, the long-term Cell State ($C_t$) is updated using **Addition**: 
-```math
+
+$$
 C_t = (f_t \cdot C_{t-1}) + (i_t \cdot \tilde{C}_t)
-```
+$$
+
 Because the fundamental operation keeping the memory alive is addition ($+$) rather than matrix multiplication, the derivative flowing backward through the Cell State is 1. The LSTM creates a "Gradient Superhighway" (conceptually identical to a ResNet Skip Connection), allowing gradients to flow backward through thousands of time steps without vanishing!
 
 ---
 
-### Topic 5 Placement Prep: Elite LSTM Flashcards
+### Topic 7 Placement Prep: Elite LSTM Flashcards
 
 **Q1: In an LSTM, why do the Gates use a Sigmoid ($\sigma$) activation function, but the Candidate Values ($\tilde{C}_t$) use a $\tanh$ activation function?**
 *   **Answer:** Sigmoid restricts values between 0 and 1. This perfectly mimics a physical "valve" or percentage—0 means the gate is completely closed (block the data), and 1 means the gate is completely open (pass the data). $\tanh$ restricts values between $-1$ and 1. This is required for candidate values because the network must be able to *subtract* (decrease) or *add* (increase) to the state. If candidate values used Sigmoid, the Cell State could only ever grow larger and would eventually explode.
@@ -3009,7 +3315,7 @@ Because the fundamental operation keeping the memory alive is addition ($+$) rat
 *   **Answer:** A GRU is a streamlined, more computationally efficient version of an LSTM. The primary difference is that a GRU completely removes the separate Cell State ($C_t$) and relies strictly on the Hidden State ($h_t$) to transfer memory. Furthermore, it merges the Forget and Input gates into a single "Update Gate." It achieves similar performance to an LSTM on many tasks, but requires significantly fewer weights/parameters, making it faster to train.
 
 
-## Topic 6: End-to-End LSTM Math Walkthrough (StatQuest Style)
+## Topic 8: End-to-End LSTM Math Walkthrough (StatQuest Style)
 
 To truly understand how LSTMs solve the vanishing gradient problem, we must abandon abstract algebra and run actual numbers through the network. As explained in Josh Starmer's famous *StatQuest*, the secret is that an LSTM splits memory into two completely separate paths.
 
@@ -3031,7 +3337,11 @@ We use a **Sigmoid** activation function to turn our inputs into a percentage (a
 *   **Sigmoid(5.95) = 0.997**
 
 We take this percentage and multiply it against the Long-Term Memory line:
-$$ 2.0 \times 0.997 = \mathbf{1.99} $$
+
+$$
+2.0 \times 0.997 = \mathbf{1.99}
+$$
+
 *(The network decided to remember 99.7% of the past!)*
 
 ---
@@ -3051,7 +3361,11 @@ We use another Sigmoid function to decide how much of the $0.97$ we want to keep
 
 **Part C: Update the Long-Term Line**
 We multiply the percentage by the potential memory ($1.0 \times 0.97 = 0.97$), and then simply **ADD** it to our Long-Term Memory line.
-$$ 1.99 + 0.97 = \mathbf{2.96} $$
+
+$$
+1.99 + 0.97 = \mathbf{2.96}
+$$
+
 **Double BAM!** We have successfully updated the long-term memory.
 
 ---
@@ -3067,14 +3381,17 @@ Next, we use our final **Sigmoid** function to decide what percentage of this bo
 *   **Sigmoid(4.78) = 0.99**
 
 Finally, we multiply them together:
-$$ 0.99 \times 0.99 = \mathbf{0.98} $$
+
+$$
+0.99 \times 0.99 = \mathbf{0.98}
+$$
 
 **Triple BAM!!!** The number **$0.98$** is the final output of the LSTM for this time step, and it is passed forward as the Short-Term Memory for the next time step.
 ---
 
 ![LSTM Backward Pass](./assets/lstm_template_backward.png)
 
-## Topic 7: The Backward Pass (Calculus Trace)
+## Topic 9: The Backward Pass (Calculus Trace)
 
 *(Note: To demonstrate the Calculus and Backpropagation Through Time (BPTT), we switch to a simplified scalar LSTM where $x_1 = 2$, $h_0=0$, and $C_0=0$. This resulted in $h_1 = 0.61$ and $C_1 = 0.84$.)*
 
@@ -3083,70 +3400,93 @@ Assume the loss function sends an error gradient of **$dh_1 = 2$** backward into
 **Step 1: Splitting the Error at the Hidden State**
 The forward equation was $h_1 = o_1 \cdot \tanh(C_1)$. The error $dh_1 = 2$ splits into two paths:
 1.  **Gradient to the Output Gate ($do_1$):**
-```math
+
+$$
 do_1 = dh_1 \cdot \tanh(C_1) = 2 \cdot 0.69 = \mathbf{1.38}
-```
+$$
+
 2.  **Gradient entering the Cell State ($dC_1$):**
     The error passes backward through the multiplication, then backward through the $\tanh$ activation. (The derivative of $\tanh(x)$ is $1 - \tanh^2(x)$).
-```math
+
+$$
 dC_1 = dh_1 \cdot o_1 \cdot (1 - \tanh^2(C_1))
-```
-```math
+$$
+
+$$
 dC_1 = 2 \cdot 0.88 \cdot (1 - 0.69^2) = 1.76 \cdot 0.52 \approx \mathbf{0.92}
-```
+$$
+
 **Step 2: Distributing the Cell State Error ($dC_1$)**
 The forward equation was:
-```math
+
+$$
 C_1 = (f_1 \cdot C_0) + (i_1 \cdot \tilde{C}_1)
-```
+$$
+
 The error $dC_1 = 0.92$ flows across the addition node.
 1.  **Gradient to the Forget Gate ($df_1$):**
-```math
+
+$$
 df_1 = dC_1 \cdot C_0 = 0.92 \cdot 0 = \mathbf{0}
-```
+$$
+
 *(Since $C_0=0$, forgetting had no mathematical impact on the error).*
 
 2.  **Gradient to the Input Gate ($di_1$):**
-```math
+
+$$
 di_1 = dC_1 \cdot \tilde{C}_1 = 0.92 \cdot 0.96 \approx \mathbf{0.88}
-```
+$$
+
 3.  **Gradient to the Candidate ($\tilde{C}_1$):**
-```math
+
+$$
 d\tilde{C}_1 = dC_1 \cdot i_1 = 0.92 \cdot 0.88 \approx \mathbf{0.81}
-```
+$$
+
 **Step 3: Calculating the Final Weight Updates (*dW*)**
 We now pass the gate errors through their respective activation function derivatives to update the actual weights. 
 *(Note: The derivative of Sigmoid is $\sigma \cdot (1 - \sigma)$).*
-```math
+
+$$
 \sigma'(2) = 0.88 \cdot 0.12 \approx 0.11
-```
+$$
+
 *(The derivative of Tanh is $1 - \tanh^2(x)$).*
-```math
+
+$$
 \tanh'(2) = 1 - 0.96^2 \approx 0.08
-```
+$$
 
 **Output Weight:** 
-```math
+
+$$
 dW_o = do_1 \cdot \sigma'(2) \cdot x_1 = 1.38 \cdot 0.11 \cdot 2 \approx \mathbf{0.30}
-```
+$$
+
 **Input Weight:** 
-```math
+
+$$
 dW_i = di_1 \cdot \sigma'(2) \cdot x_1 = 0.88 \cdot 0.11 \cdot 2 \approx \mathbf{0.19}
-```
+$$
+
 **Candidate Weight:** 
-```math
+
+$$
 dW_c = d\tilde{C}_1 \cdot \tanh'(2) \cdot x_1 = 0.81 \cdot 0.08 \cdot 2 \approx \mathbf{0.13}
-```
+$$
+
 **Forget Weight:** 
-```math
+
+$$
 dW_f = df_1 \cdot \sigma'(2) \cdot x_1 = 0 \cdot 0.11 \cdot 2 = \mathbf{0}
-```
+$$
 
 *(The optimizer will now use these exact gradients to adjust the weights for the next epoch!)*
 
 ---
 
-## Topic 8: Modern LSTM Architectural Variants
+## Topic 10: Modern LSTM Architectural Variants
 
 Standard LSTMs are powerful, but they have a few architectural blind spots that are frequently patched in production environments.
 
@@ -3157,17 +3497,20 @@ Standard LSTMs are powerful, but they have a few architectural blind spots that 
 *   One LSTM processes the sequence forward.
 *   One LSTM processes the sequence strictly in reverse.
 *   The final output for any given time step (*t*) is the concatenation of the forward Hidden State and the backward Hidden State: 
-```math
+
+$$
 h_t = [\overrightarrow{h_t}, \overleftarrow{h_t}]
-```
+$$
 
 ### 2. Peephole Connections
 **The Problem:** In a standard LSTM, the three gates (Forget, Input, Output) are only allowed to look at the short-term memory ($h_{t-1}$) and the current input ($x_t$) to make their decisions. They are completely blind to the long-term Cell State ($C_{t-1}$) when deciding whether to open or close!
 **The Solution:** Introduced by Felix Gers, Peephole Connections allow the gates to mathematically "peek" at the Cell State. 
 *   The math changes slightly: 
-```math
+
+$$
 f_t = \sigma(W_f \cdot [C_{t-1}, h_{t-1}, x_t] + b_f)
-```
+$$
+
 *   This drastically improves the network's ability to count and time exact intervals, as the gates can explicitly read the core memory before altering it.
 
 ---
@@ -3176,19 +3519,23 @@ f_t = \sigma(W_f \cdot [C_{t-1}, h_{t-1}, x_t] + b_f)
 
 **Q1: In an LSTM, if the Forget Gate outputs exactly 1, and the Input Gate outputs exactly 0, what mathematically happens to the Cell State ($C_t$), and what does this mean for the gradient?**
 *   **Answer:** If $f_t = 1$ and $i_t = 0$, the update equation:
-```math
+
+$$
 C_t = (1 \cdot C_{t-1}) + (0 \cdot \tilde{C}_t)
-```
+$$
+
 collapses to simply $C_t = C_{t-1}$. The Cell State passes forward completely unaltered. Consequently, during backpropagation, the derivative is exactly 1, meaning the error gradient flows backward through that time step with 100% of its strength preserved (a perfect gradient superhighway).
 
 **Q2: During backpropagation in an LSTM, why is the error gradient entering the Cell State ($dC_1$) smaller than the total error gradient provided by the loss function ($dh_1$)?**
 *   **Answer:** Because of the Output Gate ($o_t$). The error $dh_1$ represents the total error of the prediction. However, that prediction was generated by applying the Output Gate as a mathematical filter: 
-```math
+
+$$
 h_1 = o_1 \cdot \tanh(C_1)
-```
+$$
+
 By the Product Rule, the error flowing back into the Cell State is multiplied by $o_1$. If the Output Gate was partially closed (e.g., $o_1 = 0.5$), it shielded the internal Cell State from the final output, and therefore shields it from receiving the full magnitude of the resulting error.
 
-## Topic 9: The Fall of the LSTM (Why we needed Transformers)
+## Topic 11: The Fall of the LSTM (Why we needed Transformers)
 
 While LSTMs completely dominated Natural Language Processing from 2014 to 2017, they had two fatal flaws that prevented them from scaling to the level of modern Foundation Models (like GPT-4).
 
