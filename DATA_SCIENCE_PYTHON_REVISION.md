@@ -46,6 +46,7 @@
    - [The 12-Step Exploratory Data Analysis (EDA) Checklist](#6-the-12-step-eda-checklist)
    - [Visualization Toolkit (Matplotlib & Seaborn)](#7-visualization-toolkit)
 5. [PART 5 — FEATURE ENGINEERING & PREPROCESSING](#part-5--feature-engineering--preprocessing)
+   - [Anti-Leakage Cardinal Rule](#the-cardinal-rule-of-anti-leakage-in-feature-engineering)
    - [Numerical Transformations](#1-numerical-transformations)
    - [Categorical Encoding](#2-categorical-encoding)
    - [Datetime Feature Extraction](#3-datetime-feature-extraction)
@@ -55,7 +56,7 @@
 6. [PART 6 — COMPLETE DATA SCIENCE PIPELINE TEMPLATE](#part-6--complete-data-science-pipeline-template)
 7. [PART 7 — MACHINE LEARNING MODELS & SCIKIT-LEARN](#part-7--machine-learning-models--scikit-learn)
    - [7.1 ML Problem Types](#71-ml-problem-types)
-   - [7.2 Universal Scikit-Learn Workflow](#72-universal-scikit-learn-workflow)
+   - [7.2 Universal 7-Step ML Workflow](#72-universal-7-step-ml-workflow)
    - [7.3 Linear Regression ⭐⭐⭐](#73-linear-regression-)
    - [7.4 Ridge & Lasso Regularization ⭐⭐](#74-ridge--lasso-regularization-)
    - [7.5 Logistic Regression ⭐⭐⭐](#75-logistic-regression-)
@@ -67,7 +68,7 @@
    - [7.11 K-Means Clustering](#711-k-means-clustering)
 8. [PART 8 — MODEL EVALUATION & VALIDATION](#part-8--model-evaluation--validation)
    - [8.1 Regression Metrics (MAE, MSE, RMSE, R²)](#81-regression-metrics-mae-mse-rmse-r)
-   - [8.2 Classification Metrics (Accuracy, Precision, Recall, F1, ROC-AUC)](#82-classification-metrics-accuracy-precision-recall-f1-roc-auc)
+   - [8.2 Classification Metrics (Accuracy, Precision, Recall, F1, ROC-AUC, PR-AUC)](#82-classification-metrics)
    - [8.3 Confusion Matrix Visual Breakdown](#83-confusion-matrix-visual-breakdown)
    - [8.4 Cross-Validation Best Practices](#84-cross-validation-best-practices)
    - [8.5 Hyperparameter Tuning (GridSearchCV)](#85-hyperparameter-tuning-gridsearchcv)
@@ -77,20 +78,28 @@
    - [9.2 Convolutional Neural Networks (CNN) ⭐⭐](#92-convolutional-neural-networks-cnn-)
    - [9.3 Recurrent Neural Networks (RNN) ⭐⭐](#93-recurrent-neural-networks-rnn-)
    - [9.4 LSTM & GRU (Long-Term Sequential Memory)](#94-lstm--gru-long-term-sequential-memory)
-10. [MODEL CHEAT SHEETS & DECISION GUIDES](#model-cheat-sheets--decision-guides)
+10. [PART 10 — STATISTICS FOR DATA SCIENCE & OAs](#part-10--statistics-for-data-science--oas)
+    - [10.1 Descriptive Statistics & Dispersion (Mean, Median, Mode, Variance, Std, IQR)](#101-descriptive-statistics--dispersion)
+    - [10.2 Standardization, Z-Score & Outlier Detection](#102-standardization-z-score--outlier-detection)
+    - [10.3 Probability & Bayes' Theorem](#103-probability--bayes-theorem)
+    - [10.4 Key Statistical Distributions](#104-key-statistical-distributions)
+    - [10.5 Central Limit Theorem & Confidence Intervals](#105-central-limit-theorem--confidence-intervals)
+    - [10.6 Hypothesis Testing, p-values & Error Types](#106-hypothesis-testing-p-values--error-types)
+    - [10.7 Covariance, Pearson vs. Spearman Correlation & VIF](#107-covariance-pearson-vs-spearman-correlation--vif)
+11. [MODEL CHEAT SHEETS & DECISION GUIDES](#model-cheat-sheets--decision-guides)
     - [Model Master Cheat Sheet Table](#model-master-cheat-sheet-table)
     - [Model Selection Decision Tree ("What Model First?")](#model-selection-decision-tree-what-model-first)
     - [Universal Model Templates (Regression, Classification, Clustering)](#universal-model-templates)
-11. [🧠 ACTIVE RECALL DRILLS](#-active-recall-drills)
-12. [⚠️ ML HIGH-FREQUENCY FORGETTING POINTS](#-ml-high-frequency-forgetting-points)
-13. [QUICK REVISION SECTIONS (TIMED DRILLS)](#quick-revision-sections)
+12. [🧠 ACTIVE RECALL DRILLS](#-active-recall-drills)
+13. [⚠️ ML HIGH-FREQUENCY FORGETTING POINTS](#-ml-high-frequency-forgetting-points)
+14. [QUICK REVISION SECTIONS (TIMED DRILLS)](#quick-revision-sections)
     - [10-Minute Python Revision](#10-minute-python-revision)
     - [10-Minute NumPy Revision](#10-minute-numpy-revision)
     - [15-Minute Pandas Revision](#15-minute-pandas-revision)
     - [15-Minute EDA Fast Run](#15-minute-eda-fast-run)
     - [Pipeline One-Screen Cheat Sheet](#pipeline-one-screen-cheat-sheet)
-14. [PATTERN LIBRARY (20 COPY-PASTE DATA SCIENCE PATTERNS)](#pattern-library-20-copy-paste-patterns)
-15. ["WHAT DO I USE?" DECISION TABLE](#what-do-i-use-decision-table)
+15. [PATTERN LIBRARY (20 COPY-PASTE DATA SCIENCE PATTERNS)](#pattern-library-20-copy-paste-patterns)
+16. ["WHAT DO I USE?" DECISION TABLE](#what-do-i-use-decision-table)
 
 ---
 
@@ -1115,6 +1124,13 @@ plt.show()
 
 ---
 
+> [!IMPORTANT]
+> **THE CARDINAL RULE OF ANTI-LEAKAGE IN FEATURE ENGINEERING:**
+> Any transformation that depends on **data distribution statistics** (mean, median, standard deviation, min/max, frequency maps, target encoding, outlier clipping boundaries, or feature selection) **MUST be fitted strictly on the training set (`X_train`)** and then applied (mapped/transformed) to `X_test`.
+> 
+> * **Leakage Bug:** Computing `freq_map = df['col'].value_counts(normalize=True)` on the whole DataFrame before splitting.
+> * **Leak-Free Fix:** Split into `X_train, X_test` first. Compute `freq_map = X_train['col'].value_counts(normalize=True).to_dict()`, then map onto `X_train` and `X_test`.
+
 ## 1. Numerical Transformations
 
 ```python
@@ -1407,9 +1423,9 @@ Before touching Scikit-Learn code, immediately identify which of the 4 problem s
 
 ---
 
-## 7.2 Universal Scikit-Learn Workflow
+## 7.2 Universal 7-Step ML Workflow
 
-Every estimator in Scikit-Learn adheres strictly to the **Unified 9-Step API Pattern**:
+Every estimator in Scikit-Learn adheres strictly to the **Universal 7-Step ML Workflow**:
 
 ```
  ┌───────────────┐     ┌───────────────┐     ┌───────────────┐     ┌───────────────┐
@@ -1421,32 +1437,46 @@ Every estimator in Scikit-Learn adheres strictly to the **Unified 9-Step API Pat
  └───────────────┘     └───────────────┘     └───────────────┘
 ```
 
-### The Universal Code Template
+### Pattern A: Modern Pipeline Best Practice (Recommended for Zero Leakage)
 ```python
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error, accuracy_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 
 # 1. Define Features (X) and Target (y)
 X = df.drop("target", axis=1) # 2D Matrix (DataFrame / 2D NumPy array)
 y = df["target"]              # 1D Vector (Series / 1D NumPy array)
 
-# 2. Strict Train / Test Split FIRST (Guarantees zero data leakage)
+# 2. Strict Train / Test Split FIRST
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.20, random_state=42, stratify=None # use stratify=y for classification
+    X, y, test_size=0.20, random_state=42, stratify=y
 )
 
-# 3. Fit Preprocessing ONLY on X_train, Transform both
+# 3. Encapsulate Preprocessing + Model in a Pipeline (Prevents Test Leakage!)
+pipeline = Pipeline([
+    ("scaler", StandardScaler()),
+    ("model", LogisticRegression(random_state=42))
+])
+
+# 4. Fit pipeline on training data (automatically runs scaler.fit_transform -> model.fit)
+pipeline.fit(X_train, y_train)
+
+# 5. Predict on test data (automatically runs scaler.transform -> model.predict)
+y_pred = pipeline.predict(X_test)
+print(f"Test Accuracy: {accuracy_score(y_test, y_pred):.4f}")
+```
+
+### Pattern B: Manual Step-by-Step Template (For Fast Prototyping)
+```python
 scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled  = scaler.transform(X_test) # NEVER fit on test data!
+X_train_scaled = scaler.fit_transform(X_train) # Fit & transform on train
+X_test_scaled  = scaler.transform(X_test)      # ONLY transform on test!
 
-# 4. Instantiate & Fit Model
 model = ModelName(hyperparameter=value)
-model.fit(X_train_scaled, y_train)        # Learns internal parameters from training set
-
-# 5. Predict & Score
-y_pred = model.predict(X_test_scaled)     # Generates discrete predictions
+model.fit(X_train_scaled, y_train)
+y_pred = model.predict(X_test_scaled)
 ```
 
 ### The 4 Core Estimator Methods Explained
@@ -1469,12 +1499,15 @@ It optimizes the weights by finding the hyperplane that minimizes the **Sum of S
 * When maximum **interpretability** is required (stakeholders must understand the exact unit effect of each variable).
 * Baseline benchmarking before deploying complex non-linear ensembles.
 
-### The 5 Core Assumptions (L.I.N.E. + M)
-1. **Linearity:** Relationship between features and target mean is linear.
-2. **Independence:** Observations are independent (no autocorrelation in errors).
-3. **Normality:** Residuals ($y - \hat{y}$) are normally distributed around mean 0.
-4. **Equal Variance (Homoscedasticity):** Variance of residuals is constant across all predicted values.
-5. **No Multicollinearity:** Input features are not perfectly correlated with one another.
+### Linear Regression Assumptions — What Matters for What?
+
+| Assumption | What It Means | Why It Matters / Practical Consequence if Violated |
+| :--- | :--- | :--- |
+| **1. Linearity** | Expected target is a linear combination of features | **Core requirement for unbiased predictions.** If violated, OLS line fails to capture curvature (fix: polynomial terms, log-transform). |
+| **2. Independent Errors** | Residuals are uncorrelated (no autocorrelation) | **Essential for valid standard errors & $p$-values.** In time-series or clustered data, positive correlation artificially deflates standard errors, causing false positives (fix: time-series models, lag features). |
+| **3. Homoscedasticity** | Residual variance is constant across all predictions | **Ensures OLS is BLUE (Best Linear Unbiased Estimator).** If heteroscedastic (cone-shaped residuals), point predictions remain unbiased, but standard errors & confidence intervals are wrong (fix: log-transform $y$, robust standard errors). |
+| **4. Normal Residuals** | Residuals are normally distributed around mean 0 | **Mainly needed for exact small-sample hypothesis tests ($t, F$) and confidence intervals ($N < 30$).** For large sample sizes, the Central Limit Theorem guarantees asymptotically valid inference regardless. It is NOT required for OLS to make accurate point predictions! |
+| **5. No Perfect Multicollinearity** | Features are not exact linear combinations of each other | **Mathematical invertibility of $(X^T X)$.** Perfect collinearity prevents unique coefficient estimation. High (imperfect) collinearity inflates standard errors, making individual coefficients unstable and uninterpretable (fix: VIF analysis, Ridge/Lasso). |
 
 ### Exact Scikit-Learn Code
 ```python
@@ -1934,14 +1967,20 @@ r2   = r2_score(y_true, y_pred)
 
 ```python
 from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+    accuracy_score, precision_score, recall_score, f1_score,
+    roc_auc_score, precision_recall_curve, auc
 )
 
 acc  = accuracy_score(y_true, y_pred)
 prec = precision_score(y_true, y_pred)
 rec  = recall_score(y_true, y_pred)
 f1   = f1_score(y_true, y_pred)
-auc  = roc_auc_score(y_true, y_prob) # Note: Requires PROBABILITIES, not discrete classes!
+roc_auc = roc_auc_score(y_true, y_prob) # Requires predicted probabilities P(y=1)!
+
+# Precision-Recall AUC (PR-AUC / Average Precision)
+precision_pts, recall_pts, _ = precision_recall_curve(y_true, y_prob)
+pr_auc = auc(recall_pts, precision_pts)
+print(f"Accuracy: {acc:.4f} | F1: {f1:.4f} | ROC-AUC: {roc_auc:.4f} | PR-AUC: {pr_auc:.4f}")
 ```
 
 ### Metric Selection Decision Guide
@@ -1949,10 +1988,18 @@ auc  = roc_auc_score(y_true, y_prob) # Note: Requires PROBABILITIES, not discret
 | Business Situation | Primary Metric | Intuition & Reason |
 | :--- | :--- | :--- |
 | **Balanced Classes** (50% Cat, 50% Dog) | **Accuracy** | Simple ratio of correct predictions across all samples. |
-| **False Positives are very costly** (e.g., Spam Filter deleting important email; Job candidate screening) | **Precision** | $\frac{\text{TP}}{\text{TP} + \text{FP}}$: When the model predicts Positive, it must be correct. |
-| **False Negatives are fatal** (e.g., Cancer screening, Fraud detection, Defect inspection) | **Recall** (Sensitivity) | $\frac{\text{TP}}{\text{TP} + \text{FN}}$: Must catch every single actual Positive instance. |
+| **False Positives are very costly** (e.g., Spam Filter deleting legitimate email) | **Precision** | $\frac{\text{TP}}{\text{TP} + \text{FP}}$: When the model predicts Positive, it must be correct. |
+| **False Negatives are fatal** (e.g., Cancer screening, Fraud detection) | **Recall** (Sensitivity) | $\frac{\text{TP}}{\text{TP} + \text{FN}}$: Must catch every single actual Positive instance. |
 | **Imbalanced Classes where both errors matter** | **F1-Score** | $2 \cdot \frac{\text{Prec} \cdot \text{Rec}}{\text{Prec} + \text{Rec}}$: Harmonic mean balancing precision and recall. |
-| **Evaluating model across all possible thresholds** | **ROC-AUC** | Measures probability that a random positive ranks higher than a random negative. |
+| **Evaluating ranking on balanced/moderate data** | **ROC-AUC** | Plots TPR vs. FPR across all thresholds. Measures probability that a positive ranks above a negative. |
+| **Extreme Class Imbalance** (e.g., 0.1% Fraud, Ad Clicks) | **PR-AUC** | Plots Precision vs. Recall. Ignores True Negatives, preventing huge negative majorities from inflating the score! |
+
+### ROC-AUC vs. PR-AUC (The Imbalanced Data Trap)
+
+* **ROC-AUC (Receiver Operating Characteristic):** Plots True Positive Rate vs. False Positive Rate ($\text{FPR} = \frac{\text{FP}}{\text{TN} + \text{FP}}$).
+  * **The Trap:** When the negative class is overwhelming (e.g. 99.9% legit, 0.1% fraud), $\text{TN}$ is huge. A model can produce 5,000 False Positives, yet $\text{FPR}$ remains tiny, yielding a deceptively high ROC-AUC ($>0.98$) despite awful precision.
+* **PR-AUC (Precision-Recall Area Under Curve):** Plots Precision vs. Recall.
+  * **The Fix:** PR-AUC does NOT include True Negatives anywhere in its formula. It evaluates performance strictly on the positive minority class.
 
 ---
 
@@ -1987,7 +2034,7 @@ print(f"TN: {tn}, FP: {fp}, FN: {fn}, TP: {tp}")
 
 ## 8.4 Cross-Validation Best Practices
 
-Never rely on a single 80/20 train/test split to evaluate a model; you might get an unusually lucky or difficult test split. **$K$-Fold Cross-Validation** splits data into $K$ equal folds, trains $K$ times (using $K-1$ folds for training and 1 fold for validation), and averages the scores.
+Use **$K$-Fold Cross-Validation** on the training data when model selection or a more stable validation estimate is needed; keep the blind test set untouched for final unbiased evaluation. $K$-Fold CV splits the training data into $K$ equal partitions, trains $K$ times (using $K-1$ folds for training and 1 fold for validation), and averages the validation scores across all folds.
 
 ```python
 from sklearn.model_selection import cross_val_score
@@ -2040,9 +2087,12 @@ grid.fit(X_train, y_train)
 print("Best Hyperparameters:", grid.best_params_)
 print(f"Best CV Score: {grid.best_score_:.4f}")
 
-# 5. Evaluate Best Model directly on Test Set
+# 5. Evaluate Best Model directly on Test Set (using the target metric!)
+from sklearn.metrics import f1_score
 best_model = grid.best_estimator_
-test_f1 = best_model.score(X_test, y_test)
+y_test_pred = best_model.predict(X_test)
+test_f1 = f1_score(y_test, y_test_pred)
+print(f"Test Set F1-Score: {test_f1:.4f}")
 ```
 
 ---
@@ -2142,9 +2192,10 @@ model.fit(X_train, y_train, epochs=10, batch_size=32)
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import SimpleRNN, Dense
 
-# Input shape format is ALWAYS: (batch_size, timesteps, num_features)
+# X_train 3D tensor shape: (samples, timesteps, features)
+# Note: Keras layer input_shape excludes batch size -> input_shape=(timesteps, features)
 model = Sequential([
-    SimpleRNN(64, activation="tanh", input_shape=(10, 1)), # 10 past timesteps, 1 feature per step
+    SimpleRNN(64, activation="tanh", input_shape=(10, 1)), # 10 timesteps, 1 feature per step
     Dense(1) # Next-step continuous prediction
 ])
 model.compile(optimizer="adam", loss="mse")
@@ -2177,25 +2228,275 @@ gru_model = Sequential([
 
 ---
 
+
+---
+
+# PART 10 — STATISTICS FOR DATA SCIENCE & OAs
+
+Statistics provides the mathematical framework for hypothesis testing, feature importance, distributions, and error analysis in Data Science interviews and online assessments.
+
+```
+                       STATISTICAL TOOLKIT MAP
+                       
+   DESCRIPTIVE STATS       PROBABILITY & DISTRIBUTIONS       INFERENTIAL STATS
+  ┌─────────────────┐     ┌───────────────────────────┐     ┌─────────────────┐
+  │ Mean vs Median  │     │ Normal (68-95-99.7)       │     │ Central Limit   │
+  │ Std vs Variance │     │ Binomial & Poisson        │     │ Hypothesis Test │
+  │ IQR & Z-score   │     │ Conditional Probability   │     │ p-values & CIs  │
+  │ Skew & Kurtosis │     │ Bayes' Theorem            │     │ Type I / II Err │
+  └─────────────────┘     └───────────────────────────┘     └─────────────────┘
+```
+
+---
+
+## 10.1 Descriptive Statistics & Dispersion
+
+### 1. Measures of Central Tendency
+* **Mean ($\mu$ or $\bar{x}$):** $\frac{1}{n} \sum x_i$. Arithmetic average. **Highly sensitive to outliers.**
+* **Median ($Q_2$):** Middle value of sorted data. **Robust to outliers and skewness.**
+* **Mode:** Most frequently occurring value. Useful for categorical data.
+
+> **Interview Golden Rule:**
+> * Symmetrical Distribution: $\text{Mean} \approx \text{Median} \approx \text{Mode}$.
+> * Right-Skewed (Positive, fat right tail, e.g. Income): $\text{Mean} > \text{Median} > \text{Mode}$.
+> * Left-Skewed (Negative, fat left tail, e.g. Age of death): $\text{Mean} < \text{Median} < \text{Mode}$.
+> * *Always use **Median** for skewed data (salaries, real estate, transaction amounts).*
+
+### 2. Measures of Dispersion (Spread)
+* **Variance ($\sigma^2$ or $s^2$):** Average squared deviation from the mean:
+  $$\text{Population: } \sigma^2 = \frac{1}{N} \sum_{i=1}^N (x_i - \mu)^2 \quad \quad \text{Sample (Bessel's Correction): } s^2 = \frac{1}{n-1} \sum_{i=1}^n (x_i - \bar{x})^2$$
+  *(Note: We divide by $n-1$ for sample variance to provide an **unbiased** estimate of the population variance).*
+* **Standard Deviation ($\sigma$ or $s$):** $\sqrt{\text{Variance}}$. Measures spread in the **same physical units** as the original data.
+* **Percentiles & Interquartile Range (IQR):**
+  * $Q_1$ (25th percentile), $Q_2$ (Median / 50th percentile), $Q_3$ (75th percentile).
+  * $\text{IQR} = Q_3 - Q_1$ (Contains the middle 50% of the data). **Robust to outliers.**
+
+---
+
+## 10.2 Standardization, Z-Score & Outlier Detection
+
+### 1. The Z-Score (Standard Score)
+Measures how many standard deviations a value $x$ lies away from the mean:
+$$z = \frac{x - \mu}{\sigma}$$
+* $z = 0 \implies x$ is exactly at the mean.
+* $z = +2.0 \implies x$ is 2 standard deviations above the mean.
+
+### 2. Outlier Detection Rules
+* **Z-Score Method (for Gaussian/Normal data):** A point is an outlier if $|z| > 3$ ($99.73\%$ of normal data lies within $\pm 3\sigma$).
+* **IQR Method (for Skewed/Non-Normal data):**
+  $$\text{Lower Bound} = Q_1 - 1.5 \times \text{IQR} \quad \quad \text{Upper Bound} = Q_3 + 1.5 \times \text{IQR}$$
+
+```python
+import numpy as np
+from scipy import stats
+
+# 1. Z-Score calculation
+data = np.array([10, 12, 12, 14, 15, 18, 100]) # 100 is an extreme outlier
+z_scores = stats.zscore(data)
+outliers_z = data[np.abs(z_scores) > 3]
+
+# 2. IQR calculation
+q1, q3 = np.percentile(data, [25, 75])
+iqr = q3 - q1
+outliers_iqr = data[(data < q1 - 1.5 * iqr) | (data > q3 + 1.5 * iqr)]
+```
+
+---
+
+## 10.3 Probability & Bayes' Theorem
+
+### 1. Probability Fundamentals
+* **Joint Probability:** $P(A \cap B) = P(A \text{ and } B)$ (Probability both occur).
+* **Union Probability:** $P(A \cup B) = P(A) + P(B) - P(A \cap B)$.
+* **Conditional Probability:** Probability of $A$ given that $B$ has already occurred:
+  $$P(A|B) = \frac{P(A \cap B)}{P(B)}$$
+* **Independent Events:** $P(A \cap B) = P(A) \cdot P(B) \implies P(A|B) = P(A)$.
+
+### 2. Bayes' Theorem
+Updates prior beliefs based on new observed evidence:
+$$P(A|B) = \frac{P(B|A) \cdot P(A)}{P(B)}$$
+$$\text{Posterior} = \frac{\text{Likelihood} \times \text{Prior}}{\text{Marginal Evidence}}$$
+
+```
+                       BAYES' THEOREM MENTAL MODEL
+                     
+    PRIOR P(Disease)          TEST ACCURACY              POSTERIOR P(Disease | +Test)
+    Base disease rate   ──►   Sensitivity P(+ | Dis)  ──► Actual probability you are sick
+    (e.g., 1 in 1000)         Specificity P(- | No)      (Often surprisingly low if prior is tiny!)
+```
+
+> **Classic Interview Problem (Medical Test Paradox):**
+> * A disease affects $1\%$ of the population: $P(D) = 0.01 \implies P(\neg D) = 0.99$.
+> * A test is $95\%$ accurate: $P(+|D) = 0.95$ (Sensitivity) and $P(+|\neg D) = 0.05$ (False Positive rate).
+> * If a patient tests positive, what is the probability they actually have the disease?
+> $$P(D|+) = \frac{P(+|D)P(D)}{P(+|D)P(D) + P(+|\neg D)P(\neg D)} = \frac{0.95 \times 0.01}{(0.95 \times 0.01) + (0.05 \times 0.99)} = \frac{0.0095}{0.0095 + 0.0495} \approx 16.1\%$$
+> *Even with a 95% accurate test, there is only a ~16% chance the patient is actually sick because the disease is rare!*
+
+---
+
+## 10.4 Key Statistical Distributions
+
+```
+     GAUSSIAN / NORMAL                 BINOMIAL                       POISSON
+      Continuous Curve              Discrete Trials               Count over Time
+             │                             │                             │
+        ╭────┴────╮                     │  │  │  │                    │  │  │
+       ╱     │     ╲                   ┌┴──┴──┴──┴┐                  ┌┴──┴──┴──┐
+      ╱      │      ╲                  │  n trials│                  │ Lambda rate
+     68% within ±1 sigma               p probability                 Events / interval
+```
+
+| Distribution | Type | Key Formula / Parameters | Real-World Use Case |
+| :--- | :--- | :--- | :--- |
+| **Normal (Gaussian)** | Continuous | Parameters: $\mu, \sigma$. Bell-shaped symmetrical. | Heights, measurement errors, test scores, residual errors in linear regression. |
+| **Bernoulli** | Discrete | Single trial with binary outcome ($0$ or $1$) with success probability $p$. | Single coin flip, single customer conversion (converted or not). |
+| **Binomial** | Discrete | $n$ independent Bernoulli trials: $P(X=k) = \binom{n}{k} p^k (1-p)^{n-k}$. $\mu = np, \sigma^2 = np(1-p)$. | Number of heads in 10 coin flips; number of converted customers out of 100 website visitors. |
+| **Poisson** | Discrete | Count of independent events occurring in a fixed interval of time/space with constant rate $\lambda$: $P(X=k) = \frac{\lambda^k e^{-\lambda}}{k!}$. $\mu = \lambda, \sigma^2 = \lambda$. | Number of server requests per minute; number of customer support tickets per hour. |
+
+### The 68–95–99.7 Empirical Rule (For Normal Distributions)
+* **$\mu \pm 1\sigma$** contains **$68.27\%$** of all data.
+* **$\mu \pm 2\sigma$** contains **$95.45\%$** of all data ($1.96\sigma$ for exact 95%).
+* **$\mu \pm 3\sigma$** contains **$99.73\%$** of all data.
+
+---
+
+## 10.5 Central Limit Theorem & Confidence Intervals
+
+### 1. Central Limit Theorem (CLT)
+> **The Theorem:** Given ANY independent population distribution (even if severely skewed, uniform, or bimodal), the distribution of the **sample means ($\bar{X}$)** approaches a **Normal Distribution** as the sample size $n$ becomes sufficiently large ($n \ge 30$).
+
+$$\bar{X} \sim \mathcal{N}\left(\mu, \frac{\sigma^2}{n}\right) \quad \implies \quad \text{Standard Error of the Mean (SE)} = \frac{\sigma}{\sqrt{n}}$$
+
+### 2. Confidence Interval (CI) for the Mean
+Range of values that contains the true population mean $\mu$ with a specified confidence level (typically $95\%$):
+$$\text{CI} = \bar{x} \pm z^* \times \frac{s}{\sqrt{n}}$$
+*(For 95% confidence: $z^* = 1.96$. For 99% confidence: $z^* = 2.576$. Use $t^*$ if $n < 30$ and $\sigma$ is unknown).*
+
+```python
+from scipy import stats
+import numpy as np
+
+sample_data = np.array([23, 25, 28, 32, 24, 26, 29, 31, 27, 30])
+mean = np.mean(sample_data)
+sem = stats.sem(sample_data) # Standard Error = s / sqrt(n)
+
+# 95% Confidence Interval
+ci_95 = stats.t.interval(confidence=0.95, df=len(sample_data)-1, loc=mean, scale=sem)
+print(f"95% CI: ({ci_95[0]:.2f}, {ci_95[1]:.2f})")
+```
+
+---
+
+## 10.6 Hypothesis Testing, p-values & Error Types
+
+### 1. The 5-Step Hypothesis Testing Framework
+1. **State Hypotheses:** 
+   * $H_0$ (Null Hypothesis): Baseline / No effect / No difference (e.g., $\mu_{\text{treatment}} = \mu_{\text{control}}$).
+   * $H_a$ (Alternative Hypothesis): Effect exists (e.g., $\mu_{\text{treatment}} \neq \mu_{\text{control}}$).
+2. **Choose Significance Level ($\alpha$):** Typically $\alpha = 0.05$ ($5\%$ threshold for false alarms).
+3. **Compute Test Statistic:** (e.g. $t$-statistic, $z$-statistic).
+4. **Compute $p$-value:** Probability of observing a test statistic as extreme as (or more extreme than) the one calculated, **assuming $H_0$ is true**.
+5. **Make Decision:**
+   * **$p \le \alpha \implies$ Reject $H_0$** (Result is statistically significant).
+   * **$p > \alpha \implies$ Fail to Reject $H_0$** (Insufficient evidence to claim an effect).
+
+### 2. Type I vs. Type II Errors
+
+```
+                                 TRUE REALITY
+                       H0 is TRUE               H0 is FALSE
+                  ┌──────────────────────┬──────────────────────┐
+     Reject H0    │     TYPE I ERROR     │   CORRECT DECISION   │
+  DECISION        │ (False Positive, a)  │   (Power = 1 - b)    │
+  MADE            ├──────────────────────┼──────────────────────┤
+     Fail to      │   CORRECT DECISION   │    TYPE II ERROR     │
+     Reject H0    │  (Confidence, 1 - a) │  (False Negative, b) │
+                  └──────────────────────┴──────────────────────┘
+```
+* **Type I Error ($\alpha$):** Rejecting $H_0$ when $H_0$ is true (False Alarm, e.g. innocent person convicted).
+* **Type II Error ($\beta$):** Failing to reject $H_0$ when $H_0$ is false (Missed Opportunity, e.g. guilty person goes free).
+* **Statistical Power ($1 - \beta$):** Probability of correctly rejecting a false null hypothesis (catching a real effect).
+
+### 3. Python Code for Two-Sample Independent $t$-test
+```python
+from scipy import stats
+
+# A/B Testing: Conversion rates for Version A vs Version B
+group_a = [12, 14, 15, 12, 16, 13, 14]
+group_b = [17, 18, 19, 15, 16, 20, 18]
+
+# Two-sample independent t-test (Welch's t-test: equal_var=False)
+t_stat, p_val = stats.ttest_ind(group_a, group_b, equal_var=False)
+print(f"t-statistic: {t_stat:.4f} | p-value: {p_val:.4e}")
+
+if p_val < 0.05:
+    print("Reject H0: Statistically significant difference between groups!")
+else:
+    print("Fail to Reject H0: No significant difference.")
+```
+
+---
+
+## 10.7 Covariance, Pearson vs. Spearman Correlation & VIF
+
+### 1. Covariance vs. Correlation
+* **Covariance ($\text{Cov}(X, Y) = \frac{1}{n-1}\sum(x_i - \bar{x})(y_i - \bar{y})$):** Measures the direction of a linear relationship, but value depends on data units ($-\infty..+\infty$).
+* **Pearson Correlation ($r$):** Standardized covariance bounded between $[-1.0, +1.0]$. Measures **linear** relationships only.
+  $$r = \frac{\text{Cov}(X, Y)}{s_X \cdot s_Y}$$
+* **Spearman Rank Correlation ($\rho$):** Computes Pearson correlation on the **ranks** of the data. Measures **monotonic** (increasing or decreasing) relationships, even if non-linear! **Robust to outliers.**
+
+```python
+from scipy import stats
+
+x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 100] # Extreme outlier at end
+y = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+
+# Pearson is ruined by the outlier; Spearman handles it gracefully:
+r_pearson, _ = stats.pearsonr(x, y)   # Highly degraded by outlier
+r_spearman, _ = stats.spearmanr(x, y) # 1.0 (perfect monotonic order preserved!)
+```
+
+### 2. Variance Inflation Factor (VIF) for Multicollinearity
+Quantifies how much the variance of an estimated regression coefficient is inflated due to collinearity with other features:
+$$\text{VIF}_j = \frac{1}{1 - R_j^2}$$
+*where $R_j^2$ is the $R^2$ score when feature $X_j$ is regressed on all other independent features.*
+* **$\text{VIF} = 1$:** No correlation with other features.
+* **$\text{VIF} > 5$:** Moderate multicollinearity (investigate).
+* **$\text{VIF} > 10$:** Severe multicollinearity (feature MUST be dropped or regularized with Ridge).
+
+```python
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+import pandas as pd
+
+# Assume X_num is a DataFrame of numeric features
+X_with_const = sm.add_constant(X_num) if 'sm' in locals() else X_num
+vif_data = pd.DataFrame({
+    "Feature": X_num.columns,
+    "VIF": [variance_inflation_factor(X_num.values, i) for i in range(X_num.shape[1])]
+}).sort_values(by="VIF", ascending=False)
+```
+
+---
+
 # MODEL CHEAT SHEETS & DECISION GUIDES
 
 ## Model Master Cheat Sheet Table
 
-| Model | Primary Task | Core Intuition / Key Mechanism | Scaling Mandatory? | Primary Hyperparameters |
+| Model | Primary Task | Core Intuition / Key Mechanism | Feature Scaling Need | Primary Hyperparameters |
 | :--- | :--- | :--- | :--- | :--- |
-| **Linear Regression** | Regression | OLS line fitting: $\mathbf{w}^T\mathbf{x} + b$ | No (Yes for weights) | `fit_intercept` |
-| **Ridge Regression** | Regression | OLS with $L2$ weight penalty ($\alpha \sum w_i^2$) | **YES** | `alpha` |
-| **Lasso Regression** | Regression | OLS with $L1$ weight penalty ($\alpha \sum \|w_i\|$) | **YES** | `alpha` |
-| **Logistic Regression**| Classification | Linear log-odds mapped via Sigmoid | **YES** | `C`, `penalty`, `max_iter` |
-| **KNN** | Both | Majority vote of $k$ closest neighbors | **YES (100%)** | `n_neighbors`, `metric` |
-| **Decision Tree** | Both | Recursive binary greedy feature splitting | **NO** | `max_depth`, `min_samples_leaf` |
-| **Random Forest** | Both | Bagged ensemble of unpruned parallel trees | **NO** | `n_estimators`, `max_depth`, `n_jobs` |
-| **Gradient Boosting** | Both | Sequential trees correcting previous errors | **NO** | `n_estimators`, `learning_rate`, `max_depth`|
-| **SVM** | Both | Maximum margin separation with kernel trick | **YES (100%)** | `C`, `kernel`, `gamma` |
-| **K-Means** | Clustering | Iterative centroid update minimizing inertia | **YES (100%)** | `n_clusters`, `n_init` |
-| **MLP / Neural Net** | Both | Stacked linear layers + non-linear activations | **YES** | `epochs`, `lr`, `units`, `batch_size` |
-| **CNN** | Images/Spatial | Parameter-shared spatial 2D convolutions | **YES (0..1 pixel)**| `filters`, `kernel_size`, `pool_size` |
-| **LSTM / GRU** | Sequences/Time | Gated cell state overcoming vanishing gradient| **YES** | `units`, `timesteps` |
+| **Linear Regression** | Regression | OLS line fitting: $\mathbf{w}^T\mathbf{x} + b$ | Not required (Recommended for interpretable weights) | `fit_intercept` |
+| **Ridge Regression** | Regression | OLS with $L2$ weight penalty ($\alpha \sum w_i^2$) | **Strongly Recommended** (equal penalty across weights) | `alpha` |
+| **Lasso Regression** | Regression | OLS with $L1$ weight penalty ($\alpha \sum \|w_i\|$) | **Strongly Recommended** (fair feature selection) | `alpha` |
+| **Logistic Regression**| Classification | Linear log-odds mapped via Sigmoid | **Recommended** (faster gradient descent & fair penalty) | `C`, `penalty`, `max_iter` |
+| **KNN** | Both | Majority vote of $k$ closest neighbors | **Strongly Recommended** (distance-based algorithm) | `n_neighbors`, `metric` |
+| **Decision Tree** | Both | Recursive binary greedy feature splitting | **NO** (monotonic scale-invariant splits) | `max_depth`, `min_samples_leaf` |
+| **Random Forest** | Both | Bagged ensemble of unpruned parallel trees | **NO** (tree-based) | `n_estimators`, `max_depth`, `n_jobs` |
+| **Gradient Boosting** | Both | Sequential trees correcting previous errors | **NO** (tree-based) | `n_estimators`, `learning_rate`, `max_depth`|
+| **SVM** | Both | Maximum margin separation with kernel trick | **Strongly Recommended** (margin width & RBF kernel scale) | `C`, `kernel`, `gamma` |
+| **K-Means** | Clustering | Iterative centroid update minimizing inertia | **Strongly Recommended** (Euclidean centroid distances) | `n_clusters`, `n_init` |
+| **MLP / Neural Net** | Both | Stacked linear layers + non-linear activations | **Strongly Recommended** (stable gradients, avoids saturation)| `epochs`, `lr`, `units`, `batch_size` |
+| **CNN** | Images/Spatial | Parameter-shared spatial 2D convolutions | **Input normalization recommended** (e.g. 0–1 or standard) | `filters`, `kernel_size`, `pool_size` |
+| **LSTM / GRU** | Sequences/Time | Gated cell state overcoming vanishing gradient| **Input normalization recommended** (prevents saturation) | `units`, `timesteps` |
 
 ---
 
