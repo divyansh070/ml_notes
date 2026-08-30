@@ -53,14 +53,44 @@
    - [Outlier Detection & Capping](#5-outlier-detection--capping)
    - [Scikit-Learn Preprocessing Essentials](#6-scikit-learn-preprocessing-essentials)
 6. [PART 6 — COMPLETE DATA SCIENCE PIPELINE TEMPLATE](#part-6--complete-data-science-pipeline-template)
-7. [QUICK REVISION SECTIONS (TIMED DRILLS)](#quick-revision-sections)
-   - [10-Minute Python Revision](#10-minute-python-revision)
-   - [10-Minute NumPy Revision](#10-minute-numpy-revision)
-   - [15-Minute Pandas Revision](#15-minute-pandas-revision)
-   - [15-Minute EDA Fast Run](#15-minute-eda-fast-run)
-   - [Pipeline One-Screen Cheat Sheet](#pipeline-one-screen-cheat-sheet)
-8. [PATTERN LIBRARY (20 COPY-PASTE DATA SCIENCE PATTERNS)](#pattern-library-20-copy-paste-patterns)
-9. ["WHAT DO I USE?" DECISION TABLE](#what-do-i-use-decision-table)
+7. [PART 7 — MACHINE LEARNING MODELS & SCIKIT-LEARN](#part-7--machine-learning-models--scikit-learn)
+   - [7.1 ML Problem Types](#71-ml-problem-types)
+   - [7.2 Universal Scikit-Learn Workflow](#72-universal-scikit-learn-workflow)
+   - [7.3 Linear Regression ⭐⭐⭐](#73-linear-regression-)
+   - [7.4 Ridge & Lasso Regularization ⭐⭐](#74-ridge--lasso-regularization-)
+   - [7.5 Logistic Regression ⭐⭐⭐](#75-logistic-regression-)
+   - [7.6 K-Nearest Neighbors (KNN) ⭐⭐](#76-k-nearest-neighbors-knn-)
+   - [7.7 Decision Trees ⭐⭐⭐](#77-decision-trees-)
+   - [7.8 Random Forest ⭐⭐⭐](#78-random-forest-)
+   - [7.9 Gradient Boosting (GBM / XGBoost)](#79-gradient-boosting-gbm--xgboost)
+   - [7.10 Support Vector Machines (SVM)](#710-support-vector-machines-svm)
+   - [7.11 K-Means Clustering](#711-k-means-clustering)
+8. [PART 8 — MODEL EVALUATION & VALIDATION](#part-8--model-evaluation--validation)
+   - [8.1 Regression Metrics (MAE, MSE, RMSE, R²)](#81-regression-metrics-mae-mse-rmse-r)
+   - [8.2 Classification Metrics (Accuracy, Precision, Recall, F1, ROC-AUC)](#82-classification-metrics-accuracy-precision-recall-f1-roc-auc)
+   - [8.3 Confusion Matrix Visual Breakdown](#83-confusion-matrix-visual-breakdown)
+   - [8.4 Cross-Validation Best Practices](#84-cross-validation-best-practices)
+   - [8.5 Hyperparameter Tuning (GridSearchCV)](#85-hyperparameter-tuning-gridsearchcv)
+   - [8.6 Overfitting vs. Underfitting Diagnostics](#86-overfitting-vs-underfitting-diagnostics)
+9. [PART 9 — DEEP LEARNING QUICK REFERENCE](#part-9--deep-learning-quick-reference)
+   - [9.1 Multi-Layer Perceptron (MLP) with Keras](#91-multi-layer-perceptron-mlp-with-keras)
+   - [9.2 Convolutional Neural Networks (CNN) ⭐⭐](#92-convolutional-neural-networks-cnn-)
+   - [9.3 Recurrent Neural Networks (RNN) ⭐⭐](#93-recurrent-neural-networks-rnn-)
+   - [9.4 LSTM & GRU (Long-Term Sequential Memory)](#94-lstm--gru-long-term-sequential-memory)
+10. [MODEL CHEAT SHEETS & DECISION GUIDES](#model-cheat-sheets--decision-guides)
+    - [Model Master Cheat Sheet Table](#model-master-cheat-sheet-table)
+    - [Model Selection Decision Tree ("What Model First?")](#model-selection-decision-tree-what-model-first)
+    - [Universal Model Templates (Regression, Classification, Clustering)](#universal-model-templates)
+11. [🧠 ACTIVE RECALL DRILLS](#-active-recall-drills)
+12. [⚠️ ML HIGH-FREQUENCY FORGETTING POINTS](#-ml-high-frequency-forgetting-points)
+13. [QUICK REVISION SECTIONS (TIMED DRILLS)](#quick-revision-sections)
+    - [10-Minute Python Revision](#10-minute-python-revision)
+    - [10-Minute NumPy Revision](#10-minute-numpy-revision)
+    - [15-Minute Pandas Revision](#15-minute-pandas-revision)
+    - [15-Minute EDA Fast Run](#15-minute-eda-fast-run)
+    - [Pipeline One-Screen Cheat Sheet](#pipeline-one-screen-cheat-sheet)
+14. [PATTERN LIBRARY (20 COPY-PASTE DATA SCIENCE PATTERNS)](#pattern-library-20-copy-paste-patterns)
+15. ["WHAT DO I USE?" DECISION TABLE](#what-do-i-use-decision-table)
 
 ---
 
@@ -1333,6 +1363,1077 @@ if __name__ == "__main__":
 
 ---
 
+```
+  Data Preparation
+         │
+         ▼
+  Feature Engineering
+         │
+         ▼
+  Preprocessing
+         │
+         ▼
+  Model Selection
+         │
+         ▼
+  Training (fit)
+         │
+         ▼
+  Evaluation (metrics)
+         │
+         ▼
+  Cross-Validation (stability)
+         │
+         ▼
+  Hyperparameter Tuning (GridSearchCV)
+```
+
+---
+
+# PART 7 — MACHINE LEARNING MODELS & SCIKIT-LEARN
+
+---
+
+## 7.1 ML Problem Types
+
+Before touching Scikit-Learn code, immediately identify which of the 4 problem spaces you are solving:
+
+| Problem Type | Target Variable ($y$) | When is it used? (Real-World Example) | Typical Baseline Models | Evaluation Metrics |
+| :--- | :--- | :--- | :--- | :--- |
+| **Regression** | **Continuous** real number ($-\infty, +\infty$) | Predicting house sale price, battery remaining cycles, customer lifetime value ($) | Linear Regression, Ridge/Lasso, Random Forest Regressor | MAE, MSE, RMSE, $R^2$ |
+| **Binary Classification** | **Discrete binary** label ($0$ or $1$, True/False) | Credit card fraud detection (1=Fraud, 0=Legit), disease diagnosis, customer churn | Logistic Regression, Decision Tree, Random Forest | Accuracy, Precision, Recall, F1, ROC-AUC |
+| **Multiclass Classification** | **Multiple discrete** categories ($3+$ mutually exclusive classes) | Handwritten digit classification ($0..9$), sentiment analysis (Pos/Neu/Neg) | Logistic Regression (Multinomial/OvR), Random Forest, XGBoost | Macro/Micro F1, Multi-class Log-Loss |
+| **Clustering (Unsupervised)** | **No target label** (find hidden geometric groupings) | Customer market segmentation, document topic discovery, anomaly grouping | K-Means, DBSCAN, Hierarchical Clustering | Silhouette Score, Inertia (Elbow) |
+
+---
+
+## 7.2 Universal Scikit-Learn Workflow
+
+Every estimator in Scikit-Learn adheres strictly to the **Unified 9-Step API Pattern**:
+
+```
+ ┌───────────────┐     ┌───────────────┐     ┌───────────────┐     ┌───────────────┐
+ │ 1. Clean Data │ ──► │ 2. Split X/y  │ ──► │ 3. Train/Test │ ──► │ 4. Preprocess │
+ └───────────────┘     └───────────────┘     └───────────────┘     └───────────────┘
+                                                                           │
+ ┌───────────────┐     ┌───────────────┐     ┌───────────────┐             │
+ │ 7. Evaluate   │ ◄── │  6. Predict   │ ◄── │ 5. Fit Model  │ ◄───────────┘
+ └───────────────┘     └───────────────┘     └───────────────┘
+```
+
+### The Universal Code Template
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error, accuracy_score
+
+# 1. Define Features (X) and Target (y)
+X = df.drop("target", axis=1) # 2D Matrix (DataFrame / 2D NumPy array)
+y = df["target"]              # 1D Vector (Series / 1D NumPy array)
+
+# 2. Strict Train / Test Split FIRST (Guarantees zero data leakage)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.20, random_state=42, stratify=None # use stratify=y for classification
+)
+
+# 3. Fit Preprocessing ONLY on X_train, Transform both
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled  = scaler.transform(X_test) # NEVER fit on test data!
+
+# 4. Instantiate & Fit Model
+model = ModelName(hyperparameter=value)
+model.fit(X_train_scaled, y_train)        # Learns internal parameters from training set
+
+# 5. Predict & Score
+y_pred = model.predict(X_test_scaled)     # Generates discrete predictions
+```
+
+### The 4 Core Estimator Methods Explained
+* **`model.fit(X_train, y_train)`:** The learning step. Computes mathematical parameters (e.g., OLS normal equation weights, decision tree split thresholds, or cluster centroids). Modifies the model in-place and returns `self`.
+* **`model.predict(X_test)`:** Applies learned parameters to new, unseen feature rows. Returns a 1D NumPy array of predicted continuous numbers (regression) or predicted class labels (classification).
+* **`model.predict_proba(X_test)`:** *(Classification only)* Returns an $(N, K)$ matrix of predicted class probabilities summing to 1.0 per row. `[:, 1]` extracts the positive class probability $P(y=1|X)$.
+* **`model.score(X_test, y_test)`:** Default evaluation shortcut. Returns **$R^2$ score** for regression and **Accuracy** for classification.
+
+---
+
+## 7.3 Linear Regression ⭐⭐⭐
+
+### Concept & Intuition
+Linear Regression models the target variable $y$ as a linear combination of input features:
+$$\hat{y} = w_0 + w_1 x_1 + w_2 x_2 + \dots + w_p x_p = \mathbf{w}^T \mathbf{x} + b$$
+It optimizes the weights by finding the hyperplane that minimizes the **Sum of Squared Residuals (Ordinary Least Squares / OLS)**: $\sum (y_i - \hat{y}_i)^2$.
+
+### When to Use It
+* Predicting continuous targets where relationships between features and output are predominantly additive/linear.
+* When maximum **interpretability** is required (stakeholders must understand the exact unit effect of each variable).
+* Baseline benchmarking before deploying complex non-linear ensembles.
+
+### The 5 Core Assumptions (L.I.N.E. + M)
+1. **Linearity:** Relationship between features and target mean is linear.
+2. **Independence:** Observations are independent (no autocorrelation in errors).
+3. **Normality:** Residuals ($y - \hat{y}$) are normally distributed around mean 0.
+4. **Equal Variance (Homoscedasticity):** Variance of residuals is constant across all predicted values.
+5. **No Multicollinearity:** Input features are not perfectly correlated with one another.
+
+### Exact Scikit-Learn Code
+```python
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+# 1. Instantiate & Fit
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+
+# 2. Predict
+y_pred = lr.predict(X_test)
+
+# 3. Evaluate Metrics
+mae  = mean_absolute_error(y_test, y_pred)
+mse  = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+r2   = r2_score(y_test, y_pred)
+
+print(f"MAE: {mae:.2f} | RMSE: {rmse:.2f} | R²: {r2:.4f}")
+
+# 4. Inspect Learned Parameters
+print("Intercept (b):", lr.intercept_) # Baseline value when all X=0
+print("Coefficients (w):", lr.coef_)   # Slope per feature: delta y for +1 unit of X_j
+
+# Inspect feature weights with names:
+coef_df = pd.DataFrame({"Feature": X.columns, "Weight": lr.coef_}).sort_values(by="Weight", ascending=False)
+```
+
+### Common Traps & Mistakes
+* **Trap 1: Confusing `lr.coef_` with predictions.** `lr.coef_` is the learned weight vector $(p,)$, NOT the output $\hat{y}$.
+* **Trap 2: Using classification metrics (Accuracy/F1) on regression.** Linear Regression outputs continuous floats; computing accuracy throws an error or yields 0.0%.
+* **Trap 3: Not scaling when interpreting relative feature importance.** If feature $A$ is in grams ($0..10000$) and feature $B$ is in kilograms ($0..10$), their unscaled coefficient magnitudes cannot be compared directly!
+
+> **🧠 Active Recall Check:** Close your eyes or open a scratch terminal. Write the 4 lines of code to instantiate, fit, predict, and compute RMSE + $R^2$ for Linear Regression.
+
+---
+
+## 7.4 Ridge & Lasso Regularization ⭐⭐
+
+### Concept & Intuition
+When features are correlated or $p \approx n$, standard OLS Linear Regression overfits by learning massive, unstable positive and negative weights that cancel each other out. **Regularization** adds a mathematical penalty to the loss function to penalize large weights.
+
+$$\text{Loss}_{\text{Ridge (L2)}} = \text{MSE} + \alpha \sum_{j=1}^p w_j^2 \quad \quad \text{Loss}_{\text{Lasso (L1)}} = \text{MSE} + \alpha \sum_{j=1}^p |w_j|$$
+
+```
+   RIDGE PENALTY (L2 Ball)                LASSO PENALTY (L1 Diamond)
+   Shrinks weights smoothly toward 0       Forces small/unimportant weights 
+   (never sets weights to EXACT zero)      to EXACTLY ZERO (Feature Selection!)
+            w2                                      w2
+            │   * OLS unconstrained                 │   * OLS unconstrained
+         ╭──┼──╮                                   ╱│╲
+        │   │   │                                 ╱ │ ╲
+    ────┼───●───┼──── w1                     ────●──┼──●──── w1
+        │   │   │                                 ╲ │ ╲   (Spiky corners hit axes
+         ╰──┼──╯                                   ╲│╱     -> exact zeros!)
+```
+
+### Ridge vs. Lasso Decision Table
+
+| Characteristic | Ridge Regression (L2) | Lasso Regression (L1) | ElasticNet (L1 + L2) |
+| :--- | :--- | :--- | :--- |
+| **Penalty Term** | $\alpha \sum w_j^2$ (Squared weights) | $\alpha \sum \|w_j\|$ (Absolute weights) | $r \alpha \|w\|_1 + \frac{1-r}{2} \alpha \|w\|_2^2$ |
+| **Weight Effect** | Shrinks coefficients asymptotically toward 0 | Drives redundant coefficients to **exactly 0.0** | Blends shrinkage + sparsity |
+| **Feature Selection** | **No** (all features kept in model) | **Yes** (acts as automated feature selector) | **Yes** |
+| **Correlated Features** | Distributes weight evenly among them | Arbitrarily picks one and zeros the others | Groups correlated features together |
+| **Mandatory Requirement** | **Must standardize features (`StandardScaler`)** | **Must standardize features (`StandardScaler`)** | **Must standardize features** |
+
+### Exact Scikit-Learn Code
+```python
+from sklearn.linear_model import Ridge, Lasso
+
+# alpha controls penalty strength:
+# alpha=0 -> Identical to standard OLS
+# large alpha -> Heavy penalty, weights shrink, model becomes simpler (higher bias, lower variance)
+ridge = Ridge(alpha=1.0)
+lasso = Lasso(alpha=0.1)
+
+# Fit on scaled data!
+ridge.fit(X_train_scaled, y_train)
+lasso.fit(X_train_scaled, y_train)
+
+# Check zeroed-out features in Lasso:
+zero_features = X.columns[lasso.coef_ == 0.0]
+print(f"Lasso dropped {len(zero_features)} useless features: {list(zero_features)}")
+```
+
+---
+
+## 7.5 Logistic Regression ⭐⭐⭐
+
+### Concept & Intuition
+Despite its name, **Logistic Regression is a CLASSIFICATION algorithm**. It models the probability that an observation belongs to the positive class ($y=1$) by passing a linear equation through the **Sigmoid (Logistic) Function**:
+
+$$z = \mathbf{w}^T \mathbf{x} + b \quad \implies \quad P(y=1|\mathbf{x}) = \sigma(z) = \frac{1}{1 + e^{-z}}$$
+
+```
+                      THE SIGMOID ACTIVATION
+        P(y=1)
+         1.0 ┼                                    ╭─────────
+             │                                   ╱
+         0.5 ┼─────────────────●────────────────╯  <-- Decision Threshold (0.5)
+             │                ╱
+         0.0 ┼───────────────╯
+             └─────────────────┼─────────────────── z = w^T x + b
+                              z=0 (Boundary)
+```
+
+* If $z \ge 0 \implies \sigma(z) \ge 0.5 \implies$ Predict **Class 1**.
+* If $z < 0 \implies \sigma(z) < 0.5 \implies$ Predict **Class 0**.
+
+### Exact Scikit-Learn Code
+```python
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    confusion_matrix, classification_report, roc_auc_score
+)
+
+# 1. Instantiate with increased max_iter (prevents convergence warnings)
+log_reg = LogisticRegression(max_iter=1000, C=1.0, random_state=42)
+# C is inverse regularization strength: Smaller C = stronger regularization!
+
+# 2. Fit
+log_reg.fit(X_train_scaled, y_train)
+
+# 3. Predict Classes vs. Probabilities
+y_pred = log_reg.predict(X_test_scaled)          # Discrete 0 or 1 (threshold = 0.5)
+y_prob = log_reg.predict_proba(X_test_scaled)[:, 1] # Probability of Class 1: P(y=1)
+
+# 4. Standard Classification Evaluation Block
+print(f"Accuracy:  {accuracy_score(y_test, y_pred):.4f}")
+print(f"Precision: {precision_score(y_test, y_pred):.4f}")
+print(f"Recall:    {recall_score(y_test, y_pred):.4f}")
+print(f"F1-Score:  {f1_score(y_test, y_pred):.4f}")
+print(f"ROC-AUC:   {roc_auc_score(y_test, y_prob):.4f}")
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# 5. Inspect Log-Odds Weights
+print("Intercept:", log_reg.intercept_)
+print("Coefficients:", log_reg.coef_)
+```
+
+### Custom Decision Thresholding Pattern
+In high-stakes problems (fraud, cancer), the default 0.5 threshold is often suboptimal:
+```python
+# Lower threshold to 0.30 to catch MORE fraud (increases Recall, lowers Precision)
+custom_threshold = 0.30
+y_pred_custom = (y_prob >= custom_threshold).astype(int)
+```
+
+---
+
+## 7.6 K-Nearest Neighbors (KNN) ⭐⭐
+
+### Concept & Intuition
+A non-parametric, instance-based algorithm. To classify a new point $\mathbf{x}$, it computes the Euclidean distance between $\mathbf{x}$ and all training samples, finds the $k$ closest neighbors, and takes a **majority vote**.
+
+$$\text{Distance}(\mathbf{p}, \mathbf{q}) = \sqrt{\sum_{j=1}^p (p_j - q_j)^2}$$
+
+```
+                K-NEAREST NEIGHBORS (k=3 vs k=5)
+                          
+                          ▲ Class A
+                        ▲   ▲
+                      ▲   ● ◄── New point
+                        ▼   ▼
+                      ▼   ▼   ▼ Class B
+                k=3: 2 ▲ vs 1 ▼ -> Predicts Class A
+                k=5: 2 ▲ vs 3 ▼ -> Predicts Class B
+```
+
+### Key Rules to Remember
+* **Feature Scaling is 100% MANDATORY:** Distance calculations are completely ruined if one feature has range $0..100,000$ and another is $0..1$.
+* **The $k$ Hyperparameter:**
+  * **Small $k$ ($k=1$):** High variance / Overfitting. Memorizes individual noisy points and creates erratic decision boundaries.
+  * **Large $k$ ($k=50$):** High bias / Underfitting. Oversmooths decision boundaries and simply predicts the majority class.
+  * **Rule of thumb:** Choose an odd number (e.g., $k=3, 5, 7$) to prevent 50/50 voting ties in binary classification.
+
+### Exact Scikit-Learn Code
+```python
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+
+# Classification
+knn_clf = KNeighborsClassifier(n_neighbors=5, metric="minkowski", p=2) # p=2 -> Euclidean
+knn_clf.fit(X_train_scaled, y_train)
+y_pred = knn_clf.predict(X_test_scaled)
+
+# Regression (averages targets of k nearest neighbors)
+knn_reg = KNeighborsRegressor(n_neighbors=5)
+knn_reg.fit(X_train_scaled, y_train)
+y_pred_reg = knn_reg.predict(X_test_scaled)
+```
+
+---
+
+## 7.7 Decision Trees ⭐⭐⭐
+
+### Concept & Intuition
+Decision Trees recursively partition the feature space into axis-aligned rectangular boxes. At each step, it chooses the feature $j$ and split threshold $t$ that **maximizes purity** (minimizes Gini Impurity or Entropy for classification; minimizes Variance/MSE for regression).
+
+$$\text{Gini Impurity} = 1 - \sum_{k=1}^K p_k^2 \quad \quad \text{Entropy} = - \sum_{k=1}^K p_k \log_2(p_k)$$
+
+```
+                     DECISION TREE SPLITTING
+                     
+                       [ Age <= 30.5 ]
+                        /          \
+                      YES          NO
+                      /              \
+               [ Salary <= 50k ]    [ Class 1 ]
+                 /          \
+            [ Class 0 ]   [ Class 1 ]
+```
+
+### The Overfitting Danger & Hyperparameter Guards
+An unconstrained tree grows until every leaf contains exactly 1 sample (100% train accuracy, terrible generalization). You **must** constrain it:
+
+| Hyperparameter | What it controls | Effect on Overfitting |
+| :--- | :--- | :--- |
+| **`max_depth`** | Maximum vertical levels allowed in tree | **Most important.** Lower values ($3..8$) prevent deep memorization. |
+| **`min_samples_split`** | Minimum samples required inside a node before it can split | Higher values ($10..50$) stop the tree from splitting on tiny clusters. |
+| **`min_samples_leaf`** | Minimum samples that MUST remain in a terminal leaf | Higher values ($5..20$) smooth out noisy leaf predictions. |
+| **`max_features`** | Number of features to consider when looking for the best split | Subsampling features decorrelates nodes. |
+
+### Exact Scikit-Learn Code
+```python
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+
+# Classification Tree
+dt_clf = DecisionTreeClassifier(
+    criterion="gini",         # 'gini' or 'entropy'
+    max_depth=5,              # Restrict depth to avoid overfitting
+    min_samples_split=10,
+    min_samples_leaf=5,
+    random_state=42
+)
+dt_clf.fit(X_train, y_train) # Decision trees do NOT require feature scaling!
+y_pred = dt_clf.predict(X_test)
+
+# Regression Tree
+dt_reg = DecisionTreeRegressor(max_depth=5, random_state=42)
+dt_reg.fit(X_train, y_train)
+y_pred_reg = dt_reg.predict(X_test)
+```
+
+---
+
+## 7.8 Random Forest ⭐⭐⭐
+
+### Concept & Intuition
+A single Decision Tree has **low bias but very high variance** (sensitive to tiny changes in data). Random Forest fixes this using **Bagging (Bootstrap Aggregation) + Random Feature Subspacing**:
+
+1. **Bootstrap Sampling:** Creates $B$ different training datasets by sampling $N$ rows *with replacement* from the original data.
+2. **Feature Subspacing:** At every single split, considers only a random subset of features (typically $\sqrt{p}$).
+3. **Ensemble Averaging:** Trains $B$ unpruned, deep trees in parallel. The final prediction is a **majority vote** (classification) or **mean average** (regression).
+
+$$\text{Variance}_{\text{Ensemble}} = \rho \sigma^2 + \frac{1 - \rho}{B} \sigma^2$$
+*As $B \to \infty$, the second term vanishes. Because feature subspacing reduces tree correlation $\rho$, total variance drops dramatically without increasing bias!*
+
+```
+                     RANDOM FOREST ARCHITECTURE
+                     
+                            [ Training Data ]
+                          /        │         \
+                   Bootstrap 1  Bootstrap 2  Bootstrap B
+                        │          │            │
+                     Tree 1     Tree 2       Tree B
+                     (Tree)     (Tree)       (Tree)
+                        │          │            │
+                     Pred: 1    Pred: 1      Pred: 0
+                          \        │         /
+                           [ MAJORITY VOTE ]
+                                   │
+                              Final: 1
+```
+
+### Exact Scikit-Learn Code
+```python
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
+# 1. Instantiate Random Forest Classifier
+rf_clf = RandomForestClassifier(
+    n_estimators=200,         # Number of trees in the forest (100-500 standard)
+    max_depth=10,             # Maximum depth of each tree
+    min_samples_leaf=4,       # Prevent single-sample leaves
+    n_jobs=-1,                # Utilize all available CPU cores in parallel!
+    random_state=42
+)
+
+# 2. Fit & Predict
+rf_clf.fit(X_train, y_train)
+y_pred = rf_clf.predict(X_test)
+y_prob = rf_clf.predict_proba(X_test)[:, 1]
+
+# 3. Extract Feature Importances (Mean Impurity Decrease)
+feat_imp = pd.DataFrame({
+    "Feature": X.columns,
+    "Importance": rf_clf.feature_importances_
+}).sort_values(by="Importance", ascending=False)
+print("Top 5 Predictive Features:\n", feat_imp.head(5))
+
+# Regression Equivalent
+rf_reg = RandomForestRegressor(n_estimators=200, max_depth=10, n_jobs=-1, random_state=42)
+rf_reg.fit(X_train, y_train)
+```
+
+---
+
+## 7.9 Gradient Boosting (GBM / XGBoost)
+
+### Concept: Bagging vs. Boosting Mental Model
+
+* **Random Forest (Bagging):** Trees are built **independently in parallel**. Each tree tries to predict the target $y$. Their results are averaged to reduce variance.
+* **Gradient Boosting (Boosting):** Trees are built **sequentially in a chain**. Each new tree is trained to predict the **residuals (errors)** of all previous trees combined.
+
+$$\hat{y}^{(m)}(\mathbf{x}) = \hat{y}^{(m-1)}(\mathbf{x}) + \eta \cdot \text{Tree}_m(\mathbf{x}, \text{Residuals})$$
+*where $\eta$ is the `learning_rate` (shrinkage step size).*
+
+```
+                     BOOSTING SEQUENTIAL CHAIN
+                     
+   [ Tree 1 ] ──► Computes Residuals ──► [ Tree 2 ] ──► Computes Residuals ──► [ Tree 3 ]
+   (Base Pred)    (y - y_hat_1)          (Fixes Errors) (y - y_hat_2)          (Refines)
+```
+
+### Exact Scikit-Learn Code
+```python
+from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
+
+# Scikit-Learn Native Implementation
+gbm = GradientBoostingClassifier(
+    n_estimators=100,         # Number of sequential boosting stages
+    learning_rate=0.1,        # Shrinkage factor (lower = requires more trees, more robust)
+    max_depth=3,              # Shallow trees (stumps) work best in boosting!
+    random_state=42
+)
+gbm.fit(X_train, y_train)
+y_pred = gbm.predict(X_test)
+
+# Industry Standard Equivalent: XGBoost / LightGBM
+# import xgboost as xgb
+# model = xgb.XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
+```
+
+---
+
+## 7.10 Support Vector Machines (SVM)
+
+### Concept & Intuition
+SVM finds the unique decision hyperplane that separates two classes while maximizing the **Margin** (geometric distance to the nearest training points, known as **Support Vectors**).
+
+* **Hard Margin:** Requires 100% linear separability with 0 errors (easily breaks on noisy data).
+* **Soft Margin ($C$ hyperparameter):** Permits controlled margin violations:
+  * **Large $C$:** Severe penalty on violations $\implies$ Narrow margin, complex boundary, risk of **overfitting**.
+  * **Small $C$:** Lenient penalty on violations $\implies$ Wide margin, simpler boundary, risk of **underfitting**.
+* **Kernel Trick:** Projects non-linearly separable inputs into a higher-dimensional space where a linear hyperplane exists without computing coordinates explicitly (e.g., **Radial Basis Function / RBF Kernel**).
+
+### Exact Scikit-Learn Code
+```python
+from sklearn.svm import SVC, SVR
+
+# SVM Classification (Feature Scaling is 100% Mandatory!)
+svm = SVC(
+    C=1.0,                    # Regularization parameter
+    kernel="rbf",             # 'linear', 'poly', 'rbf', 'sigmoid'
+    gamma="scale",            # Kernel coefficient (higher gamma = tighter RBF envelopes)
+    probability=True,         # Enables predict_proba via internal Platt scaling
+    random_state=42
+)
+svm.fit(X_train_scaled, y_train)
+y_pred = svm.predict(X_test_scaled)
+y_prob = svm.predict_proba(X_test_scaled)[:, 1]
+```
+
+---
+
+## 7.11 K-Means Clustering
+
+### Concept & Intuition
+An **unsupervised algorithm** that partitions unlabelled data into $k$ distinct, non-overlapping clusters.
+1. Randomly initializes $k$ centroids.
+2. **Assignment Step:** Assigns every data point to its nearest centroid (Euclidean distance).
+3. **Update Step:** Recomputes each centroid as the mathematical mean of all points assigned to it.
+4. Repeats until centroids stabilize (convergence).
+
+$$\text{Inertia (WCSS)} = \sum_{i=1}^N \min_{\mu_j} \|\mathbf{x}_i - \mu_j\|^2$$
+
+```
+                         THE ELBOW METHOD
+             Inertia
+                │
+                │  ●  k=1
+                │   \
+                │    \
+                │     ●  k=2
+                │      \
+                │       ● ◄──── Optimal "Elbow" Point (k=3)
+                │         \───●───●───●
+                └────────────────────────── k (n_clusters)
+```
+
+### Exact Scikit-Learn Code
+```python
+from sklearn.cluster import KMeans
+
+# 1. Instantiate & Fit (Scaling is MANDATORY for distance calculations!)
+kmeans = KMeans(
+    n_clusters=3,             # Target number of clusters (k)
+    n_init="auto",            # Number of random centroid initializations
+    random_state=42
+)
+cluster_labels = kmeans.fit_predict(X_train_scaled) # Returns cluster IDs: array([0, 2, 1, 0, ...])
+
+# 2. Inspect Cluster Properties
+print("Cluster Centroid Coordinates:\n", kmeans.cluster_centers_) # Shape: (k, num_features)
+print("Inertia (Within-Cluster Sum of Squares):", kmeans.inertia_)
+
+# 3. Elbow Method Pattern to find Optimal k:
+inertias = []
+k_range = range(1, 10)
+for k in k_range:
+    km = KMeans(n_clusters=k, n_init="auto", random_state=42).fit(X_train_scaled)
+    inertias.append(km.inertia_)
+```
+
+---
+
+# PART 8 — MODEL EVALUATION & VALIDATION
+
+---
+
+## 8.1 Regression Metrics (MAE, MSE, RMSE, R²)
+
+```python
+import numpy as np
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+# y_true = actual test targets, y_pred = model predictions
+mae  = mean_absolute_error(y_true, y_pred)
+mse  = mean_squared_error(y_true, y_pred)
+rmse = np.sqrt(mse)
+r2   = r2_score(y_true, y_pred)
+```
+
+| Metric | Formula | Output Units | Outlier Sensitivity | When to Use |
+| :--- | :--- | :--- | :--- | :--- |
+| **MAE** | $\frac{1}{n}\sum \|y - \hat{y}\|$ | Same as target ($) | **Low** (linear penalty) | When business errors cost proportionally; robust to outliers. |
+| **MSE** | $\frac{1}{n}\sum (y - \hat{y})^2$ | Target units squared ($^2) | **Very High** (quadratic penalty) | Mathematical optimization loss function. |
+| **RMSE** | $\sqrt{\text{MSE}}$ | Same as target ($) | **High** | When large catastrophic errors must be heavily penalized. |
+| **$R^2$ Score** | $1 - \frac{\sum(y-\hat{y})^2}{\sum(y-\bar{y})^2}$ | Unitless ($-\infty..1.0$) | Medium | Measuring the % of target variance explained by features. |
+
+---
+
+## 8.2 Classification Metrics
+
+```python
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+)
+
+acc  = accuracy_score(y_true, y_pred)
+prec = precision_score(y_true, y_pred)
+rec  = recall_score(y_true, y_pred)
+f1   = f1_score(y_true, y_pred)
+auc  = roc_auc_score(y_true, y_prob) # Note: Requires PROBABILITIES, not discrete classes!
+```
+
+### Metric Selection Decision Guide
+
+| Business Situation | Primary Metric | Intuition & Reason |
+| :--- | :--- | :--- |
+| **Balanced Classes** (50% Cat, 50% Dog) | **Accuracy** | Simple ratio of correct predictions across all samples. |
+| **False Positives are very costly** (e.g., Spam Filter deleting important email; Job candidate screening) | **Precision** | $\frac{\text{TP}}{\text{TP} + \text{FP}}$: When the model predicts Positive, it must be correct. |
+| **False Negatives are fatal** (e.g., Cancer screening, Fraud detection, Defect inspection) | **Recall** (Sensitivity) | $\frac{\text{TP}}{\text{TP} + \text{FN}}$: Must catch every single actual Positive instance. |
+| **Imbalanced Classes where both errors matter** | **F1-Score** | $2 \cdot \frac{\text{Prec} \cdot \text{Rec}}{\text{Prec} + \text{Rec}}$: Harmonic mean balancing precision and recall. |
+| **Evaluating model across all possible thresholds** | **ROC-AUC** | Measures probability that a random positive ranks higher than a random negative. |
+
+---
+
+## 8.3 Confusion Matrix Visual Breakdown
+
+```
+                         PREDICTED CLASS
+                      Positive (1)       Negative (0)
+                  ┌──────────────────┬──────────────────┐
+     Positive (1) │  TRUE POSITIVE   │  FALSE NEGATIVE  │
+                  │       (TP)       │   (FN) Type II   │
+  ACTUAL          ├──────────────────┼──────────────────┤
+  CLASS           │  FALSE POSITIVE  │  TRUE NEGATIVE   │
+     Negative (0) │   (FP) Type I    │       (TN)       │
+                  └──────────────────┴──────────────────┘
+```
+
+```python
+from sklearn.metrics import confusion_matrix
+
+cm = confusion_matrix(y_true, y_pred)
+# cm[0, 0] = True Negatives (TN)
+# cm[0, 1] = False Positives (FP)
+# cm[1, 0] = False Negatives (FN)
+# cm[1, 1] = True Positives (TP)
+
+tn, fp, fn, tp = cm.ravel()
+print(f"TN: {tn}, FP: {fp}, FN: {fn}, TP: {tp}")
+```
+
+---
+
+## 8.4 Cross-Validation Best Practices
+
+Never rely on a single 80/20 train/test split to evaluate a model; you might get an unusually lucky or difficult test split. **$K$-Fold Cross-Validation** splits data into $K$ equal folds, trains $K$ times (using $K-1$ folds for training and 1 fold for validation), and averages the scores.
+
+```python
+from sklearn.model_selection import cross_val_score
+
+# 5-Fold Cross Validation
+scores = cross_val_score(
+    estimator=model,
+    X=X_train,
+    y=y_train,
+    cv=5,                     # 5 folds
+    scoring="accuracy",       # 'r2', 'neg_root_mean_squared_error', 'f1', 'roc_auc'
+    n_jobs=-1
+)
+
+print(f"CV Scores per fold: {scores}")
+print(f"Mean CV Score: {scores.mean():.4f} (+/- {scores.std():.4f})")
+```
+
+---
+
+## 8.5 Hyperparameter Tuning (`GridSearchCV`)
+
+* **Parameters:** Learned internally by model during `.fit()` (e.g., $w, b$).
+* **Hyperparameters:** Configured externally before training (e.g., `n_estimators`, `max_depth`, `alpha`, `C`).
+
+```python
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+
+# 1. Define hyperparameter search grid
+param_grid = {
+    "n_estimators": [100, 200],
+    "max_depth": [5, 10, None],
+    "min_samples_leaf": [2, 5]
+}
+
+# 2. Instantiate GridSearch with 5-fold CV
+grid = GridSearchCV(
+    estimator=RandomForestClassifier(random_state=42),
+    param_grid=param_grid,
+    cv=5,
+    scoring="f1",
+    n_jobs=-1
+)
+
+# 3. Fit GridSearch (strictly on training set!)
+grid.fit(X_train, y_train)
+
+# 4. Extract Best Configuration
+print("Best Hyperparameters:", grid.best_params_)
+print(f"Best CV Score: {grid.best_score_:.4f}")
+
+# 5. Evaluate Best Model directly on Test Set
+best_model = grid.best_estimator_
+test_f1 = best_model.score(X_test, y_test)
+```
+
+---
+
+## 8.6 Overfitting vs. Underfitting Diagnostics
+
+```
+                   THE BIAS-VARIANCE TRADEOFF
+          Error
+            │
+            │  \                           /  Validation Error (High Variance!)
+            │   \     Optimal Balance     /
+            │    \          ▼            /
+            │     \        ●────────────●
+            │      \      /
+            │       \    / ─────────────── Training Error
+            │        \  /
+            │         ●
+            └──────────────────────────────────── Model Complexity
+                Underfitting                Overfitting
+                (High Bias)                (High Variance)
+```
+
+| State | Model Complexity | Training Score | Test/Val Score | Primary Diagnosis | What is the Fix? |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Underfitting** | Too Simple (e.g. Linear model on complex non-linear curve) | **Low** | **Low** | High Bias | Add features, use non-linear models, reduce regularization ($\downarrow \alpha$). |
+| **Good Fit** | Balanced | **High** | **High** | Generalized | Ready for production deployment. |
+| **Overfitting** | Too Complex (e.g. Unpruned Tree, $k=1$ KNN) | **High (Near 100%)** | **Low** | High Variance | Add regularization ($\uparrow \alpha$, $\downarrow C$), prune tree depth, get more data, dropout. |
+
+---
+
+# PART 9 — DEEP LEARNING QUICK REFERENCE
+
+---
+
+## 9.1 Multi-Layer Perceptron (MLP) with Keras
+
+```python
+import tensorflow as tf
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+
+# Regression MLP (Outputs continuous number)
+reg_mlp = Sequential([
+    Dense(64, activation="relu", input_shape=(X_train.shape[1],)), # Input layer + Hidden 1
+    Dropout(0.2),                                                  # Regularization
+    Dense(32, activation="relu"),                                  # Hidden 2
+    Dense(1)                                                       # Output: 1 neuron, NO activation!
+])
+reg_mlp.compile(optimizer="adam", loss="mse", metrics=["mae"])
+reg_mlp.fit(X_train_scaled, y_train, epochs=20, batch_size=32, validation_split=0.2, verbose=0)
+reg_preds = reg_mlp.predict(X_test_scaled)
+
+# Binary Classification Output Layer Comparison:
+# Output: Dense(1, activation="sigmoid"), Loss: loss="binary_crossentropy", Metric: metrics=["accuracy"]
+
+# Multi-class Classification Output Layer Comparison:
+# Output: Dense(K, activation="softmax"), Loss: loss="sparse_categorical_crossentropy"
+```
+
+---
+
+## 9.2 Convolutional Neural Networks (CNN) ⭐⭐
+
+**Core Purpose:** Grid-like spatial data (Images, Spectrograms, Video Frames).
+
+```python
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+
+model = Sequential([
+    # 1. Conv2D: Slides 32 distinct (3x3) learnable filters to extract local spatial patterns (edges, textures)
+    Conv2D(32, (3, 3), activation="relu", input_shape=(64, 64, 3)),
+    
+    # 2. MaxPooling2D: Downsamples spatial dimensions by 2x2, reducing computation and adding translation invariance
+    MaxPooling2D((2, 2)),
+    
+    # 3. Flatten: Unrolls 2D feature maps into a 1D vector
+    Flatten(),
+    
+    # 4. Dense: Fully connected layers for non-linear feature combination and final class scoring
+    Dense(64, activation="relu"),
+    Dense(1, activation="sigmoid") # Binary classification output
+])
+
+model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+model.fit(X_train, y_train, epochs=10, batch_size=32)
+```
+
+---
+
+## 9.3 Recurrent Neural Networks (RNN) ⭐⭐
+
+**Core Purpose:** Sequential temporal data where current state depends on past history (Time-series, sensor streams, text).
+
+```python
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import SimpleRNN, Dense
+
+# Input shape format is ALWAYS: (batch_size, timesteps, num_features)
+model = Sequential([
+    SimpleRNN(64, activation="tanh", input_shape=(10, 1)), # 10 past timesteps, 1 feature per step
+    Dense(1) # Next-step continuous prediction
+])
+model.compile(optimizer="adam", loss="mse")
+model.fit(X_train, y_train, epochs=20, batch_size=32)
+```
+* **Hidden State ($h_t$):** Vector that acts as the model's memory, passed recursively from timestep $t-1$ to timestep $t$.
+
+---
+
+## 9.4 LSTM & GRU (Long-Term Sequential Memory)
+
+Vanilla RNNs suffer from **Vanishing Gradients**; errors cannot backpropagate across $>10$ timesteps. **LSTMs (Long Short-Term Memory)** fix this using an internal Cell State and 3 additive gating mechanisms:
+
+$$\text{Vanilla RNN (Short Memory)} \quad \longrightarrow \quad \text{LSTM (Deep Memory Gates)} \quad \longrightarrow \quad \text{GRU (Faster 2-Gate Alternative)}$$
+
+```python
+from tensorflow.keras.layers import LSTM, GRU
+
+# Drop-in replacement for SimpleRNN with deep memory gates:
+lstm_model = Sequential([
+    LSTM(64, input_shape=(10, 1)), # Contains Forget, Input, Output gates
+    Dense(1)
+])
+
+gru_model = Sequential([
+    GRU(64, input_shape=(10, 1)),  # Simpler 2-gate architecture (Reset & Update gates)
+    Dense(1)
+])
+```
+
+---
+
+# MODEL CHEAT SHEETS & DECISION GUIDES
+
+## Model Master Cheat Sheet Table
+
+| Model | Primary Task | Core Intuition / Key Mechanism | Scaling Mandatory? | Primary Hyperparameters |
+| :--- | :--- | :--- | :--- | :--- |
+| **Linear Regression** | Regression | OLS line fitting: $\mathbf{w}^T\mathbf{x} + b$ | No (Yes for weights) | `fit_intercept` |
+| **Ridge Regression** | Regression | OLS with $L2$ weight penalty ($\alpha \sum w_i^2$) | **YES** | `alpha` |
+| **Lasso Regression** | Regression | OLS with $L1$ weight penalty ($\alpha \sum \|w_i\|$) | **YES** | `alpha` |
+| **Logistic Regression**| Classification | Linear log-odds mapped via Sigmoid | **YES** | `C`, `penalty`, `max_iter` |
+| **KNN** | Both | Majority vote of $k$ closest neighbors | **YES (100%)** | `n_neighbors`, `metric` |
+| **Decision Tree** | Both | Recursive binary greedy feature splitting | **NO** | `max_depth`, `min_samples_leaf` |
+| **Random Forest** | Both | Bagged ensemble of unpruned parallel trees | **NO** | `n_estimators`, `max_depth`, `n_jobs` |
+| **Gradient Boosting** | Both | Sequential trees correcting previous errors | **NO** | `n_estimators`, `learning_rate`, `max_depth`|
+| **SVM** | Both | Maximum margin separation with kernel trick | **YES (100%)** | `C`, `kernel`, `gamma` |
+| **K-Means** | Clustering | Iterative centroid update minimizing inertia | **YES (100%)** | `n_clusters`, `n_init` |
+| **MLP / Neural Net** | Both | Stacked linear layers + non-linear activations | **YES** | `epochs`, `lr`, `units`, `batch_size` |
+| **CNN** | Images/Spatial | Parameter-shared spatial 2D convolutions | **YES (0..1 pixel)**| `filters`, `kernel_size`, `pool_size` |
+| **LSTM / GRU** | Sequences/Time | Gated cell state overcoming vanishing gradient| **YES** | `units`, `timesteps` |
+
+---
+
+## Model Selection Decision Tree ("What Model First?")
+
+```
+                          WHAT IS YOUR TARGET TYPE?
+                                      │
+               ┌──────────────────────┴──────────────────────┐
+               ▼                                             ▼
+        [ CONTINUOUS ]                                 [ CATEGORICAL ]
+               │                                             │
+      Is dataset linear?                            Are classes imbalanced?
+       /              \                              /                    \
+     YES              NO                           YES                    NO
+     │                │                            │                      │
+[ Linear / Ridge ] [ Random Forest ]         [ Random Forest / XGBoost ]  [ Logistic Reg ]
+                   [ LightGBM / XGBoost ]    (Use PR-AUC / F1)             [ Random Forest ]
+
+                          SPECIAL DATA MODALITIES:
+  * Images / 2D Spatial Grid  ──────► CNN
+  * Audio / Text / Sequential ──────► LSTM / GRU / Transformer
+  * Unlabelled Data           ──────► K-Means / DBSCAN
+```
+
+---
+
+## Universal Model Templates
+
+### 1. Regression Template
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import numpy as np
+
+X = df.drop("target", axis=1); y = df["target"]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+print(f"MAE:  {mean_absolute_error(y_test, y_pred):.2f}")
+print(f"RMSE: {np.sqrt(mean_squared_error(y_test, y_pred)):.2f}")
+print(f"R²:   {r2_score(y_test, y_pred):.4f}")
+```
+
+### 2. Classification Template
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+
+X = df.drop("target", axis=1); y = df["target"]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+model = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+y_prob = model.predict_proba(X_test)[:, 1]
+
+print(f"Accuracy:  {accuracy_score(y_test, y_pred):.4f}")
+print(f"Precision: {precision_score(y_test, y_pred):.4f}")
+print(f"Recall:    {recall_score(y_test, y_pred):.4f}")
+print(f"F1-Score:  {f1_score(y_test, y_pred):.4f}")
+print(f"ROC-AUC:   {roc_auc_score(y_test, y_prob):.4f}")
+```
+
+### 3. Clustering Template
+```python
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+
+X_scaled = StandardScaler().fit_transform(df)
+kmeans = KMeans(n_clusters=3, n_init="auto", random_state=42)
+labels = kmeans.fit_predict(X_scaled)
+print("Cluster Centroids:\n", kmeans.cluster_centers_)
+print("Inertia:", kmeans.inertia_)
+```
+
+---
+
+# 🧠 ACTIVE RECALL DRILLS
+
+Test your muscle memory right now. Do not look at the answers until you have written out the code!
+
+### Drill 1: Write a Complete Linear Regression Training + Evaluation Pipeline
+<details>
+<summary>Show Answer</summary>
+
+```python
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+X = df.drop("target", axis=1); y = df["target"]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+r2 = r2_score(y_test, y_pred)
+print(f"RMSE: {rmse:.2f}, R2: {r2:.4f}")
+print("Weights:", model.coef_, "Intercept:", model.intercept_)
+```
+</details>
+
+---
+
+### Drill 2: Write Logistic Regression with Precision, Recall, and F1
+<details>
+<summary>Show Answer</summary>
+
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+scaler = StandardScaler()
+X_tr_sc = scaler.fit_transform(X_train)
+X_te_sc = scaler.transform(X_test)
+
+clf = LogisticRegression(max_iter=1000, random_state=42)
+clf.fit(X_tr_sc, y_train)
+y_pred = clf.predict(X_te_sc)
+
+print("Precision:", precision_score(y_test, y_pred))
+print("Recall:   ", recall_score(y_test, y_pred))
+print("F1-Score: ", f1_score(y_test, y_pred))
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+```
+</details>
+
+---
+
+### Drill 3: Write Random Forest Classification with Feature Importances
+<details>
+<summary>Show Answer</summary>
+
+```python
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+
+rf = RandomForestClassifier(n_estimators=200, max_depth=8, n_jobs=-1, random_state=42)
+rf.fit(X_train, y_train)
+y_pred = rf.predict(X_test)
+
+imp = pd.DataFrame({"Feature": X.columns, "Importance": rf.feature_importances_}).sort_values(by="Importance", ascending=False)
+print(imp.head(5))
+```
+</details>
+
+---
+
+### Drill 4: Write K-Means Clustering and Extract Inertia
+<details>
+<summary>Show Answer</summary>
+
+```python
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+
+X_scaled = StandardScaler().fit_transform(X)
+km = KMeans(n_clusters=4, n_init="auto", random_state=42)
+cluster_labels = km.fit_predict(X_scaled)
+print("Inertia (WCSS):", km.inertia_)
+print("Centroids:\n", km.cluster_centers_)
+```
+</details>
+
+---
+
+### Drill 5: Write a Keras CNN for Binary Image Classification
+<details>
+<summary>Show Answer</summary>
+
+```python
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+
+cnn = Sequential([
+    Conv2D(32, (3, 3), activation="relu", input_shape=(64, 64, 3)),
+    MaxPooling2D((2, 2)),
+    Flatten(),
+    Dense(64, activation="relu"),
+    Dense(1, activation="sigmoid")
+])
+cnn.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+cnn.fit(X_train, y_train, epochs=10, batch_size=32)
+```
+</details>
+
+---
+
+### Drill 6: Write a Keras LSTM for Sequential Regression
+<details>
+<summary>Show Answer</summary>
+
+```python
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import LSTM, Dense
+
+lstm = Sequential([
+    LSTM(64, input_shape=(10, 1)), # 10 timesteps, 1 feature
+    Dense(1)
+])
+lstm.compile(optimizer="adam", loss="mse", metrics=["mae"])
+lstm.fit(X_train, y_train, epochs=20, batch_size=32)
+```
+</details>
+
+---
+
+# ⚠️ ML HIGH-FREQUENCY FORGETTING POINTS
+
+| Concept Pair | Core Distinction / What People Forget |
+| :--- | :--- |
+| **Regression vs. Classification** | Regression outputs continuous real numbers (Price, RUL, Temp); Classification outputs discrete class categories (0/1, Cat/Dog). |
+| **Linear Reg vs. Logistic Reg** | Linear Reg models continuous numbers; Logistic Reg is **Classification** (passes linear score through Sigmoid to output probabilities). |
+| **`fit` vs `predict` vs `predict_proba`** | `fit` calculates parameters from training data; `predict` outputs final class labels (0 or 1); `predict_proba` outputs probabilities $[P_0, P_1]$. |
+| **Parameters vs. Hyperparameters** | Parameters are learned *internally* by the model ($w, b$); Hyperparameters are tuned *externally* by you (`max_depth`, `alpha`, `k`). |
+| **$X$ vs $y$** | $X$ is a **2D matrix** of independent features $(N, p)$; $y$ is a **1D vector** of target labels $(N,)$. |
+| **Scaling vs. Encoding** | Scaling normalizes numeric magnitude ranges (StandardScaler/MinMax); Encoding converts text categories to numbers (OHE/Ordinal). |
+| **Precision vs. Recall** | Precision = Quality of positive predictions ($\frac{\text{TP}}{\text{TP}+\text{FP}}$); Recall = Quantity of actual positives found ($\frac{\text{TP}}{\text{TP}+\text{FN}}$). |
+| **MAE vs. RMSE** | MAE gives equal weight to all errors; RMSE squares errors first, heavily punishing large catastrophic mistakes. |
+| **Overfitting vs. Underfitting** | Overfitting = High Train Score, Low Test Score (Memorized noise); Underfitting = Low Train Score, Low Test Score (Too simple). |
+| **Random Forest vs. Boosting** | Random Forest builds trees **in parallel independently**; Gradient Boosting builds trees **sequentially correcting previous errors**. |
+| **CNN vs. RNN** | CNNs extract local spatial patterns from grid images; RNNs model sequential temporal dependencies over time. |
+| **RNN vs. LSTM** | Vanilla RNN forgets long sequences ($>10$ steps); LSTM uses additive cell state gating to preserve long-term memory. |
+| **Output Layer Activations** | Regression $\to$ `Dense(1)` (linear); Binary Class $\to$ `Dense(1, activation='sigmoid')`; Multi Class $\to$ `Dense(K, activation='softmax')`. |
+
+---
 # QUICK REVISION SECTIONS
 
 ## 10-Minute Python Revision
