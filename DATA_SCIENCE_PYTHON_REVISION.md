@@ -53,13 +53,15 @@
    - [Binning & Discretization](#4-binning--discretization)
    - [Outlier Detection & Capping](#5-outlier-detection--capping)
    - [Scikit-Learn Preprocessing Essentials](#6-scikit-learn-preprocessing-essentials)
-6. [PART 6 — COMPLETE DATA SCIENCE PIPELINE TEMPLATE](#part-6--complete-data-science-pipeline-template)
+6. [PART 6 — COMPLETE DATA SCIENCE PIPELINE TEMPLATES](#part-6--complete-data-science-pipeline-templates)
+   - [6.1 Production Scikit-Learn Pipeline (Pipeline + ColumnTransformer)](#61-production-scikit-learn-pipeline)
+   - [6.2 Pure NumPy & Pandas From-Scratch End-to-End Pipeline](#62-pure-numpy--pandas-from-scratch-end-to-end-pipeline)
 7. [PART 7 — MACHINE LEARNING MODELS & SCIKIT-LEARN](#part-7--machine-learning-models--scikit-learn)
    - [7.1 ML Problem Types](#71-ml-problem-types)
    - [7.2 Universal 7-Step ML Workflow](#72-universal-7-step-ml-workflow)
-   - [7.3 Linear Regression ⭐⭐⭐](#73-linear-regression-)
+   - [7.3 Linear Regression (Scikit-Learn + Pure NumPy from Scratch) ⭐⭐⭐](#73-linear-regression-)
    - [7.4 Ridge & Lasso Regularization ⭐⭐](#74-ridge--lasso-regularization-)
-   - [7.5 Logistic Regression ⭐⭐⭐](#75-logistic-regression-)
+   - [7.5 Logistic Regression (Scikit-Learn + Pure NumPy from Scratch) ⭐⭐⭐](#75-logistic-regression-)
    - [7.6 K-Nearest Neighbors (KNN) ⭐⭐](#76-k-nearest-neighbors-knn-)
    - [7.7 Decision Trees ⭐⭐⭐](#77-decision-trees-)
    - [7.8 Random Forest ⭐⭐⭐](#78-random-forest-)
@@ -1264,41 +1266,45 @@ X_test_processed  = preprocessor.transform(X_test)
 
 ---
 
-# PART 6 — COMPLETE DATA SCIENCE PIPELINE TEMPLATE
+# PART 6 — COMPLETE DATA SCIENCE PIPELINE TEMPLATES
 
-Copy-paste this turnkey template at the beginning of any project:
+---
+
+Companies test candidate capabilities in two distinct ways:
+1. **Industry Production Standard:** Clean Scikit-Learn `Pipeline` + `ColumnTransformer` (prevents test data leakage and encapsulates full inference).
+2. **From-Scratch / Low-Level OA Standard:** Pure NumPy + Pandas (tests underlying vectorization, linear algebra, memory control, and mathematical intuition without helper libraries).
+
+---
+
+## 6.1 Production Scikit-Learn Pipeline
 
 ```python
-# ==============================================================================
-# END-TO-END DATA SCIENCE PIPELINE TEMPLATE
-# ==============================================================================
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.impute import SimpleImputer
-from sklearn.compose import ColumnTransformer
+from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-# --- 1. LOAD DATA ---
+# --- 1. DATA INGESTION & TYPE SPECIFICATION ---
 def load_data(filepath: str) -> pd.DataFrame:
     df = pd.read_csv(filepath)
+    df.columns = [c.strip().lower().replace(" ", "_") for c in df.columns]
     return df
 
-# --- 2. CLEAN & BASIC FEATURE ENGINEERING ---
+# --- 2. FEATURE ENGINEERING FUNCTION ---
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     
-    # Clean string columns
-    if "customer_name" in df.columns:
-        df["customer_name"] = df["customer_name"].str.strip().str.title()
+    # Missing value indicators
+    for col in df.select_dtypes(include=[np.number]).columns:
+        if df[col].isna().sum() > 0:
+            df[f"{col}_isnan"] = df[col].isna().astype(int)
         
-    # Date extraction
+    # Datetime extraction
     if "order_date" in df.columns:
         df["order_date"] = pd.to_datetime(df["order_date"])
         df["order_month"] = df["order_date"].dt.month
@@ -1306,15 +1312,15 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         df["is_weekend"] = df["order_dayofweek"].isin([5, 6]).astype(int)
         df.drop(columns=["order_date"], inplace=True)
         
-    # Ratios
+    # Domain ratios
     if "revenue" in df.columns and "units" in df.columns:
         df["price_per_unit"] = df["revenue"] / (df["units"] + 1e-5)
         
     return df
 
 # --- 3. MAIN PIPELINE EXECUTION ---
-def run_pipeline():
-    # A. Ingestion
+def run_sklearn_pipeline():
+    # A. Load & Clean
     raw_df = load_data("data.csv")
     clean_df = engineer_features(raw_df)
     
@@ -1354,10 +1360,10 @@ def run_pipeline():
         ("regressor", RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1))
     ])
     
-    # G. Train Model
+    # G. Train Model (Fits preprocessor & model simultaneously on X_train)
     full_model.fit(X_train, y_train)
     
-    # H. Evaluate
+    # H. Evaluate on Blind Test Set
     y_pred = full_model.predict(X_test)
     
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))
@@ -1365,16 +1371,158 @@ def run_pipeline():
     r2   = r2_score(y_test, y_pred)
     
     print("\n" + "=" * 45)
-    print("MODEL EVALUATION RESULTS (TEST SET)")
-    print(f"RMSE: {rmse:.4f}")
-    print(f"MAE:  {mae:.4f}")
-    print(f"R²:   {r2:.4f}")
+    print("SCIKIT-LEARN PIPELINE RESULTS (TEST SET)")
+    print(f"RMSE: {rmse:.4f} | MAE: {mae:.4f} | R²: {r2:.4f}")
     print("=" * 45)
     
     return full_model
+```
 
-if __name__ == "__main__":
-    model = run_pipeline()
+---
+
+## 6.2 Pure NumPy & Pandas From-Scratch End-to-End Pipeline
+
+This complete template performs **zero-leakage ingestion, missing value imputation, one-hot encoding, train/test splitting, standard scaling, vectorized model training, and metric calculations using ONLY NumPy and Pandas**.
+
+```python
+import numpy as np
+import pandas as pd
+
+# =========================================================================
+# STEP 1: LOAD RAW DATA & SPLIT FIRST (Zero-Leakage Guarantee)
+# =========================================================================
+def load_and_split(filepath: str, target_col: str, test_ratio: float = 0.20, random_seed: int = 42):
+    df = pd.read_csv(filepath)
+    df.columns = [c.strip().lower().replace(" ", "_") for c in df.columns]
+
+    # Split using pure NumPy indices (Strict partition BEFORE any calculations!)
+    np.random.seed(random_seed)
+    indices = np.random.permutation(len(df))
+    split_boundary = int(len(df) * (1.0 - test_ratio))
+    
+    train_idx = indices[:split_boundary]
+    test_idx  = indices[split_boundary:]
+    
+    df_train = df.iloc[train_idx].copy().reset_index(drop=True)
+    df_test  = df.iloc[test_idx].copy().reset_index(drop=True)
+    
+    return df_train, df_test, target_col
+
+# =========================================================================
+# STEP 2: PREPROCESSING (Learn stats on Train -> Apply to Train & Test)
+# =========================================================================
+class FromScratchPreprocessor:
+    def __init__(self):
+        self.num_medians = {}
+        self.cat_categories = {}
+        self.scaler_mean = None
+        self.scaler_std = None
+        self.feature_columns = []
+
+    def fit_transform(self, df_train: pd.DataFrame, num_cols: list, cat_cols: list) -> np.ndarray:
+        df = df_train.copy()
+
+        # 1. Learn & Apply Numeric Imputation (Median)
+        for col in num_cols:
+            self.num_medians[col] = df[col].median()
+            df[col] = df[col].fillna(self.num_medians[col])
+
+        # 2. Learn & Apply Categorical One-Hot Encoding
+        for col in cat_cols:
+            unique_vals = sorted(df[col].dropna().unique().tolist())
+            self.cat_categories[col] = unique_vals
+            for val in unique_vals:
+                df[f"{col}_{val}"] = (df[col] == val).astype(float)
+            df.drop(columns=[col], inplace=True)
+
+        # Record engineered feature column ordering
+        self.feature_columns = [c for c in df.columns if c in num_cols or any(c.startswith(f"{cat}_") for cat in cat_cols)]
+        X_matrix = df[self.feature_columns].values.astype(float)
+
+        # 3. Learn & Apply Standard Scaling: (X - mu) / (sigma + eps)
+        self.scaler_mean = np.mean(X_matrix, axis=0)
+        self.scaler_std  = np.std(X_matrix, axis=0)
+        self.scaler_std[self.scaler_std == 0.0] = 1.0 # prevent zero division
+
+        X_scaled = (X_matrix - self.scaler_mean) / self.scaler_std
+        return X_scaled
+
+    def transform(self, df_test: pd.DataFrame, num_cols: list, cat_cols: list) -> np.ndarray:
+        df = df_test.copy()
+
+        # 1. Apply learned medians to test data
+        for col in num_cols:
+            df[col] = df[col].fillna(self.num_medians[col])
+
+        # 2. Apply learned categories (handles unseen test categories by setting them to 0.0)
+        for col, unique_vals in self.cat_categories.items():
+            for val in unique_vals:
+                df[f"{col}_{val}"] = (df[col] == val).astype(float)
+            df.drop(columns=[col], inplace=True)
+
+        # 3. Align columns and apply learned training scale parameters
+        X_matrix = df[self.feature_columns].values.astype(float)
+        X_scaled = (X_matrix - self.scaler_mean) / self.scaler_std
+        return X_scaled
+
+# =========================================================================
+# STEP 3: FROM-SCRATCH METRIC EVALUATION
+# =========================================================================
+def evaluate_regression(y_true: np.ndarray, y_pred: np.ndarray):
+    mae  = np.mean(np.abs(y_true - y_pred))
+    mse  = np.mean((y_true - y_pred) ** 2)
+    rmse = np.sqrt(mse)
+    ss_res = np.sum((y_true - y_pred) ** 2)
+    ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
+    r2 = 1.0 - (ss_res / (ss_tot + 1e-15))
+    return {"MAE": mae, "MSE": mse, "RMSE": rmse, "R2": r2}
+
+def evaluate_classification(y_true: np.ndarray, y_pred: np.ndarray):
+    tp = np.sum((y_true == 1) & (y_pred == 1))
+    tn = np.sum((y_true == 0) & (y_pred == 0))
+    fp = np.sum((y_true == 0) & (y_pred == 1))
+    fn = np.sum((y_true == 1) & (y_pred == 0))
+
+    accuracy  = (tp + tn) / (tp + tn + fp + fn + 1e-15)
+    precision = tp / (tp + fp + 1e-15)
+    recall    = tp / (tp + fn + 1e-15)
+    f1        = 2 * (precision * recall) / (precision + recall + 1e-15)
+    cm        = np.array([[tn, fp], [fn, tp]])
+    return {"Accuracy": accuracy, "Precision": precision, "Recall": recall, "F1": f1, "CM": cm}
+
+# =========================================================================
+# STEP 4: END-TO-END EXECUTION FUNCTION
+# =========================================================================
+def run_from_scratch_pipeline():
+    # 1. Ingest and strictly split
+    df_train, df_test, target_col = load_and_split("data.csv", target_col="target_variable")
+
+    num_cols = ["age", "income", "tenure"]
+    cat_cols = ["department", "tier"]
+
+    # 2. Extract targets
+    y_train = df_train[target_col].values.astype(float)
+    y_test  = df_test[target_col].values.astype(float)
+
+    # 3. Fit preprocessing on train, transform both
+    preprocessor = FromScratchPreprocessor()
+    X_train_scaled = preprocessor.fit_transform(df_train, num_cols, cat_cols)
+    X_test_scaled  = preprocessor.transform(df_test, num_cols, cat_cols)
+
+    # 4. Train from-scratch model (e.g. LinearRegressionNumPy or LogisticRegressionNumPy)
+    model = LinearRegressionNumPy(lr=0.01, n_iters=1000)
+    model.fit(X_train_scaled, y_train)
+
+    # 5. Predict and compute metrics
+    y_pred = model.predict(X_test_scaled)
+    results = evaluate_regression(y_test, y_pred)
+
+    print("\n" + "=" * 45)
+    print("FROM-SCRATCH NUMPY PIPELINE RESULTS")
+    print(f"RMSE: {results['RMSE']:.4f} | MAE: {results['MAE']:.4f} | R²: {results['R2']:.4f}")
+    print("=" * 45)
+
+    return model
 ```
 
 ---
@@ -1509,9 +1657,10 @@ It optimizes the weights by finding the hyperplane that minimizes the **Sum of S
 | **4. Normal Residuals** | Residuals are normally distributed around mean 0 | **Mainly needed for exact small-sample hypothesis tests ($t, F$) and confidence intervals ($N < 30$).** For large sample sizes, the Central Limit Theorem guarantees asymptotically valid inference regardless. It is NOT required for OLS to make accurate point predictions! |
 | **5. No Perfect Multicollinearity** | Features are not exact linear combinations of each other | **Mathematical invertibility of $(X^T X)$.** Perfect collinearity prevents unique coefficient estimation. High (imperfect) collinearity inflates standard errors, making individual coefficients unstable and uninterpretable (fix: VIF analysis, Ridge/Lasso). |
 
-### Exact Scikit-Learn Code
+### Approach A: Exact Scikit-Learn Code
 ```python
 import numpy as np
+import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
@@ -1536,6 +1685,79 @@ print("Coefficients (w):", lr.coef_)   # Slope per feature: delta y for +1 unit 
 
 # Inspect feature weights with names:
 coef_df = pd.DataFrame({"Feature": X.columns, "Weight": lr.coef_}).sort_values(by="Weight", ascending=False)
+```
+
+---
+
+### Approach B: Pure NumPy From-Scratch Implementation (OA & Interview Must-Know)
+
+```
+        FORWARD PASS                  MSE LOSS                     VECTORIZED GRADIENT
+    y_hat = X @ w + b   ──►   Loss = (1/N) * ||y_hat - y||^2  ──►  dw = (2/N) * X^T @ (y_hat - y)
+                                                                   db = (2/N) * sum(y_hat - y)
+```
+
+#### Method 1: Vectorized Batch Gradient Descent (`LinearRegressionNumPy`)
+```python
+import numpy as np
+
+class LinearRegressionNumPy:
+    def __init__(self, lr: float = 0.01, n_iters: int = 1000):
+        self.lr = lr
+        self.n_iters = n_iters
+        self.weights = None
+        self.bias = None
+        self.loss_history = []
+
+    def fit(self, X: np.ndarray, y: np.ndarray):
+        n_samples, n_features = X.shape
+        
+        # 1. Initialize weights to zeros and bias to 0.0
+        self.weights = np.zeros(n_features)
+        self.bias = 0.0
+
+        for epoch in range(self.n_iters):
+            # 2. Forward pass: Linear prediction (N,)
+            y_pred = np.dot(X, self.weights) + self.bias
+            error = y_pred - y # (N,)
+
+            # 3. Compute Mean Squared Error (MSE)
+            loss = np.mean(error ** 2)
+            self.loss_history.append(loss)
+
+            # 4. Analytical Vectorized Gradients
+            # dw = (2 / N) * X^T @ (y_pred - y) -> Shape: (p,)
+            # db = (2 / N) * sum(y_pred - y)    -> Scalar
+            dw = (2.0 / n_samples) * np.dot(X.T, error)
+            db = (2.0 / n_samples) * np.sum(error)
+
+            # 5. Gradient Descent Update
+            self.weights -= self.lr * dw
+            self.bias    -= self.lr * db
+
+        return self
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        return np.dot(X, self.weights) + self.bias
+
+# Usage:
+# model = LinearRegressionNumPy(lr=0.01, n_iters=1000)
+# model.fit(X_train_scaled, y_train)
+# y_pred = model.predict(X_test_scaled)
+```
+
+#### Method 2: Closed-Form Normal Equation ($\mathbf{w} = (X_b^T X_b)^{-1} X_b^T \mathbf{y}$)
+```python
+def normal_equation_solve(X: np.ndarray, y: np.ndarray):
+    # Append a bias column of 1s to feature matrix X: shape (N, p+1)
+    X_b = np.c_[np.ones((X.shape[0], 1)), X]
+    
+    # theta = (X_b^T @ X_b)^(-1) @ X_b^T @ y (using pinv for numerical stability)
+    theta = np.linalg.pinv(X_b.T @ X_b) @ X_b.T @ y
+    
+    bias = theta[0]
+    weights = theta[1:]
+    return weights, bias
 ```
 
 ### Common Traps & Mistakes
@@ -1620,7 +1842,7 @@ $$z = \mathbf{w}^T \mathbf{x} + b \quad \implies \quad P(y=1|\mathbf{x}) = \sigm
 * If $z \ge 0 \implies \sigma(z) \ge 0.5 \implies$ Predict **Class 1**.
 * If $z < 0 \implies \sigma(z) < 0.5 \implies$ Predict **Class 0**.
 
-### Exact Scikit-Learn Code
+### Approach A: Exact Scikit-Learn Code
 ```python
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
@@ -1650,6 +1872,80 @@ print("\nClassification Report:\n", classification_report(y_test, y_pred))
 # 5. Inspect Log-Odds Weights
 print("Intercept:", log_reg.intercept_)
 print("Coefficients:", log_reg.coef_)
+```
+
+---
+
+### Approach B: Pure NumPy From-Scratch Implementation (Vectorized Gradient Descent)
+
+```
+        LINEAR COMBO                SIGMOID ACTIVATION            LOG-LOSS (CROSS-ENTROPY)
+      z = X @ w + b     ──►    p_hat = 1 / (1 + e^-z)   ──►  L = -(1/N) * sum(y*log(p) + (1-y)*log(1-p))
+                                                                          │
+                                                                          ▼
+                                                                VECTORIZED GRADIENTS
+                                                             dw = (1/N) * X^T @ (p_hat - y)
+                                                             db = (1/N) * sum(p_hat - y)
+```
+
+```python
+import numpy as np
+
+class LogisticRegressionNumPy:
+    def __init__(self, lr: float = 0.05, n_iters: int = 1000):
+        self.lr = lr
+        self.n_iters = n_iters
+        self.weights = None
+        self.bias = None
+        self.loss_history = []
+
+    def _sigmoid(self, z: np.ndarray) -> np.ndarray:
+        # Clip z to prevent exp overflow runtime warnings in float64
+        z = np.clip(z, -500, 500)
+        return 1.0 / (1.0 + np.exp(-z))
+
+    def fit(self, X: np.ndarray, y: np.ndarray):
+        n_samples, n_features = X.shape
+        
+        # 1. Initialize weights to zeros and bias to 0.0
+        self.weights = np.zeros(n_features)
+        self.bias = 0.0
+
+        for epoch in range(self.n_iters):
+            # 2. Linear combination + Sigmoid activation
+            z = np.dot(X, self.weights) + self.bias
+            p_hat = self._sigmoid(z) # Predicted probabilities P(y=1)
+
+            # 3. Binary Cross-Entropy Loss (Log-Loss)
+            eps = 1e-15 # Guard against log(0)
+            p_hat_safe = np.clip(p_hat, eps, 1.0 - eps)
+            loss = -np.mean(y * np.log(p_hat_safe) + (1.0 - y) * np.log(1.0 - p_hat_safe))
+            self.loss_history.append(loss)
+
+            # 4. Analytical Vectorized Gradients
+            # dw = (1 / N) * X^T @ (p_hat - y) -> Shape: (p,)
+            # db = (1 / N) * sum(p_hat - y)    -> Scalar
+            dw = (1.0 / n_samples) * np.dot(X.T, (p_hat - y))
+            db = (1.0 / n_samples) * np.sum(p_hat - y)
+
+            # 5. Gradient Descent Update
+            self.weights -= self.lr * dw
+            self.bias    -= self.lr * db
+
+        return self
+
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        z = np.dot(X, self.weights) + self.bias
+        return self._sigmoid(z)
+
+    def predict(self, X: np.ndarray, threshold: float = 0.5) -> np.ndarray:
+        return (self.predict_proba(X) >= threshold).astype(int)
+
+# Usage:
+# clf = LogisticRegressionNumPy(lr=0.1, n_iters=1000)
+# clf.fit(X_train_scaled, y_train)
+# y_prob = clf.predict_proba(X_test_scaled)
+# y_pred = clf.predict(X_test_scaled, threshold=0.5)
 ```
 
 ### Custom Decision Thresholding Pattern
