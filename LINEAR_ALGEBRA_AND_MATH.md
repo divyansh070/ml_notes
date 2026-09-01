@@ -2503,13 +2503,13 @@ $$
 - [ ] **20. Gradient Descent Step:** Given $f(x)=x^2, x_0=4, \alpha=0.1$, compute step $x_1 = 3.2, x_2 = 2.56$.
 - [ ] **21. Chain Rule:** Differentiate $y = (3x + 2)^2 \implies \frac{dy}{dx} = 18x + 12$.
 - [ ] **22. Entropy Calculation:** Compute $H(0.5, 0.5) = 1.0 \text{ Bit}$ and $H(1.0, 0.0) = 0.0 \text{ Bits}$.
-- [ ] **23. Four Subspaces & Null Space:** Given $A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}$, find $N(A) = \text{span}\left(\begin{bmatrix} -2 \\ 1 \end{bmatrix}\right)$ and verify $\text{rank}(A) + \text{nullity}(A) = 2$.
+- [ ] **23. Four Subspaces & Null Space:** For the $2 \times 2$ matrix with rows $[1, 2]$ and $[2, 4]$, find $N(A) = \text{span}([-2, 1]^T)$ and verify $\text{rank}(A) + \text{nullity}(A) = 2$.
 - [ ] **24. Gram-Schmidt Orthogonalization:** Orthonormalize $\mathbf{a}_1 = [1, 1]^T, \mathbf{a}_2 = [1, 0]^T$ to find $\mathbf{q}_1 = [1/\sqrt{2}, 1/\sqrt{2}]^T, \mathbf{q}_2 = [1/\sqrt{2}, -1/\sqrt{2}]^T$.
-- [ ] **25. Construct QR Decomposition:** Factor $A = QR$ and construct upper-triangular matrix $R = \begin{bmatrix} \sqrt{2} & 1/\sqrt{2} \\ 0 & 1/\sqrt{2} \end{bmatrix}$.
-- [ ] **26. Positive Definite Test:** Compute $\mathbf{x}^T A \mathbf{x} = 2x_1^2 + 2x_1 x_2 + 2x_2^2$ for $A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$ and prove it is Positive Definite via eigenvalues $\lambda_1=3, \lambda_2=1 \gt 0$.
+- [ ] **25. Construct QR Decomposition:** Factor $A = QR$ and construct the upper-triangular matrix $R$ with diagonal entries $[\sqrt{2}, 1/\sqrt{2}]$.
+- [ ] **26. Positive Definite Test:** Compute quadratic form $\mathbf{x}^T A \mathbf{x} = 2x_1^2 + 2x_1 x_2 + 2x_2^2$ for matrix $A$ (eigenvalues $\lambda_1=3, \lambda_2=1 \gt 0$) and prove it is Positive Definite.
 - [ ] **27. Why Covariance is PSD:** Prove $\mathbf{x}^T \Sigma \mathbf{x} = \frac{1}{n-1} \|X_c \mathbf{x}\|_2^2 \ge 0$ for any vector $\mathbf{x}$.
-- [ ] **28. Moore-Penrose Pseudoinverse:** For $A = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$, compute $A^+ = (A^T A)^{-1} A^T = \begin{bmatrix} 1/5 & 2/5 \end{bmatrix}$ and verify $A^+ A = [1]$.
-- [ ] **29. Linear Transformation Geometry:** Apply 2D Rotation $R_{90^\circ} = \begin{bmatrix} 0 & -1 \\ 1 & 0 \end{bmatrix}$ and Scaling to vectors on paper.
+- [ ] **28. Moore-Penrose Pseudoinverse:** For column vector $A = [1, 2]^T$, compute $A^+ = (A^T A)^{-1} A^T = [0.2, 0.4]$ and verify $A^+ A = [1.0]$.
+- [ ] **29. Linear Transformation Geometry:** Apply 2D Rotation $R_{90^\circ}$ (mapping $[1, 0]^T \to [0, 1]^T$) and Scaling to vectors on paper.
 - [ ] **30. SVD Geometric Decomposition:** Interpret $A = U \Sigma V^T$ as Rotate $\to$ Stretch $\to$ Rotate.
 
 ---
