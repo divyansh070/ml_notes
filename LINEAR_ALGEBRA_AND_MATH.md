@@ -2550,24 +2550,13 @@ $$
 
 ### Calculus & Optimization
 15. **Q: What is the mathematical definition of a gradient?**
-    * **A:** A vector containing all partial derivatives of a multivariable function:
-
-$$
-\nabla f = \left[\frac{\partial f}{\partial x_1}, \frac{\partial f}{\partial x_2}, \dots, \frac{\partial f}{\partial x_n}\right]^T
-$$
-
-    It points in the direction of steepest ascent.
+    * **A:** A vector containing all partial derivatives of a multivariable function: $\nabla f = \left[\frac{\partial f}{\partial x_1}, \frac{\partial f}{\partial x_2}, \dots, \frac{\partial f}{\partial x_n}\right]^T$. It points in the direction of steepest ascent.
 16. **Q: Why do we subtract the gradient in Gradient Descent?**
     * **A:** Because $\nabla f$ points uphill toward maximum loss. To minimize loss, we step in the opposite direction ($-\nabla f$) downhill.
 17. **Q: What happens if the learning rate $\alpha$ is too large or too small?**
     * **A:** If too small, training converges at a glacial pace and can get trapped in shallow local minima. If too large, parameter updates overshoot the valley, causing the loss to oscillate wildly or diverge to $\infty$.
 18. **Q: How does Backpropagation utilize the Chain Rule?**
-    * **A:** It evaluates the loss gradient with respect to deep hidden weights by multiplying local derivatives backward through the computational graph:
-
-$$
-\frac{\partial \mathcal{L}}{\partial W_1} = \frac{\partial \mathcal{L}}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial z_2} \cdot \frac{\partial z_2}{\partial a_1} \cdot \frac{\partial a_1}{\partial z_1} \cdot \frac{\partial z_1}{\partial W_1}
-$$
-
+    * **A:** It evaluates the loss gradient with respect to deep hidden weights by multiplying local derivatives backward through the computational graph: $\frac{\partial \mathcal{L}}{\partial W_1} = \frac{\partial \mathcal{L}}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial z_2} \cdot \frac{\partial z_2}{\partial a_1} \cdot \frac{\partial a_1}{\partial z_1} \cdot \frac{\partial z_1}{\partial W_1}$.
 19. **Q: What is the Hessian matrix?**
     * **A:** The $p \times p$ square matrix of second-order partial derivatives: $H_{ij} = \frac{\partial^2 f}{\partial x_i \partial x_j}$. It describes the curvature of the loss surface.
 
@@ -2609,13 +2598,7 @@ $$
 36. **Q: What is the difference between a Positive Definite (PD) and a Positive Semidefinite (PSD) matrix?**
     * **A:** A symmetric matrix $A$ is PD ($A \succ 0$) if its quadratic form satisfies $\mathbf{x}^T A \mathbf{x} \gt 0$ for all $\mathbf{x} \neq \mathbf{0}$ (all eigenvalues $\lambda_i \gt 0$). It is PSD ($A \succeq 0$) if $\mathbf{x}^T A \mathbf{x} \ge 0$ (all eigenvalues $\lambda_i \ge 0$, allowing zeros).
 37. **Q: Why is any sample covariance matrix $\Sigma$ guaranteed to be Positive Semidefinite?**
-    * **A:** Because for any vector $\mathbf{x}$:
-
-$$
-\mathbf{x}^T \Sigma \mathbf{x} = \mathbf{x}^T \left(\frac{1}{n-1} X_c^T X_c\right) \mathbf{x} = \frac{1}{n-1} \|X_c \mathbf{x}\|_2^2 \ge 0
-$$
-
-    The squared Euclidean norm of any real vector is non-negative, meaning variance along any projection direction can never be negative.
+    * **A:** Because for any vector $\mathbf{x}$, $\mathbf{x}^T \Sigma \mathbf{x} = \mathbf{x}^T \left(\frac{1}{n-1} X_c^T X_c\right) \mathbf{x} = \frac{1}{n-1} \|X_c \mathbf{x}\|_2^2 \ge 0$. The squared Euclidean norm of any real vector is non-negative, meaning variance along any projection direction can never be negative.
 38. **Q: What is the Moore-Penrose Pseudoinverse $A^+$ and when is it used?**
     * **A:** A generalized matrix inverse that exists for any matrix (rectangular or singular). For overdetermined systems, $A^+ \mathbf{b}$ yields the Ordinary Least Squares solution. For underdetermined systems, it finds the unique solution with the minimum $L_2$ norm.
 39. **Q: When is $A^+ = (A^T A)^{-1} A^T$ valid vs. the general SVD formulation $A^+ = V \Sigma^+ U^T$?**
