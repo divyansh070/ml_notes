@@ -1013,7 +1013,7 @@ $$
 \mathbf{v} = c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \dots + c_k \mathbf{v}_k
 $$
 
-* **Span:** The entire set of all possible vectors that can be reached by all linear combinations of $\{\mathbf{v}_1, \mathbf{v}_2, \dots, \mathbf{v}_k\}$.
+* **Span:** The entire set of all possible vectors that can be reached by all linear combinations of $\lbrace\mathbf{v}_1, \mathbf{v}_2, \dots, \mathbf{v}_k\rbrace$.
 
 ---
 
@@ -1731,7 +1731,7 @@ $$
 \text{Explained Variance Ratio} = \frac{\lambda_k}{\sum \lambda_i}
 $$
 
-* For Component 1: $\frac{\lambda_1}{\lambda_1 + \lambda_2} = \frac{2}{2 + 0} = \frac{2}{2} = 1.0 \implies \mathbf{100\%}$.
+* For Component 1: $\frac{\lambda_1}{\lambda_1 + \lambda_2} = \frac{2}{2 + 0} = \frac{2}{2} = 1.0 \implies$ **100%**.
 * **The Takeaway:** By compressing from 2D coordinates $[x, y]$ down to a 1D scalar $z$, we **retained 100% of the variance in this particular dataset** while eliminating 1 redundant feature axis.
 
 ---
@@ -1820,7 +1820,7 @@ $$
 
 ## 11.2 Orthonormal Bases & Unit Length
 
-A set of vectors $\{\mathbf{q}_1, \mathbf{q}_2, \dots, \mathbf{q}_k\}$ is **Orthonormal** if:
+A set of vectors $\lbrace\mathbf{q}_1, \mathbf{q}_2, \dots, \mathbf{q}_k\rbrace$ is **Orthonormal** if:
 1. Every vector is orthogonal to every other vector: $\mathbf{q}_i \cdot \mathbf{q}_j = 0$ for $i \neq j$.
 2. Every vector has unit length ($L_2$ norm = 1): $\|\mathbf{q}_i\|_2 = 1 \implies \mathbf{q}_i \cdot \mathbf{q}_i = 1$.
 
@@ -2647,7 +2647,7 @@ $$
 * **Definition:** The **Column Space** (or Range) of an $m \times n$ matrix $A$, denoted $C(A)$ or $\text{Col}(A)$, is the subspace of $\mathbb{R}^m$ spanned by the column vectors of $A$:
 
 $$
-C(A) = \left\{ A\mathbf{x} \mid \mathbf{x} \in \mathbb{R}^n \right\} \subseteq \mathbb{R}^m
+C(A) = \left\lbrace A\mathbf{x} \mid \mathbf{x} \in \mathbb{R}^n \right\rbrace \subseteq \mathbb{R}^m
 $$
 
 * **Geometric Meaning:** $C(A)$ contains every output vector $\mathbf{b}$ that can be reached by multiplying $A$ by some input vector $\mathbf{x}$. The linear system $A\mathbf{x} = \mathbf{b}$ is solvable if and only if $\mathbf{b} \in C(A)$.
@@ -2672,7 +2672,7 @@ $$
 * **Definition:** The **Row Space** of $A$, denoted $C(A^T)$ or $\text{Row}(A)$, is the subspace of $\mathbb{R}^n$ spanned by the row vectors of $A$ (or the columns of $A^T$):
 
 $$
-C(A^T) = \left\{ A^T \mathbf{y} \mid \mathbf{y} \in \mathbb{R}^m \right\} \subseteq \mathbb{R}^n
+C(A^T) = \left\lbrace A^T \mathbf{y} \mid \mathbf{y} \in \mathbb{R}^m \right\rbrace \subseteq \mathbb{R}^n
 $$
 
 * **Key Fundamental Theorem:** The Row Space and Column Space **always have the exact same dimension**, equal to the rank of the matrix:
@@ -2697,7 +2697,7 @@ $$
 * **Definition:** The **Null Space** (or Kernel) of $A$, denoted $N(A)$, is the set of all input vectors $\mathbf{x} \in \mathbb{R}^n$ that $A$ maps to the zero vector $\mathbf{0}$:
 
 $$
-N(A) = \left\{ \mathbf{x} \in \mathbb{R}^n \mid A\mathbf{x} = \mathbf{0} \right\} \subseteq \mathbb{R}^n
+N(A) = \left\lbrace \mathbf{x} \in \mathbb{R}^n \mid A\mathbf{x} = \mathbf{0} \right\rbrace \subseteq \mathbb{R}^n
 $$
 
 * **Geometric Meaning:** $N(A)$ represents all directions in the input space that are completely squashed/destroyed by the matrix transformation $A$.
@@ -2761,7 +2761,7 @@ $$
 * **Definition:** The **Left Null Space** of $A$, denoted $N(A^T)$, is the null space of the transpose matrix $A^T$:
 
 $$
-N(A^T) = \left\{ \mathbf{y} \in \mathbb{R}^m \mid A^T \mathbf{y} = \mathbf{0} \right\} \subseteq \mathbb{R}^m
+N(A^T) = \left\lbrace \mathbf{y} \in \mathbb{R}^m \mid A^T \mathbf{y} = \mathbf{0} \right\rbrace \subseteq \mathbb{R}^m
 $$
 
 * *(Why "Left"? Because transposing gives $\mathbf{y}^T A = \mathbf{0}^T$, so $\mathbf{y}^T$ multiplies $A$ from the left).*
