@@ -1474,8 +1474,8 @@ $$
 $$
 \Sigma =
 \begin{bmatrix}
-\operatorname{Var}(X) & \operatorname{Cov}(X,Y) \\
-\operatorname{Cov}(Y,X) & \operatorname{Var}(Y)
+\text{Var}(X) & \text{Cov}(X,Y) \\
+\text{Cov}(Y,X) & \text{Var}(Y)
 \end{bmatrix} =
 \begin{bmatrix}
 1.0 & 2.5 \\
@@ -2287,7 +2287,11 @@ $$
 
 ## 17.3 Mathematical Geometry: Why L2 Shrinks Smoothly (Weight Decay)
 
-Loss function: $\mathcal{L}_{\text{Ridge}} = \text{MSE} + \frac{\lambda}{2} \sum_{j=1}^{p} w_j^2$.
+Loss function:
+
+$$
+\mathcal{L}_{\text{Ridge}} = \text{MSE} + \frac{\lambda}{2} \sum_{j=1}^{p} w_j^2
+$$
 
 Gradient update step:
 
@@ -2505,13 +2509,24 @@ $$
 
 ### Calculus & Optimization
 15. **Q: What is the mathematical definition of a gradient?**
-    * **A:** A vector containing all partial derivatives of a multivariable function: $\nabla f = \left[\frac{\partial f}{\partial x_1}, \frac{\partial f}{\partial x_2}, \dots, \frac{\partial f}{\partial x_n}\right]^T$. It points in the direction of steepest ascent.
+    * **A:** A vector containing all partial derivatives of a multivariable function:
+
+$$
+\nabla f = \left[\frac{\partial f}{\partial x_1}, \frac{\partial f}{\partial x_2}, \dots, \frac{\partial f}{\partial x_n}\right]^T
+$$
+
+    It points in the direction of steepest ascent.
 16. **Q: Why do we subtract the gradient in Gradient Descent?**
     * **A:** Because $\nabla f$ points uphill toward maximum loss. To minimize loss, we step in the opposite direction ($-\nabla f$) downhill.
 17. **Q: What happens if the learning rate $\alpha$ is too large or too small?**
     * **A:** If too small, training converges at a glacial pace and can get trapped in shallow local minima. If too large, parameter updates overshoot the valley, causing the loss to oscillate wildly or diverge to $\infty$.
 18. **Q: How does Backpropagation utilize the Chain Rule?**
-    * **A:** It evaluates the loss gradient with respect to deep hidden weights by multiplying local derivatives backward through the computational graph: $\frac{\partial \mathcal{L}}{\partial W_1} = \frac{\partial \mathcal{L}}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial z_2} \cdot \frac{\partial z_2}{\partial a_1} \cdot \frac{\partial a_1}{\partial z_1} \cdot \frac{\partial z_1}{\partial W_1}$.
+    * **A:** It evaluates the loss gradient with respect to deep hidden weights by multiplying local derivatives backward through the computational graph:
+
+$$
+\frac{\partial \mathcal{L}}{\partial W_1} = \frac{\partial \mathcal{L}}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial z_2} \cdot \frac{\partial z_2}{\partial a_1} \cdot \frac{\partial a_1}{\partial z_1} \cdot \frac{\partial z_1}{\partial W_1}
+$$
+
 19. **Q: What is the Hessian matrix?**
     * **A:** The $p \times p$ square matrix of second-order partial derivatives: $H_{ij} = \frac{\partial^2 f}{\partial x_i \partial x_j}$. It describes the curvature of the loss surface.
 
