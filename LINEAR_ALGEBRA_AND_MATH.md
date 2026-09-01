@@ -120,6 +120,7 @@
 * **Scalar:** A single real number (e.g., $c \in \mathbb{R}$, like a learning rate $\alpha = 0.01$, a loss value $\mathcal{L} = 0.45$, or temperature $T = 25.0$).
 * **Vector:** An ordered 1D array of numbers representing a point or direction in space.
   * In Machine Learning, a **feature vector** represents a single sample/data point across $p$ features:
+
 $$
 \mathbf{x} =
 \begin{bmatrix}
@@ -130,7 +131,9 @@ x_p
 \end{bmatrix}
 \in \mathbb{R}^p
 $$
+
   * *Example:* A house with 2 bedrooms and 3 bathrooms is represented as the vector:
+
 $$
 \mathbf{x} =
 \begin{bmatrix}
@@ -145,6 +148,7 @@ $$
 
 ### Algebraic Definition
 To add two vectors of the same dimension, add their corresponding components:
+
 $$
 \mathbf{a} + \mathbf{b} =
 \begin{bmatrix}
@@ -155,8 +159,7 @@ a_2
 \begin{bmatrix}
 b_1 \\
 b_2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 a_1 + b_1 \\
 a_2 + b_2
@@ -165,6 +168,7 @@ $$
 
 ### Hand Calculation Example
 Let $\mathbf{a} = [2, 3]^T$ and $\mathbf{b} = [4, 1]^T$:
+
 $$
 \mathbf{a} + \mathbf{b} =
 \begin{bmatrix}
@@ -175,13 +179,11 @@ $$
 \begin{bmatrix}
 4 \\
 1
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 2 + 4 \\
 3 + 1
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 6 \\
 4
@@ -199,13 +201,13 @@ Place the tail of vector $\mathbf{b}$ at the tip of vector $\mathbf{a}$. The res
 
 ### Algebraic Definition
 Multiplying a vector by a scalar scales every component by that scalar:
+
 $$
 c \mathbf{x} = c
 \begin{bmatrix}
 x_1 \\
 x_2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 c x_1 \\
 c x_2
@@ -214,18 +216,17 @@ $$
 
 ### Hand Calculation Example
 Let $c = 3$ and $\mathbf{x} = [2, 4]^T$:
+
 $$
 3 \mathbf{x} = 3
 \begin{bmatrix}
 2 \\
 4
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 3 \times 2 \\
 3 \times 4
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 6 \\
 12
@@ -255,17 +256,20 @@ The **Dot Product** (inner product) takes two vectors and produces a single **sc
 ```
 
 ### 1. Algebraic Definition
+
 $$
 \mathbf{a} \cdot \mathbf{b} = \mathbf{a}^T \mathbf{b} = \sum_{i=1}^{n} a_i b_i = a_1 b_1 + a_2 b_2 + \dots + a_n b_n
 $$
 
 ### Hand Calculation Example
 Let $\mathbf{a} = [2, 3]^T$ and $\mathbf{b} = [4, 1]^T$:
+
 $$
 \mathbf{a} \cdot \mathbf{b} = (2 \times 4) + (3 \times 1) = 8 + 3 = 11
 $$
 
 ### 2. Geometric Definition & Angle Formula
+
 $$
 \mathbf{a} \cdot \mathbf{b} = \|\mathbf{a}\|_2 \|\mathbf{b}\|_2 \cos\theta
 $$
@@ -276,25 +280,32 @@ Where:
 
 ### Step-by-Step Angle Calculation:
 1. Compute lengths:
+
 $$
 \|\mathbf{a}\|_2 = \sqrt{2^2 + 3^2} = \sqrt{4 + 9} = \sqrt{13} \approx 3.606
 $$
+
 $$
 \|\mathbf{b}\|_2 = \sqrt{4^2 + 1^2} = \sqrt{16 + 1} = \sqrt{17} \approx 4.123
 $$
+
 2. Solve for $\cos\theta$:
+
 $$
 \cos\theta = \frac{\mathbf{a} \cdot \mathbf{b}}{\|\mathbf{a}\|_2 \|\mathbf{b}\|_2} = \frac{11}{\sqrt{13} \times \sqrt{17}} = \frac{11}{\sqrt{221}} = \frac{11}{14.866} \approx 0.740
 $$
+
 3. Angle: $\theta = \arccos(0.740) \approx 42.3^\circ$.
 
 ### Orthogonality Rule (Perpendicular Vectors)
 If $\theta = 90^\circ$, then $\cos(90^\circ) = 0$. Therefore:
+
 $$
 \mathbf{a} \perp \mathbf{b} \iff \mathbf{a} \cdot \mathbf{b} = 0
 $$
 
 * *Test:* Let $\mathbf{u} = [2, 3]^T$ and $\mathbf{v} = [-3, 2]^T$:
+
 $$
 \mathbf{u} \cdot \mathbf{v} = 2(-3) + 3(2) = -6 + 6 = 0 \quad \text{(Orthogonal!)}
 $$
@@ -319,45 +330,51 @@ A **norm** is a mathematical function that measures the length or magnitude of a
 
 ### 1. $L_2$ Norm (Euclidean Norm / Length)
 Derived directly from the Pythagorean theorem ($c = \sqrt{a^2 + b^2}$):
+
 $$
 \|\mathbf{x}\|_2 = \sqrt{\sum_{i=1}^{n} x_i^2} = \sqrt{x_1^2 + x_2^2 + \dots + x_n^2}
 $$
 
 * *Hand Calculation:* For $\mathbf{v} = [3, -4]^T$:
+
 $$
 \|\mathbf{v}\|_2 = \sqrt{3^2 + (-4)^2} = \sqrt{9 + 16} = \sqrt{25} = 5
 $$
 
 ### 2. $L_1$ Norm (Manhattan / Taxicab Norm)
 Sum of absolute values:
+
 $$
 \|\mathbf{x}\|_1 = \sum_{i=1}^{n} |x_i| = |x_1| + |x_2| + \dots + |x_n|
 $$
 
 * *Hand Calculation:* For $\mathbf{v} = [3, -4]^T$:
+
 $$
 \|\mathbf{v}\|_1 = |3| + |-4| = 3 + 4 = 7
 $$
 
 ### 3. Euclidean Distance between Two Points
 The straight-line distance between vectors $\mathbf{p}$ and $\mathbf{q}$:
+
 $$
 d(\mathbf{p}, \mathbf{q}) = \|\mathbf{p} - \mathbf{q}\|_2 = \sqrt{\sum_{i=1}^{n} (p_i - q_i)^2}
 $$
 
 * *Hand Calculation:* Let $\mathbf{p} = [1, 2]^T$ and $\mathbf{q} = [4, 6]^T$:
+
 $$
 \mathbf{p} - \mathbf{q} =
 \begin{bmatrix}
 1 - 4 \\
 2 - 6
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 -3 \\
 -4
 \end{bmatrix}
 $$
+
 $$
 d(\mathbf{p}, \mathbf{q}) = \sqrt{(-3)^2 + (-4)^2} = \sqrt{9 + 16} = \sqrt{25} = 5
 $$
@@ -367,6 +384,7 @@ $$
 ## 1.6 Cosine Similarity & Embeddings
 
 **Cosine Similarity** measures the alignment (angle) between two vectors regardless of their scale/magnitude:
+
 $$
 \text{Cosine Similarity}(\mathbf{u}, \mathbf{v}) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\|_2 \|\mathbf{v}\|_2} = \cos\theta
 $$
@@ -382,9 +400,11 @@ Compare two document embedding vectors: $\mathbf{u} = [1, 2]^T$ (Document A) and
 2. Norm of $\mathbf{u}$: $\|\mathbf{u}\|_2 = \sqrt{1^2 + 2^2} = \sqrt{5}$.
 3. Norm of $\mathbf{v}$: $\|\mathbf{v}\|_2 = \sqrt{2^2 + 4^2} = \sqrt{4 + 16} = \sqrt{20} = 2\sqrt{5}$.
 4. Compute similarity:
+
 $$
 \text{Cosine Similarity} = \frac{10}{\sqrt{5} \times 2\sqrt{5}} = \frac{10}{2 \times 5} = \frac{10}{10} = 1.0
 $$
+
 *Even though Document B is twice as long as Document A, their cosine similarity is 1.0 because their topic direction is identical!*
 
 * **Why Cosine Similarity is Preferred in NLP & LLMs:** In high-dimensional text embeddings (e.g. Word2Vec, BERT, OpenAI embeddings), document length affects vector magnitude but not semantic meaning. Cosine similarity normalizes out length differences.
@@ -430,6 +450,7 @@ A matrix is a 2D rectangular array of numbers arranged into rows and columns. In
 
 ### 1. Matrix Addition (Element-wise)
 Matrices must have the **exact same shape**:
+
 $$
 \begin{bmatrix}
 1 & 3 \\
@@ -439,13 +460,11 @@ $$
 \begin{bmatrix}
 5 & 1 \\
 0 & 2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 1+5 & 3+1 \\
 2+0 & 4+2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 6 & 4 \\
 2 & 6
@@ -453,18 +472,17 @@ $$
 $$
 
 ### 2. Scalar Multiplication
+
 $$
 2
 \begin{bmatrix}
 1 & 3 \\
 2 & 4
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 2(1) & 2(3) \\
 2(2) & 2(4)
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 2 & 6 \\
 4 & 8
@@ -479,6 +497,7 @@ Matrix multiplication is **NOT** element-wise multiplication. It is the composit
 
 ### Compatibility Rule
 To multiply $A \times B$, the **number of columns in $A$ MUST equal the number of rows in $B$**:
+
 $$
 (M \times K) \times (K \times N) \implies (M \times N)
 $$
@@ -494,6 +513,7 @@ $$
 
 ### Complete Hand Calculation Example
 Let:
+
 $$
 A =
 \begin{bmatrix}
@@ -509,23 +529,31 @@ B =
 $$
 
 1. **Calculate $C_{11}$ (Row 1 of $A \cdot$ Column 1 of $B$):**
+
 $$
 C_{11} = (1 \times 5) + (2 \times 7) = 5 + 14 = 19
 $$
+
 2. **Calculate $C_{12}$ (Row 1 of $A \cdot$ Column 2 of $B$):**
+
 $$
 C_{12} = (1 \times 6) + (2 \times 8) = 6 + 16 = 22
 $$
+
 3. **Calculate $C_{21}$ (Row 2 of $A \cdot$ Column 1 of $B$):**
+
 $$
 C_{21} = (3 \times 5) + (4 \times 7) = 15 + 28 = 43
 $$
+
 4. **Calculate $C_{22}$ (Row 2 of $A \cdot$ Column 2 of $B$):**
+
 $$
 C_{22} = (3 \times 6) + (4 \times 8) = 18 + 32 = 50
 $$
 
 **Final Result Matrix:**
+
 $$
 C = AB =
 \begin{bmatrix}
@@ -536,6 +564,7 @@ $$
 
 ### Machine Learning Connection: $X \mathbf{w} = \hat{\mathbf{y}}$
 In linear regression, generating predictions for $N$ samples simultaneously is a single matrix-vector multiplication:
+
 $$
 \hat{\mathbf{y}} = X \mathbf{w} =
 \begin{bmatrix}
@@ -547,14 +576,14 @@ $$
 w_0 \\
 w_1 \\
 w_2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 w_0 + w_1 x_{11} + w_2 x_{12} \\
 w_0 + w_1 x_{21} + w_2 x_{22} \\
 w_0 + w_1 x_{31} + w_2 x_{32}
 \end{bmatrix}
 $$
+
 * Shape check: $(3 \times 3) \times (3 \times 1) = (3 \times 1)$ predictions vector!
 
 ---
@@ -562,11 +591,13 @@ $$
 ## 2.5 Matrix Transpose & Properties
 
 The **transpose** $A^T$ flips a matrix over its diagonal, switching rows and columns:
+
 $$
 (A^T)_{ij} = A_{ji} \quad \quad \text{Shape: } (M \times N) \to (N \times M)
 $$
 
 ### Hand Calculation Example
+
 $$
 A =
 \begin{bmatrix}
@@ -593,6 +624,7 @@ $$
 ## 2.6 Identity Matrix & Diagonal Matrices
 
 The **Identity Matrix** $I$ is the matrix equivalent of the number $1$. It has $1$s along the main diagonal and $0$s elsewhere:
+
 $$
 I =
 \begin{bmatrix}
@@ -602,6 +634,7 @@ I =
 $$
 
 ### Property: $AI = IA = A$
+
 $$
 \begin{bmatrix}
 3 & 7 \\
@@ -610,13 +643,11 @@ $$
 \begin{bmatrix}
 1 & 0 \\
 0 & 1
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 (3\times 1 + 7\times 0) & (3\times 0 + 7\times 1) \\
 (2\times 1 + 5\times 0) & (2\times 0 + 5\times 1)
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 3 & 7 \\
 2 & 5
@@ -628,12 +659,14 @@ $$
 ## 2.7 Matrix Inverse (2x2 Hand Derivation & Invertibility)
 
 The **inverse** $A^{-1}$ of a square matrix $A$ is the matrix that undoes the transformation of $A$:
+
 $$
 A A^{-1} = A^{-1} A = I
 $$
 
 ### 2x2 Inverse Formula:
 For:
+
 $$
 A =
 \begin{bmatrix}
@@ -641,6 +674,7 @@ a & b \\
 c & d
 \end{bmatrix}
 $$
+
 $$
 A^{-1} = \frac{1}{\det(A)}
 \begin{bmatrix}
@@ -656,6 +690,7 @@ $$
 
 ### Step-by-Step Hand Calculation
 Let:
+
 $$
 A =
 \begin{bmatrix}
@@ -665,10 +700,13 @@ A =
 $$
 
 1. Calculate determinant:
+
 $$
 \det(A) = (4 \times 6) - (7 \times 2) = 24 - 14 = 10
 $$
+
 2. Swap diagonal elements ($4 \leftrightarrow 6$) and negate off-diagonal elements ($7 \to -7, 2 \to -2$):
+
 $$
 \text{Adj}(A) =
 \begin{bmatrix}
@@ -676,14 +714,15 @@ $$
 -2 & 4
 \end{bmatrix}
 $$
+
 3. Multiply by $\frac{1}{\det(A)}$:
+
 $$
 A^{-1} = \frac{1}{10}
 \begin{bmatrix}
 6 & -7 \\
 -2 & 4
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 0.6 & -0.7 \\
 -0.2 & 0.4
@@ -691,6 +730,7 @@ A^{-1} = \frac{1}{10}
 $$
 
 4. **Verify by multiplication ($A A^{-1} = I$):**
+
 $$
 A A^{-1} =
 \begin{bmatrix}
@@ -700,13 +740,11 @@ A A^{-1} =
 \begin{bmatrix}
 0.6 & -0.7 \\
 -0.2 & 0.4
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 4(0.6)+7(-0.2) & 4(-0.7)+7(0.4) \\
 2(0.6)+6(-0.2) & 2(-0.7)+6(0.4)
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 1 & 0 \\
 0 & 1
@@ -726,6 +764,7 @@ $$
 ## 3.1 The 2x2 Determinant Formula
 
 For a $2 \times 2$ matrix:
+
 $$
 A =
 \begin{bmatrix}
@@ -733,12 +772,14 @@ a & b \\
 c & d
 \end{bmatrix}
 $$
+
 $$
 \det(A) = |A| = ad - bc
 $$
 
 ### Hand Calculation Example
 Let:
+
 $$
 A =
 \begin{bmatrix}
@@ -746,6 +787,7 @@ A =
 2 & 4
 \end{bmatrix}
 $$
+
 $$
 \det(A) = (5 \times 4) - (3 \times 2) = 20 - 6 = 14
 $$
@@ -769,6 +811,7 @@ The determinant represents the **factor by which a linear transformation scales 
 
 * **Unit Square:** The unit square formed by basis vectors $\mathbf{i} = [1, 0]^T$ and $\mathbf{j} = [0, 1]^T$ has an initial area of $1 \times 1 = 1$.
 * **After Transformation:**
+
 $$
 A =
 \begin{bmatrix}
@@ -776,6 +819,7 @@ a & b \\
 c & d
 \end{bmatrix}
 $$
+
   * $\mathbf{i}$ moves to $[a, c]^T$
   * $\mathbf{j}$ moves to $[b, d]^T$
   * The resulting parallelogram has an exact geometric area equal to $|ad - bc| = \det(A)$.
@@ -799,6 +843,7 @@ $$
 ## 4.1 Simultaneous Equations to Matrix Form
 
 Consider a system of 2 linear equations with 2 unknowns:
+
 $$
 \begin{aligned}
 2x + y &= 5 \\
@@ -807,6 +852,7 @@ x - y &= 1
 $$
 
 ### Converting to Matrix-Vector Form:
+
 $$
 \begin{bmatrix}
 2 & 1 \\
@@ -815,8 +861,7 @@ $$
 \begin{bmatrix}
 x \\
 y
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 5 \\
 1
@@ -826,6 +871,7 @@ $$
 
 Where:
 * The **Coefficient Matrix** $A$:
+
 $$
 A =
 \begin{bmatrix}
@@ -833,6 +879,7 @@ A =
 1 & -1
 \end{bmatrix}
 $$
+
 * $\mathbf{x} = [x, y]^T$ is the **Vector of Unknowns**.
 * $\mathbf{b} = [5, 1]^T$ is the **Output / Target Vector**.
 
@@ -842,34 +889,42 @@ $$
 
 ### Method 1: Algebraic Elimination (Fast on Paper)
 1. Add equation (1) and equation (2):
+
 $$
 (2x + y) + (x - y) = 5 + 1 \implies 3x = 6 \implies x = 2
 $$
+
 2. Substitute $x = 2$ back into equation (2):
+
 $$
 2 - y = 1 \implies y = 1
 $$
+
 3. Solution: $\mathbf{x} = [2, 1]^T$.
 
 ### Method 2: Matrix Inversion ($\mathbf{x} = A^{-1} \mathbf{b}$)
 1. Compute $\det(A)$:
+
 $$
 \det(A) = (2 \times -1) - (1 \times 1) = -2 - 1 = -3
 $$
+
 2. Compute $A^{-1}$:
+
 $$
 A^{-1} = \frac{1}{-3}
 \begin{bmatrix}
 -1 & -1 \\
 -1 & 2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 1/3 & 1/3 \\
 1/3 & -2/3
 \end{bmatrix}
 $$
+
 3. Multiply $A^{-1} \mathbf{b}$:
+
 $$
 \mathbf{x} =
 \begin{bmatrix}
@@ -879,18 +934,15 @@ $$
 \begin{bmatrix}
 5 \\
 1
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 (5/3 + 1/3) \\
 (5/3 - 2/3)
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 6/3 \\
 3/3
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 2 \\
 1
@@ -923,9 +975,11 @@ $$
 ## 5.1 Linear Combinations & Span
 
 * **Linear Combination:** A vector $\mathbf{v}$ formed by multiplying vectors by scalars and adding them:
+
 $$
 \mathbf{v} = c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \dots + c_k \mathbf{v}_k
 $$
+
 * **Span:** The entire set of all possible vectors that can be reached by all linear combinations of $\{\mathbf{v}_1, \mathbf{v}_2, \dots, \mathbf{v}_k\}$.
 
 ---
@@ -939,6 +993,7 @@ Let $\mathbf{v}_1 = [1, 2]^T$ and $\mathbf{v}_2 = [2, 4]^T$.
 * *Test:* $\mathbf{v}_2 = 2 \mathbf{v}_1$.
 * Both vectors lie along the exact same line in 2D space. Their span is only a 1D line, NOT the full 2D plane!
 * Determinant check:
+
 $$
 \det
 \begin{bmatrix}
@@ -955,6 +1010,7 @@ Let $\mathbf{v}_1 = [1, 2]^T$ and $\mathbf{v}_2 = [2, 3]^T$.
   * $2(-2c_2) + 3c_2 = 0 \implies -c_2 = 0 \implies c_2 = 0, c_1 = 0$.
 * The only solution is the trivial solution ($c_1=0, c_2=0$).
 * Determinant check:
+
 $$
 \det
 \begin{bmatrix}
@@ -977,6 +1033,7 @@ $$
 ## 5.4 Connection to Multicollinearity & Singular Models
 
 In Linear Regression:
+
 $$
 \mathbf{w} = (X^T X)^{-1} X^T \mathbf{y}
 $$
@@ -987,9 +1044,11 @@ $$
   * $(X^T X)$ is **singular (non-invertible)**.
   * Ordinary Least Squares fails with a singular matrix error.
 * *The Math Fix:* **Ridge Regularization ($L_2$)** adds $\alpha I$ to $(X^T X)$:
+
 $$
 \mathbf{w} = (X^T X + \alpha I)^{-1} X^T \mathbf{y}
 $$
+
   Adding $\alpha > 0$ to the diagonal guarantees that $\det(X^T X + \alpha I) > 0$, making the matrix invertible and stable!
 
 ---
@@ -1031,6 +1090,7 @@ $$
 ## 6.2 Complete 13-Step Hand Calculation on a 2x2 Matrix
 
 We will solve for all eigenvalues and eigenvectors of:
+
 $$
 A =
 \begin{bmatrix}
@@ -1042,38 +1102,42 @@ $$
 ---
 
 ### Step 1: Write the Fundamental Definition
+
 $$
 A \mathbf{v} = \lambda \mathbf{v}
 $$
 
 ### Step 2: Move Everything to One Side
+
 $$
 A \mathbf{v} - \lambda \mathbf{v} = \mathbf{0} \quad \implies \quad (A - \lambda I) \mathbf{v} = \mathbf{0}
 $$
 
 ### Step 3: Understand Why $\det(A - \lambda I) = 0$ is Required
 If $(A - \lambda I)$ had an inverse, we could multiply both sides by $(A - \lambda I)^{-1}$:
+
 $$
 \mathbf{v} = (A - \lambda I)^{-1} \mathbf{0} = \mathbf{0}
 $$
+
 This would only give the trivial solution $\mathbf{v} = \mathbf{0}$. To find a **non-zero** eigenvector $\mathbf{v} \neq \mathbf{0}$, the matrix $(A - \lambda I)$ **MUST be non-invertible (singular)**. Therefore, its determinant must be zero:
+
 $$
 \det(A - \lambda I) = 0
 $$
 
 ### Step 4: Construct the Matrix $(A - \lambda I)$
+
 $$
 A - \lambda I =
 \begin{bmatrix}
 2 & 1 \\
 1 & 2
-\end{bmatrix}
-- \lambda
+\end{bmatrix} - \lambda
 \begin{bmatrix}
 1 & 0 \\
 0 & 1
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 2 - \lambda & 1 \\
 1 & 2 - \lambda
@@ -1081,26 +1145,31 @@ A - \lambda I =
 $$
 
 ### Step 5: Compute the Determinant
+
 $$
 \det(A - \lambda I) = (2 - \lambda)(2 - \lambda) - (1 \times 1) = (2 - \lambda)^2 - 1
 $$
 
 ### Step 6: Form the Characteristic Polynomial
+
 $$
 (4 - 4\lambda + \lambda^2) - 1 = 0 \quad \implies \quad \lambda^2 - 4\lambda + 3 = 0
 $$
 
 ### Step 7: Solve for the Eigenvalues ($\lambda$)
 Factor the quadratic equation:
+
 $$
 (\lambda - 3)(\lambda - 1) = 0 \quad \implies \quad \lambda_1 = 3, \quad \lambda_2 = 1
 $$
+
 *We have found our two eigenvalues!*
 
 ---
 
 ### Step 8: Find Eigenvector 1 for $\lambda_1 = 3$
 Substitute $\lambda_1 = 3$ into $(A - \lambda I)\mathbf{v} = \mathbf{0}$:
+
 $$
 \begin{bmatrix}
 2 - 3 & 1 \\
@@ -1109,8 +1178,7 @@ $$
 \begin{bmatrix}
 v_1 \\
 v_2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 0 \\
 0
@@ -1123,8 +1191,7 @@ v_2
 \begin{bmatrix}
 v_1 \\
 v_2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 0 \\
 0
@@ -1132,10 +1199,13 @@ v_2
 $$
 
 ### Step 9: Solve the Simultaneous Equations for $\mathbf{v}_1$
+
 $$
 -1v_1 + 1v_2 = 0 \implies v_2 = v_1
 $$
+
 Any non-zero vector where $v_1 = v_2$ is an eigenvector. Choose $v_1 = 1 \implies v_2 = 1$:
+
 $$
 \mathbf{v}_1 =
 \begin{bmatrix}
@@ -1153,6 +1223,7 @@ $$
 
 ### Step 10: Find Eigenvector 2 for $\lambda_2 = 1$
 Substitute $\lambda_2 = 1$ into $(A - \lambda I)\mathbf{v} = \mathbf{0}$:
+
 $$
 \begin{bmatrix}
 2 - 1 & 1 \\
@@ -1161,8 +1232,7 @@ $$
 \begin{bmatrix}
 v_1 \\
 v_2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 0 \\
 0
@@ -1175,17 +1245,19 @@ v_2
 \begin{bmatrix}
 v_1 \\
 v_2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 0 \\
 0
 \end{bmatrix}
 $$
+
 $$
 1v_1 + 1v_2 = 0 \implies v_2 = -v_1
 $$
+
 Choose $v_1 = 1 \implies v_2 = -1$:
+
 $$
 \mathbf{v}_2 =
 \begin{bmatrix}
@@ -1203,6 +1275,7 @@ $$
 
 ### Step 11: Verify the Result ($A \mathbf{v} = \lambda \mathbf{v}$)
 1. **Check $\mathbf{v}_1$ with $\lambda_1 = 3$:**
+
 $$
 A \mathbf{v}_1 =
 \begin{bmatrix}
@@ -1212,13 +1285,11 @@ A \mathbf{v}_1 =
 \begin{bmatrix}
 1 \\
 1
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 2(1) + 1(1) \\
 1(1) + 2(1)
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 3 \\
 3
@@ -1230,7 +1301,9 @@ A \mathbf{v}_1 =
 \end{bmatrix}
 = \lambda_1 \mathbf{v}_1 \quad \checkmark
 $$
+
 2. **Check $\mathbf{v}_2$ with $\lambda_2 = 1$:**
+
 $$
 A \mathbf{v}_2 =
 \begin{bmatrix}
@@ -1240,13 +1313,11 @@ A \mathbf{v}_2 =
 \begin{bmatrix}
 1 \\
 -1
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 2(1) + 1(-1) \\
 1(1) + 2(-1)
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 1 \\
 -1
@@ -1263,6 +1334,7 @@ $$
 
 ### Step 12: Verify Orthogonality of Eigenvectors
 Because matrix $A$ is symmetric ($A = A^T$), its eigenvectors for distinct eigenvalues **must be orthogonal**:
+
 $$
 \mathbf{v}_1 \cdot \mathbf{v}_2 = (1 \times 1) + (1 \times -1) = 1 - 1 = 0 \quad \checkmark
 $$
@@ -1305,16 +1377,19 @@ $$
 ## 7.2 Why Eigenvectors Maximize Variance
 
 Let $\mathbf{u}$ be a unit projection vector ($\|\mathbf{u}\|_2 = 1$). The variance of the projected data points is:
+
 $$
 \text{Variance}(\text{Projection}) = \mathbf{u}^T \Sigma \mathbf{u}
 $$
 
 To find the direction $\mathbf{u}$ that maximizes this variance, we set up the **Lagrangian optimization**:
+
 $$
 \mathcal{L}(\mathbf{u}, \lambda) = \mathbf{u}^T \Sigma \mathbf{u} - \lambda (\mathbf{u}^T \mathbf{u} - 1)
 $$
 
 Taking the partial derivative with respect to $\mathbf{u}$ and setting it to $\mathbf{0}$:
+
 $$
 \frac{\partial \mathcal{L}}{\partial \mathbf{u}} = 2\Sigma \mathbf{u} - 2\lambda \mathbf{u} = \mathbf{0} \quad \implies \quad \Sigma \mathbf{u} = \lambda \mathbf{u}
 $$
@@ -1330,13 +1405,17 @@ $$
 ## 8.1 Variance vs. Covariance Formulas
 
 * **Variance (Spread of single variable $X$):**
+
 $$
 \text{Var}(X) = s_X^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2
 $$
+
 * **Covariance (Joint linear association between $X$ and $Y$):**
+
 $$
 \text{Cov}(X, Y) = s_{XY} = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})
 $$
+
   * If $\text{Cov}(X,Y) > 0$: When $X$ increases, $Y$ tends to increase.
   * If $\text{Cov}(X,Y) < 0$: When $X$ increases, $Y$ tends to decrease.
   * If $\text{Cov}(X,Y) = 0$: **No linear association exists between $X$ and $Y$. (A non-linear relationship can still exist!)**
@@ -1352,9 +1431,11 @@ We have a tiny dataset of $n=3$ observations on two features ($X=$ Study Hours, 
 ---
 
 ### Step 1: Calculate Sample Means ($\bar{x}, \bar{y}$)
+
 $$
 \bar{x} = \frac{1 + 2 + 3}{3} = \frac{6}{3} = 2.0
 $$
+
 $$
 \bar{y} = \frac{2 + 3 + 7}{3} = \frac{12}{3} = 4.0
 $$
@@ -1373,12 +1454,15 @@ $$
 ---
 
 ### Step 3: Calculate Sample Variances & Covariance (Divide by $n-1 = 2$)
+
 $$
 \text{Var}(X) = \frac{\sum_{i=1}^{n} (x_i - \bar{x})^2}{n - 1} = \frac{2}{2} = 1.0
 $$
+
 $$
 \text{Var}(Y) = \frac{\sum_{i=1}^{n} (y_i - \bar{y})^2}{n - 1} = \frac{14}{2} = 7.0
 $$
+
 $$
 \text{Cov}(X, Y) = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{n - 1} = \frac{5}{2} = 2.5
 $$
@@ -1386,13 +1470,13 @@ $$
 ---
 
 ### Step 4: Construct the 2x2 Covariance Matrix
+
 $$
 \Sigma =
 \begin{bmatrix}
 \operatorname{Var}(X) & \operatorname{Cov}(X,Y) \\
 \operatorname{Cov}(Y,X) & \operatorname{Var}(Y)
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 1.0 & 2.5 \\
 2.5 & 7.0
@@ -1405,10 +1489,13 @@ $$
 
 * **Diagonal elements:** Always individual feature variances ($\ge 0$).
 * **Off-diagonal elements:** Pairwise covariances. Because $\text{Cov}(X, Y) = \text{Cov}(Y, X)$, the covariance matrix is **always symmetric**:
+
 $$
 \Sigma = \Sigma^T
 $$
+
 * **Matrix Formulation:** If $X_c$ is the mean-centered data matrix ($(N \times p)$), then:
+
 $$
 \Sigma = \frac{1}{n-1} X_c^T X_c
 $$
@@ -1418,6 +1505,7 @@ $$
 ## 8.4 Sample ($n-1$) vs. Population ($N$) Bessel's Correction
 
 * **Population Covariance (Divide by $N$):** Used when the dataset contains every single member of the population:
+
 $$
 \Sigma_{\text{pop}} = \frac{1}{N} X_c^T X_c \implies \Sigma_{\text{pop}} =
 \begin{bmatrix}
@@ -1430,6 +1518,7 @@ $$
 1.67 & 4.67
 \end{bmatrix}
 $$
+
 * **Sample Covariance (Divide by $n-1$, Bessel's Correction):** Used when the dataset is a sample drawn from a larger population. Dividing by $n-1$ corrects for the fact that sample deviations around the sample mean $\bar{x}$ are systematically smaller than deviations around the true unknown population mean $\mu$, providing an **unbiased estimator**.
 
 ---
@@ -1451,6 +1540,7 @@ $$
 ## 9.2 Step-by-Step Numerical Hand Walkthrough (2D to 1D)
 
 We have a 2D dataset of 3 points lying along the line $y = x$:
+
 $$
 X =
 \begin{bmatrix}
@@ -1463,14 +1553,14 @@ $$
 ---
 
 ### Step 1: Center the Data ($\bar{x}=2, \bar{y}=2$)
+
 $$
 X_c = X - \mu =
 \begin{bmatrix}
 1 - 2 & 1 - 2 \\
 2 - 2 & 2 - 2 \\
 3 - 2 & 3 - 2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 -1 & -1 \\
 0 & 0 \\
@@ -1481,6 +1571,7 @@ $$
 ---
 
 ### Step 2: Compute Sample Covariance Matrix $\Sigma = \frac{1}{n-1} X_c^T X_c$
+
 $$
 X_c^T X_c =
 \begin{bmatrix}
@@ -1491,13 +1582,11 @@ X_c^T X_c =
 -1 & -1 \\
 0 & 0 \\
 1 & 1
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 (-1)^2 + 0 + 1^2 & (-1)(-1) + 0 + (1)(1) \\
 (-1)(-1) + 0 + (1)(1) & (-1)^2 + 0 + 1^2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 2 & 2 \\
 2 & 2
@@ -1509,8 +1598,7 @@ $$
 \begin{bmatrix}
 2 & 2 \\
 2 & 2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 1 & 1 \\
 1 & 1
@@ -1520,6 +1608,7 @@ $$
 ---
 
 ### Step 3: Compute Eigenvalues of $\Sigma$
+
 $$
 \det(\Sigma - \lambda I) = \det
 \begin{bmatrix}
@@ -1528,6 +1617,7 @@ $$
 \end{bmatrix}
 = (1 - \lambda)^2 - 1 = \lambda^2 - 2\lambda = \lambda(\lambda - 2) = 0
 $$
+
 $$
 \lambda_1 = 2, \quad \lambda_2 = 0
 $$
@@ -1535,6 +1625,7 @@ $$
 ---
 
 ### Step 4: Compute Top Eigenvector ($\mathbf{u}_1$ for $\lambda_1 = 2$)
+
 $$
 \begin{bmatrix}
 1 - 2 & 1 \\
@@ -1543,15 +1634,16 @@ $$
 \begin{bmatrix}
 v_1 \\
 v_2
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 0 \\
 0
 \end{bmatrix}
 \implies -v_1 + v_2 = 0 \implies v_1 = v_2
 $$
+
 Unit Eigenvector:
+
 $$
 \mathbf{u}_1 =
 \begin{bmatrix}
@@ -1563,6 +1655,7 @@ $$
 ---
 
 ### Step 5: Project Centered Data onto Principal Component $\mathbf{u}_1$
+
 $$
 Z = X_c \mathbf{u}_1 =
 \begin{bmatrix}
@@ -1573,20 +1666,17 @@ Z = X_c \mathbf{u}_1 =
 \begin{bmatrix}
 1/\sqrt{2} \\
 1/\sqrt{2}
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 -1(1/\sqrt{2}) - 1(1/\sqrt{2}) \\
 0(1/\sqrt{2}) + 0(1/\sqrt{2}) \\
 1(1/\sqrt{2}) + 1(1/\sqrt{2})
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 -2/\sqrt{2} \\
 0 \\
 2/\sqrt{2}
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 -\sqrt{2} \\
 0 \\
@@ -1643,6 +1733,7 @@ $$
 ## 10.2 Geometric Interpretation of $U, \Sigma, V^T$
 
 Any linear transformation can be decomposed into three fundamental geometric steps:
+
 $$
 \mathbf{x} \quad \xrightarrow{\quad V^T \text{ (Rotate/Reflect)} \quad} \quad \xrightarrow{\quad \Sigma \text{ (Scale axes)} \quad} \quad \xrightarrow{\quad U \text{ (Second Rotation)} \quad} \quad A\mathbf{x}
 $$
@@ -1654,17 +1745,21 @@ $$
 For a mean-centered data matrix $X_c$ ($N \times p$):
 1. **Covariance Matrix:** $\Sigma_{\text{cov}} = \frac{1}{n-1} X_c^T X_c$.
 2. Substitute SVD factorization $X_c = U \Sigma V^T$:
+
 $$
 X_c^T X_c = (U \Sigma V^T)^T (U \Sigma V^T) = (V \Sigma^T U^T)(U \Sigma V^T) = V \Sigma^T (U^T U) \Sigma V^T = V \Sigma^2 V^T
 $$
+
 *(Since $U$ is orthonormal, $U^T U = I$).*
 
 3. **Core Relationships to Memorize:**
    * The **Right Singular Vectors ($V$)** of $X_c$ are **identical to the Principal Component Directions (Eigenvectors of $\Sigma_{\text{cov}}$)**.
    * The **Singular Values ($\sigma_i$)** relate directly to the Eigenvalues ($\lambda_i$):
+
 $$
 \lambda_i = \frac{\sigma_i^2}{n - 1} \quad \iff \quad \sigma_i = \sqrt{(n - 1)\lambda_i}
 $$
+
    * For the unnormalized matrix $A^T A$, singular values satisfy $\sigma_i = \sqrt{\lambda_i(A^T A)}$.
    * *Why modern libraries use SVD instead of Eigendecomposition:* Scikit-Learn's `PCA` uses SVD internally because computing $X_c = U \Sigma V^T$ directly avoids explicitly forming the $X_c^T X_c$ matrix, offering higher numerical precision and avoiding the squaring of condition numbers.
 
@@ -1677,11 +1772,13 @@ $$
 ## 11.1 Orthogonal Vectors ($u \cdot v = 0$)
 
 Two vectors are orthogonal if they meet at a $90^\circ$ right angle:
+
 $$
 \mathbf{u} \perp \mathbf{v} \iff \mathbf{u} \cdot \mathbf{v} = 0
 $$
 
 * *Hand Example:* Let $\mathbf{u} = [3, 1]^T$ and $\mathbf{v} = [-2, 6]^T$:
+
 $$
 \mathbf{u} \cdot \mathbf{v} = 3(-2) + 1(6) = -6 + 6 = 0
 $$
@@ -1695,6 +1792,7 @@ A set of vectors $\{\mathbf{q}_1, \mathbf{q}_2, \dots, \mathbf{q}_k\}$ is **Orth
 2. Every vector has unit length ($L_2$ norm = 1): $\|\mathbf{q}_i\|_2 = 1 \implies \mathbf{q}_i \cdot \mathbf{q}_i = 1$.
 
 * *Standard Basis in 2D:*
+
 $$
 \mathbf{e}_1 =
 \begin{bmatrix}
@@ -1707,7 +1805,9 @@ $$
 1
 \end{bmatrix}
 $$
+
 * *Rotated Orthonormal Basis:*
+
 $$
 \mathbf{q}_1 =
 \begin{bmatrix}
@@ -1726,6 +1826,7 @@ $$
 ## 11.3 Orthogonal Matrices ($Q^T Q = I$)
 
 A square matrix $Q$ whose columns are mutually orthonormal is called an **Orthogonal Matrix**:
+
 $$
 Q^T Q = Q Q^T = I \quad \iff \quad Q^{-1} = Q^T
 $$
@@ -1753,14 +1854,19 @@ $$
 We wish to drop a perpendicular shadow from vector $\mathbf{a}$ onto vector $\mathbf{b}$.
 1. The projection $\mathbf{p} = \text{proj}_{\mathbf{b}}(\mathbf{a})$ lies along the direction of $\mathbf{b}$, so $\mathbf{p} = c \mathbf{b}$ for some scalar $c$.
 2. The error vector $(\mathbf{a} - c\mathbf{b})$ must be **orthogonal** to $\mathbf{b}$:
+
 $$
 \mathbf{b} \cdot (\mathbf{a} - c\mathbf{b}) = 0
 $$
+
 3. Expand the dot product:
+
 $$
 \mathbf{b} \cdot \mathbf{a} - c(\mathbf{b} \cdot \mathbf{b}) = 0 \implies c = \frac{\mathbf{a} \cdot \mathbf{b}}{\mathbf{b} \cdot \mathbf{b}} = \frac{\mathbf{a} \cdot \mathbf{b}}{\|\mathbf{b}\|_2^2}
 $$
+
 4. Multiply scalar $c$ by vector $\mathbf{b}$:
+
 $$
 \text{proj}_{\mathbf{b}}(\mathbf{a}) = \left(\frac{\mathbf{a} \cdot \mathbf{b}}{\mathbf{b} \cdot \mathbf{b}}\right) \mathbf{b}
 $$
@@ -1773,6 +1879,7 @@ Project vector $\mathbf{a} = [3, 4]^T$ onto vector $\mathbf{b} = [4, 0]^T$:
 1. Compute $\mathbf{a} \cdot \mathbf{b} = (3 \times 4) + (4 \times 0) = 12 + 0 = 12$.
 2. Compute $\mathbf{b} \cdot \mathbf{b} = (4 \times 4) + (0 \times 0) = 16 + 0 = 16$.
 3. Compute projection vector:
+
 $$
 \mathbf{p} = \frac{12}{16}
 \begin{bmatrix}
@@ -1783,13 +1890,13 @@ $$
 \begin{bmatrix}
 4 \\
 0
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 3 \\
 0
 \end{bmatrix}
 $$
+
 4. Verification of Orthogonal Error: $\mathbf{e} = \mathbf{a} - \mathbf{p} = [3, 4]^T - [3, 0]^T = [0, 4]^T$.
    * $\mathbf{e} \cdot \mathbf{b} = (0 \times 4) + (4 \times 0) = 0 \quad \checkmark$
 
@@ -1798,9 +1905,11 @@ $$
 ## 12.3 Projection Matrices & Subspaces
 
 The **Projection Matrix** $P$ that projects any arbitrary vector onto the column space of a matrix $X$:
+
 $$
 P = X (X^T X)^{-1} X^T
 $$
+
 * **Property:** $P^2 = P$ (Projecting a second time changes nothing).
 * **ML Connection:** Linear regression predictions $\hat{\mathbf{y}} = X \mathbf{w} = X(X^T X)^{-1} X^T \mathbf{y} = P \mathbf{y}$ is the orthogonal projection of target vector $\mathbf{y}$ onto the column space of feature matrix $X$.
 
@@ -1818,8 +1927,7 @@ y_1 \\
 y_2 \\
 \vdots \\
 y_N
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 1 & x_{11} & \dots & x_{1p} \\
 1 & x_{21} & \dots & x_{2p} \\
@@ -1852,16 +1960,19 @@ $$
 Residual error vector: $\mathbf{e} = \mathbf{y} - \hat{\mathbf{y}} = \mathbf{y} - X\mathbf{w}$.
 
 The Ordinary Least Squares (OLS) Loss function is the squared $L_2$ norm of the error vector:
+
 $$
 \mathcal{L}(\mathbf{w}) = \|\mathbf{y} - X\mathbf{w}\|_2^2 = (\mathbf{y} - X\mathbf{w})^T (\mathbf{y} - X\mathbf{w})
 $$
 
 Expand the matrix transpose product:
+
 $$
 \mathcal{L}(\mathbf{w}) = (\mathbf{y}^T - \mathbf{w}^T X^T)(\mathbf{y} - X\mathbf{w}) = \mathbf{y}^T \mathbf{y} - \mathbf{y}^T X \mathbf{w} - \mathbf{w}^T X^T \mathbf{y} + \mathbf{w}^T X^T X \mathbf{w}
 $$
 
 Since $\mathbf{y}^T X \mathbf{w}$ is a scalar, $(\mathbf{y}^T X \mathbf{w})^T = \mathbf{w}^T X^T \mathbf{y}$. Combining terms:
+
 $$
 \mathcal{L}(\mathbf{w}) = \mathbf{y}^T \mathbf{y} - 2\mathbf{w}^T X^T \mathbf{y} + \mathbf{w}^T X^T X \mathbf{w}
 $$
@@ -1871,16 +1982,19 @@ $$
 ## 13.3 Derivation of the Normal Equation ($X^T X w = X^T y$)
 
 To find the minimum loss, take the matrix derivative with respect to $\mathbf{w}$ and set it to $\mathbf{0}$:
+
 $$
 \frac{\partial \mathcal{L}}{\partial \mathbf{w}} = -2 X^T \mathbf{y} + 2 X^T X \mathbf{w} = \mathbf{0}
 $$
 
 Divide by 2 and rearrange:
+
 $$
 X^T X \mathbf{w} = X^T \mathbf{y}
 $$
 
 Assuming $X^T X$ is invertible, multiply both sides by $(X^T X)^{-1}$:
+
 $$
 \mathbf{w} = (X^T X)^{-1} X^T \mathbf{y}
 $$
@@ -1909,14 +2023,17 @@ $$
 ## 14.1 1D Derivatives & Slope of Tangent Line
 
 The derivative $\frac{df}{dx}$ measures the instantaneous rate of change of $f(x)$ with respect to $x$:
+
 $$
 f'(x) = \lim_{h \to 0} \frac{f(x + h) - f(x)}{h}
 $$
 
 * *Hand Example:* For $f(x) = x^2$:
+
 $$
 f'(x) = \lim_{h \to 0} \frac{(x+h)^2 - x^2}{h} = \lim_{h \to 0} \frac{x^2 + 2xh + h^2 - x^2}{h} = \lim_{h \to 0} (2x + h) = 2x
 $$
+
   * At $x = 3$: Slope $= 2(3) = +6$ (Function is increasing steeply).
   * At $x = 0$: Slope $= 2(0) = 0$ (Minimum point / flat slope).
   * At $x = -2$: Slope $= 2(-2) = -4$ (Function is decreasing).
@@ -1930,10 +2047,13 @@ When a function depends on multiple variables $f(x_1, x_2, \dots, x_n)$, the **p
 ### Hand Calculation Example
 Let $f(x, y) = x^2 + 3xy + y^2$:
 1. **Compute $\frac{\partial f}{\partial x}$ (treat $y$ as a constant number):**
+
 $$
 \frac{\partial f}{\partial x} = \frac{d}{dx}[x^2] + \frac{d}{dx}[3y \cdot x] + \frac{d}{dx}[y^2] = 2x + 3y + 0 = 2x + 3y
 $$
+
 2. **Compute $\frac{\partial f}{\partial y}$ (treat $x$ as a constant number):**
+
 $$
 \frac{\partial f}{\partial y} = \frac{d}{dy}[x^2] + \frac{d}{dy}[3x \cdot y] + \frac{d}{dy}[y^2] = 0 + 3x + 2y = 3x + 2y
 $$
@@ -1943,6 +2063,7 @@ $$
 ## 14.3 The Gradient Vector (Direction of Steepest Ascent)
 
 The **Gradient** $\nabla f$ bundles all partial derivatives into a single vector:
+
 $$
 \nabla f(x, y) =
 \begin{bmatrix}
@@ -1972,30 +2093,39 @@ We wish to find the minimum of $f(x) = x^2$ using Gradient Descent.
 
 ### Iteration 1:
 1. Compute gradient at $x_0 = 4.0$:
+
 $$
 \nabla f(4.0) = 2(4.0) = 8.0
 $$
+
 2. Update parameter:
+
 $$
 x_1 = 4.0 - 0.1(8.0) = 4.0 - 0.8 = \mathbf{3.2}
 $$
 
 ### Iteration 2:
 1. Compute gradient at $x_1 = 3.2$:
+
 $$
 \nabla f(3.2) = 2(3.2) = 6.4
 $$
+
 2. Update parameter:
+
 $$
 x_2 = 3.2 - 0.1(6.4) = 3.2 - 0.64 = \mathbf{2.56}
 $$
 
 ### Iteration 3:
 1. Compute gradient at $x_2 = 2.56$:
+
 $$
 \nabla f(2.56) = 2(2.56) = 5.12
 $$
+
 2. Update parameter:
+
 $$
 x_3 = 2.56 - 0.1(5.12) = 2.56 - 0.512 = \mathbf{2.048}
 $$
@@ -2009,6 +2139,7 @@ $$
 ## 15.1 Single-Variable & Multivariable Chain Rule
 
 For a composite nested function $y = f(u)$ where $u = g(x)$:
+
 $$
 \frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx}
 $$
@@ -2025,10 +2156,13 @@ Let $y = (3x + 2)^2$. Find $\frac{dy}{dx}$ at $x = 1$.
    * $\frac{du}{dx} = 3$
    * $\frac{dy}{du} = 2u$
 3. Apply chain rule:
+
 $$
 \frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx} = (2u) \times 3 = 2(3x + 2) \times 3 = 6(3x + 2) = 18x + 12
 $$
+
 4. Evaluate at $x = 1$:
+
 $$
 \frac{dy}{dx}\Big|_{x=1} = 18(1) + 12 = 30
 $$
@@ -2038,6 +2172,7 @@ $$
 ## 15.3 Neural Network Computational Graphs
 
 In deep learning, every neural network layer is a composite function:
+
 $$
 \text{Input } x \quad \xrightarrow{\quad \text{Linear} \quad} \quad z = wx + b \quad \xrightarrow{\quad \text{Activation} \quad} \quad a = \sigma(z) \quad \xrightarrow{\quad \text{Loss} \quad} \quad \mathcal{L}(a, y)
 $$
@@ -2049,6 +2184,7 @@ $$
 ```
 
 By the Chain Rule:
+
 $$
 \frac{\partial \mathcal{L}}{\partial w} = \frac{\partial \mathcal{L}}{\partial a} \cdot \frac{\partial a}{\partial z} \cdot \frac{\partial z}{\partial w}
 $$
@@ -2069,17 +2205,23 @@ $$
 Let Point $A = (1, 2)$ and Point $B = (4, 6)$:
 
 1. **Euclidean Distance ($L_2$):**
+
 $$
 d_{L2}(A, B) = \sqrt{(4 - 1)^2 + (6 - 2)^2} = \sqrt{3^2 + 4^2} = \sqrt{9 + 16} = \sqrt{25} = \mathbf{5.0}
 $$
+
 2. **Manhattan Distance ($L_1$):**
+
 $$
 d_{L1}(A, B) = |4 - 1| + |6 - 2| = |3| + |4| = 3 + 4 = \mathbf{7.0}
 $$
+
 3. **Minkowski Distance ($L_p$ Generalization):**
+
 $$
 d_{Lp}(A, B) = \left(\sum_{i=1}^{n} |a_i - b_i|^p\right)^{1/p}
 $$
+
    * $p=1 \implies$ Manhattan
    * $p=2 \implies$ Euclidean
 
@@ -2148,6 +2290,7 @@ $$
 Loss function: $\mathcal{L}_{\text{Ridge}} = \text{MSE} + \frac{\lambda}{2} \sum_{j=1}^{p} w_j^2$.
 
 Gradient update step:
+
 $$
 w_{j}^{(t+1)} = w_j^{(t)} - \alpha \left(\frac{\partial \text{MSE}}{\partial w_j} + \lambda w_j\right) = (1 - \alpha \lambda) w_j^{(t)} - \alpha \frac{\partial \text{MSE}}{\partial w_j}
 $$
@@ -2163,6 +2306,7 @@ $$
 ## 18.1 Shannon Entropy Formula: $H(X) = -\sum p_i \log_2 p_i$
 
 **Entropy** measures the degree of uncertainty, disorder, or impurity in a probability distribution:
+
 $$
 H(S) = - \sum_{i=1}^{C} p_i \log_2(p_i)
 $$
@@ -2175,16 +2319,20 @@ $$
 
 ### Case 1: Maximum Disorder (50% Cat, 50% Dog)
 * $p(\text{cat}) = 0.5$, $p(\text{dog}) = 0.5$
+
 $$
 H = - [0.5 \log_2(0.5) + 0.5 \log_2(0.5)] = - [0.5(-1) + 0.5(-1)] = - [-0.5 - 0.5] = \mathbf{1.0 \text{ Bit}}
 $$
+
 *(Maximum possible entropy for binary classification; completely unpredictable).*
 
 ### Case 2: Complete Certainty / Pure Node (100% Cat, 0% Dog)
 * $p(\text{cat}) = 1.0$, $p(\text{dog}) = 0.0$ ($0 \log_2 0 \equiv 0$ by limit):
+
 $$
 H = - [1.0 \log_2(1.0) + 0] = - [1.0(0) + 0] = \mathbf{0.0 \text{ Bits}}
 $$
+
 *(Zero uncertainty; completely pure).*
 
 ---
@@ -2192,6 +2340,7 @@ $$
 ## 18.3 Information Gain & Gini Impurity Hand Trace
 
 ### 1. Information Gain (Decision Tree Split Criterion)
+
 $$
 \text{Information Gain} = H(\text{Parent}) - \sum_{v \in \text{Children}} \frac{N_v}{N} H(v)
 $$
@@ -2199,9 +2348,11 @@ $$
 * **Goal:** A Decision Tree chooses the feature split that **maximizes Information Gain** (creates children with the lowest combined entropy).
 
 ### 2. Gini Impurity (Faster Alternative)
+
 $$
 \text{Gini}(S) = 1 - \sum_{i=1}^{C} p_i^2
 $$
+
 * Pure Node: $\text{Gini} = 1 - (1.0)^2 = \mathbf{0.0}$.
 * 50/50 Split: $\text{Gini} = 1 - (0.5^2 + 0.5^2) = 1 - (0.25 + 0.25) = \mathbf{0.50}$.
 * *Why Scikit-Learn defaults to Gini:* Computing squared sums ($p_i^2$) is much faster for CPUs than computing logarithms ($\log_2 p_i$).
@@ -2235,6 +2386,7 @@ Before technical interviews and coding assessments, test yourself on a blank she
 - [ ] **3. Euclidean Distance:** Given $\mathbf{p} = [1, 2]^T, \mathbf{q} = [4, 6]^T$, compute $d(\mathbf{p}, \mathbf{q}) = 5$.
 - [ ] **4. Cosine Similarity:** Given $\mathbf{u} = [1, 2]^T, \mathbf{v} = [2, 4]^T$, prove similarity $= 1.0$.
 - [ ] **5. Matrix Multiplication:** Given $A$ and $B$, compute $AB$:
+
 $$
 A =
 \begin{bmatrix}
@@ -2254,8 +2406,10 @@ AB =
 43 & 50
 \end{bmatrix}
 $$
+
 - [ ] **6. Matrix Transpose:** Transpose a non-square matrix and prove $(AB)^T = B^T A^T$.
 - [ ] **7. 2x2 Determinant:** Given $A$, compute $\det(A) = 14$:
+
 $$
 A =
 \begin{bmatrix}
@@ -2263,7 +2417,9 @@ A =
 2 & 4
 \end{bmatrix}
 $$
+
 - [ ] **8. 2x2 Matrix Inverse:** Given $A$, compute $A^{-1}$ and verify $A A^{-1} = I$:
+
 $$
 A =
 \begin{bmatrix}
@@ -2277,10 +2433,12 @@ A^{-1} =
 -0.2 & 0.4
 \end{bmatrix}
 $$
+
 - [ ] **9. Solve Linear System:** Convert $2x+y=5, x-y=1$ into $A\mathbf{x}=\mathbf{b}$ and solve $\mathbf{x} = [2, 1]^T$.
 - [ ] **10. Check Linear Independence:** Prove that $[1, 2]^T$ and $[2, 4]^T$ are dependent ($\det = 0$).
 - [ ] **11. Sample Covariance Table:** Given $X = [1, 2, 3], Y = [2, 3, 7]$, compute $\text{Var}(X)=1, \text{Var}(Y)=7, \text{Cov}(X,Y)=2.5$.
 - [ ] **12. Build Covariance Matrix:** Construct $\Sigma$ from scratch:
+
 $$
 \Sigma =
 \begin{bmatrix}
@@ -2288,7 +2446,9 @@ $$
 2.5 & 7.0
 \end{bmatrix}
 $$
+
 - [ ] **13. Characteristic Equation:** Set up $\det(A - \lambda I) = 0$ for $A$ and get $\lambda^2 - 4\lambda + 3 = 0$:
+
 $$
 A =
 \begin{bmatrix}
@@ -2296,6 +2456,7 @@ A =
 1 & 2
 \end{bmatrix}
 $$
+
 - [ ] **14. Derive Eigenvalues:** Solve $\lambda_1 = 3, \lambda_2 = 1$.
 - [ ] **15. Derive Eigenvectors:** Substitute $\lambda=3$ to find $\mathbf{v}_1 = [1, 1]^T$ and $\lambda=1$ to find $\mathbf{v}_2 = [1, -1]^T$.
 - [ ] **16. Verify Eigenvectors:** Multiply $A \mathbf{v}_1$ and show it equals $3 \mathbf{v}_1$.
