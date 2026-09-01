@@ -95,7 +95,40 @@
 19. [PART 19 — ML MATHEMATICS ROADMAP TABLE](#part-19-ml-mathematics-roadmap-table)
 20. [PART 20 — "WHAT I SHOULD BE ABLE TO DO ON PAPER" CHECKLIST](#part-20-what-i-should-be-able-to-do-on-paper-checklist)
 21. [PART 21 — 30 ESSENTIAL TECHNICAL INTERVIEW QUESTIONS](#part-21-30-essential-technical-interview-questions)
-22. [FINAL SECTION — ONE-PAGE MASTER FORMULA CHEAT SHEET](#final-section-one-page-master-formula-cheat-sheet)
+22. [PART 22 — FOUR FUNDAMENTAL SUBSPACES](#part-22-four-fundamental-subspaces)
+   - [22.1 Column Space](#221-column-space)
+   - [22.2 Row Space](#222-row-space)
+   - [22.3 Null Space](#223-null-space)
+   - [22.4 Left Null Space](#224-left-null-space)
+   - [22.5 The Four Fundamental Subspaces](#225-the-four-fundamental-subspaces)
+   - [22.6 Rank-Nullity Theorem](#226-rank-nullity-theorem)
+   - [22.7 ML Connection](#227-ml-connection)
+23. [PART 23 — GRAM-SCHMIDT ORTHOGONALIZATION & QR DECOMPOSITION](#part-23-gram-schmidt-orthogonalization--qr-decomposition)
+   - [23.1 Why We Need Orthogonal Bases](#231-why-we-need-orthogonal-bases)
+   - [23.2 Gram-Schmidt Derivation](#232-gram-schmidt-derivation)
+   - [23.3 Build Q and R](#233-build-q-and-r)
+   - [23.4 Why QR Matters in ML](#234-why-qr-matters-in-ml)
+24. [PART 24 — POSITIVE DEFINITE & POSITIVE SEMIDEFINITE MATRICES](#part-24-positive-definite--positive-semidefinite-matrices)
+   - [24.1 Quadratic Form](#241-quadratic-form)
+   - [24.2 Positive Definite](#242-positive-definite)
+   - [24.3 Positive Semidefinite](#243-positive-semidefinite)
+   - [24.4 Negative Definite and Indefinite](#244-negative-definite-and-indefinite)
+   - [24.5 Geometric Intuition](#245-geometric-intuition)
+   - [24.6 ML Connections](#246-ml-connections)
+25. [PART 25 — MOORE-PENROSE PSEUDOINVERSE](#part-25-moore-penrose-pseudoinverse)
+   - [25.1 Why Ordinary Inverse Fails](#251-why-ordinary-inverse-fails)
+   - [25.2 What the Pseudoinverse Does](#252-what-the-pseudoinverse-does)
+   - [25.3 Least Squares Connection](#253-least-squares-connection)
+   - [25.4 Hand Calculation](#254-hand-calculation)
+   - [25.5 ML Applications](#255-ml-applications)
+26. [PART 26 — LINEAR TRANSFORMATIONS](#part-26-linear-transformations)
+   - [26.1 Definition](#261-definition)
+   - [26.2 The Two Defining Properties](#262-the-two-defining-properties)
+   - [26.3 Matrices as Geometric Transformations](#263-matrices-as-geometric-transformations)
+   - [26.4 Connection to Eigenvectors](#264-connection-to-eigenvectors)
+   - [26.5 Connection to SVD](#265-connection-to-svd)
+   - [26.6 ML Connection](#266-ml-connection)
+27. [FINAL SECTION — ONE-PAGE MASTER FORMULA CHEAT SHEET](#final-section-one-page-master-formula-cheat-sheet)
 
 ---
 
@@ -2367,17 +2400,17 @@ $$
 
 | Machine Learning Algorithm | Primary Mathematical Foundations | Key Equations / Operations |
 | :--- | :--- | :--- |
-| **Linear Regression** | Matrix Multiplication, Inverses, Least Squares, Gradients | $\mathbf{w} = (X^T X)^{-1} X^T \mathbf{y}$, $\nabla_{\mathbf{w}} \text{MSE}$ |
-| **Ridge Regression ($L_2$)** | Matrix Inversion, Quadratic Forms, L2 Regularization | $(X^T X + \alpha I)^{-1} X^T \mathbf{y}$, $(1 - \alpha \lambda) \mathbf{w}$ |
+| **Linear Regression** | Matrix Inverses, Least Squares, QR Decomposition, Pseudoinverse | $\mathbf{w} = (X^T X)^{-1} X^T \mathbf{y} = X^+ \mathbf{y}$, $R\mathbf{w} = Q^T \mathbf{y}$ |
+| **Ridge Regression ($L_2$)** | Positive Definite Inversion, Quadratic Forms, Regularization | $(X^T X + \alpha I)^{-1} X^T \mathbf{y}$, $(1 - \alpha \lambda) \mathbf{w}$ |
 | **Lasso Regression ($L_1$)** | L1 Geometry, Non-differentiable Optimization, Subgradients | $\text{MSE} + \alpha \sum_{j=1}^{p} \lvert w_j \rvert \implies \text{Sparsity}$ |
 | **Logistic Regression** | Sigmoid Activation, Log-Loss (BCE), Gradients | $\sigma(z) = \frac{1}{1 + e^{-z}}$, $\nabla_{\mathbf{w}} = \frac{1}{N} X^T (\hat{\mathbf{p}} - \mathbf{y})$ |
 | **K-Nearest Neighbors (KNN)** | Vector Norms, Metric Spaces, Curse of Dimensionality | $d(\mathbf{p}, \mathbf{q}) = \sqrt{\sum_{i=1}^{n} (p_i - q_i)^2}$ |
 | **K-Means Clustering** | Euclidean Distance, Centroids, Optimization (Lloyd's) | $\arg\min_{\mu} \sum_{i=1}^{n} \lVert \mathbf{x}_i - \mu_k \rVert_2^2$ |
 | **Support Vector Machines (SVM)** | Hyperplane Geometry, Projections, Quadratic Programming | $\text{Margin} = \frac{2}{\lVert \mathbf{w} \rVert_2}$, Kernel Trick $K(\mathbf{x}, \mathbf{z})$ |
-| **PCA** | Covariance Matrix, Eigendecomposition, Orthogonal Projections | $\Sigma \mathbf{v} = \lambda \mathbf{v}$, $Z = X_c V_k$ |
-| **Singular Value Decomposition (SVD)** | Matrix Factorization, Orthonormal Bases, Low-Rank Approx | $A = U \Sigma V^T$, $A^T A = V \Sigma^2 V^T$ |
+| **PCA** | Covariance Matrix (PSD), Eigendecomposition, Orthogonal Projections | $\Sigma \mathbf{v} = \lambda \mathbf{v}$, $\mathbf{x}^T \Sigma \mathbf{x} \ge 0$, $Z = X_c V_k$ |
+| **Singular Value Decomposition (SVD)** | Matrix Factorization, Geometric Transformations, Pseudoinverse | $A = U \Sigma V^T$, $A^+ = V \Sigma^+ U^T$ |
 | **Decision Trees** | Probability, Shannon Entropy, Information Gain, Gini Impurity | $H(S) = -\sum_{i=1}^{C} p_i \log_2 p_i$, $\text{Gini} = 1 - \sum_{i=1}^{C} p_i^2$ |
-| **Neural Networks / Deep Learning** | Matrix Transformations, Multivariable Chain Rule, Gradient Descent | $\mathbf{z} = W\mathbf{x} + \mathbf{b}$, $\frac{\partial \mathcal{L}}{\partial W} = \frac{\partial \mathcal{L}}{\partial a} \frac{\partial a}{\partial z} \frac{\partial z}{\partial W}$ |
+| **Neural Networks / Deep Learning** | Linear Transformations, Hessians (Positive Definite), Chain Rule | $\mathbf{z} = W\mathbf{x} + \mathbf{b}$, $H \succ 0 \implies \text{Local Minimum}$ |
 
 ---
 
@@ -2470,6 +2503,14 @@ $$
 - [ ] **20. Gradient Descent Step:** Given $f(x)=x^2, x_0=4, \alpha=0.1$, compute step $x_1 = 3.2, x_2 = 2.56$.
 - [ ] **21. Chain Rule:** Differentiate $y = (3x + 2)^2 \implies \frac{dy}{dx} = 18x + 12$.
 - [ ] **22. Entropy Calculation:** Compute $H(0.5, 0.5) = 1.0 \text{ Bit}$ and $H(1.0, 0.0) = 0.0 \text{ Bits}$.
+- [ ] **23. Four Subspaces & Null Space:** Given $A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}$, find $N(A) = \text{span}\left(\begin{bmatrix} -2 \\ 1 \end{bmatrix}\right)$ and verify $\text{rank}(A) + \text{nullity}(A) = 2$.
+- [ ] **24. Gram-Schmidt Orthogonalization:** Orthonormalize $\mathbf{a}_1 = [1, 1]^T, \mathbf{a}_2 = [1, 0]^T$ to find $\mathbf{q}_1 = [1/\sqrt{2}, 1/\sqrt{2}]^T, \mathbf{q}_2 = [1/\sqrt{2}, -1/\sqrt{2}]^T$.
+- [ ] **25. Construct QR Decomposition:** Factor $A = QR$ and construct upper-triangular matrix $R = \begin{bmatrix} \sqrt{2} & 1/\sqrt{2} \\ 0 & 1/\sqrt{2} \end{bmatrix}$.
+- [ ] **26. Positive Definite Test:** Compute $\mathbf{x}^T A \mathbf{x} = 2x_1^2 + 2x_1 x_2 + 2x_2^2$ for $A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$ and prove it is Positive Definite via eigenvalues $\lambda_1=3, \lambda_2=1 > 0$.
+- [ ] **27. Why Covariance is PSD:** Prove $\mathbf{x}^T \Sigma \mathbf{x} = \frac{1}{n-1} \|X_c \mathbf{x}\|_2^2 \ge 0$ for any vector $\mathbf{x}$.
+- [ ] **28. Moore-Penrose Pseudoinverse:** For $A = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$, compute $A^+ = (A^T A)^{-1} A^T = \begin{bmatrix} 1/5 & 2/5 \end{bmatrix}$ and verify $A^+ A = [1]$.
+- [ ] **29. Linear Transformation Geometry:** Apply 2D Rotation $R_{90^\circ} = \begin{bmatrix} 0 & -1 \\ 1 & 0 \end{bmatrix}$ and Scaling to vectors on paper.
+- [ ] **30. SVD Geometric Decomposition:** Interpret $A = U \Sigma V^T$ as Rotate $\to$ Stretch $\to$ Rotate.
 
 ---
 
@@ -2554,6 +2595,877 @@ $$
 30. **Q: Why is Bessel's correction ($n-1$) needed for sample variance?**
     * **A:** Deviations calculated from the sample mean $\bar{x}$ are inherently smaller than deviations from the true population mean $\mu$. Dividing by $n-1$ compensates for this downward bias, providing an unbiased estimator.
 
+### Advanced Linear Algebra & Decompositions
+31. **Q: What are the Four Fundamental Subspaces of a matrix $A \in \mathbb{R}^{m \times n}$?**
+    * **A:** Column Space $C(A) \subset \mathbb{R}^m$, Row Space $C(A^T) \subset \mathbb{R}^n$, Null Space $N(A) \subset \mathbb{R}^n$, and Left Null Space $N(A^T) \subset \mathbb{R}^m$. They form orthogonal complements: $C(A^T) \perp N(A)$ in $\mathbb{R}^n$ and $C(A) \perp N(A^T)$ in $\mathbb{R}^m$.
+32. **Q: What does the Rank-Nullity Theorem mean in practical ML terms?**
+    * **A:** $\text{rank}(A) + \text{nullity}(A) = n$. In a dataset with $n$ feature columns, the rank represents the number of informative, linearly independent feature axes, while nullity represents the number of completely redundant dimensions that map to zero.
+33. **Q: Why does the least-squares residual error vector lie in the Left Null Space $N(A^T)$?**
+    * **A:** Because least squares projects target vector $\mathbf{y}$ orthogonally onto the Column Space $C(A)$. The residual error $\mathbf{e} = \mathbf{y} - A\hat{\mathbf{x}}$ is perpendicular to all columns of $A$, meaning $A^T \mathbf{e} = \mathbf{0}$, which is the exact definition of $N(A^T)$.
+34. **Q: What is the purpose of Gram-Schmidt Orthogonalization?**
+    * **A:** It takes any set of linearly independent vectors and converts them into an equivalent set of mutually orthogonal (or orthonormal) unit vectors that span the exact same subspace, eliminating cross-talk between axes.
+35. **Q: Why do production ML libraries solve Linear Regression via QR Decomposition rather than $(X^T X)^{-1} X^T \mathbf{y}$?**
+    * **A:** Explicitly forming $X^T X$ squares the condition number ($\kappa(X^T X) = \kappa(X)^2$), amplifying numerical rounding errors. QR decomposition ($X = QR$) allows solving $R\mathbf{w} = Q^T \mathbf{y}$ via fast back-substitution without matrix inversion, preserving numerical precision.
+36. **Q: What is the difference between a Positive Definite (PD) and a Positive Semidefinite (PSD) matrix?**
+    * **A:** A symmetric matrix $A$ is PD ($A \succ 0$) if its quadratic form satisfies $\mathbf{x}^T A \mathbf{x} > 0$ for all $\mathbf{x} \neq \mathbf{0}$ (all eigenvalues $\lambda_i > 0$). It is PSD ($A \succeq 0$) if $\mathbf{x}^T A \mathbf{x} \ge 0$ (all eigenvalues $\lambda_i \ge 0$, allowing zeros).
+37. **Q: Why is any sample covariance matrix $\Sigma$ guaranteed to be Positive Semidefinite?**
+    * **A:** Because $\mathbf{x}^T \Sigma \mathbf{x} = \mathbf{x}^T \left(\frac{1}{n-1} X_c^T X_c\right) \mathbf{x} = \frac{1}{n-1} \|X_c \mathbf{x}\|_2^2 \ge 0$. The squared Euclidean norm of any real vector is non-negative, meaning variance along any projection direction can never be negative.
+38. **Q: What is the Moore-Penrose Pseudoinverse $A^+$ and when is it used?**
+    * **A:** A generalized matrix inverse that exists for any matrix (rectangular or singular). For overdetermined systems, $A^+ \mathbf{b}$ yields the Ordinary Least Squares solution. For underdetermined systems, it finds the unique solution with the minimum $L_2$ norm.
+39. **Q: When is $A^+ = (A^T A)^{-1} A^T$ valid vs. the general SVD formulation $A^+ = V \Sigma^+ U^T$?**
+    * **A:** The formula $(A^T A)^{-1} A^T$ requires $A$ to have full column rank ($A^T A$ invertible). The SVD formulation $A^+ = V \Sigma^+ U^T$ works universally for any matrix of arbitrary shape and rank by inverting non-zero singular values ($1/\sigma_i$).
+40. **Q: How does viewing a matrix as a linear transformation explain neural network dense layers?**
+    * **A:** A dense feedforward layer $\mathbf{z} = W\mathbf{x} + \mathbf{b}$ is an affine transformation: the weight matrix $W$ performs a linear transformation (rotating, scaling, shearing input feature space), and the bias vector $\mathbf{b}$ translates the origin.
+
+---
+
+# PART 22 — FOUR FUNDAMENTAL SUBSPACES
+
+---
+
+## 22.1 Column Space
+
+```
+                   COLUMN SPACE C(A) in R^m
+        (All linear combinations of the columns of A)
+                             y
+                             │          Col(A) = span([1, 2]^T)
+                             │         ╱
+                           2 ┼────────● [1, 2]^T
+                             │       ╱
+                             │      ╱
+                             └─────┴─────► x
+                                   1
+```
+
+* **Definition:** The **Column Space** (or Range) of an $m \times n$ matrix $A$, denoted $C(A)$ or $\text{Col}(A)$, is the subspace of $\mathbb{R}^m$ spanned by the column vectors of $A$:
+
+$$
+C(A) = \left\{ A\mathbf{x} \mid \mathbf{x} \in \mathbb{R}^n \right\} \subseteq \mathbb{R}^m
+$$
+
+* **Geometric Meaning:** $C(A)$ contains every output vector $\mathbf{b}$ that can be reached by multiplying $A$ by some input vector $\mathbf{x}$. The linear system $A\mathbf{x} = \mathbf{b}$ is solvable if and only if $\mathbf{b} \in C(A)$.
+* **Dimension:** $\dim(C(A)) = r = \text{rank}(A)$.
+
+### Hand Calculation Example
+Let $A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix} \in \mathbb{R}^{2 \times 2}$:
+* Column 1: $\mathbf{a}_1 = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$, Column 2: $\mathbf{a}_2 = \begin{bmatrix} 2 \\ 4 \end{bmatrix} = 2\mathbf{a}_1$.
+* Column 2 is a scalar multiple of Column 1 (linearly dependent).
+* Therefore, the Column Space is the 1D line in $\mathbb{R}^2$ spanned by $\begin{bmatrix} 1 \\ 2 \end{bmatrix}$:
+
+$$
+C(A) = \text{span}\left( \begin{bmatrix} 1 \\ 2 \end{bmatrix} \right)
+$$
+
+* **Dimension:** $r = 1$.
+
+---
+
+## 22.2 Row Space
+
+* **Definition:** The **Row Space** of $A$, denoted $C(A^T)$ or $\text{Row}(A)$, is the subspace of $\mathbb{R}^n$ spanned by the row vectors of $A$ (or the columns of $A^T$):
+
+$$
+C(A^T) = \left\{ A^T \mathbf{y} \mid \mathbf{y} \in \mathbb{R}^m \right\} \subseteq \mathbb{R}^n
+$$
+
+* **Key Fundamental Theorem:** The Row Space and Column Space **always have the exact same dimension**, equal to the rank of the matrix:
+
+$$
+\dim(C(A^T)) = \dim(C(A)) = r = \text{rank}(A)
+$$
+
+### Hand Calculation Example
+For $A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}$:
+* Row 1: $[1, 2]$, Row 2: $[2, 4] = 2[1, 2]$.
+* The Row Space is the 1D line in $\mathbb{R}^2$ spanned by $\begin{bmatrix} 1 \\ 2 \end{bmatrix}$:
+
+$$
+C(A^T) = \text{span}\left( \begin{bmatrix} 1 \\ 2 \end{bmatrix} \right)
+$$
+
+---
+
+## 22.3 Null Space
+
+* **Definition:** The **Null Space** (or Kernel) of $A$, denoted $N(A)$, is the set of all input vectors $\mathbf{x} \in \mathbb{R}^n$ that $A$ maps to the zero vector $\mathbf{0}$:
+
+$$
+N(A) = \left\{ \mathbf{x} \in \mathbb{R}^n \mid A\mathbf{x} = \mathbf{0} \right\} \subseteq \mathbb{R}^n
+$$
+
+* **Geometric Meaning:** $N(A)$ represents all directions in the input space that are completely squashed/destroyed by the matrix transformation $A$.
+* **Dimension:** $\dim(N(A)) = n - r$ (the **nullity**).
+
+### Step-by-Step Hand Calculation Example
+Find the Null Space basis for $A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}$:
+1. Set up the homogeneous equation $A\mathbf{x} = \mathbf{0}$:
+
+$$
+\begin{bmatrix}
+1 & 2 \\
+2 & 4
+\end{bmatrix}
+\begin{bmatrix}
+x_1 \\
+x_2
+\end{bmatrix} =
+\begin{bmatrix}
+0 \\
+0
+\end{bmatrix}
+$$
+
+2. Write the scalar equations:
+   * Equation 1: $1x_1 + 2x_2 = 0 \implies x_1 = -2x_2$.
+   * Equation 2: $2x_1 + 4x_2 = 0 \implies 2(-2x_2) + 4x_2 = 0$ (redundant $0=0$).
+3. Identify the free variable:
+   * $x_2$ is free. Let $x_2 = t$ where $t \in \mathbb{R}$.
+4. Express the solution vector:
+
+$$
+\mathbf{x} =
+\begin{bmatrix}
+x_1 \\
+x_2
+\end{bmatrix} =
+\begin{bmatrix}
+-2t \\
+t
+\end{bmatrix} =
+t
+\begin{bmatrix}
+-2 \\
+1
+\end{bmatrix}
+$$
+
+5. **Null Space Basis:**
+
+$$
+N(A) = \text{span}\left( \begin{bmatrix} -2 \\ 1 \end{bmatrix} \right)
+$$
+
+* **Dimension:** $\text{nullity}(A) = 1$.
+
+---
+
+## 22.4 Left Null Space
+
+* **Definition:** The **Left Null Space** of $A$, denoted $N(A^T)$, is the null space of the transpose matrix $A^T$:
+
+$$
+N(A^T) = \left\{ \mathbf{y} \in \mathbb{R}^m \mid A^T \mathbf{y} = \mathbf{0} \right\} \subseteq \mathbb{R}^m
+$$
+
+* *(Why "Left"? Because transposing gives $\mathbf{y}^T A = \mathbf{0}^T$, so $\mathbf{y}^T$ multiplies $A$ from the left).*
+* **Dimension:** $\dim(N(A^T)) = m - r$.
+
+### Step-by-Step Hand Calculation Example
+For $A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}$, $A^T = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}$:
+1. Set up $A^T \mathbf{y} = \mathbf{0}$:
+
+$$
+\begin{bmatrix}
+1 & 2 \\
+2 & 4
+\end{bmatrix}
+\begin{bmatrix}
+y_1 \\
+y_2
+\end{bmatrix} =
+\begin{bmatrix}
+0 \\
+0
+\end{bmatrix}
+\implies y_1 + 2y_2 = 0 \implies y_1 = -2y_2
+$$
+
+2. Let $y_2 = s$ (free variable):
+
+$$
+\mathbf{y} = s
+\begin{bmatrix}
+-2 \\
+1
+\end{bmatrix} \implies N(A^T) = \text{span}\left( \begin{bmatrix} -2 \\ 1 \end{bmatrix} \right)
+$$
+
+---
+
+## 22.5 The Four Fundamental Subspaces (Big Picture)
+
+```
+        INPUT SPACE R^n (n dimensions)                     OUTPUT SPACE R^m (m dimensions)
+   ┌─────────────────────────────────────┐            ┌─────────────────────────────────────┐
+   │                                     │            │                                     │
+   │           ROW SPACE                 │            │          COLUMN SPACE               │
+   │           C(A^T)                    │   ──A──►   │          C(A)                       │
+   │         Dimension = r               │            │        Dimension = r                │
+   │                                     │            │                                     │
+   │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ │            │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ │
+   │           NULL SPACE                │            │       LEFT NULL SPACE               │
+   │           N(A)                      │   ──A──►   │          N(A^T)                     │
+   │        Dimension = n - r            │   maps to  │        Dimension = m - r            │
+   │                                     │   vector 0 │                                     │
+   └─────────────────────────────────────┘            └─────────────────────────────────────┘
+        Orthogonal Complements:                            Orthogonal Complements:
+           C(A^T) ⊥ N(A)                                      C(A) ⊥ N(A^T)
+```
+
+| Subspace | Notation | Ambient Space | Dimension | Orthogonal Complement |
+| :--- | :--- | :--- | :--- | :--- |
+| **Column Space** | $C(A)$ | $\mathbb{R}^m$ | $r$ | $N(A^T)$ |
+| **Row Space** | $C(A^T)$ | $\mathbb{R}^n$ | $r$ | $N(A)$ |
+| **Null Space** | $N(A)$ | $\mathbb{R}^n$ | $n - r$ | $C(A^T)$ |
+| **Left Null Space** | $N(A^T)$ | $\mathbb{R}^m$ | $m - r$ | $C(A)$ |
+
+### Orthogonality Verification
+Notice that any vector in the Row Space $C(A^T)$ is perpendicular to any vector in the Null Space $N(A)$:
+* Row vector: $\mathbf{r} = [1, 2]^T \in C(A^T)$.
+* Null vector: $\mathbf{n} = [-2, 1]^T \in N(A)$.
+* Dot product: $\mathbf{r} \cdot \mathbf{n} = (1)(-2) + (2)(1) = -2 + 2 = 0 \implies \mathbf{r} \perp \mathbf{n} \quad \checkmark$.
+
+---
+
+## 22.6 Rank-Nullity Theorem
+
+For any matrix $A \in \mathbb{R}^{m \times n}$ with $n$ columns:
+
+$$
+\text{rank}(A) + \text{nullity}(A) = n
+$$
+
+* **Intuition:** The total number of columns ($n$) is divided between:
+  1. Directions that produce meaningful outputs ($\text{rank} = r$).
+  2. Directions that are squashed into zero ($\text{nullity} = n - r$).
+* *Concrete Check:* For our $2 \times 2$ matrix $A$, $\text{rank}(A) = 1$, $\text{nullity}(A) = 1$, and $n = 2$:
+  $1 + 1 = 2 \quad \checkmark$.
+
+---
+
+## 22.7 ML Connection
+
+* **Redundant Features & Multicollinearity:** If a dataset has $n = 100$ features but $\text{rank}(X) = 80$, then $\text{nullity}(X) = 20$. Exactly 20 feature combinations lie in the Null Space $N(X)$, meaning they have zero predictive power and make $(X^T X)$ singular.
+* **Least Squares Projection ($b = p + e$):** In linear regression, the target $\mathbf{y} \in \mathbb{R}^m$ rarely lies in the Column Space $C(X)$. The model decomposes $\mathbf{y}$ into:
+  * Prediction $\hat{\mathbf{y}} = \mathbf{p} \in C(X)$ (orthogonal projection onto column space).
+  * Residual error $\mathbf{e} = \mathbf{y} - \hat{\mathbf{y}} \in N(X^T)$ (perpendicular error living in the Left Null Space!).
+
+> [!TIP]
+> **Common Interview Question:** *"Where does the residual error vector $\mathbf{e} = \mathbf{y} - X\mathbf{w}$ live in the four fundamental subspaces?"*
+> **Answer:** It lives in the **Left Null Space $N(X^T)$**, because $\mathbf{e}$ is perpendicular to every column of $X$, satisfying $X^T \mathbf{e} = \mathbf{0}$.
+
+> [!WARNING]
+> **Common Mistake:** Confusing the ambient spaces: the Column Space $C(A)$ lives in $\mathbb{R}^m$ (output space), while the Row Space $C(A^T)$ and Null Space $N(A)$ live in $\mathbb{R}^n$ (input space).
+
+---
+
+# PART 23 — GRAM-SCHMIDT ORTHOGONALIZATION & QR DECOMPOSITION
+
+---
+
+## 23.1 Why We Need Orthogonal Bases
+
+When basis vectors are mutually orthogonal ($\mathbf{q}_i \cdot \mathbf{q}_j = 0$ for $i \neq j$) and normalized ($\|\mathbf{q}_i\|_2 = 1$):
+1. **No Cross-Talk:** Projecting a vector onto coordinate $i$ is completely independent of coordinate $j$: $c_i = \mathbf{x} \cdot \mathbf{q}_i$.
+2. **Trivial Matrix Inversion:** An orthogonal matrix $Q$ satisfies $Q^T Q = I \implies Q^{-1} = Q^T$.
+3. **Numerical Precision:** Orthogonal transformations preserve $L_2$ lengths and do not amplify floating-point rounding errors.
+
+---
+
+## 23.2 Gram-Schmidt Derivation
+
+The **Gram-Schmidt Process** converts a set of linearly independent vectors $\{\mathbf{a}_1, \mathbf{a}_2, \dots, \mathbf{a}_k\}$ into an orthonormal set $\{\mathbf{q}_1, \mathbf{q}_2, \dots, \mathbf{q}_k\}$.
+
+```
+        VECTOR 1: Set u1 = a1                VECTOR 2: Subtract projection onto u1
+                  y                                           y
+                  │     a1 = u1                               │     a2
+                  │    ╱                                      │    ╱│
+                1 ┼───●                                     1 ┼───● │  u2 = a2 - proj_u1(a2)
+                  │  ╱                                        │   │ └──► (Orthogonal to u1!)
+                  └──┴─────► x                                └───┴────► x
+                     1                                            1
+```
+
+### Complete Step-by-Step Hand Calculation Example
+Orthonormalize the two vectors:
+
+$$
+\mathbf{a}_1 =
+\begin{bmatrix}
+1 \\
+1
+\end{bmatrix},
+\quad
+\mathbf{a}_2 =
+\begin{bmatrix}
+1 \\
+0
+\end{bmatrix}
+$$
+
+---
+
+### Step 1: Set the First Orthogonal Vector $\mathbf{u}_1$
+$$
+\mathbf{u}_1 = \mathbf{a}_1 =
+\begin{bmatrix}
+1 \\
+1
+\end{bmatrix}
+$$
+
+---
+
+### Step 2: Compute the Second Orthogonal Vector $\mathbf{u}_2$
+Subtract the projection of $\mathbf{a}_2$ onto $\mathbf{u}_1$:
+
+$$
+\mathbf{u}_2 = \mathbf{a}_2 - \text{proj}_{\mathbf{u}_1}(\mathbf{a}_2) = \mathbf{a}_2 - \left(\frac{\mathbf{a}_2 \cdot \mathbf{u}_1}{\mathbf{u}_1 \cdot \mathbf{u}_1}\right) \mathbf{u}_1
+$$
+
+1. Dot products:
+   * $\mathbf{a}_2 \cdot \mathbf{u}_1 = (1)(1) + (0)(1) = 1$.
+   * $\mathbf{u}_1 \cdot \mathbf{u}_1 = 1^2 + 1^2 = 2$.
+2. Projection fraction: $\frac{\mathbf{a}_2 \cdot \mathbf{u}_1}{\mathbf{u}_1 \cdot \mathbf{u}_1} = \frac{1}{2}$.
+3. Subtract:
+
+$$
+\mathbf{u}_2 =
+\begin{bmatrix}
+1 \\
+0
+\end{bmatrix} - \frac{1}{2}
+\begin{bmatrix}
+1 \\
+1
+\end{bmatrix} =
+\begin{bmatrix}
+1 - 1/2 \\
+0 - 1/2
+\end{bmatrix} =
+\begin{bmatrix}
+1/2 \\
+-1/2
+\end{bmatrix}
+$$
+
+4. **Orthogonality Check:**
+   $\mathbf{u}_1 \cdot \mathbf{u}_2 = (1)(1/2) + (1)(-1/2) = 1/2 - 1/2 = 0 \quad \checkmark$.
+
+---
+
+### Step 3: Normalize Both Vectors to Unit Length ($L_2 = 1$)
+1. Normalize $\mathbf{u}_1$:
+   * $\|\mathbf{u}_1\|_2 = \sqrt{1^2 + 1^2} = \sqrt{2}$.
+
+$$
+\mathbf{q}_1 = \frac{\mathbf{u}_1}{\|\mathbf{u}_1\|_2} =
+\begin{bmatrix}
+1/\sqrt{2} \\
+1/\sqrt{2}
+\end{bmatrix}
+$$
+
+2. Normalize $\mathbf{u}_2$:
+   * $\|\mathbf{u}_2\|_2 = \sqrt{(1/2)^2 + (-1/2)^2} = \sqrt{1/4 + 1/4} = \sqrt{2/4} = \frac{1}{\sqrt{2}}$.
+
+$$
+\mathbf{q}_2 = \frac{\mathbf{u}_2}{\|\mathbf{u}_2\|_2} = \sqrt{2}
+\begin{bmatrix}
+1/2 \\
+-1/2
+\end{bmatrix} =
+\begin{bmatrix}
+1/\sqrt{2} \\
+-1/\sqrt{2}
+\end{bmatrix}
+$$
+
+---
+
+## 23.3 Build Q and R ($A = QR$)
+
+Any matrix $A$ with linearly independent columns can be factored into:
+
+$$
+A = QR
+$$
+
+Where:
+* $Q$: An **orthogonal matrix** ($Q^T Q = I$) containing the orthonormal basis vectors as columns.
+* $R$: An **upper-triangular matrix** ($R_{ij} = \mathbf{q}_i^T \mathbf{a}_j$, with $R_{ij} = 0$ for $i > j$) storing the projection coefficients.
+
+### Constructing $Q$ and $R$ from our Hand Example:
+1. Form $Q$:
+
+$$
+Q =
+\begin{bmatrix}
+\mathbf{q}_1 & \mathbf{q}_2
+\end{bmatrix} =
+\begin{bmatrix}
+1/\sqrt{2} & 1/\sqrt{2} \\
+1/\sqrt{2} & -1/\sqrt{2}
+\end{bmatrix}
+$$
+
+2. Compute entries of $R = Q^T A$:
+   * $R_{11} = \mathbf{q}_1 \cdot \mathbf{a}_1 = (1/\sqrt{2})(1) + (1/\sqrt{2})(1) = 2/\sqrt{2} = \sqrt{2}$.
+   * $R_{12} = \mathbf{q}_1 \cdot \mathbf{a}_2 = (1/\sqrt{2})(1) + (1/\sqrt{2})(0) = 1/\sqrt{2}$.
+   * $R_{21} = \mathbf{q}_2 \cdot \mathbf{a}_1 = (1/\sqrt{2})(1) + (-1/\sqrt{2})(1) = 0$.
+   * $R_{22} = \mathbf{q}_2 \cdot \mathbf{a}_2 = (1/\sqrt{2})(1) + (-1/\sqrt{2})(0) = 1/\sqrt{2}$.
+
+$$
+R =
+\begin{bmatrix}
+\sqrt{2} & 1/\sqrt{2} \\
+0 & 1/\sqrt{2}
+\end{bmatrix}
+$$
+
+3. **Verification ($A = QR$):**
+
+$$
+QR =
+\begin{bmatrix}
+1/\sqrt{2} & 1/\sqrt{2} \\
+1/\sqrt{2} & -1/\sqrt{2}
+\end{bmatrix}
+\begin{bmatrix}
+\sqrt{2} & 1/\sqrt{2} \\
+0 & 1/\sqrt{2}
+\end{bmatrix} =
+\begin{bmatrix}
+1 + 0 & 1/2 + 1/2 \\
+1 + 0 & 1/2 - 1/2
+\end{bmatrix} =
+\begin{bmatrix}
+1 & 1 \\
+1 & 0
+\end{bmatrix} = A \quad \checkmark
+$$
+
+---
+
+## 23.4 Why QR Matters in ML
+
+In Ordinary Least Squares, the Normal Equation is $X^T X \mathbf{w} = X^T \mathbf{y}$.
+1. Substitute $X = QR$:
+
+$$
+(QR)^T (QR) \mathbf{w} = (QR)^T \mathbf{y} \implies R^T (Q^T Q) R \mathbf{w} = R^T Q^T \mathbf{y}
+$$
+
+2. Since $Q^T Q = I$:
+
+$$
+R^T R \mathbf{w} = R^T Q^T \mathbf{y} \implies R \mathbf{w} = Q^T \mathbf{y}
+$$
+
+3. **Why this is superior to $(X^T X)^{-1}$:**
+   * Because $R$ is **upper-triangular**, $R\mathbf{w} = Q^T \mathbf{y}$ is solved instantly using **back-substitution** without inverting any matrices!
+   * Forming $X^T X$ squares the condition number: $\kappa(X^T X) = \kappa(X)^2$. If $\kappa(X) = 10^4$, then $\kappa(X^T X) = 10^8$, ruining numerical accuracy. QR solves least squares with condition number $\kappa(X)$, providing maximum numerical stability.
+
+---
+
+# PART 24 — POSITIVE DEFINITE & POSITIVE SEMIDEFINITE MATRICES
+
+---
+
+## 24.1 Quadratic Form
+
+A **Quadratic Form** is a scalar polynomial where every term has degree 2, generated by a symmetric matrix $A \in \mathbb{R}^{n \times n}$:
+
+$$
+f(\mathbf{x}) = \mathbf{x}^T A \mathbf{x} = \sum_{i=1}^{n} \sum_{j=1}^{n} A_{ij} x_i x_j
+$$
+
+### Hand Calculation Example
+Let $A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$ and $\mathbf{x} = \begin{bmatrix} x_1 \\ x_2 \end{bmatrix}$:
+1. Compute $A\mathbf{x}$:
+
+$$
+A\mathbf{x} =
+\begin{bmatrix}
+2 & 1 \\
+1 & 2
+\end{bmatrix}
+\begin{bmatrix}
+x_1 \\
+x_2
+\end{bmatrix} =
+\begin{bmatrix}
+2x_1 + x_2 \\
+x_1 + 2x_2
+\end{bmatrix}
+$$
+
+2. Multiply by $\mathbf{x}^T$:
+
+$$
+\mathbf{x}^T (A\mathbf{x}) =
+\begin{bmatrix}
+x_1 & x_2
+\end{bmatrix}
+\begin{bmatrix}
+2x_1 + x_2 \\
+x_1 + 2x_2
+\end{bmatrix} = x_1(2x_1 + x_2) + x_2(x_1 + 2x_2) = 2x_1^2 + 2x_1 x_2 + 2x_2^2
+$$
+
+---
+
+## 24.2 Positive Definite ($A \succ 0$)
+
+* **Definition:** A symmetric matrix $A$ is **Positive Definite** if its quadratic form is strictly positive for every non-zero vector $\mathbf{x} \neq \mathbf{0}$:
+
+$$
+\mathbf{x}^T A \mathbf{x} > 0 \quad \forall \mathbf{x} \neq \mathbf{0} \quad \iff \quad \text{All eigenvalues } \lambda_i > 0
+$$
+
+### Hand Proof for $A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$:
+Complete the square on the quadratic form:
+
+$$
+2x_1^2 + 2x_1 x_2 + 2x_2^2 = 2\left(x_1^2 + x_1 x_2 + \frac{1}{4}x_2^2\right) + \frac{3}{2}x_2^2 = 2\left(x_1 + \frac{1}{2}x_2\right)^2 + \frac{3}{2}x_2^2
+$$
+
+* Since both terms are squares multiplied by positive numbers, the sum is strictly $> 0$ for any $(x_1, x_2) \neq (0, 0)$.
+* Eigenvalue check: $\lambda_1 = 3 > 0, \lambda_2 = 1 > 0 \implies \mathbf{A \succ 0}$.
+
+---
+
+## 24.3 Positive Semidefinite ($A \succeq 0$)
+
+* **Definition:** A symmetric matrix $A$ is **Positive Semidefinite** if its quadratic form is non-negative for all vectors:
+
+$$
+\mathbf{x}^T A \mathbf{x} \ge 0 \quad \forall \mathbf{x} \quad \iff \quad \text{All eigenvalues } \lambda_i \ge 0 \text{ (zeros allowed)}
+$$
+
+* *Example:* $B = \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} \implies \mathbf{x}^T B \mathbf{x} = x_1^2 + 2x_1 x_2 + x_2^2 = (x_1 + x_2)^2 \ge 0$.
+  * For $\mathbf{x} = [1, -1]^T \neq \mathbf{0}$, $\mathbf{x}^T B \mathbf{x} = (1 - 1)^2 = 0$.
+  * Eigenvalues: $\lambda_1 = 2, \lambda_2 = 0 \implies \mathbf{B \succeq 0}$.
+
+---
+
+## 24.4 Negative Definite and Indefinite
+
+| Matrix Class | Condition on $\mathbf{x}^T A \mathbf{x}$ | Condition on Eigenvalues | Geometric Shape of Surface |
+| :--- | :--- | :--- | :--- |
+| **Positive Definite ($A \succ 0$)** | $\mathbf{x}^T A \mathbf{x} > 0$ ($\mathbf{x} \neq \mathbf{0}$) | All $\lambda_i > 0$ | Upward bowl (strict minimum) |
+| **Positive Semidefinite ($A \succeq 0$)** | $\mathbf{x}^T A \mathbf{x} \ge 0$ | All $\lambda_i \ge 0$ | Flat-bottomed trough/valley |
+| **Negative Definite ($A \prec 0$)** | $\mathbf{x}^T A \mathbf{x} < 0$ ($\mathbf{x} \neq \mathbf{0}$) | All $\lambda_i < 0$ | Downward dome (strict maximum) |
+| **Indefinite** | Positive for some $\mathbf{x}$, negative for others | Mixed positive & negative $\lambda_i$ | **Saddle point** (mountain pass) |
+
+---
+
+## 24.5 Geometric Intuition
+
+```
+     POSITIVE DEFINITE (Bowl)               INDEFINITE (Saddle Point)
+               z                                       z
+               │      (Min at origin)                  │        (Up in x, Down in y)
+               │    )                          ╭───────┼───────╮
+               │   (                           │       │       │
+               └───┴──────► x                  └───●───┴───────┴──► x
+                  y                                (Saddle)
+```
+
+---
+
+## 24.6 ML Connections
+
+1. **Why Covariance Matrices are Always PSD:**
+   For any mean-centered data matrix $X_c$ and any vector $\mathbf{u}$:
+
+$$
+\mathbf{u}^T \Sigma \mathbf{u} = \mathbf{u}^T \left(\frac{1}{n-1} X_c^T X_c\right) \mathbf{u} = \frac{1}{n-1} (X_c \mathbf{u})^T (X_c \mathbf{u}) = \frac{1}{n-1} \|X_c \mathbf{u}\|_2^2 \ge 0
+$$
+
+   *Because the squared $L_2$ norm of any vector is non-negative, the variance of projected data can NEVER be negative!*
+
+2. **Hessian Matrix & Convex Optimization:**
+   * If the Hessian matrix $H = \nabla^2 \mathcal{L}(\mathbf{w})$ is Positive Definite ($H \succ 0$), the loss surface is strictly **convex** (a bowl), guaranteeing that any stationary point ($\nabla \mathcal{L} = \mathbf{0}$) is a **unique global minimum**.
+   * If $H$ is Indefinite, the optimizer is stuck at a **saddle point**.
+
+---
+
+# PART 25 — MOORE-PENROSE PSEUDOINVERSE
+
+---
+
+## 25.1 Why Ordinary Inverse Fails
+
+The standard matrix inverse $A^{-1}$ only exists if $A$ is **square** ($n \times n$) and **full rank** ($\det(A) \neq 0$). It fails when:
+1. Matrix is **rectangular** ($m \times n$, e.g., $1000$ samples $\times 10$ features).
+2. Matrix is **square but singular** ($\det(A) = 0$, redundant features).
+
+---
+
+## 25.2 What the Pseudoinverse Does
+
+The **Moore-Penrose Pseudoinverse** $A^+$ is the unique matrix satisfying the 4 Moore-Penrose conditions:
+1. $A A^+ A = A$
+2. $A^+ A A^+ = A^+$
+3. $(A A^+)^T = A A^+$
+4. $(A^+ A)^T = A^+ A$
+
+* **Intuition:** $A^+$ provides the "best possible inverse":
+  * For **overdetermined systems** ($m > n$, more equations than unknowns), $A^+ \mathbf{b}$ gives the **least-squares solution** minimizing $\|\mathbf{y} - X\mathbf{w}\|_2^2$.
+  * For **underdetermined systems** ($m < n$, infinitely many solutions), $A^+ \mathbf{b}$ picks the unique solution with the **minimum $L_2$ norm** ($\|\mathbf{w}\|_2$).
+
+---
+
+## 25.3 Least Squares Connection
+
+$$
+\mathbf{w}_{\text{LS}} = A^+ \mathbf{b}
+$$
+
+* When $A$ has full column rank ($\text{rank}(A) = n$), the pseudoinverse formula is:
+
+$$
+A^+ = (A^T A)^{-1} A^T
+$$
+
+* When $A$ has full row rank ($\text{rank}(A) = m$), the right-inverse formula is:
+
+$$
+A^+ = A^T (A A^T)^{-1}
+$$
+
+* **Universal SVD Formulation:** For ANY matrix of any rank, SVD $A = U \Sigma V^T$ gives:
+
+$$
+A^+ = V \Sigma^+ U^T
+$$
+
+  where $\Sigma^+$ transposes $\Sigma$ and inverts all non-zero singular values ($\sigma_i \to 1/\sigma_i$).
+
+---
+
+## 25.4 Complete Step-by-Step Hand Calculation
+
+Find the pseudoinverse of the rectangular column vector $A = \begin{bmatrix} 1 \\ 2 \end{bmatrix} \in \mathbb{R}^{2 \times 1}$:
+1. Since $A$ has full column rank ($r = 1 = n$), use $A^+ = (A^T A)^{-1} A^T$:
+2. Compute $A^T A$:
+
+$$
+A^T A =
+\begin{bmatrix}
+1 & 2
+\end{bmatrix}
+\begin{bmatrix}
+1 \\
+2
+\end{bmatrix} = 1^2 + 2^2 = 5
+$$
+
+3. Invert scalar $(A^T A)^{-1} = \frac{1}{5} = 0.2$.
+4. Multiply by $A^T$:
+
+$$
+A^+ = \frac{1}{5}
+\begin{bmatrix}
+1 & 2
+\end{bmatrix} =
+\begin{bmatrix}
+0.2 & 0.4
+\end{bmatrix}
+$$
+
+5. **Verify Moore-Penrose Property ($A^+ A = I_1$):**
+
+$$
+A^+ A =
+\begin{bmatrix}
+0.2 & 0.4
+\end{bmatrix}
+\begin{bmatrix}
+1 \\
+2
+\end{bmatrix} = 0.2(1) + 0.4(2) = 0.2 + 0.8 = 1.0 = I_1 \quad \checkmark
+$$
+
+6. **Solve Least Squares Problem:**
+   Let target $\mathbf{b} = \begin{bmatrix} 3 \\ 1 \end{bmatrix}$. Find best scalar $x$:
+
+$$
+\hat{x} = A^+ \mathbf{b} =
+\begin{bmatrix}
+0.2 & 0.4
+\end{bmatrix}
+\begin{bmatrix}
+3 \\
+1
+\end{bmatrix} = 0.2(3) + 0.4(1) = 0.6 + 0.4 = \mathbf{1.0}
+$$
+
+   * Fitted point: $A\hat{x} = \begin{bmatrix} 1 \\ 2 \end{bmatrix}(1) = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$.
+   * Residual error: $\mathbf{e} = \mathbf{b} - A\hat{x} = \begin{bmatrix} 3-1 \\ 1-2 \end{bmatrix} = \begin{bmatrix} 2 \\ -1 \end{bmatrix}$.
+   * Orthogonality check: $\mathbf{e} \cdot A = 2(1) + (-1)(2) = 0 \quad \checkmark$.
+
+---
+
+## 25.5 ML Applications
+
+* **Linear Regression:** Directly computes $\mathbf{w} = X^+ \mathbf{y}$ even if $X$ contains collinear columns.
+* **Ridge Regularization Connection:** As regularization $\alpha \to 0$, Ridge solution $(X^T X + \alpha I)^{-1} X^T \mathbf{y}$ converges smoothly to the minimum-norm pseudoinverse solution $X^+ \mathbf{y}$.
+
+---
+
+# PART 26 — LINEAR TRANSFORMATIONS
+
+---
+
+## 26.1 Definition
+
+A **Transformation** $T: \mathbb{R}^n \to \mathbb{R}^m$ is a rule that takes an input vector $\mathbf{x} \in \mathbb{R}^n$ and produces an output vector $T(\mathbf{x}) \in \mathbb{R}^m$.
+
+A transformation is **Linear** if it can be represented entirely as a matrix multiplication:
+
+$$
+T(\mathbf{x}) = A\mathbf{x}
+$$
+
+```
+                   LINEAR TRANSFORMATION AS MAPPING
+        Input Space R^2                             Output Space R^2
+               y                                           y
+               │     x = [1, 2]^T                          │           A @ x = [2, 6]^T
+             2 ┼────●                                    6 ┼──────────●
+               │    │                                      │          │
+               └───┴────► x                                └──────────┴────► x
+                   1                                                  2
+```
+
+---
+
+## 26.2 The Two Defining Properties
+
+A transformation $T$ is linear if and only if it preserves vector addition and scalar multiplication:
+1. **Additivity:** $T(\mathbf{u} + \mathbf{v}) = T(\mathbf{u}) + T(\mathbf{v})$
+2. **Homogeneity (Scalar Scaling):** $T(c\mathbf{u}) = cT(\mathbf{u})$
+
+### Numerical Verification Example
+Let $A = \begin{bmatrix} 2 & 0 \\ 0 & 3 \end{bmatrix}$, $\mathbf{u} = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$, $\mathbf{v} = \begin{bmatrix} 3 \\ 1 \end{bmatrix}$, $c = 4$:
+* $T(\mathbf{u}) = A\mathbf{u} = [2, 6]^T$, $T(\mathbf{v}) = A\mathbf{v} = [6, 3]^T$.
+* $\mathbf{u} + \mathbf{v} = [4, 3]^T \implies T(\mathbf{u} + \mathbf{v}) = A[4, 3]^T = [8, 9]^T$.
+* Check Additivity: $T(\mathbf{u}) + T(\mathbf{v}) = [2+6, 6+3]^T = [8, 9]^T \quad \checkmark$.
+* Check Homogeneity: $T(4\mathbf{u}) = A[4, 8]^T = [8, 24]^T = 4[2, 6]^T = 4T(\mathbf{u}) \quad \checkmark$.
+
+---
+
+## 26.3 Matrices as Geometric Transformations
+
+Every 2D linear transformation is completely determined by where it sends the standard unit basis vectors $\mathbf{i} = [1, 0]^T$ and $\mathbf{j} = [0, 1]^T$:
+
+1. **Non-Uniform Scaling (Stretch/Shrink):**
+$$
+A_{\text{scale}} =
+\begin{bmatrix}
+s_x & 0 \\
+0 & s_y
+\end{bmatrix}
+\implies
+\begin{bmatrix}
+2 & 0 \\
+0 & 0.5
+\end{bmatrix}
+\begin{bmatrix}
+x \\
+y
+\end{bmatrix} =
+\begin{bmatrix}
+2x \\
+0.5y
+\end{bmatrix}
+$$
+
+2. **Rotation by Angle $\theta$ (Counter-Clockwise):**
+$$
+R_\theta =
+\begin{bmatrix}
+\cos\theta & -\sin\theta \\
+\sin\theta & \cos\theta
+\end{bmatrix}
+\implies R_{90^\circ} =
+\begin{bmatrix}
+0 & -1 \\
+1 & 0
+\end{bmatrix}
+$$
+   * Sends $\mathbf{i} = [1, 0]^T \to [0, 1]^T$ and $\mathbf{j} = [0, 1]^T \to [-1, 0]^T$.
+
+3. **Reflection over the x-axis:**
+$$
+A_{\text{reflect}} =
+\begin{bmatrix}
+1 & 0 \\
+0 & -1
+\end{bmatrix}
+\begin{bmatrix}
+x \\
+y
+\end{bmatrix} =
+\begin{bmatrix}
+x \\
+-y
+\end{bmatrix}
+$$
+
+4. **Horizontal Shear (Sliding Layers):**
+$$
+A_{\text{shear}} =
+\begin{bmatrix}
+1 & k \\
+0 & 1
+\end{bmatrix}
+\implies
+\begin{bmatrix}
+1 & 1.5 \\
+0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+x \\
+y
+\end{bmatrix} =
+\begin{bmatrix}
+x + 1.5y \\
+y
+\end{bmatrix}
+$$
+
+---
+
+## 26.4 Connection to Eigenvectors
+
+* **Geometric Insight:** Under most linear transformations, vectors change both length and direction.
+* **The Eigenvector Exception:** An **eigenvector** is a direction where the linear transformation $A$ acts as a **pure scalar stretch** without rotating the vector at all:
+
+$$
+T(\mathbf{v}) = A\mathbf{v} = \lambda \mathbf{v}
+$$
+
+---
+
+## 26.5 Connection to SVD
+
+Singular Value Decomposition factorizes ANY linear transformation $A = U \Sigma V^T$ into three pure geometric actions:
+$$
+\mathbf{x} \quad \xrightarrow{\quad V^T \text{ (Orthonormal Rotation/Reflection)} \quad} \quad \xrightarrow{\quad \Sigma \text{ (Axis Scaling by Singular Values)} \quad} \quad \xrightarrow{\quad U \text{ (Second Orthonormal Rotation)} \quad} \quad A\mathbf{x}
+$$
+
+---
+
+## 26.6 ML Connection
+
+* **Neural Network Dense Layers:** A fully connected neural network layer $\mathbf{z} = W\mathbf{x} + \mathbf{b}$ is an **affine transformation**: the weight matrix $W$ performs a linear transformation on the input features, and the bias vector $\mathbf{b}$ translates the origin. Non-linear activation functions (ReLU, GELU) then warp the space to learn non-linear decision boundaries.
+* **Embeddings & Latent Representations:** Learned weight matrices project raw inputs into lower-dimensional latent spaces where geometric relationships (like cosine angle and Euclidean distance) encode semantic meaning.
+
 ---
 
 # FINAL SECTION — ONE-PAGE MASTER FORMULA CHEAT SHEET
@@ -2606,6 +3518,18 @@ $$
 │                                                                                                  │
 │ 13. SINGULAR VALUE DECOMPOSITION (SVD):                                                          │
 │     A = U * Sigma * V^T                           X_c^T * X_c = V * Sigma^2 * V^T                │
+│                                                                                                  │
+│ 14. RANK-NULLITY THEOREM:                                                                        │
+│     rank(A) + nullity(A) = n (number of columns)                                                 │
+│                                                                                                  │
+│ 15. GRAM-SCHMIDT & QR DECOMPOSITION:                                                             │
+│     A = Q * R                                     (Q is orthonormal, R is upper-triangular)      │
+│                                                                                                  │
+│ 16. POSITIVE DEFINITE TEST:                                                                      │
+│     x^T * A * x > 0 for all x != 0               <===> all eigenvalues lambda_i > 0              │
+│                                                                                                  │
+│ 17. MOORE-PENROSE PSEUDOINVERSE:                                                                 │
+│     A^+ = (A^T * A)^-1 * A^T (full col rank)     A^+ = V * Sigma^+ * U^T (universal SVD)        │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
