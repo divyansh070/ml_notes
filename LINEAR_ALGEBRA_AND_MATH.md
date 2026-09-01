@@ -2559,8 +2559,8 @@ $$
     * **A:** It evaluates the loss gradient with respect to deep hidden weights by multiplying local derivatives backward through the computational graph: $\frac{\partial \mathcal{L}}{\partial W_1} = \frac{\partial \mathcal{L}}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial z_2} \cdot \frac{\partial z_2}{\partial a_1} \cdot \frac{\partial a_1}{\partial z_1} \cdot \frac{\partial z_1}{\partial W_1}$.
 19. **Q: What is the Hessian matrix?**
     * **A:** The $p \times p$ square matrix of second-order partial derivatives: $H_{ij} = \frac{\partial^2 f}{\partial x_i \partial x_j}$. It describes the curvature of the loss surface.
-
-### Machine Learning Mathematics
+<!-- 
+### Machine Learning Mathematics -->
 20. **Q: Why does Ordinary Least Squares minimize squared errors rather than absolute errors?**
     * **A:** Squared error $(\mathbf{y} - X\mathbf{w})^2$ is continuous and smoothly differentiable everywhere, yielding a closed-form analytical solution ($\mathbf{w} = (X^T X)^{-1} X^T \mathbf{y}$). Absolute error has a sharp non-differentiable cusp at zero.
 21. **Q: What is the geometric interpretation of the Normal Equation?**
