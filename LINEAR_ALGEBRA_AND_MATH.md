@@ -2654,10 +2654,19 @@ $$
 * **Dimension:** $\dim(C(A)) = r = \text{rank}(A)$.
 
 ### Hand Calculation Example
-Let $A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix} \in \mathbb{R}^{2 \times 2}$:
-* Column 1: $\mathbf{a}_1 = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$, Column 2: $\mathbf{a}_2 = \begin{bmatrix} 2 \\ 4 \end{bmatrix} = 2\mathbf{a}_1$.
+Let $A \in \mathbb{R}^{2 \times 2}$ be the matrix:
+
+$$
+A =
+\begin{bmatrix}
+1 & 2 \\
+2 & 4
+\end{bmatrix}
+$$
+
+* Column 1: $\mathbf{a}_1 = [1, 2]^T$, Column 2: $\mathbf{a}_2 = [2, 4]^T = 2\mathbf{a}_1$.
 * Column 2 is a scalar multiple of Column 1 (linearly dependent).
-* Therefore, the Column Space is the 1D line in $\mathbb{R}^2$ spanned by $\begin{bmatrix} 1 \\ 2 \end{bmatrix}$:
+* Therefore, the Column Space is the 1D line in $\mathbb{R}^2$ spanned by $[1, 2]^T$:
 
 $$
 C(A) = \text{span}\left( \begin{bmatrix} 1 \\ 2 \end{bmatrix} \right)
@@ -2682,9 +2691,9 @@ $$
 $$
 
 ### Hand Calculation Example
-For $A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}$:
+For the matrix $A$ defined above:
 * Row 1: $[1, 2]$, Row 2: $[2, 4] = 2[1, 2]$.
-* The Row Space is the 1D line in $\mathbb{R}^2$ spanned by $\begin{bmatrix} 1 \\ 2 \end{bmatrix}$:
+* The Row Space is the 1D line in $\mathbb{R}^2$ spanned by $[1, 2]^T$:
 
 $$
 C(A^T) = \text{span}\left( \begin{bmatrix} 1 \\ 2 \end{bmatrix} \right)
@@ -2704,7 +2713,7 @@ $$
 * **Dimension:** $\dim(N(A)) = n - r$ (the **nullity**).
 
 ### Step-by-Step Hand Calculation Example
-Find the Null Space basis for $A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}$:
+Find the Null Space basis for $A$:
 1. Set up the homogeneous equation $A\mathbf{x} = \mathbf{0}$:
 
 $$
@@ -2768,7 +2777,7 @@ $$
 * **Dimension:** $\dim(N(A^T)) = m - r$.
 
 ### Step-by-Step Hand Calculation Example
-For $A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}$, $A^T = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}$:
+For the matrix $A$ (where $A^T = A$ due to symmetry):
 1. Set up $A^T \mathbf{y} = \mathbf{0}$:
 
 $$
@@ -3100,7 +3109,16 @@ f(\mathbf{x}) = \mathbf{x}^T A \mathbf{x} = \sum_{i=1}^{n} \sum_{j=1}^{n} A_{ij}
 $$
 
 ### Hand Calculation Example
-Let $A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$ and $\mathbf{x} = \begin{bmatrix} x_1 \\ x_2 \end{bmatrix}$:
+Let $\mathbf{x} = [x_1, x_2]^T$ and $A$ be the symmetric matrix:
+
+$$
+A =
+\begin{bmatrix}
+2 & 1 \\
+1 & 2
+\end{bmatrix}
+$$
+
 1. Compute $A\mathbf{x}$:
 
 $$
@@ -3142,7 +3160,7 @@ $$
 \mathbf{x}^T A \mathbf{x} \gt 0 \quad \forall \mathbf{x} \neq \mathbf{0} \quad \iff \quad \text{All eigenvalues } \lambda_i \gt 0
 $$
 
-### Hand Proof for $A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$:
+### Hand Proof for Positive Definiteness of Matrix $A$:
 Complete the square on the quadratic form:
 
 $$
@@ -3162,9 +3180,19 @@ $$
 \mathbf{x}^T A \mathbf{x} \ge 0 \quad \forall \mathbf{x} \quad \iff \quad \text{All eigenvalues } \lambda_i \ge 0 \text{ (zeros allowed)}
 $$
 
-* *Example:* $B = \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} \implies \mathbf{x}^T B \mathbf{x} = x_1^2 + 2x_1 x_2 + x_2^2 = (x_1 + x_2)^2 \ge 0$.
-  * For $\mathbf{x} = [1, -1]^T \neq \mathbf{0}$, $\mathbf{x}^T B \mathbf{x} = (1 - 1)^2 = 0$.
-  * Eigenvalues: $\lambda_1 = 2, \lambda_2 = 0 \implies B \succeq 0$.
+* *Example:* For the symmetric matrix:
+
+$$
+B =
+\begin{bmatrix}
+1 & 1 \\
+1 & 1
+\end{bmatrix}
+$$
+
+The quadratic form is $\mathbf{x}^T B \mathbf{x} = x_1^2 + 2x_1 x_2 + x_2^2 = (x_1 + x_2)^2 \ge 0$.
+* For $\mathbf{x} = [1, -1]^T \neq \mathbf{0}$, $\mathbf{x}^T B \mathbf{x} = (1 - 1)^2 = 0$.
+* Eigenvalues: $\lambda_1 = 2, \lambda_2 = 0 \implies B \succeq 0$.
 
 ---
 
@@ -3266,7 +3294,7 @@ $$
 
 ## 25.4 Complete Step-by-Step Hand Calculation
 
-Find the pseudoinverse of the rectangular column vector $A = \begin{bmatrix} 1 \\ 2 \end{bmatrix} \in \mathbb{R}^{2 \times 1}$:
+Find the pseudoinverse of the rectangular column vector $A = [1, 2]^T \in \mathbb{R}^{2 \times 1}$:
 1. Since $A$ has full column rank ($r = 1 = n$), use $A^+ = (A^T A)^{-1} A^T$:
 2. Compute $A^T A$:
 
@@ -3308,7 +3336,7 @@ A^+ A =
 $$
 
 6. **Solve Least Squares Problem:**
-   Let target $\mathbf{b} = \begin{bmatrix} 3 \\ 1 \end{bmatrix}$. Find best scalar $x$:
+   Let target vector $\mathbf{b} = [3, 1]^T$. Find best scalar $x$:
 
 $$
 \hat{x} = A^+ \mathbf{b} =
@@ -3321,8 +3349,8 @@ $$
 \end{bmatrix} = 0.2(3) + 0.4(1) = 0.6 + 0.4 = \mathbf{1.0}
 $$
 
-   * Fitted point: $A\hat{x} = \begin{bmatrix} 1 \\ 2 \end{bmatrix}(1) = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$.
-   * Residual error: $\mathbf{e} = \mathbf{b} - A\hat{x} = \begin{bmatrix} 3-1 \\ 1-2 \end{bmatrix} = \begin{bmatrix} 2 \\ -1 \end{bmatrix}$.
+   * Fitted point: $A\hat{x} = [1, 2]^T(1) = [1, 2]^T$.
+   * Residual error: $\mathbf{e} = \mathbf{b} - A\hat{x} = [3-1, 1-2]^T = [2, -1]^T$.
    * Orthogonality check: $\mathbf{e} \cdot A = 2(1) + (-1)(2) = 0 \quad \checkmark$.
 
 ---
@@ -3368,7 +3396,16 @@ A transformation $T$ is linear if and only if it preserves vector addition and s
 2. **Homogeneity (Scalar Scaling):** $T(c\mathbf{u}) = cT(\mathbf{u})$
 
 ### Numerical Verification Example
-Let $A = \begin{bmatrix} 2 & 0 \\ 0 & 3 \end{bmatrix}$, $\mathbf{u} = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$, $\mathbf{v} = \begin{bmatrix} 3 \\ 1 \end{bmatrix}$, $c = 4$:
+Let $\mathbf{u} = [1, 2]^T$, $\mathbf{v} = [3, 1]^T$, $c = 4$, and:
+
+$$
+A =
+\begin{bmatrix}
+2 & 0 \\
+0 & 3
+\end{bmatrix}
+$$
+
 * $T(\mathbf{u}) = A\mathbf{u} = [2, 6]^T$, $T(\mathbf{v}) = A\mathbf{v} = [6, 3]^T$.
 * $\mathbf{u} + \mathbf{v} = [4, 3]^T \implies T(\mathbf{u} + \mathbf{v}) = A[4, 3]^T = [8, 9]^T$.
 * Check Additivity: $T(\mathbf{u}) + T(\mathbf{v}) = [2+6, 6+3]^T = [8, 9]^T \quad \checkmark$.
@@ -3479,8 +3516,12 @@ $$
 Singular Value Decomposition factorizes ANY linear transformation $A = U \Sigma V^T$ into three pure geometric actions:
 
 $$
-\mathbf{x} \quad \xrightarrow{\quad V^T \text{ (Orthonormal Rotation/Reflection)} \quad} \quad \xrightarrow{\quad \Sigma \text{ (Axis Scaling by Singular Values)} \quad} \quad \xrightarrow{\quad U \text{ (Second Orthonormal Rotation)} \quad} \quad A\mathbf{x}
+\mathbf{x} \quad \xrightarrow{\quad V^T \quad} \quad \mathbf{x}' \quad \xrightarrow{\quad \Sigma \quad} \quad \mathbf{x}'' \quad \xrightarrow{\quad U \quad} \quad A\mathbf{x}
 $$
+
+1. **Rotate / Reflect ($V^T$):** Aligns the input coordinate system with the principal axes.
+2. **Scale ($\Sigma$):** Stretches or compresses along each principal axis by singular value factors $\sigma_i$.
+3. **Second Rotation ($U$):** Rotates the resulting ellipse into the target coordinate space.
 
 ---
 
