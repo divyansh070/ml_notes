@@ -267,9 +267,9 @@ $$
 $$
 
 ### Geometric Intuition
-* If $c > 1$: Stretches the vector in the same direction.
-* If $0 < c < 1$: Shrinks the vector in the same direction.
-* If $c < 0$: Reverses the vector's direction by $180^\circ$ and scales its length by $|c|$.
+* If $c \gt 1$: Stretches the vector in the same direction.
+* If $0 \lt c \lt 1$: Shrinks the vector in the same direction.
+* If $c \lt 0$: Reverses the vector's direction by $180^\circ$ and scales its length by $|c|$.
 * **ML Connection:** Gradient descent step update: $\mathbf{w}_{\text{new}} = \mathbf{w} - \alpha \nabla \mathcal{L}$. The scalar learning rate $\alpha$ scales the magnitude of the gradient vector step.
 
 ---
@@ -856,7 +856,7 @@ $$
   * $\mathbf{i}$ moves to $[a, c]^T$
   * $\mathbf{j}$ moves to $[b, d]^T$
   * The resulting parallelogram has an exact geometric area equal to $|ad - bc| = \det(A)$.
-* **Negative Determinant ($\det(A) < 0$):** Indicates the transformation flipped the orientation of space (like looking at an image in a mirror).
+* **Negative Determinant ($\det(A) \lt 0$):** Indicates the transformation flipped the orientation of space (like looking at an image in a mirror).
 
 ---
 
@@ -1073,7 +1073,7 @@ $$
 
 * If feature 2 is redundant with feature 1 (e.g. $x_2 = 2.5 x_1$, like height in inches vs height in feet):
   * The columns of $X$ are **linearly dependent**.
-  * $\text{rank}(X^T X) < p \implies \det(X^T X) = 0$.
+  * $\text{rank}(X^T X) \lt p \implies \det(X^T X) = 0$.
   * $(X^T X)$ is **singular (non-invertible)**.
   * Ordinary Least Squares fails with a singular matrix error.
 * *The Math Fix:* **Ridge Regularization ($L_2$)** adds $\alpha I$ to $(X^T X)$:
@@ -1082,7 +1082,7 @@ $$
 \mathbf{w} = (X^T X + \alpha I)^{-1} X^T \mathbf{y}
 $$
 
-  Adding $\alpha > 0$ to the diagonal guarantees that $\det(X^T X + \alpha I) > 0$, making the matrix invertible and stable!
+  Adding $\alpha \gt 0$ to the diagonal guarantees that $\det(X^T X + \alpha I) \gt 0$, making the matrix invertible and stable!
 
 ---
 
@@ -1449,8 +1449,8 @@ $$
 \text{Cov}(X, Y) = s_{XY} = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})
 $$
 
-  * If $\text{Cov}(X,Y) > 0$: When $X$ increases, $Y$ tends to increase.
-  * If $\text{Cov}(X,Y) < 0$: When $X$ increases, $Y$ tends to decrease.
+  * If $\text{Cov}(X,Y) \gt 0$: When $X$ increases, $Y$ tends to increase.
+  * If $\text{Cov}(X,Y) \lt 0$: When $X$ increases, $Y$ tends to decrease.
   * If $\text{Cov}(X,Y) = 0$: **No linear association exists between $X$ and $Y$. (A non-linear relationship can still exist!)**
 
 ---
@@ -2332,7 +2332,7 @@ $$
 w_{j}^{(t+1)} = w_j^{(t)} - \alpha \left(\frac{\partial \text{MSE}}{\partial w_j} + \lambda w_j\right) = (1 - \alpha \lambda) w_j^{(t)} - \alpha \frac{\partial \text{MSE}}{\partial w_j}
 $$
 
-* Since $(1 - \alpha \lambda) < 1$, the weights are multiplied by a decay factor less than 1 at every single step before taking the gradient step! This is why $L_2$ is called **Weight Decay**.
+* Since $(1 - \alpha \lambda) \lt 1$, the weights are multiplied by a decay factor less than 1 at every single step before taking the gradient step! This is why $L_2$ is called **Weight Decay**.
 
 ---
 
@@ -2506,7 +2506,7 @@ $$
 - [ ] **23. Four Subspaces & Null Space:** Given $A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}$, find $N(A) = \text{span}\left(\begin{bmatrix} -2 \\ 1 \end{bmatrix}\right)$ and verify $\text{rank}(A) + \text{nullity}(A) = 2$.
 - [ ] **24. Gram-Schmidt Orthogonalization:** Orthonormalize $\mathbf{a}_1 = [1, 1]^T, \mathbf{a}_2 = [1, 0]^T$ to find $\mathbf{q}_1 = [1/\sqrt{2}, 1/\sqrt{2}]^T, \mathbf{q}_2 = [1/\sqrt{2}, -1/\sqrt{2}]^T$.
 - [ ] **25. Construct QR Decomposition:** Factor $A = QR$ and construct upper-triangular matrix $R = \begin{bmatrix} \sqrt{2} & 1/\sqrt{2} \\ 0 & 1/\sqrt{2} \end{bmatrix}$.
-- [ ] **26. Positive Definite Test:** Compute $\mathbf{x}^T A \mathbf{x} = 2x_1^2 + 2x_1 x_2 + 2x_2^2$ for $A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$ and prove it is Positive Definite via eigenvalues $\lambda_1=3, \lambda_2=1 > 0$.
+- [ ] **26. Positive Definite Test:** Compute $\mathbf{x}^T A \mathbf{x} = 2x_1^2 + 2x_1 x_2 + 2x_2^2$ for $A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$ and prove it is Positive Definite via eigenvalues $\lambda_1=3, \lambda_2=1 \gt 0$.
 - [ ] **27. Why Covariance is PSD:** Prove $\mathbf{x}^T \Sigma \mathbf{x} = \frac{1}{n-1} \|X_c \mathbf{x}\|_2^2 \ge 0$ for any vector $\mathbf{x}$.
 - [ ] **28. Moore-Penrose Pseudoinverse:** For $A = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$, compute $A^+ = (A^T A)^{-1} A^T = \begin{bmatrix} 1/5 & 2/5 \end{bmatrix}$ and verify $A^+ A = [1]$.
 - [ ] **29. Linear Transformation Geometry:** Apply 2D Rotation $R_{90^\circ} = \begin{bmatrix} 0 & -1 \\ 1 & 0 \end{bmatrix}$ and Scaling to vectors on paper.
@@ -2607,9 +2607,15 @@ $$
 35. **Q: Why do production ML libraries solve Linear Regression via QR Decomposition rather than $(X^T X)^{-1} X^T \mathbf{y}$?**
     * **A:** Explicitly forming $X^T X$ squares the condition number ($\kappa(X^T X) = \kappa(X)^2$), amplifying numerical rounding errors. QR decomposition ($X = QR$) allows solving $R\mathbf{w} = Q^T \mathbf{y}$ via fast back-substitution without matrix inversion, preserving numerical precision.
 36. **Q: What is the difference between a Positive Definite (PD) and a Positive Semidefinite (PSD) matrix?**
-    * **A:** A symmetric matrix $A$ is PD ($A \succ 0$) if its quadratic form satisfies $\mathbf{x}^T A \mathbf{x} > 0$ for all $\mathbf{x} \neq \mathbf{0}$ (all eigenvalues $\lambda_i > 0$). It is PSD ($A \succeq 0$) if $\mathbf{x}^T A \mathbf{x} \ge 0$ (all eigenvalues $\lambda_i \ge 0$, allowing zeros).
+    * **A:** A symmetric matrix $A$ is PD ($A \succ 0$) if its quadratic form satisfies $\mathbf{x}^T A \mathbf{x} \gt 0$ for all $\mathbf{x} \neq \mathbf{0}$ (all eigenvalues $\lambda_i \gt 0$). It is PSD ($A \succeq 0$) if $\mathbf{x}^T A \mathbf{x} \ge 0$ (all eigenvalues $\lambda_i \ge 0$, allowing zeros).
 37. **Q: Why is any sample covariance matrix $\Sigma$ guaranteed to be Positive Semidefinite?**
-    * **A:** Because $\mathbf{x}^T \Sigma \mathbf{x} = \mathbf{x}^T \left(\frac{1}{n-1} X_c^T X_c\right) \mathbf{x} = \frac{1}{n-1} \|X_c \mathbf{x}\|_2^2 \ge 0$. The squared Euclidean norm of any real vector is non-negative, meaning variance along any projection direction can never be negative.
+    * **A:** Because for any vector $\mathbf{x}$:
+
+$$
+\mathbf{x}^T \Sigma \mathbf{x} = \mathbf{x}^T \left(\frac{1}{n-1} X_c^T X_c\right) \mathbf{x} = \frac{1}{n-1} \|X_c \mathbf{x}\|_2^2 \ge 0
+$$
+
+    The squared Euclidean norm of any real vector is non-negative, meaning variance along any projection direction can never be negative.
 38. **Q: What is the Moore-Penrose Pseudoinverse $A^+$ and when is it used?**
     * **A:** A generalized matrix inverse that exists for any matrix (rectangular or singular). For overdetermined systems, $A^+ \mathbf{b}$ yields the Ordinary Least Squares solution. For underdetermined systems, it finds the unique solution with the minimum $L_2$ norm.
 39. **Q: When is $A^+ = (A^T A)^{-1} A^T$ valid vs. the general SVD formulation $A^+ = V \Sigma^+ U^T$?**
@@ -2866,16 +2872,26 @@ $$
 
 ## 23.1 Why We Need Orthogonal Bases
 
-When basis vectors are mutually orthogonal ($\mathbf{q}_i \cdot \mathbf{q}_j = 0$ for $i \neq j$) and normalized ($\|\mathbf{q}_i\|_2 = 1$):
-1. **No Cross-Talk:** Projecting a vector onto coordinate $i$ is completely independent of coordinate $j$: $c_i = \mathbf{x} \cdot \mathbf{q}_i$.
-2. **Trivial Matrix Inversion:** An orthogonal matrix $Q$ satisfies $Q^T Q = I \implies Q^{-1} = Q^T$.
+When basis vectors are mutually orthogonal ($\mathbf{q}_i \cdot \mathbf{q}_j = 0 \text{ for } i \neq j$) and normalized ($\|\mathbf{q}_i\|_2 = 1$):
+1. **No Cross-Talk:** Projecting a vector onto coordinate axis $i$ is completely independent of coordinate axis $j$:
+
+$$
+c_i = \mathbf{x} \cdot \mathbf{q}_i
+$$
+
+2. **Trivial Matrix Inversion:** Any orthogonal matrix satisfies:
+
+$$
+Q^T Q = I \implies Q^{-1} = Q^T
+$$
+
 3. **Numerical Precision:** Orthogonal transformations preserve $L_2$ lengths and do not amplify floating-point rounding errors.
 
 ---
 
 ## 23.2 Gram-Schmidt Derivation
 
-The **Gram-Schmidt Process** converts a set of linearly independent vectors $\{\mathbf{a}_1, \mathbf{a}_2, \dots, \mathbf{a}_k\}$ into an orthonormal set $\{\mathbf{q}_1, \mathbf{q}_2, \dots, \mathbf{q}_k\}$.
+The **Gram-Schmidt Process** converts a set of linearly independent vectors $\mathbf{a}_1, \mathbf{a}_2, \dots, \mathbf{a}_k$ into an orthonormal set $\mathbf{q}_1, \mathbf{q}_2, \dots, \mathbf{q}_k$.
 
 ```
         VECTOR 1: Set u1 = a1                VECTOR 2: Subtract projection onto u1
@@ -2908,6 +2924,7 @@ $$
 ---
 
 ### Step 1: Set the First Orthogonal Vector $\mathbf{u}_1$
+
 $$
 \mathbf{u}_1 = \mathbf{a}_1 =
 \begin{bmatrix}
@@ -2995,7 +3012,7 @@ $$
 
 Where:
 * $Q$: An **orthogonal matrix** ($Q^T Q = I$) containing the orthonormal basis vectors as columns.
-* $R$: An **upper-triangular matrix** ($R_{ij} = \mathbf{q}_i^T \mathbf{a}_j$, with $R_{ij} = 0$ for $i > j$) storing the projection coefficients.
+* $R$: An **upper-triangular matrix** ($R_{ij} = \mathbf{q}_i^T \mathbf{a}_j$, with $R_{ij} = 0$ for $i \gt j$) storing the projection coefficients.
 
 ### Constructing $Q$ and $R$ from our Hand Example:
 1. Form $Q$:
@@ -3122,7 +3139,7 @@ $$
 * **Definition:** A symmetric matrix $A$ is **Positive Definite** if its quadratic form is strictly positive for every non-zero vector $\mathbf{x} \neq \mathbf{0}$:
 
 $$
-\mathbf{x}^T A \mathbf{x} > 0 \quad \forall \mathbf{x} \neq \mathbf{0} \quad \iff \quad \text{All eigenvalues } \lambda_i > 0
+\mathbf{x}^T A \mathbf{x} \gt 0 \quad \forall \mathbf{x} \neq \mathbf{0} \quad \iff \quad \text{All eigenvalues } \lambda_i \gt 0
 $$
 
 ### Hand Proof for $A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$:
@@ -3132,8 +3149,8 @@ $$
 2x_1^2 + 2x_1 x_2 + 2x_2^2 = 2\left(x_1^2 + x_1 x_2 + \frac{1}{4}x_2^2\right) + \frac{3}{2}x_2^2 = 2\left(x_1 + \frac{1}{2}x_2\right)^2 + \frac{3}{2}x_2^2
 $$
 
-* Since both terms are squares multiplied by positive numbers, the sum is strictly $> 0$ for any $(x_1, x_2) \neq (0, 0)$.
-* Eigenvalue check: $\lambda_1 = 3 > 0, \lambda_2 = 1 > 0 \implies \mathbf{A \succ 0}$.
+* Since both terms are squares multiplied by positive numbers, the sum is strictly $\gt 0$ for any $(x_1, x_2) \neq (0, 0)$.
+* Eigenvalue check: $\lambda_1 = 3 \gt 0, \lambda_2 = 1 \gt 0 \implies A \succ 0$.
 
 ---
 
@@ -3147,7 +3164,7 @@ $$
 
 * *Example:* $B = \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} \implies \mathbf{x}^T B \mathbf{x} = x_1^2 + 2x_1 x_2 + x_2^2 = (x_1 + x_2)^2 \ge 0$.
   * For $\mathbf{x} = [1, -1]^T \neq \mathbf{0}$, $\mathbf{x}^T B \mathbf{x} = (1 - 1)^2 = 0$.
-  * Eigenvalues: $\lambda_1 = 2, \lambda_2 = 0 \implies \mathbf{B \succeq 0}$.
+  * Eigenvalues: $\lambda_1 = 2, \lambda_2 = 0 \implies B \succeq 0$.
 
 ---
 
@@ -3155,9 +3172,9 @@ $$
 
 | Matrix Class | Condition on $\mathbf{x}^T A \mathbf{x}$ | Condition on Eigenvalues | Geometric Shape of Surface |
 | :--- | :--- | :--- | :--- |
-| **Positive Definite ($A \succ 0$)** | $\mathbf{x}^T A \mathbf{x} > 0$ ($\mathbf{x} \neq \mathbf{0}$) | All $\lambda_i > 0$ | Upward bowl (strict minimum) |
+| **Positive Definite ($A \succ 0$)** | $\mathbf{x}^T A \mathbf{x} \gt 0$ ($\mathbf{x} \neq \mathbf{0}$) | All $\lambda_i \gt 0$ | Upward bowl (strict minimum) |
 | **Positive Semidefinite ($A \succeq 0$)** | $\mathbf{x}^T A \mathbf{x} \ge 0$ | All $\lambda_i \ge 0$ | Flat-bottomed trough/valley |
-| **Negative Definite ($A \prec 0$)** | $\mathbf{x}^T A \mathbf{x} < 0$ ($\mathbf{x} \neq \mathbf{0}$) | All $\lambda_i < 0$ | Downward dome (strict maximum) |
+| **Negative Definite ($A \prec 0$)** | $\mathbf{x}^T A \mathbf{x} \lt 0$ ($\mathbf{x} \neq \mathbf{0}$) | All $\lambda_i \lt 0$ | Downward dome (strict maximum) |
 | **Indefinite** | Positive for some $\mathbf{x}$, negative for others | Mixed positive & negative $\lambda_i$ | **Saddle point** (mountain pass) |
 
 ---
@@ -3214,8 +3231,8 @@ The **Moore-Penrose Pseudoinverse** $A^+$ is the unique matrix satisfying the 4 
 4. $(A^+ A)^T = A^+ A$
 
 * **Intuition:** $A^+$ provides the "best possible inverse":
-  * For **overdetermined systems** ($m > n$, more equations than unknowns), $A^+ \mathbf{b}$ gives the **least-squares solution** minimizing $\|\mathbf{y} - X\mathbf{w}\|_2^2$.
-  * For **underdetermined systems** ($m < n$, infinitely many solutions), $A^+ \mathbf{b}$ picks the unique solution with the **minimum $L_2$ norm** ($\|\mathbf{w}\|_2$).
+  * For **overdetermined systems** ($m \gt n$, more equations than unknowns), $A^+ \mathbf{b}$ gives the **least-squares solution** minimizing $\|\mathbf{y} - X\mathbf{w}\|_2^2$.
+  * For **underdetermined systems** ($m \lt n$, infinitely many solutions), $A^+ \mathbf{b}$ picks the unique solution with the **minimum $L_2$ norm** ($\|\mathbf{w}\|_2$).
 
 ---
 
@@ -3364,6 +3381,7 @@ Let $A = \begin{bmatrix} 2 & 0 \\ 0 & 3 \end{bmatrix}$, $\mathbf{u} = \begin{bma
 Every 2D linear transformation is completely determined by where it sends the standard unit basis vectors $\mathbf{i} = [1, 0]^T$ and $\mathbf{j} = [0, 1]^T$:
 
 1. **Non-Uniform Scaling (Stretch/Shrink):**
+
 $$
 A_{\text{scale}} =
 \begin{bmatrix}
@@ -3386,6 +3404,7 @@ y
 $$
 
 2. **Rotation by Angle $\theta$ (Counter-Clockwise):**
+
 $$
 R_\theta =
 \begin{bmatrix}
@@ -3398,9 +3417,11 @@ R_\theta =
 1 & 0
 \end{bmatrix}
 $$
+
    * Sends $\mathbf{i} = [1, 0]^T \to [0, 1]^T$ and $\mathbf{j} = [0, 1]^T \to [-1, 0]^T$.
 
 3. **Reflection over the x-axis:**
+
 $$
 A_{\text{reflect}} =
 \begin{bmatrix}
@@ -3418,6 +3439,7 @@ x \\
 $$
 
 4. **Horizontal Shear (Sliding Layers):**
+
 $$
 A_{\text{shear}} =
 \begin{bmatrix}
@@ -3455,6 +3477,7 @@ $$
 ## 26.5 Connection to SVD
 
 Singular Value Decomposition factorizes ANY linear transformation $A = U \Sigma V^T$ into three pure geometric actions:
+
 $$
 \mathbf{x} \quad \xrightarrow{\quad V^T \text{ (Orthonormal Rotation/Reflection)} \quad} \quad \xrightarrow{\quad \Sigma \text{ (Axis Scaling by Singular Values)} \quad} \quad \xrightarrow{\quad U \text{ (Second Orthonormal Rotation)} \quad} \quad A\mathbf{x}
 $$
