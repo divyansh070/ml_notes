@@ -50,7 +50,7 @@
 
 ---
 
-# PART 21 — 30 ESSENTIAL TECHNICAL INTERVIEW QUESTIONS
+# PART 21 — 40 ESSENTIAL TECHNICAL INTERVIEW QUESTIONS
 
 ### Linear Algebra Core
 1. **Q:** What does a vector represent in Machine Learning?
@@ -389,7 +389,7 @@ $$
 > **Common Interview Question:** *"Where does the residual error vector $\mathbf{e} = \mathbf{y} - X\mathbf{w}$ live in the four fundamental subspaces?"*
 > **Answer:** It lives in the **Left Null Space** $N(X^T)$, because $\mathbf{e}$ is perpendicular to every column of $X$, satisfying $X^T \mathbf{e} = \mathbf{0}$.
 
-> [!]
+> [!WARNING]
 > **Common Mistake:** Confusing the ambient spaces: the Column Space $C(A)$ lives in $\mathbb{R}^m$ (output space), while the Row Space $C(A^T)$ and Null Space $N(A)$ live in $\mathbb{R}^n$ (input space).
 
 ---
@@ -613,6 +613,13 @@ $$
    * Because $R$ is **upper-triangular**, $R\mathbf{w} = Q^T \mathbf{y}$ is solved instantly using **back-substitution** without inverting any matrices!
    * Forming $X^T X$ squares the condition number: $\kappa(X^T X) = \kappa(X)^2$. If $\kappa(X) = 10^4$, then $\kappa(X^T X) = 10^8$, ruining numerical accuracy. QR solves least squares with condition number $\kappa(X)$, providing maximum numerical stability.
 
+> [!TIP]
+> **Common Interview Question:** *"Why do production machine learning libraries use QR decomposition to solve Ordinary Least Squares rather than inverting $X^T X$ directly?"*
+> **Answer:** Explicitly forming $X^T X$ squares the condition number ($\kappa(X^T X) = \kappa(X)^2$), which magnifies floating-point roundoff errors and can cause numerical singularity. QR decomposition solves $R\mathbf{w} = Q^T \mathbf{y}$ via simple back-substitution with condition number $\kappa(X)$, providing maximum numerical stability without computing any matrix inverse.
+
+> [!WARNING]
+> **Common Mistake:** Forgetting that Gram-Schmidt produces **orthogonal** vectors ($\mathbf{u}_k$) that must be individually normalized by dividing by their $L_2$ norm ($\mathbf{q}_k = \mathbf{u}_k / \|\mathbf{u}_k\|_2$) to form an **orthonormal** matrix $Q$ where $Q^T Q = I$.
+
 ---
 
 # PART 24 — POSITIVE DEFINITE & POSITIVE SEMIDEFINITE MATRICES
@@ -755,6 +762,13 @@ $$
    * If the Hessian matrix $H = \nabla^2 \mathcal{L}(\mathbf{w})$ is Positive Definite ($H \succ 0$), the loss surface is strictly **convex** (a bowl), guaranteeing that any stationary point ($\nabla \mathcal{L} = \mathbf{0}$) is a **unique global minimum**.
    * If $H$ is Indefinite, the optimizer is stuck at a **saddle point**.
 
+> [!TIP]
+> **Common Interview Question:** *"Why is every sample covariance matrix $\Sigma = \frac{1}{n-1} X_c^T X_c$ guaranteed to be Positive Semidefinite?"*
+> **Answer:** For any test vector $\mathbf{x} \in \mathbb{R}^p$, the quadratic form evaluates to $\mathbf{x}^T \Sigma \mathbf{x} = \frac{1}{n-1} \|X_c \mathbf{x}\|_2^2$. Because the squared Euclidean norm of any real vector is strictly non-negative ($\ge 0$), the variance of the projected data along $\mathbf{x}$ can never be negative.
+
+> [!WARNING]
+> **Common Mistake:** Confusing **Positive Definite** ($A \succ 0$, all $\lambda_i \gt 0$, strictly positive quadratic form $\mathbf{x}^T A \mathbf{x} \gt 0$) with **Positive Semidefinite** ($A \succeq 0$, all $\lambda_i \ge 0$, allows zero eigenvalues). If a covariance matrix has a zero eigenvalue ($\lambda = 0$), it is PSD but NOT PD, meaning at least one redundant feature direction has zero variance.
+
 ---
 
 # PART 25 — MOORE-PENROSE PSEUDOINVERSE
@@ -878,6 +892,13 @@ $$
 
 * **Linear Regression:** Directly computes $\mathbf{w} = X^+ \mathbf{y}$ even if $X$ contains collinear columns.
 * **Ridge Regularization Connection:** As regularization $\alpha \to 0$, Ridge solution $(X^T X + \alpha I)^{-1} X^T \mathbf{y}$ converges smoothly to the minimum-norm pseudoinverse solution $X^+ \mathbf{y}$.
+
+> [!TIP]
+> **Common Interview Question:** *"When is the formula $A^+ = (A^T A)^{-1} A^T$ valid, and what should you use if $A$ does not have full column rank?"*
+> **Answer:** The normal-equation formula $(A^T A)^{-1} A^T$ is valid only when $A$ has full column rank ($A^T A$ is non-singular and invertible). When $A$ is rank-deficient or has collinear columns, you must use the universal SVD formulation $A^+ = V \Sigma^+ U^T$, which inverts only the non-zero singular values ($1/\sigma_i$) and sets zero singular values to zero.
+
+> [!WARNING]
+> **Common Mistake:** Assuming $A^+ A = I$ is always the full identity matrix. For a rectangular matrix with $m \gt n$, $A^+ A = I_n$ (an $n \times n$ identity), but $A A^+ \neq I_m$ — instead, $A A^+$ is an orthogonal projection matrix onto the Column Space $C(A)$.
 
 ---
 
@@ -1049,6 +1070,13 @@ $$
 * **Neural Network Dense Layers:** A fully connected neural network layer $\mathbf{z} = W\mathbf{x} + \mathbf{b}$ is an **affine transformation**: the weight matrix $W$ performs a linear transformation on the input features, and the bias vector $\mathbf{b}$ translates the origin. Non-linear activation functions (ReLU, GELU) then warp the space to learn non-linear decision boundaries.
 * **Embeddings & Latent Representations:** Learned weight matrices project raw inputs into lower-dimensional latent spaces where geometric relationships (like cosine angle and Euclidean distance) encode semantic meaning.
 
+> [!TIP]
+> **Common Interview Question:** *"How does Singular Value Decomposition decompose any arbitrary linear transformation geometrically?"*
+> **Answer:** SVD factorizes $A = U \Sigma V^T$ into three successive geometric operations: (1) an initial rotation/reflection in the domain by orthogonal matrix $V^T$, (2) an axis-aligned stretching/compression along coordinate axes by diagonal matrix $\Sigma$, and (3) a second rotation/reflection in the codomain by orthogonal matrix $U$.
+
+> [!WARNING]
+> **Common Mistake:** Confusing a **linear transformation** ($T(\mathbf{x}) = W\mathbf{x}$) with an **affine transformation** ($T(\mathbf{x}) = W\mathbf{x} + \mathbf{b}$). A linear transformation must map the origin to the origin ($T(\mathbf{0}) = \mathbf{0}$). A neural network dense layer is an affine transformation because the bias vector $\mathbf{b}$ shifts the origin.
+
 ---
 
 # FINAL SECTION — ONE-PAGE MASTER FORMULA CHEAT SHEET
@@ -1112,7 +1140,7 @@ $$
 │     x^T * A * x > 0 for all x != 0               <===> all eigenvalues lambda_i > 0              │
 │                                                                                                  │
 │ 17. MOORE-PENROSE PSEUDOINVERSE:                                                                 │
-│     A^+ = (A^T * A)^-1 * A^T (full col rank)     A^+ = V * Sigma^+ * U^T (universal SVD)        │
+│     A^+ = (A^T * A)^-1 * A^T (full col rank)     A^+ = V * Sigma^+ * U^T (universal SVD)         │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```

@@ -104,7 +104,6 @@
 * **[PART 25 — MOORE-PENROSE PSEUDOINVERSE](LINEAR_ALGEBRA_AND_MATH_PART_2.md#part-25--moore-penrose-pseudoinverse)**
 * **[PART 26 — LINEAR TRANSFORMATIONS](LINEAR_ALGEBRA_AND_MATH_PART_2.md#part-26--linear-transformations)**
 * **[FINAL SECTION — ONE-PAGE MASTER FORMULA CHEAT SHEET](LINEAR_ALGEBRA_AND_MATH_PART_2.md#final-section--one-page-master-formula-cheat-sheet)**
-27. [FINAL SECTION — ONE-PAGE MASTER FORMULA CHEAT SHEET](#final-section-one-page-master-formula-cheat-sheet)
 
 ---
 
