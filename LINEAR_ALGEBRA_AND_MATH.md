@@ -493,7 +493,20 @@ $$
 ```
 
 ### Complete Hand Calculation Example
-Let $A = \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}$ and $B = \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix}$:
+Let:
+$$
+A =
+\begin{bmatrix}
+1 & 2 \\
+3 & 4
+\end{bmatrix},
+\quad
+B =
+\begin{bmatrix}
+5 & 6 \\
+7 & 8
+\end{bmatrix}
+$$
 
 1. **Calculate $C_{11}$ (Row 1 of $A \cdot$ Column 1 of $B$):**
 $$
@@ -620,7 +633,14 @@ A A^{-1} = A^{-1} A = I
 $$
 
 ### 2x2 Inverse Formula:
-For $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$:
+For:
+$$
+A =
+\begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix}
+$$
 $$
 A^{-1} = \frac{1}{\det(A)}
 \begin{bmatrix}
@@ -635,7 +655,14 @@ d & -b \\
 $$
 
 ### Step-by-Step Hand Calculation
-Let $A = \begin{bmatrix} 4 & 7 \\ 2 & 6 \end{bmatrix}$:
+Let:
+$$
+A =
+\begin{bmatrix}
+4 & 7 \\
+2 & 6
+\end{bmatrix}
+$$
 
 1. Calculate determinant:
 $$
@@ -698,13 +725,27 @@ $$
 
 ## 3.1 The 2x2 Determinant Formula
 
-For a $2 \times 2$ matrix $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$:
+For a $2 \times 2$ matrix:
+$$
+A =
+\begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix}
+$$
 $$
 \det(A) = |A| = ad - bc
 $$
 
 ### Hand Calculation Example
-Let $A = \begin{bmatrix} 5 & 3 \\ 2 & 4 \end{bmatrix}$:
+Let:
+$$
+A =
+\begin{bmatrix}
+5 & 3 \\
+2 & 4
+\end{bmatrix}
+$$
 $$
 \det(A) = (5 \times 4) - (3 \times 2) = 20 - 6 = 14
 $$
@@ -727,7 +768,14 @@ The determinant represents the **factor by which a linear transformation scales 
 ```
 
 * **Unit Square:** The unit square formed by basis vectors $\mathbf{i} = [1, 0]^T$ and $\mathbf{j} = [0, 1]^T$ has an initial area of $1 \times 1 = 1$.
-* **After Transformation $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$:**
+* **After Transformation:**
+$$
+A =
+\begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix}
+$$
   * $\mathbf{i}$ moves to $[a, c]^T$
   * $\mathbf{j}$ moves to $[b, d]^T$
   * The resulting parallelogram has an exact geometric area equal to $|ad - bc| = \det(A)$.
@@ -777,7 +825,14 @@ y
 $$
 
 Where:
-* $A = \begin{bmatrix} 2 & 1 \\ 1 & -1 \end{bmatrix}$ is the **Coefficient Matrix**.
+* The **Coefficient Matrix** $A$:
+$$
+A =
+\begin{bmatrix}
+2 & 1 \\
+1 & -1
+\end{bmatrix}
+$$
 * $\mathbf{x} = [x, y]^T$ is the **Vector of Unknowns**.
 * $\mathbf{b} = [5, 1]^T$ is the **Output / Target Vector**.
 
@@ -2179,15 +2234,68 @@ Before technical interviews and coding assessments, test yourself on a blank she
 - [ ] **2. Vector Norms:** Given $\mathbf{v} = [3, -4]^T$, compute $\|\mathbf{v}\|_2 = 5$ and $\|\mathbf{v}\|_1 = 7$.
 - [ ] **3. Euclidean Distance:** Given $\mathbf{p} = [1, 2]^T, \mathbf{q} = [4, 6]^T$, compute $d(\mathbf{p}, \mathbf{q}) = 5$.
 - [ ] **4. Cosine Similarity:** Given $\mathbf{u} = [1, 2]^T, \mathbf{v} = [2, 4]^T$, prove similarity $= 1.0$.
-- [ ] **5. Matrix Multiplication:** Given $A = \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}, B = \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix}$, compute $AB = \begin{bmatrix} 19 & 22 \\ 43 & 50 \end{bmatrix}$.
+- [ ] **5. Matrix Multiplication:** Given $A$ and $B$, compute $AB$:
+$$
+A =
+\begin{bmatrix}
+1 & 2 \\
+3 & 4
+\end{bmatrix},
+\quad
+B =
+\begin{bmatrix}
+5 & 6 \\
+7 & 8
+\end{bmatrix}
+\implies
+AB =
+\begin{bmatrix}
+19 & 22 \\
+43 & 50
+\end{bmatrix}
+$$
 - [ ] **6. Matrix Transpose:** Transpose a non-square matrix and prove $(AB)^T = B^T A^T$.
-- [ ] **7. 2x2 Determinant:** Given $A = \begin{bmatrix} 5 & 3 \\ 2 & 4 \end{bmatrix}$, compute $\det(A) = 14$.
-- [ ] **8. 2x2 Matrix Inverse:** Given $A = \begin{bmatrix} 4 & 7 \\ 2 & 6 \end{bmatrix}$, compute $A^{-1} = \begin{bmatrix} 0.6 & -0.7 \\ -0.2 & 0.4 \end{bmatrix}$ and verify $A A^{-1} = I$.
+- [ ] **7. 2x2 Determinant:** Given $A$, compute $\det(A) = 14$:
+$$
+A =
+\begin{bmatrix}
+5 & 3 \\
+2 & 4
+\end{bmatrix}
+$$
+- [ ] **8. 2x2 Matrix Inverse:** Given $A$, compute $A^{-1}$ and verify $A A^{-1} = I$:
+$$
+A =
+\begin{bmatrix}
+4 & 7 \\
+2 & 6
+\end{bmatrix}
+\implies
+A^{-1} =
+\begin{bmatrix}
+0.6 & -0.7 \\
+-0.2 & 0.4
+\end{bmatrix}
+$$
 - [ ] **9. Solve Linear System:** Convert $2x+y=5, x-y=1$ into $A\mathbf{x}=\mathbf{b}$ and solve $\mathbf{x} = [2, 1]^T$.
 - [ ] **10. Check Linear Independence:** Prove that $[1, 2]^T$ and $[2, 4]^T$ are dependent ($\det = 0$).
 - [ ] **11. Sample Covariance Table:** Given $X = [1, 2, 3], Y = [2, 3, 7]$, compute $\text{Var}(X)=1, \text{Var}(Y)=7, \text{Cov}(X,Y)=2.5$.
-- [ ] **12. Build Covariance Matrix:** Construct $\Sigma = \begin{bmatrix} 1.0 & 2.5 \\ 2.5 & 7.0 \end{bmatrix}$ from scratch.
-- [ ] **13. Characteristic Equation:** Set up $\det(A - \lambda I) = 0$ for $A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$ and get $\lambda^2 - 4\lambda + 3 = 0$.
+- [ ] **12. Build Covariance Matrix:** Construct $\Sigma$ from scratch:
+$$
+\Sigma =
+\begin{bmatrix}
+1.0 & 2.5 \\
+2.5 & 7.0
+\end{bmatrix}
+$$
+- [ ] **13. Characteristic Equation:** Set up $\det(A - \lambda I) = 0$ for $A$ and get $\lambda^2 - 4\lambda + 3 = 0$:
+$$
+A =
+\begin{bmatrix}
+2 & 1 \\
+1 & 2
+\end{bmatrix}
+$$
 - [ ] **14. Derive Eigenvalues:** Solve $\lambda_1 = 3, \lambda_2 = 1$.
 - [ ] **15. Derive Eigenvectors:** Substitute $\lambda=3$ to find $\mathbf{v}_1 = [1, 1]^T$ and $\lambda=1$ to find $\mathbf{v}_2 = [1, -1]^T$.
 - [ ] **16. Verify Eigenvectors:** Multiply $A \mathbf{v}_1$ and show it equals $3 \mathbf{v}_1$.
