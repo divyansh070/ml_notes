@@ -10,6 +10,7 @@
    - [2. Three-Valued Logic & NULL Handling](#2-three-valued-logic--null-handling)
    - [3. JOIN Cheat Sheet & Visual Guide](#3-join-cheat-sheet--visual-guide)
    - [4. Essential SQL Functions Toolkit](#4-essential-sql-functions-toolkit)
+   - [5. Regex & Pattern Matching Toolkit](#5-regex--pattern-matching-toolkit)
 2. [LeetCode SQL 50 — All Modules & Problems](#part-2-leetcode-sql-50--all-modules--problems)
    - [Module 1: Basic Select (#1 – #5)](#module-1-basic-select)
    - [Module 2: Basic Joins (#6 – #14)](#module-2-basic-joins)
@@ -415,6 +416,117 @@ ROW_NUMBER() OVER (
 )
 ```
 That combination of `PARTITION BY` + `ORDER BY` + window functions is probably the most important window-function skill for the SQL problems you’re currently doing.
+
+---
+
+### 5. Regex & Pattern Matching Toolkit
+
+Pattern matching in SQL spans from simple substring and prefix checks (`LIKE`, `INSTR`) to full POSIX regular expression evaluations (`REGEXP` / `RLIKE`). In technical interviews, selecting the appropriate tool balances expressive power against query execution overhead and index efficiency.
+
+#### 1. LIKE vs REGEXP: When to Use Which
+
+| Feature / Dimension | `LIKE` (Simple Pattern Matching) | `REGEXP` / `RLIKE` (Regular Expressions) |
+| :--- | :--- | :--- |
+| **Wildcards & Syntax** | `%` (0 or more chars), `_` (exactly 1 char) | Full POSIX/PCRE regex (`^`, `$`, `[]`, `[^]`, `*`, `+`, `?`, `\|`, etc.) |
+| **Matching Rule** | Matches the **entire string** from start to end by default | Matches **anywhere** in the string unless bounded by `^` and `$` |
+| **Engine Overhead** | Minimal CPU cost (simple byte/character comparison) | Higher CPU cost (invokes the regex state machine engine per row) |
+| **Index Sargability** | **Sargable** for fixed prefixes (`LIKE 'abc%'`) | **Non-sargable** (requires full table scan in standard B-Tree indexes) |
+| **Best Used For** | Simple prefix/suffix/contains checks (`'user_%'`, `'%.csv'`) | Complex validation rules (emails, phone formats, character classes) |
+
+```sql
+-- FAST & SARGABLE: Checks prefix using standard B-Tree index
+SELECT user_id, email 
+FROM Users 
+WHERE email LIKE 'admin_%';
+
+-- EXPRESSIVE: Enforces complex character set and structure rules
+SELECT user_id, email 
+FROM Users 
+WHERE email REGEXP '^[a-zA-Z][a-zA-Z0-9_.-]*@leetcode[.]com$';
+```
+
+---
+
+#### 2. Core Regex Anchors & Metacharacters
+
+| Metacharacter | Name / Meaning | Example Expression | Matches | Does NOT Match |
+| :--- | :--- | :--- | :--- | :--- |
+| `^` | **Start anchor** (matches start of string) | `REGEXP '^[A-Z]'` | `'Alice'`, `'Bob'` | `'alice'`, `'1Bob'` |
+| `$` | **End anchor** (matches end of string) | `REGEXP 'com$'` | `'site.com'`, `'a@b.com'` | `'site.community'` |
+| `.` | **Wildcard** (matches any single character) | `REGEXP '^a.c$'` | `'abc'`, `'a-c'`, `'a1c'` | `'abbc'`, `'ac'` |
+| `*` | **Zero or more** of preceding token | `REGEXP '^ab*c$'` | `'ac'`, `'abc'`, `'abbbc'` | `'adc'` |
+| `+` | **One or more** of preceding token | `REGEXP '^[0-9]+$'` | `'5'`, `'42'`, `'9999'` | `''` (empty string), `'12a'` |
+| `[...]` | **Character class** (any single char inside) | `REGEXP '^[a-zA-Z]'` | `'User'`, `'admin'` | `'1user'`, `'_admin'` |
+| `[^...]` | **Negated class** (any char NOT inside) | `REGEXP '[^0-9]'` | `'12a34'` (contains 'a') | `'12345'` (pure digits) |
+| `\|` | **Alternation / OR** (matches either side) | `REGEXP 'apple\|banana'` | `'green apple'`, `'banana'` | `'orange'` |
+
+---
+
+#### 3. Worked Breakdown: LeetCode 1517 ("Find Users With Valid E-Mails")
+
+LeetCode 1517 requires selecting users whose email prefix starts with an English letter, contains only valid alphanumeric characters or allowed symbols (`_`, `.`, `-`), and belongs strictly to the domain `@leetcode.com`.
+
+**The Target Regex:**
+```sql
+mail REGEXP '^[a-zA-Z][a-zA-Z0-9_.-]*@leetcode[.]com$'
+```
+
+**Token-by-Token Dissection:**
+
+| Token / Chunk | Component Name | Exact Meaning & Validation Role |
+| :--- | :--- | :--- |
+| `^` | Start of String Anchor | Ensures validation starts strictly at the very first character of the string. |
+| `[a-zA-Z]` | Leading Character Class | Enforces that the first character **must** be an uppercase or lowercase English letter (no numbers or symbols). |
+| `[a-zA-Z0-9_.-]*` | Prefix Body (Quantified) | Matches zero or more trailing prefix characters consisting only of letters, digits, underscores (`_`), dots (`.`), or dashes (`-`). |
+| `@` | Literal At-Sign | Literal `@` delimiter separating the local prefix from the domain name. |
+| `leetcode` | Literal Domain Name | Exact literal string match for the domain brand name. |
+| `[.]` | Escaped Literal Dot | Matches a **literal dot character** (`.`). Placing `.` inside square brackets disables its wildcard behavior. |
+| `com` | Literal Top-Level Domain | Exact literal string match for the top-level domain `'com'`. |
+| `$` | End of String Anchor | Ensures no extraneous characters appear after `.com` (e.g., rejects `@leetcode.com.org`). |
+
+> [!IMPORTANT]
+> **Why `[.]` (or `\.`) is Mandatory — The "Bare Dot" Trap:**
+> In regular expressions, an unescaped dot (`.`) is a special metacharacter matching **any character**.
+> - If written as `@leetcode.com$`, strings like `'user@leetcodeXcom'` or `'user@leetcode9com'` would **falsely evaluate to TRUE**.
+> - Enclosing the dot in brackets `[.]` or escaping it as `\\.` (in SQL string literals) guarantees that the database matches only a literal period `.`.
+
+---
+
+#### 4. Common Regex Patterns for SQL Interviews
+
+| Scenario / Requirement | Regex Pattern | Valid Example | Invalid Example | Explanation |
+| :--- | :--- | :--- | :--- | :--- |
+| **Standard Email Validation** | `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+[.][a-zA-Z]{2,}$` | `jane.doe@company.org` | `jane@company`, `@co.com` | Requires standard local part, `@`, domain label, and a 2+ character TLD. |
+| **Starts with Letter vs Digit** | `^[a-zA-Z]` vs `^[0-9]` | `A102` (Letter) / `89X` (Digit) | `_A102`, `#89X` | Filters row identifiers by initial character type. |
+| **Reject Consecutive Special Characters** | `NOT REGEXP '[.]{2}\|_{2}\|-{2}'` | `first.last@mail.com` | `first..last@mail.com` | Flags invalid double punctuation (`..`, `__`, `--`) in usernames or emails. |
+| **Standard US Phone Number** | `^[0-9]{3}-[0-9]{3}-[0-9]{4}$` | `555-123-4567` | `5551234567`, `55-123-4567` | Enforces exact 3-digit, 3-digit, 4-digit formatting delimited by hyphens. |
+| **Fixed-Length Alphanumeric ID** | `^[A-Z0-9]{6,10}$` | `PROMO2024` (9 chars) | `PROMO_24` (symbol), `PR2` (<6) | Enforces uppercase alphanumeric codes between 6 and 10 characters long. |
+
+---
+
+#### 5. LIKE vs INSTR vs REGEXP: Decision & Sargability Guide
+
+| Method / Operator | Use Case Scenario | Sargable (Index-Friendly)? | Performance Impact & Engine Behavior |
+| :--- | :--- | :--- | :--- |
+| **`col LIKE 'prefix%'`** | Fixed prefix matching | **YES (Sargable)** | **Fastest:** Traverses B-Tree index via binary seek (range scan). |
+| **`col LIKE '%suffix'` or `'%substr%'`** | Substring / suffix check without complex rules | **NO (Non-Sargable)** | **Moderate:** Causes full table scan; lightweight string byte scan per row. |
+| **`INSTR(col, 'str') > 0` / `LOCATE()`** | Exact substring position check | **NO (Non-Sargable)** | **Moderate:** Full table scan; fast C-level substring search (simpler than regex). |
+| **`col REGEXP 'pattern'`** | Complex validation, character classes, quantifiers | **NO (Non-Sargable)** | **Slowest:** Full table scan; invokes regex compilation and state-machine evaluation per row. |
+
+> [!TIP]
+> **Performance Rule of Thumb (Sargability):**
+> - Always prefer sargable operators (like `LIKE 'prefix%'` or `BETWEEN`) over `REGEXP` or function-wrapped columns (like `DATE_FORMAT()` in #48 or `CHAR_LENGTH()` in #5) when querying large production datasets.
+> - Reserve `REGEXP` for validation pipelines, data sanitization scripts, or complex multi-token interview constraints that cannot be expressed via standard equality or prefix `LIKE`.
+
+---
+
+#### 6. Interview Practice Questions
+
+- **Interviewer Follow-up:** *"Write a `WHERE` condition using regular expressions that matches usernames containing only alphanumeric characters, periods, and underscores, but strictly rejects strings with consecutive dots (`..`) or leading/trailing dots."*
+- **Interviewer Follow-up:** *"Given a `phone_numbers` table, write a regex query to identify international numbers that begin with an optional `+` country code (1 to 3 digits), followed by a space or hyphen, and 10 national digits."*
+- **Interviewer Follow-up:** *"How would you rewrite a regex filter `WHERE code REGEXP '^ABC[0-9]+'` to be sargable if 99% of your queries only search for prefixes starting with `'ABC'`?"*
+- **Interviewer Follow-up:** *"What is the performance implication of using `NOT REGEXP` across a 50-million-row user table, and what architectural strategy (e.g., generated columns, functional indexes, pre-validation at ingest) would you propose to eliminate full table scans?"*
+
 ---
 
 ## PART 2: LeetCode SQL 50 — All Modules & Problems
