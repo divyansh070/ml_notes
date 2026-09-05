@@ -523,9 +523,31 @@ mail REGEXP '^[a-zA-Z][a-zA-Z0-9_.-]*@leetcode[.]com$'
 #### 6. Interview Practice Questions
 
 - **Interviewer Follow-up:** *"Write a `WHERE` condition using regular expressions that matches usernames containing only alphanumeric characters, periods, and underscores, but strictly rejects strings with consecutive dots (`..`) or leading/trailing dots."*
+  - **Answer:**
+```sql
+WHERE username REGEXP '^[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*$'
+-- Or using multi-condition filtering:
+WHERE username REGEXP '^[a-zA-Z0-9_][a-zA-Z0-9_.]*[a-zA-Z0-9_]$' 
+  AND username NOT REGEXP '[.]{2}';
+```
 - **Interviewer Follow-up:** *"Given a `phone_numbers` table, write a regex query to identify international numbers that begin with an optional `+` country code (1 to 3 digits), followed by a space or hyphen, and 10 national digits."*
+  - **Answer:**
+```sql
+WHERE phone REGEXP '^(\+[0-9]{1,3}[ -])?[0-9]{10}$';
+```
 - **Interviewer Follow-up:** *"How would you rewrite a regex filter `WHERE code REGEXP '^ABC[0-9]+'` to be sargable if 99% of your queries only search for prefixes starting with `'ABC'`?"*
+  - **Answer:** Combine a sargable `LIKE` prefix check with the regex validator:
+```sql
+WHERE code LIKE 'ABC%' AND code REGEXP '^ABC[0-9]+$';
+```
+*Why this works:* `code LIKE 'ABC%'` performs a fast B-Tree index range seek to discard 99% of non-matching rows, executing the expensive regex engine only on the remaining candidates.
 - **Interviewer Follow-up:** *"What is the performance implication of using `NOT REGEXP` across a 50-million-row user table, and what architectural strategy (e.g., generated columns, functional indexes, pre-validation at ingest) would you propose to eliminate full table scans?"*
+  - **Answer:**
+  1. *Performance Implication:* `NOT REGEXP` forces a full table scan and runs regex state-machine parsing on 50M rows, pegging CPU and exhausting buffer pool resources.
+  2. *Architectural Solutions:*
+     - **Generated Column + Index:** Add `is_valid_email BOOLEAN GENERATED ALWAYS AS (email REGEXP '...') STORED` with an index on `(is_valid_email)`.
+     - **Ingestion Pre-Validation:** Enforce regex validation at the API/Kafka ingest boundary so invalid emails are rejected before touching the database.
+     - **Asynchronous Dead-Letter Table:** Run offline sanitization batch jobs writing invalid user IDs into a separate `invalid_users` audit table.
 
 ---
 
@@ -541,6 +563,7 @@ mail REGEXP '^[a-zA-Z][a-zA-Z0-9_.-]*@leetcode[.]com$'
 - **Edge Cases:** Empty table returns an empty set. If a product has a `NULL` value for `low_fats` or `recyclable`, the `='Y'` comparison evaluates to `UNKNOWN` (not `TRUE`), and the row is safely ignored.
 - **Performance:** Requires a sequential scan by default. To optimize for read-heavy systems, a composite index on `(low_fats, recyclable, product_id)` allows an **Index-Only Scan**.
 - **Interviewer Follow-up:** *"If we stored these flags as `BOOLEAN` (1 and 0) instead of `VARCHAR` ('Y' and 'N'), how would that impact storage size and index performance at a scale of 10 billion rows?"*
+  - **Answer:** `VARCHAR(1)` requires 1 character byte plus a 1-byte length prefix (2 bytes total per row in MySQL/InnoDB), whereas `TINYINT(1)` / `BOOLEAN` requires only 1 byte (or 1 bit in bitmap indexes). Across 10 billion rows and 2 columns, switching saves **20+ GB of raw disk storage and buffer pool memory**. In addition, the reduced row size packs more index entries per 16KB B-Tree page, drastically lowering disk I/O, cache misses, and index traversal depth.
 ```sql
 SELECT product_id 
 FROM Products 
@@ -552,7 +575,14 @@ WHERE low_fats = 'Y' AND recyclable = 'Y';
 - **Execution Order:** `FROM` ➔ `WHERE` (evaluates `!= 2` first, then `IS NULL`) ➔ `SELECT`.
 - **Edge Cases:** If the entire `referee_id` column is populated only with `NULL`s, the query simply returns every customer name.
 - **Performance:** The `OR` operator, particularly combined with `IS NULL`, often prevents the query optimizer from using B-Tree indexes effectively, leading to a full table scan.
-- **Interviewer Follow-up:** *"If this table had 500 million rows, this `OR` clause might cause a full table scan. How could you rewrite this query to ensure the database can utilize indexes optimally?" (Hint: `UNION ALL`)*.
+- **Interviewer Follow-up:** *"If this table had 500 million rows, this `OR` clause might cause a full table scan. How could you rewrite this query to ensure the database can utilize indexes optimally?"*
+  - **Answer:** Use `UNION ALL` to allow the optimizer to perform two independent, sargable index seeks:
+```sql
+SELECT name FROM Customer WHERE referee_id != 2
+UNION ALL
+SELECT name FROM Customer WHERE referee_id IS NULL;
+```
+*Why this is faster:* The optimizer can execute two separate index seeks (one index scan on `referee_id != 2` and a fast null-lookup on `referee_id IS NULL`) and concatenate the pointer streams without expensive deduplication.
 ```sql
 SELECT name 
 FROM Customer 
@@ -565,6 +595,13 @@ WHERE referee_id != 2 OR referee_id IS NULL;
 - **Edge Cases:** If a country has a `NULL` population but an area of `4000000`, it will still be returned because `UNKNOWN OR TRUE` evaluates to `TRUE`.
 - **Performance:** Using `OR` across two different columns is a performance killer. Even with separate indexes on `area` and `population`, the optimizer might still choose a full table scan.
 - **Interviewer Follow-up:** *"Write a mathematically equivalent query using `UNION` instead of `OR`, and explain why `UNION` might execute faster if we have individual indexes on both columns."*
+  - **Answer:**
+```sql
+SELECT name, population, area FROM World WHERE area >= 3000000
+UNION
+SELECT name, population, area FROM World WHERE population >= 25000000;
+```
+*Why this is faster:* An `OR` across two different columns (`area` and `population`) often disables single-column B-Tree indexes, forcing a full table scan or a costly index merge. `UNION` runs two independent, lightning-fast index range scans (one using `idx_area`, the other using `idx_population`) and merges the resulting record IDs in memory.
 ```sql
 SELECT name, population, area 
 FROM World 
@@ -577,6 +614,13 @@ WHERE area >= 3000000 OR population >= 25000000;
 - **Edge Cases:** If `author_id` or `viewer_id` is `NULL`, `NULL = NULL` evaluates to `UNKNOWN` and the row is excluded (correct behavior).
 - **Performance:** `DISTINCT` is a heavy operation requiring hashing or sorting. Using `GROUP BY author_id` behaves the exact same way but sometimes maps better to aggregate indexes depending on the engine.
 - **Interviewer Follow-up:** *"Explain the time and space complexity difference between how a database processes `DISTINCT` using a Hash set versus sorting."*
+  - **Answer:**
+  - **Hash-based `DISTINCT` (Hash Aggregate):** Builds an in-memory hash table of unique keys.
+    - *Time Complexity:* $O(N)$ average time to hash and insert rows.
+    - *Space Complexity:* $O(U)$ memory for $U$ unique rows. If $U$ exceeds available RAM (`work_mem`), partitions spill to disk (Hash Spill), introducing heavy disk I/O.
+  - **Sort-based `DISTINCT` (Sort/Stream Aggregate):** Sorts rows and scans sequentially to discard adjacent duplicates.
+    - *Time Complexity:* $O(N \log N)$ to sort (or $O(N)$ if the column is already sorted via a B-Tree index).
+    - *Space Complexity:* $O(1)$ memory if using a pre-sorted B-Tree index, or $O(N)$ buffer space for external merge-sort.
 ```sql
 SELECT DISTINCT author_id AS id 
 FROM Views 
@@ -590,6 +634,15 @@ ORDER BY id ASC;
 - **Edge Cases:** If `content` is `NULL`, `CHAR_LENGTH()` returns `NULL`, the condition `> 15` becomes `UNKNOWN`, and the row is skipped. Empty strings `''` return `0`.
 - **Performance:** Applying a function directly to a column in the `WHERE` clause violates **Sargability**, blinding the database to indexes and guaranteeing a full table scan.
 - **Interviewer Follow-up:** *"Since we cannot use indexes when applying functions to columns, how would you redesign the schema so we can instantly look up invalid tweets without doing a full table scan every time?"*
+  - **Answer:**
+  1. **Stored/Virtual Generated Column + B-Tree Index:**
+     ```sql
+     ALTER TABLE Tweets ADD COLUMN char_cnt INT GENERATED ALWAYS AS (CHAR_LENGTH(content)) STORED;
+     CREATE INDEX idx_tweets_char_cnt ON Tweets(char_cnt);
+     -- Query becomes sargable:
+     SELECT tweet_id FROM Tweets WHERE char_cnt > 15;
+     ```
+  2. **Ingest-Time Boolean Flag:** Compute `is_invalid BOOLEAN` at application write-time and add an index on `(is_invalid, tweet_id)`.
 ```sql
 SELECT tweet_id 
 FROM Tweets 
@@ -606,6 +659,7 @@ WHERE CHAR_LENGTH(content) > 15;
 - **Edge Cases:** If `EmployeeUNI` is empty, all unique_id values will simply be `NULL`. If `Employees` is empty, the result is empty.
 - **Performance:** `LEFT JOIN`s are efficient if the joined column (`id`) is indexed in the right table (`EmployeeUNI`).
 - **Interviewer Follow-up:** *"What happens if there are duplicate `id`s in the `EmployeeUNI` table? How does that affect row count?"*
+  - **Answer:** A duplicate `id` in `EmployeeUNI` causes a **Cartesian fan-out (1-to-many multiplication)** for that employee. If employee `id = 1` matches 3 duplicate rows in `EmployeeUNI`, the `LEFT JOIN` emits 3 rows for employee 1 instead of 1, artificially inflating the final query output count and corrupting aggregate metrics.
 ```sql
 SELECT eu.unique_id, e.name
 FROM Employees e
@@ -617,7 +671,14 @@ LEFT JOIN EmployeeUNI eu ON e.id = eu.id;
 - **Execution Order:** `FROM` ➔ `JOIN` (matches on product_id) ➔ `SELECT`.
 - **Edge Cases:** Sales with `product_id`s not present in the `Product` table are dropped.
 - **Performance:** The engine will likely use a Hash Join or Nested Loop Join. Ensure `product_id` is indexed in `Product`.
-- **Interviewer Follow-up:** *"If we needed to find Sales that had NO matching Product (data anomaly), how would you change this query?" (Answer: LEFT JOIN ... WHERE product.id IS NULL)*
+- **Interviewer Follow-up:** *"If we needed to find Sales that had NO matching Product (data anomaly), how would you change this query?"*
+  - **Answer:** Convert the `INNER JOIN` to a `LEFT JOIN` and check for missing foreign keys in the `WHERE` clause (Anti-Join pattern):
+```sql
+SELECT s.sale_id, s.product_id, s.year, s.price
+FROM Sales s
+LEFT JOIN Product p ON s.product_id = p.product_id
+WHERE p.product_id IS NULL;
+```
 ```sql
 SELECT p.product_name, s.year, s.price
 FROM Sales s
@@ -630,6 +691,18 @@ JOIN Product p ON s.product_id = p.product_id;
 - **Edge Cases:** If all visits have transactions, the result is an empty set.
 - **Performance:** Anti-joins using `LEFT JOIN + IS NULL` are highly optimized by modern SQL engines compared to `NOT IN` (which struggles with NULLs).
 - **Interviewer Follow-up:** *"Write this using `NOT EXISTS` instead of a `LEFT JOIN`, and explain when one might be faster than the other."*
+  - **Answer:**
+```sql
+SELECT v.customer_id, COUNT(v.visit_id) AS count_no_trans
+FROM Visits v
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM Transactions t 
+    WHERE t.visit_id = v.visit_id
+)
+GROUP BY v.customer_id;
+```
+*Performance Comparison:* `NOT EXISTS` short-circuits as soon as the first matching record is found (returning `FALSE` immediately). When `Transactions` has multiple transactions per visit and is indexed on `visit_id`, `NOT EXISTS` avoids generating intermediate joined rows and uses significantly less memory than `LEFT JOIN ... WHERE t.visit_id IS NULL`.
 ```sql
 SELECT v.customer_id, COUNT(v.visit_id) AS count_no_trans
 FROM Visits v
@@ -644,6 +717,15 @@ GROUP BY v.customer_id;
 - **Edge Cases:** Missing dates (gaps in records) won't match, which is correct.
 - **Performance:** `DATEDIFF(w1.recordDate, w2.recordDate) = 1` prevents index usage on dates. `w1.recordDate = DATE_ADD(w2.recordDate, INTERVAL 1 DAY)` is sargable and allows index seeks.
 - **Interviewer Follow-up:** *"Rewrite the join condition to be sargable so we can utilize a B-Tree index on `recordDate`."*
+  - **Answer:**
+```sql
+SELECT w1.id
+FROM Weather w1
+JOIN Weather w2 
+  ON w1.recordDate = DATE_ADD(w2.recordDate, INTERVAL 1 DAY)
+WHERE w1.temperature > w2.temperature;
+```
+*Why this is sargable:* `DATEDIFF(w1.recordDate, w2.recordDate) = 1` wraps column values inside a function, disabling index seeks on both tables. Leaving `w1.recordDate` un-wrapped on the left side allows the database engine to perform direct B-Tree index seeks on `Weather(recordDate)`.
 ```sql
 SELECT w1.id
 FROM Weather w1
@@ -657,6 +739,19 @@ WHERE w1.temperature > w2.temperature;
 - **Edge Cases:** If a process starts but never ends, the join condition fails, implicitly dropping orphaned events.
 - **Performance:** Self-joining a massive activity log is expensive. Window functions (`LEAD` or conditional aggregation) often perform better by requiring only one scan.
 - **Interviewer Follow-up:** *"Solve this in a single table scan using a `CASE WHEN` inside a `SUM()` instead of a self-join."*
+  - **Answer:**
+```sql
+SELECT 
+    machine_id,
+    ROUND(
+        SUM(CASE WHEN activity_type = 'end' THEN timestamp ELSE -timestamp END) 
+        / COUNT(DISTINCT process_id), 
+        3
+    ) AS processing_time
+FROM Activity
+GROUP BY machine_id;
+```
+*Why this is faster:* It eliminates the expensive $O(N^2)$ self-join completely, computing processing duration in a single $O(N)$ linear table pass.
 ```sql
 SELECT a1.machine_id, ROUND(AVG(a2.timestamp - a1.timestamp), 3) AS processing_time
 FROM Activity a1
@@ -674,6 +769,7 @@ GROUP BY a1.machine_id;
 - **Edge Cases:** Employees with exactly 1000 are excluded.
 - **Performance:** Simple hash/merge join. `OR IS NULL` forces scanning of the filtered join results.
 - **Interviewer Follow-up:** *"How would using an `INNER JOIN` subtly break the business requirements of this query?"*
+  - **Answer:** An `INNER JOIN` requires a matching row in **both** tables. Employees who received **no bonus at all** (i.e. do not exist in the `Bonus` table) would be discarded before the `WHERE` clause is evaluated. The business rule requires including employees with no bonus (treated as $< 1000$), so a `LEFT JOIN` is mandatory.
 ```sql
 SELECT e.name, b.bonus
 FROM Employee e
@@ -686,7 +782,8 @@ WHERE b.bonus < 1000 OR b.bonus IS NULL;
 - **Execution Order:** `FROM` ➔ `CROSS JOIN` (builds the grid) ➔ `LEFT JOIN` (attaches exams) ➔ `GROUP BY` ➔ `SELECT` (COUNT ignores NULLs) ➔ `ORDER BY`.
 - **Edge Cases:** Empty exams table still outputs the cross-joined grid with `0` for all counts.
 - **Performance:** `CROSS JOIN` explodes data volume (N * M rows). Always group and filter as early as possible on huge datasets.
-- **Interviewer Follow-up:** *"Why do we use `COUNT(e.subject_name)` instead of `COUNT(*)` in the `SELECT` clause here?" (Answer: COUNT(*) would return 1 for a NULL join result, COUNT(col) returns 0).*
+- **Interviewer Follow-up:** *"Why do we use `COUNT(e.subject_name)` instead of `COUNT(*)` in the `SELECT` clause here?"*
+  - **Answer:** `COUNT(*)` counts the total number of rows produced by the `LEFT JOIN` including rows where all examination columns are `NULL`. As a result, students who attended 0 exams for a subject would incorrectly show `attended_exams = 1`. `COUNT(e.subject_name)` ignores `NULL` entries, correctly yielding `0` attended exams.
 ```sql
 SELECT s.student_id, s.student_name, sub.subject_name, COUNT(e.subject_name) AS attended_exams
 FROM Students s
@@ -704,6 +801,15 @@ ORDER BY s.student_id, sub.subject_name;
 - **Edge Cases:** If an employee manages themselves (bad data), they count towards the 5.
 - **Performance:** The engine will likely optimize the `IN` subquery into a join (`Semi-Join`).
 - **Interviewer Follow-up:** *"Rewrite this without a subquery by using a `JOIN` and a `GROUP BY` on the outer level. What happens to the `GROUP BY` clause?"*
+  - **Answer:**
+```sql
+SELECT m.name
+FROM Employee m
+JOIN Employee e ON m.id = e.managerId
+GROUP BY m.id, m.name
+HAVING COUNT(e.id) >= 5;
+```
+*Note on `GROUP BY`:* We must group by both `m.id` and `m.name` (or primary key `m.id` under standard functional dependency rules) to prevent distinct managers who share the same name from being incorrectly merged into one bucket.
 ```sql
 SELECT name 
 FROM Employee 
@@ -721,6 +827,23 @@ WHERE id IN (
 - **Edge Cases:** Users with 0 signups are kept due to the `LEFT JOIN`. Their `AVG` is `NULL`, which `COALESCE` gracefully turns to `0`.
 - **Performance:** Computing conditional logic inside an aggregate is efficient as it happens in a single scan.
 - **Interviewer Follow-up:** *"In PostgreSQL, you can't sum/avg a boolean condition directly. How would you write this using a `FILTER` clause or `CASE WHEN`?"*
+  - **Answer:**
+  - **Using ANSI `CASE WHEN` (Standard across all SQL dialects):**
+    ```sql
+    SELECT s.user_id,
+           ROUND(COALESCE(AVG(CASE WHEN c.action = 'confirmed' THEN 1.0 ELSE 0.0 END), 0), 2) AS confirmation_rate
+    FROM Signups s
+    LEFT JOIN Confirmations c ON s.user_id = c.user_id
+    GROUP BY s.user_id;
+    ```
+  - **Using PostgreSQL `FILTER` clause:**
+    ```sql
+    SELECT s.user_id,
+           ROUND(COALESCE(COUNT(*) FILTER (WHERE c.action = 'confirmed')::NUMERIC / NULLIF(COUNT(c.action), 0), 0), 2) AS confirmation_rate
+    FROM Signups s
+    LEFT JOIN Confirmations c ON s.user_id = c.user_id
+    GROUP BY s.user_id;
+    ```
 ```sql
 SELECT s.user_id, ROUND(COALESCE(AVG(c.action = 'confirmed'), 0), 2) AS confirmation_rate
 FROM Signups s
@@ -737,7 +860,8 @@ GROUP BY s.user_id;
 - **Execution Order:** `FROM` ➔ `WHERE` ➔ `SELECT` ➔ `ORDER BY`.
 - **Edge Cases:** If all movie IDs are even, the result is empty. If description is `NULL`, `!= 'boring'` is `UNKNOWN` and excluded.
 - **Performance:** Modulo in the `WHERE` clause prevents index seeks. For a large table, you'd want a separate boolean column for `is_odd_id` or `is_boring` if this query runs frequently.
-- **Interviewer Follow-up:** *"What is the difference between `!=` and `<>` in SQL?" (Answer: Functionally identical in most dialects, but `<>` is the ISO standard).*
+- **Interviewer Follow-up:** *"What is the difference between `!=` and `<>` in SQL?"*
+  - **Answer:** Functionally, `!=` and `<>` produce identical results across all modern SQL engines. However, `<>` is the official **ANSI SQL ISO standard**, while `!=` originated as an engine-specific extension. For maximum code portability across PostgreSQL, Oracle, SQL Server, MySQL, and SQLite, `<>` is preferred.
 ```sql
 SELECT * 
 FROM cinema 
@@ -751,6 +875,7 @@ ORDER BY rating DESC;
 - **Edge Cases:** If a product hasn't sold any units, the join yields `NULL` for units. `IFNULL(..., 0)` safely catches the division by NULL/zero.
 - **Performance:** `BETWEEN` joins can be slow. Ensuring a composite index on `UnitsSold(product_id, purchase_date)` is critical.
 - **Interviewer Follow-up:** *"Why use `IFNULL` outside the aggregate instead of `COALESCE` inside the `SUM()`?"*
+  - **Answer:** When a product has no units sold in `UnitsSold`, the `LEFT JOIN` produces `NULL` for `u.units`. The division `SUM(p.price * u.units) / SUM(u.units)` evaluates to `NULL / NULL` (or `0 / 0`), yielding an aggregate-level `NULL`. Wrapping `IFNULL(..., 0)` outside the entire division converts this resulting `NULL` to `0`. Placing `COALESCE` only on the inside row operands does not prevent `0 / 0` division.
 ```sql
 SELECT p.product_id, IFNULL(ROUND(SUM(p.price * u.units) / SUM(u.units), 2), 0) AS average_price
 FROM Prices p
@@ -765,7 +890,17 @@ GROUP BY p.product_id;
 - **Execution Order:** `FROM` ➔ `JOIN` ➔ `GROUP BY` ➔ `SELECT`.
 - **Edge Cases:** If a project has no employees (or only employees with `NULL` experience), `AVG` returns `NULL`.
 - **Performance:** Very efficient hash join. Grouping by a primary/foreign key is highly optimized.
-- **Interviewer Follow-up:** *"If we wanted the median experience years instead of the average, how would you calculate that?" (Hint: `PERCENTILE_CONT` or window functions).*
+- **Interviewer Follow-up:** *"If we wanted the median experience years instead of the average, how would you calculate that?"*
+  - **Answer:**
+  - **Using `PERCENTILE_CONT` (PostgreSQL / Snowflake / BigQuery):**
+    ```sql
+    SELECT project_id,
+           PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY experience_years) AS median_years
+    FROM Project p
+    JOIN Employee e ON p.employee_id = e.employee_id
+    GROUP BY project_id;
+    ```
+  - **Using Window Functions (`ROW_NUMBER` in ANSI SQL):** Partition by `project_id`, sort by `experience_years`, and filter for the middle row(s).
 ```sql
 SELECT project_id, ROUND(AVG(experience_years), 2) AS average_years
 FROM Project p
@@ -779,6 +914,18 @@ GROUP BY project_id;
 - **Edge Cases:** If the `Users` table is completely empty, it throws a divide-by-zero error.
 - **Performance:** The engine executes the scalar subquery exactly once, caching the result, making this O(N) complexity overall.
 - **Interviewer Follow-up:** *"Can you write this using Window Functions (`COUNT() OVER()`) instead of a scalar subquery?"*
+  - **Answer:**
+```sql
+SELECT 
+    r.contest_id,
+    ROUND(COUNT(r.user_id) * 100.0 / MAX(u_total.total_users), 2) AS percentage
+FROM Register r
+CROSS JOIN (
+    SELECT COUNT(*) AS total_users FROM Users
+) u_total
+GROUP BY r.contest_id, u_total.total_users
+ORDER BY percentage DESC, contest_id ASC;
+```
 ```sql
 SELECT contest_id, ROUND(COUNT(user_id) * 100.0 / (SELECT COUNT(*) FROM Users), 2) AS percentage
 FROM Register
@@ -791,7 +938,12 @@ ORDER BY percentage DESC, contest_id ASC;
 - **Execution Order:** `FROM` ➔ `WHERE` (removes null queries) ➔ `GROUP BY` ➔ `SELECT`.
 - **Edge Cases:** If `position` is 0 (bad data), `rating / position` throws a division by zero error.
 - **Performance:** Doing multiple aggregations inside a single `GROUP BY` requires only one pass over the data, which is highly optimal.
-- **Interviewer Follow-up:** *"How would you handle a potential divide-by-zero if `position` could be 0?" (Answer: `NULLIF(position, 0)`).*
+- **Interviewer Follow-up:** *"How would you handle a potential divide-by-zero if `position` could be 0?"*
+  - **Answer:** Use `NULLIF(position, 0)` in the division:
+```sql
+ROUND(AVG(rating / NULLIF(position, 0)), 2) AS quality
+```
+*Why this works:* If `position` is `0`, `NULLIF(position, 0)` returns `NULL`. Any division by `NULL` safely evaluates to `NULL` rather than crashing with a database runtime exception.
 ```sql
 SELECT query_name, 
        ROUND(AVG(rating / position), 2) AS quality, 
@@ -806,7 +958,19 @@ GROUP BY query_name;
 - **Execution Order:** `FROM` ➔ `GROUP BY` (evaluates DATE_FORMAT dynamically) ➔ `SELECT`.
 - **Edge Cases:** Transactions with `NULL` country will be grouped together into a single `NULL` country bucket.
 - **Performance:** `DATE_FORMAT` in the `GROUP BY` clause is not indexable. In production, it's better to maintain a `month_id` column.
-- **Interviewer Follow-up:** *"What is the PostgreSQL or SQL Server equivalent of `IF()` for this query?" (Answer: `CASE WHEN state = 'approved' THEN ... END`).*
+- **Interviewer Follow-up:** *"What is the PostgreSQL or SQL Server equivalent of `IF()` for this query?"*
+  - **Answer:** Use ANSI `CASE WHEN` expressions and `TO_CHAR()` for date truncation:
+```sql
+SELECT 
+    TO_CHAR(trans_date, 'YYYY-MM') AS month,
+    country,
+    COUNT(id) AS trans_count,
+    SUM(CASE WHEN state = 'approved' THEN 1 ELSE 0 END) AS approved_count,
+    SUM(amount) AS trans_total_amount,
+    SUM(CASE WHEN state = 'approved' THEN amount ELSE 0 END) AS approved_total_amount
+FROM Transactions
+GROUP BY TO_CHAR(trans_date, 'YYYY-MM'), country;
+```
 ```sql
 SELECT DATE_FORMAT(trans_date, '%Y-%m') AS month,
        country,
@@ -824,6 +988,22 @@ GROUP BY month, country;
 - **Edge Cases:** If a customer places two orders on their very first day (same date), both are evaluated.
 - **Performance:** Tuple `IN` queries can be slow in some older MySQL versions. A `ROW_NUMBER() OVER(PARTITION BY customer_id ORDER BY order_date)` is the modern, more performant alternative.
 - **Interviewer Follow-up:** *"Rewrite this query using `ROW_NUMBER()` and explain why it might be faster than the tuple subquery."*
+  - **Answer:**
+```sql
+WITH RankedOrders AS (
+    SELECT 
+        customer_id,
+        order_date,
+        customer_pref_delivery_date,
+        ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date ASC) AS rn
+    FROM Delivery
+)
+SELECT 
+    ROUND(AVG(order_date = customer_pref_delivery_date) * 100, 2) AS immediate_percentage
+FROM RankedOrders
+WHERE rn = 1;
+```
+*Why this is faster:* The tuple `(customer_id, order_date) IN (...)` construct requires building and joining hash sets across subquery results. `ROW_NUMBER()` performs a single sorted streaming pass across partitions without materializing subquery intermediate tables.
 ```sql
 SELECT ROUND(AVG(order_date = customer_pref_delivery_date) * 100, 2) AS immediate_percentage
 FROM Delivery
@@ -839,7 +1019,25 @@ WHERE (customer_id, order_date) IN (
 - **Execution Order:** Subquery ➔ `LEFT JOIN` ➔ `SELECT` (COUNTs the matches vs the total).
 - **Edge Cases:** Players who only logged in once will yield `NULL` from the `LEFT JOIN`, correctly making `COUNT(t2.player_id)` equal 0.
 - **Performance:** Calculating `DATE_ADD()` inside the join condition is fine here because `first_login` is a computed scalar per user.
-- **Interviewer Follow-up:** *"If we wanted to find players who logged in for 3 consecutive days instead of 2, how would you structure the query?" (Hint: `LEAD()` window function).*
+- **Interviewer Follow-up:** *"If we wanted to find players who logged in for 3 consecutive days instead of 2, how would you structure the query?"*
+  - **Answer:** Use `LEAD()` with offsets 1 and 2:
+```sql
+WITH RankedActivity AS (
+    SELECT 
+        player_id, 
+        event_date,
+        LEAD(event_date, 1) OVER (PARTITION BY player_id ORDER BY event_date) AS next_day_1,
+        LEAD(event_date, 2) OVER (PARTITION BY player_id ORDER BY event_date) AS next_day_2,
+        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY event_date) AS rn
+    FROM Activity
+)
+SELECT 
+    ROUND(COUNT(DISTINCT player_id) / (SELECT COUNT(DISTINCT player_id) FROM Activity), 2) AS fraction
+FROM RankedActivity
+WHERE rn = 1 
+  AND next_day_1 = DATE_ADD(event_date, INTERVAL 1 DAY)
+  AND next_day_2 = DATE_ADD(event_date, INTERVAL 2 DAY);
+```
 ```sql
 SELECT ROUND(COUNT(t2.player_id) / COUNT(t1.player_id), 2) AS fraction
 FROM (
@@ -861,7 +1059,11 @@ LEFT JOIN Activity t2
 - **Execution Order:** `FROM` ➔ `GROUP BY` ➔ `SELECT` (evaluates COUNT DISTINCT).
 - **Edge Cases:** If a teacher teaches 0 subjects, they won't appear in the `Teacher` table at all.
 - **Performance:** `COUNT(DISTINCT)` is memory-intensive because it requires maintaining a hash set of seen values per group.
-- **Interviewer Follow-up:** *"If the table has billions of rows, `COUNT(DISTINCT)` can cause Out of Memory errors. How would you approximate this in a big data warehouse like Snowflake or BigQuery?" (Answer: `APPROX_COUNT_DISTINCT` or HyperLogLog).*
+- **Interviewer Follow-up:** *"If the table has billions of rows, `COUNT(DISTINCT)` can cause Out of Memory errors. How would you approximate this in a big data warehouse like Snowflake or BigQuery?"*
+  - **Answer:** Use **HyperLogLog (HLL)** cardinality estimation algorithms:
+  - **Snowflake / BigQuery / Databricks:** `APPROX_COUNT_DISTINCT(subject_id)`
+  - **PostgreSQL / Redshift:** `HLL_CARDINALITY(HLL_ACCUMULATOR(subject_id))`
+*Why this works:* HyperLogLog estimates unique counts within $\approx 1\%$ error using a fixed, tiny memory footprint (e.g. a few kilobytes) instead of allocating gigabytes of RAM for in-memory hash sets.
 ```sql
 SELECT teacher_id, COUNT(DISTINCT subject_id) AS cnt
 FROM Teacher
@@ -873,7 +1075,22 @@ GROUP BY teacher_id;
 - **Execution Order:** `FROM` ➔ `WHERE` (date filter) ➔ `GROUP BY` (date) ➔ `SELECT` (counts users).
 - **Edge Cases:** Dates with 0 active users will not appear in the final output because there are no rows to group.
 - **Performance:** Using `BETWEEN` on an indexed `activity_date` column allows a fast range scan.
-- **Interviewer Follow-up:** *"How would you alter this query so that dates with 0 active users STILL show up in the output with a count of 0?" (Hint: Requires a calendar dimension table and a `LEFT JOIN`).*
+- **Interviewer Follow-up:** *"How would you alter this query so that dates with 0 active users STILL show up in the output with a count of 0?"*
+  - **Answer:** Generate a complete date series using a recursive CTE (or a calendar dimension table) and `LEFT JOIN` onto `Activity`:
+```sql
+WITH RECURSIVE Calendar AS (
+    SELECT DATE('2019-06-28') AS day
+    UNION ALL
+    SELECT DATE_ADD(day, INTERVAL 1 DAY) 
+    FROM Calendar 
+    WHERE day < '2019-07-27'
+)
+SELECT c.day, COUNT(DISTINCT a.user_id) AS active_users
+FROM Calendar c
+LEFT JOIN Activity a ON c.day = a.activity_date
+GROUP BY c.day
+ORDER BY c.day;
+```
 ```sql
 SELECT activity_date AS day, COUNT(DISTINCT user_id) AS active_users
 FROM Activity
@@ -887,6 +1104,22 @@ GROUP BY activity_date;
 - **Edge Cases:** If a product was sold multiple times in its first year, all those records are returned (a tie on the minimum year).
 - **Performance:** Tuple matching can force sub-optimal execution plans. Window functions like `RANK()` are standard for "top-N per group" queries.
 - **Interviewer Follow-up:** *"Rewrite this query using the `RANK()` window function to achieve the same result."*
+  - **Answer:**
+```sql
+WITH RankedSales AS (
+    SELECT 
+        product_id, 
+        year AS first_year, 
+        quantity, 
+        price,
+        RANK() OVER (PARTITION BY product_id ORDER BY year ASC) AS rnk
+    FROM Sales
+)
+SELECT product_id, first_year, quantity, price
+FROM RankedSales
+WHERE rnk = 1;
+```
+*Why `RANK()`:* If a product has multiple sale records in its initial year, `RANK()` assigns `1` to all of them, correctly returning all tied first-year sales.
 ```sql
 SELECT product_id, year AS first_year, quantity, price
 FROM Sales
@@ -902,7 +1135,14 @@ WHERE (product_id, year) IN (
 - **Execution Order:** `FROM` ➔ `GROUP BY` ➔ `HAVING` (filters groups >= 5) ➔ `SELECT`.
 - **Edge Cases:** If a class has exactly 5 students, it is included (`>= 5`).
 - **Performance:** Grouping and then filtering is standard. Ensure an index on `class` exists to speed up the `GROUP BY`.
-- **Interviewer Follow-up:** *"What if a student accidentally enrolled in the same class twice in the table? How would you fix the query to only count unique students?" (Answer: `HAVING COUNT(DISTINCT student) >= 5`).*
+- **Interviewer Follow-up:** *"What if a student accidentally enrolled in the same class twice in the table? How would you fix the query to only count unique students?"*
+  - **Answer:** Use `COUNT(DISTINCT student)` in the `HAVING` clause:
+```sql
+SELECT class
+FROM Courses
+GROUP BY class
+HAVING COUNT(DISTINCT student) >= 5;
+```
 ```sql
 SELECT class
 FROM Courses
@@ -916,6 +1156,14 @@ HAVING COUNT(student) >= 5;
 - **Edge Cases:** Users with 0 followers won't be in the table, so they won't appear in the output.
 - **Performance:** `COUNT(follower_id)` skips NULLs. If `follower_id` cannot be NULL, `COUNT(*)` is slightly faster.
 - **Interviewer Follow-up:** *"If we needed users with 0 followers to show up as well, which additional table would we need, and what kind of join would we use?"*
+  - **Answer:** We would need a master `Users` dimension table and perform a `LEFT JOIN` from `Users` to `Followers`:
+```sql
+SELECT u.user_id, COUNT(f.follower_id) AS followers_count
+FROM Users u
+LEFT JOIN Followers f ON u.user_id = f.user_id
+GROUP BY u.user_id
+ORDER BY u.user_id;
+```
 ```sql
 SELECT user_id, COUNT(follower_id) AS followers_count
 FROM Followers
@@ -928,7 +1176,19 @@ ORDER BY user_id;
 - **Execution Order:** Subquery (`FROM` ➔ `GROUP BY` ➔ `HAVING` ➔ `SELECT`) ➔ Outer Query (`SELECT MAX`).
 - **Edge Cases:** If every number appears multiple times, the subquery is empty, and the outer query cleanly returns `NULL`.
 - **Performance:** The subquery requires a full table scan and aggregation. The outer `MAX()` is trivial.
-- **Interviewer Follow-up:** *"Without using an outer `SELECT MAX()`, how could you rewrite this using `ORDER BY` and `LIMIT` while still returning `NULL` if no rows are found?" (Hint: `IFNULL` or `COALESCE` with a subquery).*
+- **Interviewer Follow-up:** *"Without using an outer `SELECT MAX()`, how could you rewrite this using `ORDER BY` and `LIMIT` while still returning `NULL` if no rows are found?"*
+  - **Answer:** Wrap the `ORDER BY ... LIMIT 1` query as a scalar subquery:
+```sql
+SELECT (
+    SELECT num 
+    FROM MyNumbers 
+    GROUP BY num 
+    HAVING COUNT(num) = 1 
+    ORDER BY num DESC 
+    LIMIT 1
+) AS num;
+```
+*Why this works:* In SQL, evaluating an empty scalar subquery expression automatically casts the result to `NULL`.
 ```sql
 SELECT MAX(num) AS num
 FROM (
@@ -945,6 +1205,14 @@ FROM (
 - **Edge Cases:** If there are 0 products in the `Product` table, customers who bought nothing might technically match depending on how the DB evaluates `0 = 0`.
 - **Performance:** The scalar subquery `(SELECT COUNT(*) FROM Product)` is executed once and cached. The `COUNT(DISTINCT)` is the bottleneck.
 - **Interviewer Follow-up:** *"If this was a banking app, and we wanted to find users who triggered EVERY type of fraud alert, how would this exact same SQL pattern apply?"*
+  - **Answer:**
+```sql
+SELECT user_id
+FROM UserAlerts
+GROUP BY user_id
+HAVING COUNT(DISTINCT alert_type_id) = (SELECT COUNT(*) FROM FraudAlertTypes);
+```
+*Concept (Relational Division):* We group by the entity and assert that the distinct count of foreign keys associated with that entity matches the exact total cardinality of the target lookup dimension table.
 ```sql
 SELECT customer_id
 FROM Customer
@@ -961,7 +1229,20 @@ HAVING COUNT(DISTINCT product_key) = (SELECT COUNT(*) FROM Product);
 - **Execution Order:** `FROM` ➔ `JOIN` ➔ `GROUP BY` (manager_id) ➔ `SELECT` (counts reports, averages age).
 - **Edge Cases:** If an employee has no reports, they won't appear as a `mgr` because the `INNER JOIN` eliminates them.
 - **Performance:** Self-joins on large tables can be expensive. Ensuring an index exists on `reports_to` is critical for scaling this hierarchy query.
-- **Interviewer Follow-up:** *"If we wanted to include ALL employees, even those with 0 reports, how would you change this query?" (Answer: Use a `LEFT JOIN` from `mgr` to `emp`).*
+- **Interviewer Follow-up:** *"If we wanted to include ALL employees, even those with 0 reports, how would you change this query?"*
+  - **Answer:**
+```sql
+SELECT 
+    mgr.employee_id, 
+    mgr.name, 
+    COUNT(emp.employee_id) AS reports_count, 
+    ROUND(AVG(emp.age)) AS average_age
+FROM Employees mgr
+LEFT JOIN Employees emp ON mgr.employee_id = emp.reports_to
+GROUP BY mgr.employee_id, mgr.name
+ORDER BY mgr.employee_id;
+```
+*Why this works:* `LEFT JOIN` preserves managers without reports. `COUNT(emp.employee_id)` yields `0`, and `AVG(emp.age)` returns `NULL`.
 ```sql
 SELECT mgr.employee_id, mgr.name, 
        COUNT(emp.employee_id) AS reports_count, 
@@ -978,6 +1259,15 @@ ORDER BY mgr.employee_id;
 - **Edge Cases:** Negative side lengths or `0` will correctly fail the `>` conditions and return `'No'`.
 - **Performance:** This is an O(N) sequential scan. There's no filtering (`WHERE`), so no index is needed or used.
 - **Interviewer Follow-up:** *"Can you write this using a `CASE WHEN` statement instead of `IF()` so it complies with standard ANSI SQL?"*
+  - **Answer:**
+```sql
+SELECT x, y, z,
+    CASE 
+        WHEN x + y > z AND x + z > y AND y + z > x THEN 'Yes'
+        ELSE 'No'
+    END AS triangle
+FROM Triangle;
+```
 ```sql
 SELECT x, y, z, 
        IF(x + y > z AND x + z > y AND y + z > x, 'Yes', 'No') AS triangle
@@ -990,6 +1280,20 @@ FROM Triangle;
 - **Edge Cases:** If the table has fewer than 3 rows, `LEAD` returns `NULL`, the `WHERE` clause fails, and it returns an empty set.
 - **Performance:** Window functions require sorting the dataset (implicit `OVER()`). If the table is large, this sort is the bottleneck.
 - **Interviewer Follow-up:** *"What if we needed to find 10 consecutive numbers? Writing 9 `LEAD` statements is messy. How would you solve it using a gaps-and-islands approach (e.g., `ROW_NUMBER()`)?"*
+  - **Answer:** Use the classic **Difference of Row Numbers** gaps-and-islands technique:
+```sql
+WITH IslandGroups AS (
+    SELECT 
+        num,
+        id - ROW_NUMBER() OVER (PARTITION BY num ORDER BY id) AS island_id
+    FROM Logs
+)
+SELECT DISTINCT num AS ConsecutiveNums
+FROM IslandGroups
+GROUP BY num, island_id
+HAVING COUNT(*) >= 10;
+```
+*How it works:* For consecutive identical values of `num`, both `id` and `ROW_NUMBER()` increase by 1 at each step. Thus, `id - ROW_NUMBER()` remains constant. Grouping by `(num, island_id)` allows filtering streaks of any arbitrary length $K$.
 ```sql
 SELECT DISTINCT num AS ConsecutiveNums
 FROM (
@@ -1007,6 +1311,25 @@ WHERE num = num1 AND num = num2;
 - **Edge Cases:** A product that only has price changes *after* the target date falls exclusively into the second query and gets the default price of 10.
 - **Performance:** Using `UNION` requires deduplication, which is slow. `UNION ALL` is faster here because the two branches are mutually exclusive.
 - **Interviewer Follow-up:** *"Rewrite this query using the `ROW_NUMBER()` window function partitioned by `product_id` instead of using a `UNION`."*
+  - **Answer:**
+```sql
+WITH AllProducts AS (
+    SELECT DISTINCT product_id FROM Products
+),
+LatestPrices AS (
+    SELECT 
+        product_id, 
+        new_price,
+        ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY change_date DESC) AS rn
+    FROM Products
+    WHERE change_date <= '2019-08-16'
+)
+SELECT 
+    p.product_id, 
+    COALESCE(lp.new_price, 10) AS price
+FROM AllProducts p
+LEFT JOIN LatestPrices lp ON p.product_id = lp.product_id AND lp.rn = 1;
+```
 ```sql
 SELECT product_id, new_price AS price
 FROM Products
@@ -1031,7 +1354,17 @@ WHERE product_id NOT IN (
 - **Execution Order:** Subquery (`FROM` ➔ `SELECT` computes running sum) ➔ Outer Query (`FROM` ➔ `WHERE` filters `<= 1000` ➔ `ORDER BY` DESC ➔ `LIMIT 1`).
 - **Edge Cases:** If the very first person weighs more than 1000, the outer `WHERE` clause drops them, and the query returns empty.
 - **Performance:** Calculating a running sum requires the engine to maintain a rolling accumulator over a sorted data stream. An index on `turn` makes the sort essentially free.
-- **Interviewer Follow-up:** *"How would you write this cumulative sum in an older version of MySQL (e.g., v5.7) that doesn't support Window Functions?" (Answer: Correlated Subquery or Self-Join).*
+- **Interviewer Follow-up:** *"How would you write this cumulative sum in an older version of MySQL (e.g., v5.7) that doesn't support Window Functions?"*
+  - **Answer:** Use a **Self-Join with Triangular Aggregation**:
+```sql
+SELECT q1.person_name
+FROM Queue q1
+JOIN Queue q2 ON q1.turn >= q2.turn
+GROUP BY q1.turn, q1.person_name
+HAVING SUM(q2.weight) <= 1000
+ORDER BY q1.turn DESC
+LIMIT 1;
+```
 ```sql
 SELECT person_name
 FROM (
@@ -1049,6 +1382,27 @@ LIMIT 1;
 - **Edge Cases:** If `Accounts` is completely empty, the `SUM(condition)` evaluates to `NULL`. We might need to wrap it in `COALESCE(..., 0)` depending on the SQL dialect.
 - **Performance:** Scanning the `Accounts` table three separate times is horribly inefficient.
 - **Interviewer Follow-up:** *"Since scanning the table 3 times is bad for performance, rewrite this to scan the table only ONCE by using a `LEFT JOIN` against a hardcoded temporary table of categories."*
+  - **Answer:**
+```sql
+WITH Categories AS (
+    SELECT 'Low Salary' AS category
+    UNION ALL SELECT 'Average Salary'
+    UNION ALL SELECT 'High Salary'
+),
+AccountBuckets AS (
+    SELECT 
+        CASE 
+            WHEN salary < 20000 THEN 'Low Salary'
+            WHEN salary BETWEEN 20000 AND 50000 THEN 'Average Salary'
+            ELSE 'High Salary'
+        END AS category
+    FROM Accounts
+)
+SELECT c.category, COUNT(a.category) AS accounts_count
+FROM Categories c
+LEFT JOIN AccountBuckets a ON c.category = a.category
+GROUP BY c.category;
+```
 ```sql
 SELECT 'Low Salary' AS category, SUM(salary < 20000) AS accounts_count FROM Accounts
 UNION
@@ -1067,6 +1421,21 @@ SELECT 'High Salary', SUM(salary > 50000) FROM Accounts;
 - **Edge Cases:** If `manager_id` contains a `NULL`, `NOT IN` behaves dangerously (it will return empty if there is a NULL in the subquery result). It is safer to use `NOT EXISTS`.
 - **Performance:** `NOT IN` can be slow if the subquery returns many rows and is not optimized. A `LEFT JOIN` where the right side is `NULL` is generally safer and faster.
 - **Interviewer Follow-up:** *"Why is `NOT IN` dangerous when the subquery might return a `NULL` value? How would you rewrite this using `NOT EXISTS`?"*
+  - **Answer:**
+  - *Why `NOT IN` fails:* Under SQL 3-valued logic, `manager_id NOT IN (1, 2, NULL)` expands to `manager_id != 1 AND manager_id != 2 AND manager_id != NULL`. Because comparison with `NULL` yields `UNKNOWN`, the entire condition evaluates to `UNKNOWN`, causing all rows to be dropped.
+  - *Rewrite using `NOT EXISTS`:*
+    ```sql
+    SELECT e.employee_id
+    FROM Employees e
+    WHERE e.salary < 30000 
+      AND e.manager_id IS NOT NULL
+      AND NOT EXISTS (
+          SELECT 1 
+          FROM Employees m 
+          WHERE m.employee_id = e.manager_id
+      )
+    ORDER BY e.employee_id;
+    ```
 
 **Visual Breakdown:**
 | employee_id | salary | manager_id | (Subquery: Active Managers) | Result (Salary < 30k & Manager NOT IN Active) |
@@ -1088,6 +1457,17 @@ ORDER BY employee_id;
 - **Edge Cases:** If there's only 1 student, they match `MAX(id)` and keep their seat.
 - **Performance:** Calculating `MAX(id)` inline for every row could be slow, though optimizers usually execute scalar subqueries once and cache them.
 - **Interviewer Follow-up:** *"Rewrite this without mathematical swapping. How could you use the `LEAD()` and `LAG()` window functions instead?"*
+  - **Answer:**
+```sql
+SELECT 
+    id,
+    CASE 
+        WHEN id % 2 = 1 THEN COALESCE(LEAD(student) OVER (ORDER BY id), student)
+        ELSE LAG(student) OVER (ORDER BY id)
+    END AS student
+FROM Seat
+ORDER BY id;
+```
 
 **Visual Breakdown (Intermediate `CASE` evaluation):**
 | Original id | student | `id % 2 != 0` | is `MAX(id)`? | New `id` |
@@ -1113,7 +1493,8 @@ ORDER BY id;
 - **Execution Order:** Query 1 (Top User) executes ➔ Query 2 (Top Movie in Feb) executes ➔ `UNION ALL` merges them sequentially.
 - **Edge Cases:** Ties are broken lexicographically (`ORDER BY name ASC`). If there's an exact tie in counts/ratings AND names, `LIMIT 1` deterministically picks the first.
 - **Performance:** `UNION ALL` is faster than `UNION` because it skips the deduplication phase.
-- **Interviewer Follow-up:** *"If we used `UNION` instead of `UNION ALL`, in what extremely rare scenario would the result only contain 1 row instead of 2?" (Answer: If a user's name is identical to a movie's title).*
+- **Interviewer Follow-up:** *"If we used `UNION` instead of `UNION ALL`, in what extremely rare scenario would the result only contain 1 row instead of 2?"*
+  - **Answer:** If the user with the most reviews happened to have the **exact same name** as the highest-rated movie's title (e.g. a user named `'Frozen'` and a movie titled `'Frozen'`), `UNION` would identify the two resulting string records as identical duplicates and collapse them into a single row. `UNION ALL` retains both rows.
 
 **Visual Breakdown (Before UNION ALL):**
 | Query 1 Result (Top User) | Query 2 Result (Top Movie in Feb) |
@@ -1138,7 +1519,8 @@ UNION ALL
 - **Execution Order:** Subquery (`FROM` ➔ `GROUP BY` ➔ `SELECT` applies Window sums) ➔ Outer Query (`FROM` ➔ `WHERE` filters out the first 6 days ➔ `SELECT`).
 - **Edge Cases:** We use `count_days = 7` to strictly filter out the first 6 days of the dataset, which don't have a full 7-day history to average.
 - **Performance:** Window functions are highly optimized for moving averages. The `GROUP BY visited_on` in the subquery first flattens multiple orders per day.
-- **Interviewer Follow-up:** *"Why must we `GROUP BY visited_on` inside the subquery first before applying the Window function?" (Answer: Multiple customers can visit on the same day).*
+- **Interviewer Follow-up:** *"Why must we `GROUP BY visited_on` inside the subquery first before applying the Window function?"*
+  - **Answer:** The problem requires a moving window over **7 distinct calendar days**, not 7 customer visits. If multiple customers dine on the same day, calculating `ROWS BETWEEN 6 PRECEDING AND CURRENT ROW` directly on the un-aggregated table would slide across 7 individual customer transactions rather than 7 consecutive calendar dates.
 
 **Visual Breakdown (Intermediate Window Function in `t`):**
 | visited_on | amount (Daily) | Rolling SUM (7 days) | Rolling COUNT (Days) |
@@ -1164,7 +1546,22 @@ WHERE count_days = 7;
 - **Execution Order:** Subquery (`UNION ALL` stacks the columns) ➔ Main Query (`GROUP BY` ➔ `SELECT` counts ➔ `ORDER BY` DESC ➔ `LIMIT 1`).
 - **Edge Cases:** If a user requests a friend but is never accepted, they won't appear in the `RequestAccepted` table.
 - **Performance:** Unpivoting via `UNION ALL` requires reading the table twice, but it is standard for edge-list graph tables.
-- **Interviewer Follow-up:** *"What if two users have the exact same maximum number of friends? Does `LIMIT 1` guarantee returning both?" (Answer: No, you would need `RANK() = 1` or `HAVING COUNT = MAX(...)`).*
+- **Interviewer Follow-up:** *"What if two users have the exact same maximum number of friends? Does `LIMIT 1` guarantee returning both?"*
+  - **Answer:** No, `LIMIT 1` arbitrarily picks one user. To return all tied users with the highest friend count, filter using `DENSE_RANK()` or a subquery comparing against `MAX()`:
+```sql
+WITH FriendCounts AS (
+    SELECT id, COUNT(*) AS num
+    FROM (
+        SELECT requester_id AS id FROM RequestAccepted
+        UNION ALL
+        SELECT accepter_id AS id FROM RequestAccepted
+    ) t
+    GROUP BY id
+)
+SELECT id, num
+FROM FriendCounts
+WHERE num = (SELECT MAX(num) FROM FriendCounts);
+```
 
 **Visual Breakdown (Unpivoting via UNION ALL):**
 | requester_id | accepter_id | ➔ | Stacked `id` (UNION ALL) |
@@ -1193,6 +1590,23 @@ LIMIT 1;
 - **Edge Cases:** If no policy shares a `tiv_2015` value, the result is `NULL`.
 - **Performance:** Window functions execute sequentially over the partitions. A self-join approach would be much slower on large datasets.
 - **Interviewer Follow-up:** *"How would you write this using a `JOIN` to a `GROUP BY` subquery instead of Window Functions?"*
+  - **Answer:**
+```sql
+SELECT ROUND(SUM(tiv_2016), 2) AS tiv_2016
+FROM Insurance
+WHERE tiv_2015 IN (
+    SELECT tiv_2015 
+    FROM Insurance 
+    GROUP BY tiv_2015 
+    HAVING COUNT(*) > 1
+)
+AND (lat, lon) IN (
+    SELECT lat, lon 
+    FROM Insurance 
+    GROUP BY lat, lon 
+    HAVING COUNT(*) = 1
+);
+```
 
 **Visual Breakdown (Intermediate Window Function in `t`):**
 | PID | tiv_2015 | tiv_2016 | lat, lon | `tiv_2015_cnt` (Same value?) | `loc_cnt` (Same city?) | Action |
@@ -1216,7 +1630,8 @@ WHERE tiv_2015_cnt > 1 AND loc_cnt = 1;
 - **Execution Order:** Subquery (`FROM` ➔ `JOIN` ➔ `SELECT` calculates DENSE_RANK) ➔ Outer Query (`WHERE rnk <= 3`).
 - **Edge Cases:** If a department has only 2 employees, they are both returned (ranks 1 and 2 are `<= 3`).
 - **Performance:** Partitioning and sorting a massive employee table is expensive. Ensure an index on `(departmentId, salary DESC)` exists.
-- **Interviewer Follow-up:** *"What would happen to the output if you used `RANK()` instead of `DENSE_RANK()` and there was a 3-way tie for the highest salary?" (Answer: The ranks would be 1, 1, 1, 4. The `<= 3` filter would completely drop the next highest salary).*
+- **Interviewer Follow-up:** *"What would happen to the output if you used `RANK()` instead of `DENSE_RANK()` and there was a 3-way tie for the highest salary?"*
+  - **Answer:** `RANK()` produces gaps after ties. If 3 employees tie for highest salary, they all receive **Rank 1**. The next distinct salary receives **Rank 4** (skipping ranks 2 and 3). Filtering `WHERE rnk <= 3` would completely drop the 2nd-highest unique salary. `DENSE_RANK()` gives the ties Rank 1 and the next distinct salary Rank 2, correctly returning the top 3 salary tiers.
 
 **Visual Breakdown (Intermediate `DENSE_RANK`):**
 | Dept | Employee | Salary | `DENSE_RANK()` (Ties share, no gaps) |
@@ -1248,6 +1663,13 @@ WHERE rnk <= 3;
 - **Edge Cases:** If a name is only 1 character long, `SUBSTRING(name, 2)` safely returns an empty string instead of crashing.
 - **Performance:** String manipulation functions are generally fast, but cannot be optimized via index. The `ORDER BY user_id` is the main performance driver here.
 - **Interviewer Follow-up:** *"Can you write this using `LEFT()` and `RIGHT()` or `LENGTH()` instead of `SUBSTRING()`?"*
+  - **Answer:**
+```sql
+SELECT user_id,
+       CONCAT(UPPER(LEFT(name, 1)), LOWER(RIGHT(name, LENGTH(name) - 1))) AS name
+FROM Users
+ORDER BY user_id;
+```
 
 **Visual Breakdown (String Manipulation):**
 | Original `name` | `UPPER(SUBSTR(name, 1, 1))` | `LOWER(SUBSTR(name, 2))` | `CONCAT` Result |
@@ -1267,7 +1689,21 @@ ORDER BY user_id;
 - **Execution Order:** `FROM` ➔ `WHERE` (evaluates LIKE patterns) ➔ `SELECT`.
 - **Edge Cases:** A condition like `'SADIAB100'` won't be incorrectly matched because we specifically check for a leading space (`'% DIAB1%'`).
 - **Performance:** Leading wildcards (`'% DIAB1%'`) completely disable B-Tree index seeks. The DB must do a full table scan.
-- **Interviewer Follow-up:** *"Since `LIKE '% DIAB1%'` causes a full table scan, how would you redesign the database schema to make finding conditions instantly fast?" (Answer: Normalize the `conditions` into a separate mapping table).*
+- **Interviewer Follow-up:** *"Since `LIKE '% DIAB1%'` causes a full table scan, how would you redesign the database schema to make finding conditions instantly fast?"*
+  - **Answer:** Normalize the data into a separate 1-to-many lookup table with a B-Tree index:
+```sql
+CREATE TABLE PatientConditions (
+    patient_id INT,
+    condition_code VARCHAR(20),
+    PRIMARY KEY (patient_id, condition_code)
+);
+CREATE INDEX idx_cond_code ON PatientConditions(condition_code);
+-- Query becomes sargable:
+SELECT p.patient_id, p.patient_name
+FROM Patients p
+JOIN PatientConditions pc ON p.patient_id = pc.patient_id
+WHERE pc.condition_code LIKE 'DIAB1%';
+```
 
 **Visual Breakdown (LIKE Pattern Matching):**
 | conditions | Matches `'DIAB1%'`? (Starts with) | Matches `'% DIAB1%'`? (Has space before) | Result |
@@ -1288,6 +1724,18 @@ WHERE conditions LIKE 'DIAB1%' OR conditions LIKE '% DIAB1%';
 - **Edge Cases:** If an email appears 3 times (IDs 1, 2, 3), both 2 and 3 will match against 1 and be deleted simultaneously.
 - **Performance:** Self-joining a massive table for a `DELETE` can lock the table and cause massive transaction logs. In production, it's often safer to insert distinct rows into a temp table, truncate, and re-insert.
 - **Interviewer Follow-up:** *"How would you rewrite this query to use a Window Function (`ROW_NUMBER()`) instead of a self-join?"*
+  - **Answer:**
+```sql
+DELETE FROM Person
+WHERE id IN (
+    SELECT id FROM (
+        SELECT id, ROW_NUMBER() OVER (PARTITION BY email ORDER BY id ASC) AS rn
+        FROM Person
+    ) t
+    WHERE rn > 1
+);
+```
+*(Wrapping inside a subquery `t` prevents MySQL error 1093: cannot specify target table for update in FROM clause).*
 
 **Visual Breakdown (Self-Join Identification):**
 | `p1` (Target) | `p2` (Comparison) | Email Match? | `p1.id > p2.id`? | Action |
@@ -1307,6 +1755,7 @@ WHERE p1.email = p2.email AND p1.id > p2.id;
 - **Edge Cases:** If there's only 1 employee in the table, `OFFSET 1` finds nothing. The outer `SELECT` successfully converts that empty set to `NULL`.
 - **Performance:** `ORDER BY DESC LIMIT 2` is very fast if `salary` is indexed. `DISTINCT` adds slight overhead.
 - **Interviewer Follow-up:** *"If I asked for the Nth highest salary using a variable, why is `LIMIT 1 OFFSET N-1` better than using `MAX()` recursively?"*
+  - **Answer:** Recursive `MAX()` requires nesting $N$ subqueries, which cannot be dynamically parameterized for arbitrary $N$ and has $O(N \cdot M)$ execution time. `LIMIT 1 OFFSET N-1` is clean, parameterizable, and executes in $O(M \log M)$ (or $O(N)$ with an indexed B-Tree walk).
 
 **Visual Breakdown (Outer SELECT acting as NULL-coalesce):**
 | Table State | Inner Query Result (`LIMIT 1 OFFSET 1`) | Outer Query Result |
@@ -1329,6 +1778,10 @@ SELECT (
 - **Edge Cases:** If a product is sold twice on the same day, `DISTINCT` inside both `COUNT` and `GROUP_CONCAT` ensures it only appears once.
 - **Performance:** String aggregation is memory-heavy. MySQL has a default `group_concat_max_len` limit (1024 bytes) that can truncate long strings in production!
 - **Interviewer Follow-up:** *"What happens in MySQL if the concatenated string exceeds the default `group_concat_max_len` setting? How do you fix it?"*
+  - **Answer:** MySQL silently **truncates** the string to the maximum buffer length (default is 1024 bytes) without raising an error. To fix this, increase the buffer limit for the session:
+```sql
+SET SESSION group_concat_max_len = 1000000; -- Set to 1MB or larger
+```
 
 **Visual Breakdown (String Aggregation):**
 | Date | Raw Products | `DISTINCT` + `ORDER BY` | `GROUP_CONCAT` Result |
@@ -1351,6 +1804,14 @@ ORDER BY sell_date;
 - **Edge Cases:** If a product gets exactly 100 orders, it is included (`>= 100`).
 - **Performance:** `DATE_FORMAT(o.order_date)` prevents the use of indexes on the date column. It is significantly faster to write `WHERE o.order_date BETWEEN '2020-02-01' AND '2020-02-29'`.
 - **Interviewer Follow-up:** *"Why is `DATE_FORMAT(o.order_date) = '2020-02'` bad for performance? Rewrite the `WHERE` clause to be 'Sargable' (index-friendly)."*
+  - **Answer:**
+  - *Why it's bad:* Wrapping `order_date` in `DATE_FORMAT()` forces the engine to evaluate the function for every row in the table, preventing B-Tree index seeks.
+  - *Sargable rewrite:*
+    ```sql
+    WHERE o.order_date >= '2020-02-01' AND o.order_date < '2020-03-01'
+    -- Or:
+    WHERE o.order_date BETWEEN '2020-02-01' AND '2020-02-29'
+    ```
 
 **Visual Breakdown (HAVING vs WHERE):**
 | Product | Orders in Feb (`WHERE`) | Total Sum | Passes `HAVING >= 100`? |
@@ -1373,6 +1834,7 @@ HAVING SUM(o.unit) >= 100;
 - **Edge Cases:** The dot in `.com` must be escaped as `[.]` or `\.`, otherwise Regex treats it as "any character" (so `@leetcodezcom` would accidentally match).
 - **Performance:** Regex evaluations require CPU-intensive string parsing and cannot utilize standard B-Tree indexes.
 - **Interviewer Follow-up:** *"Why did we put the period inside brackets `[.]` in the Regex string? What would happen if we just wrote `@leetcode.com$`?"*
+  - **Answer:** In regex, an unescaped dot `.` matches **any character**. Writing `@leetcode.com$` would match invalid emails like `'user@leetcodeXcom'` or `'user@leetcode9com'`. Wrapping the dot in `[.]` or escaping it as `\.` forces the engine to match only a literal period.
 
 **Visual Breakdown (Regex Validation):**
 | Email String | `^[a-zA-Z]` (Starts w/ letter) | `[a-zA-Z0-9_.-]*` (Valid body) | `@leetcode[.]com$` (Valid Domain) | Result |
@@ -1393,6 +1855,13 @@ WHERE mail REGEXP '^[a-zA-Z][a-zA-Z0-9_.-]*@leetcode[.]com$';
 - **Edge Cases:** Assuming every buy has a corresponding sell, this works perfectly. If a stock is bought but not sold yet, it will accurately show a negative unrealized loss.
 - **Performance:** This is heavily optimized because it avoids self-joins or multiple subqueries. It scans the table exactly once.
 - **Interviewer Follow-up:** *"Rewrite this query using a `SUM(IF(...))` shorthand instead of `CASE WHEN`."*
+  - **Answer:**
+```sql
+SELECT stock_name,
+       SUM(IF(operation = 'Sell', price, -price)) AS capital_gain_loss
+FROM Stocks
+GROUP BY stock_name;
+```
 
 **Visual Breakdown (Conditional Net Flow):**
 | stock_name | operation | price | `CASE` Evaluation | Cumulative `SUM` per stock |
