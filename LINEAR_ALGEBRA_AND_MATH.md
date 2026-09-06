@@ -1075,6 +1075,172 @@ Let $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$. We can derive the $2 \ti
    $$
 *The famous $2 \times 2$ shortcut is simply Cramer's adjugate formula in its lowest-dimensional form!*
 
+#### 3. Complete 3x3 Worked Hand Calculation Example (The 5-Step Adjugate Method)
+
+*(As presented in Professor Dave Explains: "Inverse Matrices and Their Properties")*
+
+Let us find the inverse of the following $3 \times 3$ matrix $A$ using the **Matrix of Minors $\to$ Cofactors $\to$ Adjugate (Transpose) $\to$ Determinant Division** method:
+
+$$
+A =
+\begin{bmatrix}
+2 & 1 & 1 \\
+3 & 2 & 1 \\
+2 & 1 & 2
+\end{bmatrix}
+$$
+
+```
+                           THE 5-STEP ADJUGATE INVERSE METHOD
+      Step 1: Minors             Step 2: Cofactors           Step 3: Adjugate (Transpose)
+   Cross out row i, col j     Apply Checkerboard Sign          Flip rows and columns
+   Compute 2x2 determinants   C_ij = (-1)^(i+j) * M_ij              adj(A) = C^T
+            │                          │                                 │
+            └──────────────────────────┼─────────────────────────────────┘
+                                       ▼
+                       Step 4: Determinant & Division
+                       Compute det(A), then divide adj(A):
+                            A^-1 = (1 / det(A)) * adj(A)
+                                       │
+                                       ▼
+                       Step 5: Verification (A @ A^-1 = I)
+```
+
+---
+
+##### Step 1: Calculate the Matrix of Minors ($M$)
+For every entry $A_{ij}$, temporarily cross out row $i$ and column $j$, and compute the $2 \times 2$ determinant of the remaining numbers:
+
+* **Row 1 Minors:**
+  * $M_{11} = \det\begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix} = (2 \times 2) - (1 \times 1) = 4 - 1 = \mathbf{3}$
+  * $M_{12} = \det\begin{bmatrix} 3 & 1 \\ 2 & 2 \end{bmatrix} = (3 \times 2) - (1 \times 2) = 6 - 2 = \mathbf{4}$
+  * $M_{13} = \det\begin{bmatrix} 3 & 2 \\ 2 & 1 \end{bmatrix} = (3 \times 1) - (2 \times 2) = 3 - 4 = \mathbf{-1}$
+
+* **Row 2 Minors:**
+  * $M_{21} = \det\begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix} = (1 \times 2) - (1 \times 1) = 2 - 1 = \mathbf{1}$
+  * $M_{22} = \det\begin{bmatrix} 2 & 1 \\ 2 & 2 \end{bmatrix} = (2 \times 2) - (1 \times 2) = 4 - 2 = \mathbf{2}$
+  * $M_{23} = \det\begin{bmatrix} 2 & 1 \\ 2 & 1 \end{bmatrix} = (2 \times 1) - (1 \times 2) = 2 - 2 = \mathbf{0}$
+
+* **Row 3 Minors:**
+  * $M_{31} = \det\begin{bmatrix} 1 & 1 \\ 2 & 1 \end{bmatrix} = (1 \times 1) - (1 \times 2) = 1 - 2 = \mathbf{-1}$
+  * $M_{32} = \det\begin{bmatrix} 2 & 1 \\ 3 & 1 \end{bmatrix} = (2 \times 1) - (1 \times 3) = 2 - 3 = \mathbf{-1}$
+  * $M_{33} = \det\begin{bmatrix} 2 & 1 \\ 3 & 2 \end{bmatrix} = (2 \times 2) - (1 \times 3) = 4 - 3 = \mathbf{1}$
+
+**The Matrix of Minors ($M$):**
+
+$$
+M =
+\begin{bmatrix}
+3 & 4 & -1 \\
+1 & 2 & 0 \\
+-1 & -1 & 1
+\end{bmatrix}
+$$
+
+---
+
+##### Step 2: Form the Matrix of Cofactors ($C$)
+Apply the alternating sign **checkerboard pattern** $\begin{bmatrix} + & - & + \\ - & + & - \\ + & - & + \end{bmatrix}$ (multiplying each minor $M_{ij}$ by $(-1)^{i+j}$):
+
+$$
+C =
+\begin{bmatrix}
++(3) & -(4) & +(-1) \\
+-(1) & +(2) & -(0) \\
++(-1) & -(-1) & +(1)
+\end{bmatrix}
+=
+\begin{bmatrix}
+3 & -4 & -1 \\
+-1 & 2 & 0 \\
+-1 & 1 & 1
+\end{bmatrix}
+$$
+
+---
+
+##### Step 3: Transpose the Cofactor Matrix to Obtain the Adjugate Matrix ($\text{adj}(A)$)
+Reflect the cofactor matrix $C$ across its main diagonal (Row 1 becomes Col 1, Row 2 becomes Col 2, Row 3 becomes Col 3):
+
+$$
+\text{adj}(A) = C^T =
+\begin{bmatrix}
+3 & -1 & -1 \\
+-4 & 2 & 1 \\
+-1 & 0 & 1
+\end{bmatrix}
+$$
+
+---
+
+##### Step 4: Calculate Determinant $\det(A)$ and Divide $\text{adj}(A)$ by $\det(A)$
+Using the entries of Row 1 of $A$ and Row 1 of the Cofactor Matrix $C$:
+
+$$
+\det(A) = a_{11} C_{11} + a_{12} C_{12} + a_{13} C_{13} = 2(3) + 1(-4) + 1(-1) = 6 - 4 - 1 = \mathbf{1}
+$$
+
+*(Because $\det(A) = 1 \neq 0$, the matrix is non-singular and invertible!)*
+
+Now, divide every entry in the Adjugate matrix by $\det(A) = 1$:
+
+$$
+A^{-1} = \frac{1}{\det(A)} \text{adj}(A) = \frac{1}{1}
+\begin{bmatrix}
+3 & -1 & -1 \\
+-4 & 2 & 1 \\
+-1 & 0 & 1
+\end{bmatrix}
+=
+\begin{bmatrix}
+3 & -1 & -1 \\
+-4 & 2 & 1 \\
+-1 & 0 & 1
+\end{bmatrix}
+$$
+
+---
+
+##### Step 5: Verify the Result ($A A^{-1} = I_3$)
+
+$$
+A A^{-1} =
+\begin{bmatrix}
+2 & 1 & 1 \\
+3 & 2 & 1 \\
+2 & 1 & 2
+\end{bmatrix}
+\begin{bmatrix}
+3 & -1 & -1 \\
+-4 & 2 & 1 \\
+-1 & 0 & 1
+\end{bmatrix}
+$$
+
+* **Row 1 Computations:**
+  * Row 1 $\cdot$ Col 1: $2(3) + 1(-4) + 1(-1) = 6 - 4 - 1 = \mathbf{1}$
+  * Row 1 $\cdot$ Col 2: $2(-1) + 1(2) + 1(0) = -2 + 2 + 0 = \mathbf{0}$
+  * Row 1 $\cdot$ Col 3: $2(-1) + 1(1) + 1(1) = -2 + 1 + 1 = \mathbf{0}$
+* **Row 2 Computations:**
+  * Row 2 $\cdot$ Col 1: $3(3) + 2(-4) + 1(-1) = 9 - 8 - 1 = \mathbf{0}$
+  * Row 2 $\cdot$ Col 2: $3(-1) + 2(2) + 1(0) = -3 + 4 + 0 = \mathbf{1}$
+  * Row 2 $\cdot$ Col 3: $3(-1) + 2(1) + 1(1) = -3 + 2 + 1 = \mathbf{0}$
+* **Row 3 Computations:**
+  * Row 3 $\cdot$ Col 1: $2(3) + 1(-4) + 2(-1) = 6 - 4 - 2 = \mathbf{0}$
+  * Row 3 $\cdot$ Col 2: $2(-1) + 1(2) + 2(0) = -2 + 2 + 0 = \mathbf{0}$
+  * Row 3 $\cdot$ Col 3: $2(-1) + 1(1) + 2(1) = -2 + 1 + 2 = \mathbf{1}$
+
+$$
+A A^{-1} =
+\begin{bmatrix}
+1 & 0 & 0 \\
+0 & 1 & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+= I_3 \quad \checkmark
+$$
+
+
 ---
 
 ### 2.7.4 — Practical Reality: How Computers Actually Invert Matrices
