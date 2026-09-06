@@ -267,7 +267,13 @@ This question bank is structured by algorithm/topic, and within each topic, ques
 
 ### Level 4: "By Hand" Mathematical Calculations
 84. **Matrix Multiplication:**
-    Given Matrix $A = \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}$ and Vector $x = \begin{bmatrix} 5 \\ 6 \end{bmatrix}$.
+    Given Matrix:
+
+$$
+A = \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}, \quad \mathbf{x} = \begin{bmatrix} 5 \\ 6 \end{bmatrix}
+$$
+
+
     Calculate the resulting vector $Ax$.
 
 

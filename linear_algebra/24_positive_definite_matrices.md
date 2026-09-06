@@ -167,10 +167,18 @@ In MIT 18.06, Prof. Strang presents the **5 Equivalent Mathematical Tests for Po
   └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Hand Calculation: Testing Matrix $A = \begin{bmatrix} 4 & 2 \\ 2 & 3 \end{bmatrix}$
+### Hand Calculation: Testing Matrix
+
+$$
+A = \begin{bmatrix} 4 & 2 \\ 2 & 3 \end{bmatrix}
+$$
 1. **Test 3 (Sylvester's Minors):**
    * Minor 1: $\det([4]) = 4 > 0 \quad \checkmark$
-   * Minor 2: $\det\begin{bmatrix} 4 & 2 \\ 2 & 3 \end{bmatrix} = (4 \times 3) - (2 \times 2) = 12 - 4 = 8 > 0 \quad \checkmark$
+   * Minor 2:
+
+$$
+\det\begin{bmatrix} 4 & 2 \\ 2 & 3 \end{bmatrix} = (4 \times 3) - (2 \times 2) = 12 - 4 = 8 > 0 \quad \checkmark
+$$
    * *Conclusion: $A$ is strictly Positive Definite ($A \succ 0$)*.
 
 ---

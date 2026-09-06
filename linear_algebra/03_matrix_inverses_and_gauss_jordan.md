@@ -105,7 +105,13 @@ $$
 
 ### 2.7.1 — Why the 2x2 Shortcut Doesn't Generalize
 
-The quick $2 \times 2$ formula $\left(A^{-1} = \frac{1}{ad-bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}\right)$ relies on swapping elements and negating off-diagonals. While this is an algebraic shortcut of the **Cofactor / Adjugate method** ($A^{-1} = \frac{1}{\det(A)} \text{adj}(A)$), it **fails to provide a practical hand-computation method for larger matrices ($3 \times 3, 4 \times 4, N \times N$)**.
+The quick $2 \times 2$ formula:
+
+$$
+A^{-1} = \frac{1}{ad-bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}
+$$
+
+relies on swapping elements and negating off-diagonals. While this is an algebraic shortcut of the **Cofactor / Adjugate method** ($A^{-1} = \frac{1}{\det(A)} \text{adj}(A)$), it **fails to provide a practical hand-computation method for larger matrices ($3 \times 3, 4 \times 4, N \times N$)**.
 
 ```
                 COMPUTATIONAL COMPLEXITY: COFACTOR VS. GAUSS-JORDAN
@@ -370,7 +376,13 @@ where $\det(A) \neq 0$, $C$ is the **Cofactor Matrix**, and $\text{adj}(A) = C^T
 ```
 
 #### 2. Proof that the 2x2 Formula is a Special Case of the Adjugate Formula
-Let $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$. We can derive the $2 \times 2$ shortcut rigorously from first principles:
+Let:
+
+$$
+A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}
+$$
+
+We can derive the $2 \times 2$ shortcut rigorously from first principles:
 1. **Find all 4 Minors ($1 \times 1$ determinants):**
    * $M_{11} = |d| = d$
    * $M_{12} = |c| = c$
@@ -443,19 +455,46 @@ $$
 For every entry $A_{ij}$, temporarily cross out row $i$ and column $j$, and compute the $2 \times 2$ determinant of the remaining numbers:
 
 * **Row 1 Minors:**
-  * $M_{11} = \det\begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix} = (2 \times 2) - (1 \times 1) = 4 - 1 = \mathbf{3}$
-  * $M_{12} = \det\begin{bmatrix} 3 & 1 \\ 2 & 2 \end{bmatrix} = (3 \times 2) - (1 \times 2) = 6 - 2 = \mathbf{4}$
-  * $M_{13} = \det\begin{bmatrix} 3 & 2 \\ 2 & 1 \end{bmatrix} = (3 \times 1) - (2 \times 2) = 3 - 4 = \mathbf{-1}$
+
+$$
+M_{11} = \det\begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix} = (2 \times 2) - (1 \times 1) = 4 - 1 = \mathbf{3}
+$$
+
+$$
+M_{12} = \det\begin{bmatrix} 3 & 1 \\ 2 & 2 \end{bmatrix} = (3 \times 2) - (1 \times 2) = 6 - 2 = \mathbf{4}
+$$
+
+$$
+M_{13} = \det\begin{bmatrix} 3 & 2 \\ 2 & 1 \end{bmatrix} = (3 \times 1) - (2 \times 2) = 3 - 4 = \mathbf{-1}
+$$
 
 * **Row 2 Minors:**
-  * $M_{21} = \det\begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix} = (1 \times 2) - (1 \times 1) = 2 - 1 = \mathbf{1}$
-  * $M_{22} = \det\begin{bmatrix} 2 & 1 \\ 2 & 2 \end{bmatrix} = (2 \times 2) - (1 \times 2) = 4 - 2 = \mathbf{2}$
-  * $M_{23} = \det\begin{bmatrix} 2 & 1 \\ 2 & 1 \end{bmatrix} = (2 \times 1) - (1 \times 2) = 2 - 2 = \mathbf{0}$
+
+$$
+M_{21} = \det\begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix} = (1 \times 2) - (1 \times 1) = 2 - 1 = \mathbf{1}
+$$
+
+$$
+M_{22} = \det\begin{bmatrix} 2 & 1 \\ 2 & 2 \end{bmatrix} = (2 \times 2) - (1 \times 2) = 4 - 2 = \mathbf{2}
+$$
+
+$$
+M_{23} = \det\begin{bmatrix} 2 & 1 \\ 2 & 1 \end{bmatrix} = (2 \times 1) - (1 \times 2) = 2 - 2 = \mathbf{0}
+$$
 
 * **Row 3 Minors:**
-  * $M_{31} = \det\begin{bmatrix} 1 & 1 \\ 2 & 1 \end{bmatrix} = (1 \times 1) - (1 \times 2) = 1 - 2 = \mathbf{-1}$
-  * $M_{32} = \det\begin{bmatrix} 2 & 1 \\ 3 & 1 \end{bmatrix} = (2 \times 1) - (1 \times 3) = 2 - 3 = \mathbf{-1}$
-  * $M_{33} = \det\begin{bmatrix} 2 & 1 \\ 3 & 2 \end{bmatrix} = (2 \times 2) - (1 \times 3) = 4 - 3 = \mathbf{1}$
+
+$$
+M_{31} = \det\begin{bmatrix} 1 & 1 \\ 2 & 1 \end{bmatrix} = (1 \times 1) - (1 \times 2) = 1 - 2 = \mathbf{-1}
+$$
+
+$$
+M_{32} = \det\begin{bmatrix} 2 & 1 \\ 3 & 1 \end{bmatrix} = (2 \times 1) - (1 \times 3) = 2 - 3 = \mathbf{-1}
+$$
+
+$$
+M_{33} = \det\begin{bmatrix} 2 & 1 \\ 3 & 2 \end{bmatrix} = (2 \times 2) - (1 \times 3) = 4 - 3 = \mathbf{1}
+$$
 
 **The Matrix of Minors ($M$):**
 
@@ -471,7 +510,17 @@ $$
 ---
 
 ##### Step 2: Form the Matrix of Cofactors ($C$)
-Apply the alternating sign **checkerboard pattern** $\begin{bmatrix} + & - & + \\ - & + & - \\ + & - & + \end{bmatrix}$ (multiplying each minor $M_{ij}$ by $(-1)^{i+j}$):
+Apply the alternating sign **checkerboard pattern**:
+
+$$
+\begin{bmatrix}
++ & - & + \\
+- & + & - \\
++ & - & +
+\end{bmatrix}
+$$
+
+(multiplying each minor $M_{ij}$ by $(-1)^{i+j}$):
 
 $$
 C =
@@ -653,7 +702,11 @@ $$
 ```
 
 #### Step-by-Step Hand Calculation Example
-Let $A = \begin{bmatrix} 2 & 0 \\ 0 & 2 \end{bmatrix} \implies A^{-1} = \begin{bmatrix} 1/2 & 0 \\ 0 & 1/2 \end{bmatrix}$, with update vectors $\mathbf{u} = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$ and $\mathbf{v} = \begin{bmatrix} 3 \\ 1 \end{bmatrix}$.
+Let:
+
+$$
+A = \begin{bmatrix} 2 & 0 \\ 0 & 2 \end{bmatrix}, \quad A^{-1} = \begin{bmatrix} 1/2 & 0 \\ 0 & 1/2 \end{bmatrix}, \quad \mathbf{u} = \begin{bmatrix} 1 \\ 2 \end{bmatrix}, \quad \mathbf{v} = \begin{bmatrix} 3 \\ 1 \end{bmatrix}
+$$
 
 1. Compute $A^{-1} \mathbf{u}$:
 
@@ -737,7 +790,13 @@ S_D^{-1} & -S_D^{-1} B D^{-1} \\
 \end{bmatrix}
 $$
 
-* **Multivariate Gaussian Conditional Distribution:** For jointly Gaussian vectors $\begin{bmatrix} \mathbf{x}_1 \\ \mathbf{x}_2 \end{bmatrix} \sim \mathcal{N}\left( \begin{bmatrix} \boldsymbol{\mu}_1 \\ \boldsymbol{\mu}_2 \end{bmatrix}, \begin{bmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{bmatrix} \right)$, the conditional distribution $p(\mathbf{x}_1 \mid \mathbf{x}_2)$ has covariance matrix equal to the **Schur complement**:
+* **Multivariate Gaussian Conditional Distribution:** For jointly Gaussian vectors:
+
+$$
+\begin{bmatrix} \mathbf{x}_1 \\ \mathbf{x}_2 \end{bmatrix} \sim \mathcal{N}\left( \begin{bmatrix} \boldsymbol{\mu}_1 \\ \boldsymbol{\mu}_2 \end{bmatrix}, \begin{bmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{bmatrix} \right)
+$$
+
+the conditional distribution $p(\mathbf{x}_1 \mid \mathbf{x}_2)$ has covariance matrix equal to the **Schur complement**:
 
 $$
 \Sigma_{1|2} = \Sigma_{11} - \Sigma_{12} \Sigma_{22}^{-1} \Sigma_{21}

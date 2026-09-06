@@ -166,8 +166,16 @@ $$
 $$
 
 1. $\det(A) = (2 \times 3) - (1 \times 1) = 6 - 1 = 5$.
-2. Replace Column 1 with $\mathbf{b}$: $A_1 = \begin{bmatrix} 5 & 1 \\ 5 & 3 \end{bmatrix} \implies \det(A_1) = (5 \times 3) - (1 \times 5) = 15 - 5 = 10$.
-3. Replace Column 2 with $\mathbf{b}$: $A_2 = \begin{bmatrix} 2 & 5 \\ 1 & 5 \end{bmatrix} \implies \det(A_2) = (2 \times 5) - (5 \times 1) = 10 - 5 = 5$.
+2. Replace Column 1 with $\mathbf{b}$:
+
+$$
+A_1 = \begin{bmatrix} 5 & 1 \\ 5 & 3 \end{bmatrix} \implies \det(A_1) = (5 \times 3) - (1 \times 5) = 15 - 5 = 10
+$$
+3. Replace Column 2 with $\mathbf{b}$:
+
+$$
+A_2 = \begin{bmatrix} 2 & 5 \\ 1 & 5 \end{bmatrix} \implies \det(A_2) = (2 \times 5) - (5 \times 1) = 10 - 5 = 5
+$$
 4. Solve:
 
 $$

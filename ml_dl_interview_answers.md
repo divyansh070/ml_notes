@@ -485,11 +485,19 @@
 
 ### Level 4: "By Hand" Mathematical Calculations
 **84. Matrix Multiplication**
-*   $A = \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}$, $x = \begin{bmatrix} 5 \\ 6 \end{bmatrix}$
+*   Given:
+
+$$
+A = \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}, \quad \mathbf{x} = \begin{bmatrix} 5 \\ 6 \end{bmatrix}
+$$
 *   Result vector $y$ will be a $2 \times 1$ matrix.
 *   $y_1 = (1 \times 5) + (2 \times 6) = 5 + 12 = \textbf{17}$
 *   $y_2 = (3 \times 5) + (4 \times 6) = 15 + 24 = \textbf{39}$
-*   Output: $\begin{bmatrix} \textbf{17} \\ \textbf{39} \end{bmatrix}$
+*   Output:
+
+$$
+\mathbf{y} = A\mathbf{x} = \begin{bmatrix} 17 \\ 39 \end{bmatrix}
+$$
 
 
 ---

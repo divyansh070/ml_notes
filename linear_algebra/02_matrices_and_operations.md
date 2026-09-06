@@ -256,7 +256,11 @@ $$
 $$
 
 ### Hand Calculation Example
-For matrix $A = \begin{bmatrix} 5 & 2 & 9 \\ 1 & 8 & 3 \\ 4 & 7 & 6 \end{bmatrix}$:
+For matrix:
+
+$$
+A = \begin{bmatrix} 5 & 2 & 9 \\ 1 & 8 & 3 \\ 4 & 7 & 6 \end{bmatrix}
+$$
 
 $$
 \text{Tr}(A) = 5 + 8 + 6 = 19

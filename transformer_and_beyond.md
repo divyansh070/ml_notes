@@ -551,7 +551,7 @@ $$
 
 ### Step 2: Encoder Block Forward Pass
 
-The input matrix ($X$) is contextualized by 1 Head ($h=1$) and 1 Layer. We define learnable weight matrices (all $2 \times 2$) for simplicity: $W_Q = I$, $W_K = \begin{bmatrix} 0.5 & 0.5 \\ 0.2 & 0.8 \end{bmatrix}$, $W_V = 2I$.
+The input matrix ($X$) is contextualized by 1 Head ($h=1$) and 1 Layer. We define learnable weight matrices (all $2 \times 2$) for simplicity: $W_Q = I$, $W_K = [[0.5, 0.5], [0.2, 0.8]]$, $W_V = 2I$.
 
 ![Encoder Forward Pass Scalar Graph](./assets/encoder_forward_scalar.png)
 
@@ -641,7 +641,7 @@ The Decoder is auto-regressive. We provide the `<Start>` token and expect it to 
 **Input Sequence for Decoder (Y):**
 Word $1$ ($pos=0$): `<Start>` $\rightarrow E_0 = [1.0, 1.0]$
 Positional Encoding ($PE_0$) = $[0, 1]$.
-$Y_0 = [1.0, 1.0] + [0, 1] = \begin{bmatrix} 1.0 & 2.0 \end{bmatrix}$.
+$Y_0 = [1.0, 1.0] + [0, 1] = [1.0, 2.0]$.
 
 ![Decoder Forward Pass Scalar Graph](./assets/decoder_forward_scalar.png)
 
@@ -720,7 +720,7 @@ $$
 S = Q \cdot K^T = \begin{bmatrix} 1.28 & 1.74 \\ \dots & \dots \end{bmatrix}
 $$
 
-Recall from Step A1 that $K_0$ was generated via a learned weight matrix: $K_0 = X_0 \cdot W_K = \begin{bmatrix} 0.56 & 1.04 \end{bmatrix}$. 
+Recall from Step A1 that $K_0$ was generated via a learned weight matrix: $K_0 = X_0 \cdot W_K = [0.56, 1.04]$. 
 We know $Q_0 = [0.8, 0.8]$ and $Score(0 \cdot 0) = 1.28$.
 
 The optimizer reverse-calculates how much $K_0$ *contributed* to that $1.28$ score. The formula for the score is $S = Q_0 \cdot K_0$. Using the matrix derivative and chain rule:
@@ -918,10 +918,10 @@ Let's calculate the RoPE-rotated vectors for two words.
 *   **Base Angle:** $\theta_0 = 1$ radian (simplified for tracing).
 
 **Token 1 (Input for Query Path):** Word "Cat" at Position 0 ($m=0$).
-Embedding for "Cat": $q_0 = \begin{bmatrix} 0.8 & -0.6 \end{bmatrix}$.
+Embedding for "Cat": $q_0 = [0.8, -0.6]$.
 
 **Token 2 (Input for Key Path):** Word "Eats" at Position 2 ($n=2$).
-Embedding for "Eats": $k_2 = \begin{bmatrix} -0.1 & 0.9 \end{bmatrix}$.
+Embedding for "Eats": $k_2 = [-0.1, 0.9]$.
 
 #### Step 1: Calculate Rotation Matrices
 
@@ -1113,7 +1113,7 @@ $$
 Notice that this toy projection maps two visually different patches to the same embedding. This is possible because the projection reduces a 4-dimensional input to 2 dimensions. A real ViT learns a projection that preserves the visual information useful for the downstream task.
 
 **Step 3: `[CLS]` Token and Positional Encoding**
-We prepend a learnable `[CLS]` token ($t_{cls} = \begin{bmatrix} 0.5 & 0.5 \end{bmatrix}$) and add fixed positional encodings to inject location data back into the flattened sequence.
+We prepend a learnable `[CLS]` token ($t_{cls} = [0.5, 0.5]$) and add fixed positional encodings to inject location data back into the flattened sequence.
 
 **Positional Encodings:**
 
