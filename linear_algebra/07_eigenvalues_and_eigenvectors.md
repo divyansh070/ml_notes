@@ -1,16 +1,12 @@
-> 📖 **Navigation:** [← Previous: Part 06: Linear Independence & Matrix Rank](./06_linear_independence_and_rank.md) | [🏠 Index](./README.md) | [Next: Part 08: Eigenvalues in Principal Component Analysis (PCA) →](./08_eigenvalues_in_pca.md)
+> 📖 **Navigation:** [← Previous: Part 06: Linear Independence, Basis & Rank](./06_linear_independence_and_rank.md) | [🏠 Index](./README.md) | [Next: Part 08: Eigenvalues in Principal Component Analysis (PCA) →](./08_eigenvalues_in_pca.md)
 
 ---
 
-# PART 6 — EIGENVALUES & EIGENVECTORS (13-STEP MASTER DERIVATION)
+# PART 7 — EIGENVALUES, EIGENVECTORS & DIAGONALIZATION
 
----
+When a matrix $A$ acts on most vectors $\mathbf{x}$, it both **rotates** and **stretches** them. 
 
-## 6.1 The Fundamental Equation: $Av = \lambda v$
-
-When a matrix $A$ multiplies most vectors $\mathbf{x}$, it both **rotates** and **stretches** them.
-
-However, for square matrices, there can exist special directions $\mathbf{v}$ where the matrix **ONLY STRETCHES or SHRINKS the vector, without changing its direction at all!**
+However, for any square matrix, there exist special invariant directions $\mathbf{v}$ where the matrix **ONLY STRETCHES or COMPRESSES the vector without rotating it at all**:
 
 $$
 A \mathbf{v} = \lambda \mathbf{v}
@@ -24,376 +20,127 @@ $$
                  │      ╱                                         │          ╱
                  │     ● ◄── Rotated                              │         ●
                  │    ╱                                           │        ╱
-                 │   ● x                                          │       ● v (Same direction!)
+                 │   ● x                                          │       ● v (Same invariant line!)
                  └───┴────────► x                                 └───────┴────────► x
 ```
 
-* $\mathbf{v} \neq \mathbf{0}$ is the **Eigenvector** (the invariant direction).
-* $\lambda \in \mathbb{R}$ is the **Eigenvalue** (the scalar stretch factor).
-
-> [!NOTE]
-> **Mathematical Rigor Note:** For an arbitrary square matrix, eigenvalues and eigenvectors may be real or complex. For the **real symmetric matrices** commonly encountered in PCA and Machine Learning (such as covariance matrices $\Sigma = \Sigma^T$), the Spectral Theorem guarantees that all eigenvalues and eigenvectors are strictly **real**, and eigenvectors corresponding to distinct eigenvalues are mutually **orthogonal**.
+* $\mathbf{v} \neq \mathbf{0}$ is the **Eigenvector** (the invariant axis).
+* $\lambda \in \mathbb{R}$ is the **Eigenvalue** (the scalar stretch factor along that axis).
 
 ---
 
-## 6.2 Complete 13-Step Hand Calculation on a 2x2 Matrix
+## 7.1 Complete 13-Step Hand Derivation on a 2x2 Matrix
 
 We will solve for all eigenvalues and eigenvectors of:
-
 $$
-A =
-\begin{bmatrix}
-2 & 1 \\
-1 & 2
-\end{bmatrix}
+A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}
 $$
 
----
-
-### Step 1: Write the Fundamental Definition
-
+### Step 1: Fundamental Equation
 $$
 A \mathbf{v} = \lambda \mathbf{v}
 $$
 
-### Step 2: Move Everything to One Side
-
+### Step 2: Move Terms to One Side
 $$
-A \mathbf{v} - \lambda \mathbf{v} = \mathbf{0} \quad \implies \quad (A - \lambda I) \mathbf{v} = \mathbf{0}
-$$
-
-### Step 3: Understand Why $\det(A - \lambda I) = 0$ is Required
-If $(A - \lambda I)$ had an inverse, we could multiply both sides by $(A - \lambda I)^{-1}$:
-
-$$
-\mathbf{v} = (A - \lambda I)^{-1} \mathbf{0} = \mathbf{0}
+(A - \lambda I) \mathbf{v} = \mathbf{0}
 $$
 
-This would only give the trivial solution $\mathbf{v} = \mathbf{0}$. To find a **non-zero** eigenvector $\mathbf{v} \neq \mathbf{0}$, the matrix $(A - \lambda I)$ **MUST be non-invertible (singular)**. Therefore, its determinant must be zero:
-
+### Step 3: Why $\det(A - \lambda I) = 0$ is Required
+If $(A - \lambda I)$ were invertible, multiplying by its inverse would yield only the trivial solution $\mathbf{v} = \mathbf{0}$. To find non-zero eigenvectors $\mathbf{v} \neq \mathbf{0}$, the matrix $(A - \lambda I)$ **must be singular (non-invertible)**:
 $$
 \det(A - \lambda I) = 0
 $$
 
 ### Step 4: Construct the Matrix $(A - \lambda I)$
-
 $$
-A - \lambda I =
-\begin{bmatrix}
-2 & 1 \\
-1 & 2
-\end{bmatrix} - \lambda
-\begin{bmatrix}
-1 & 0 \\
-0 & 1
-\end{bmatrix} =
-\begin{bmatrix}
-2 - \lambda & 1 \\
-1 & 2 - \lambda
-\end{bmatrix}
+A - \lambda I = \begin{bmatrix} 2 - \lambda & 1 \\ 1 & 2 - \lambda \end{bmatrix}
 $$
 
-### Step 5: Compute the Determinant
-
+### Step 5: Compute the Characteristic Polynomial
 $$
-\det(A - \lambda I) = (2 - \lambda)(2 - \lambda) - (1 \times 1) = (2 - \lambda)^2 - 1
-$$
-
-### Step 6: Form the Characteristic Polynomial
-
-$$
-(4 - 4\lambda + \lambda^2) - 1 = 0 \quad \implies \quad \lambda^2 - 4\lambda + 3 = 0
+\det(A - \lambda I) = (2 - \lambda)^2 - (1 \times 1) = \lambda^2 - 4\lambda + 3 = 0
 $$
 
-### Step 7: Solve for the Eigenvalues ($\lambda$)
-Factor the quadratic equation:
-
+### Step 6: Solve for Eigenvalues
 $$
-(\lambda - 3)(\lambda - 1) = 0 \quad \implies \quad \lambda_1 = 3, \quad \lambda_2 = 1
+(\lambda - 3)(\lambda - 1) = 0 \implies \lambda_1 = 3, \quad \lambda_2 = 1
 $$
 
-*We have found our two eigenvalues!*
-
----
-
-### Step 8: Find Eigenvector 1 for $\lambda_1 = 3$
-Substitute $\lambda_1 = 3$ into $(A - \lambda I)\mathbf{v} = \mathbf{0}$:
+### Step 7: Find Eigenvector 1 for $\lambda_1 = 3$
+Substitute $\lambda_1 = 3$ into $(A - 3I)\mathbf{v} = \mathbf{0}$:
+$$
+\begin{bmatrix} -1 & 1 \\ 1 & -1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix} \implies -v_1 + v_2 = 0 \implies v_1 = v_2
+$$
+Choose unit length:
 
 $$
-\begin{bmatrix}
-2 - 3 & 1 \\
-1 & 2 - 3
-\end{bmatrix}
-\begin{bmatrix}
-v_1 \\
-v_2
-\end{bmatrix} =
-\begin{bmatrix}
-0 \\
-0
-\end{bmatrix}
-\quad \implies \quad
-\begin{bmatrix}
--1 & 1 \\
-1 & -1
-\end{bmatrix}
-\begin{bmatrix}
-v_1 \\
-v_2
-\end{bmatrix} =
-\begin{bmatrix}
-0 \\
-0
-\end{bmatrix}
+\mathbf{v}_1 = \begin{bmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \end{bmatrix}
 $$
 
-### Step 9: Solve the Simultaneous Equations for $\mathbf{v}_1$
+
+### Step 8: Find Eigenvector 2 for $\lambda_2 = 1$
+Substitute $\lambda_2 = 1$ into $(A - 1I)\mathbf{v} = \mathbf{0}$:
+$$
+\begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix} \implies v_1 + v_2 = 0 \implies v_2 = -v_1
+$$
+Choose unit length:
 
 $$
--1v_1 + 1v_2 = 0 \implies v_2 = v_1
+\mathbf{v}_2 = \begin{bmatrix} 1/\sqrt{2} \\ -1/\sqrt{2} \end{bmatrix}
 $$
 
-Any non-zero vector where $v_1 = v_2$ is an eigenvector. Choose $v_1 = 1 \implies v_2 = 1$:
 
+### Step 9: Verification
 $$
-\mathbf{v}_1 =
-\begin{bmatrix}
-1 \\
-1
-\end{bmatrix}
-\quad \quad \text{Normalized (Unit Length): } \mathbf{u}_1 =
-\begin{bmatrix}
-1/\sqrt{2} \\
-1/\sqrt{2}
-\end{bmatrix}
+A \mathbf{v}_1 = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = \begin{bmatrix} 3 \\ 3 \end{bmatrix} = 3 \begin{bmatrix} 1 \\ 1 \end{bmatrix} = \lambda_1 \mathbf{v}_1 \quad \checkmark
+$$
+$$
+A \mathbf{v}_2 = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix} \begin{bmatrix} 1 \\ -1 \end{bmatrix} = \begin{bmatrix} 1 \\ -1 \end{bmatrix} = 1 \begin{bmatrix} 1 \\ -1 \end{bmatrix} = \lambda_2 \mathbf{v}_2 \quad \checkmark
 $$
 
 ---
 
-### Step 10: Find Eigenvector 2 for $\lambda_2 = 1$
-Substitute $\lambda_2 = 1$ into $(A - \lambda I)\mathbf{v} = \mathbf{0}$:
+## 7.2 The Spectral Theorem & Orthogonal Diagonalization
 
-$$
-\begin{bmatrix}
-2 - 1 & 1 \\
-1 & 2 - 1
-\end{bmatrix}
-\begin{bmatrix}
-v_1 \\
-v_2
-\end{bmatrix} =
-\begin{bmatrix}
-0 \\
-0
-\end{bmatrix}
-\quad \implies \quad
-\begin{bmatrix}
-1 & 1 \\
-1 & 1
-\end{bmatrix}
-\begin{bmatrix}
-v_1 \\
-v_2
-\end{bmatrix} =
-\begin{bmatrix}
-0 \\
-0
-\end{bmatrix}
-$$
+For any real symmetric matrix $A = A^T$ (such as sample covariance matrices $\Sigma = \frac{1}{n-1} X_c^T X_c$):
 
-$$
-1v_1 + 1v_2 = 0 \implies v_2 = -v_1
-$$
+> [!IMPORTANT]
+> **The Spectral Theorem:**
+> 1. All eigenvalues $\lambda_1, \dots, \lambda_n$ are strictly **real numbers**.
+> 2. Eigenvectors corresponding to distinct eigenvalues are **mutually orthogonal** ($\mathbf{v}_1 \cdot \mathbf{v}_2 = 0$).
+> 3. Matrix $A$ can be **orthogonally diagonalized**:
+>    $$
+>    A = Q \Lambda Q^T = \sum_{i=1}^{n} \lambda_i \mathbf{q}_i \mathbf{q}_i^T
+>    $$
+>    where $Q$ is an orthogonal matrix of eigenvectors ($Q^T Q = I$) and $\Lambda = \text{diag}(\lambda_1, \dots, \lambda_n)$.
 
-Choose $v_1 = 1 \implies v_2 = -1$:
-
-$$
-\mathbf{v}_2 =
-\begin{bmatrix}
-1 \\
--1
-\end{bmatrix}
-\quad \quad \text{Normalized (Unit Length): } \mathbf{u}_2 =
-\begin{bmatrix}
-1/\sqrt{2} \\
--1/\sqrt{2}
-\end{bmatrix}
-$$
+* **Geometric Meaning of Diagonalization:** $Q^T$ rotates space to align the eigenvectors with coordinate axes; $\Lambda$ stretches along those axes; $Q$ rotates space back.
 
 ---
 
-### Step 11: Verify the Result ($A \mathbf{v} = \lambda \mathbf{v}$)
-1. **Check $\mathbf{v}_1$ with $\lambda_1 = 3$:**
+## 7.3 Power Iteration: Finding the Dominant Eigenvector
 
-$$
-A \mathbf{v}_1 =
-\begin{bmatrix}
-2 & 1 \\
-1 & 2
-\end{bmatrix}
-\begin{bmatrix}
-1 \\
-1
-\end{bmatrix} =
-\begin{bmatrix}
-2(1) + 1(1) \\
-1(1) + 2(1)
-\end{bmatrix} =
-\begin{bmatrix}
-3 \\
-3
-\end{bmatrix}
-= 3
-\begin{bmatrix}
-1 \\
-1
-\end{bmatrix}
-= \lambda_1 \mathbf{v}_1 \quad \checkmark
-$$
-
-2. **Check $\mathbf{v}_2$ with $\lambda_2 = 1$:**
-
-$$
-A \mathbf{v}_2 =
-\begin{bmatrix}
-2 & 1 \\
-1 & 2
-\end{bmatrix}
-\begin{bmatrix}
-1 \\
--1
-\end{bmatrix} =
-\begin{bmatrix}
-2(1) + 1(-1) \\
-1(1) + 2(-1)
-\end{bmatrix} =
-\begin{bmatrix}
-1 \\
--1
-\end{bmatrix}
-= 1
-\begin{bmatrix}
-1 \\
--1
-\end{bmatrix}
-= \lambda_2 \mathbf{v}_2 \quad \checkmark
-$$
+**Power Iteration** is the foundational algorithm used to find the principal eigenvector (used in Google's PageRank):
+1. Start with a random unit vector $\mathbf{x}_0$.
+2. Repeatedly multiply and normalize:
+   $$
+   \mathbf{x}_{k+1} = \frac{A \mathbf{x}_k}{\|A \mathbf{x}_k\|_2}
+   $$
+3. As $k \to \infty$, $\mathbf{x}_k$ converges to the dominant eigenvector $\mathbf{q}_1$ at rate $\left|\frac{\lambda_2}{\lambda_1}\right|^k$.
 
 ---
 
-### Step 12: Verify Orthogonality of Eigenvectors
-Because matrix $A$ is symmetric ($A = A^T$), its eigenvectors for distinct eigenvalues **must be orthogonal**:
+## Advanced / Optional — Do not study until Core track is complete
 
-$$
-\mathbf{v}_1 \cdot \mathbf{v}_2 = (1 \times 1) + (1 \times -1) = 1 - 1 = 0 \quad \checkmark
-$$
+### A.1 Spectral Radius ($\rho(A)$) & System Stability in ML
+The Spectral Radius $\rho(A) = \max_i |\lambda_i|$ governs the behavior of matrix powers $A^k$:
+* If $\rho(A) < 1.0 \implies \lim_{k \to \infty} A^k = 0$ (Stable dynamics / vanishing gradients in RNNs).
+* If $\rho(A) > 1.0 \implies \lim_{k \to \infty} \|A^k\| = \infty$ (Exploding dynamics / exploding gradients in RNNs).
 
-## 6.3 Geometric Meaning of Eigenvectors & Eigenvalues
-
-### Step 13: Geometric Interpretation
-* Any vector along the line $y = x$ ($\mathbf{v}_1$) is stretched by a factor of $3$.
-* Any vector along the perpendicular line $y = -x$ ($\mathbf{v}_2$) is stretched by a factor of $1$ (unchanged in length).
-* All other vectors in 2D space get rotated toward the dominant eigenvector direction $\mathbf{v}_1$.
+### A.2 The Gershgorin Circle Theorem
+Every eigenvalue of $A \in \mathbb{C}^{n \times n}$ lies within at least one Gershgorin disk in the complex plane centered at diagonal entry $A_{ii}$ with radius $R_i = \sum_{j \neq i} |A_{ij}|$.
 
 ---
 
-## 6.4 The Spectral Theorem & Orthogonal Diagonalization
-
-The **Spectral Theorem** is the crowning jewel of symmetric matrix theory in machine learning.
-
-### The Spectral Theorem Statement
-For any real symmetric matrix $A = A^T \in \mathbb{R}^{n \times n}$:
-1. All $n$ eigenvalues $\lambda_1, \lambda_2, \dots, \lambda_n$ are strictly **real numbers** ($\lambda_i \in \mathbb{R}$).
-2. Eigenvectors corresponding to distinct eigenvalues are mutually **orthogonal**.
-3. There exists an orthonormal matrix $Q = [\mathbf{q}_1, \dots, \mathbf{q}_n]$ ($Q^T Q = I$) such that $A$ can be **orthogonally diagonalized**:
-
-$$
-A = Q \Lambda Q^T = \sum_{i=1}^{n} \lambda_i \mathbf{q}_i \mathbf{q}_i^T
-$$
-
-```
-                    SPECTRAL DECOMPOSITION (Outer Product Form)
-           A = λ_1 (q_1 q_1^T) + λ_2 (q_2 q_2^T) + ... + λ_n (q_n q_n^T)
-               └──────┬──────┘   └──────┬──────┘
-                  Rank-1 Matrix     Rank-1 Matrix
-                   (Weight λ_1)      (Weight λ_2)
-```
-
-* **Why this is fundamental in ML:** Every covariance matrix $\Sigma = \frac{1}{n-1}X_c^TX_c$ is symmetric, guaranteeing that PCA finds a complete, orthogonal coordinate system of variance axes!
-
----
-
-## 6.5 Spectral Radius ($\rho(A)$) & System Stability in ML
-
-The **Spectral Radius** $\rho(A)$ of a square matrix $A$ is the maximum absolute value of its eigenvalues:
-
-$$
-\rho(A) = \max_{1 \le i \le n} |\lambda_i|
-$$
-
-```
-                         SPECTRAL RADIUS & STABILITY
-    ┌──────────────────────────┬──────────────────────────────────────────┐
-    │ Condition                │ System Behavior as k -> ∞                │
-    ├──────────────────────────┼──────────────────────────────────────────┤
-    │ ρ(A) < 1.0               │ lim A^k = 0 (Asymptotically Stable /     │
-    │                          │ Vanishing Dynamics)                      │
-    ├──────────────────────────┼──────────────────────────────────────────┤
-    │ ρ(A) = 1.0               │ Steady State Convergence (Markov Chains, │
-    │                          │ PageRank)                                │
-    ├──────────────────────────┼──────────────────────────────────────────┤
-    │ ρ(A) > 1.0               │ lim ||A^k|| = ∞ (Exploding Dynamics /    │
-    │                          │ Instability)                             │
-    └──────────────────────────┴──────────────────────────────────────────┘
-```
-
-* **Application to Recurrent Neural Networks (RNNs):** In an unrolled RNN with recurrent weight matrix $W_{\text{rec}}$, hidden state propagation involves powers $W_{\text{rec}}^t$. If $\rho(W_{\text{rec}}) > 1$, gradients explode exponentially; if $\rho(W_{\text{rec}}) < 1$, gradients vanish exponentially.
-
----
-
-## 6.6 The Power Iteration Algorithm (Finding Principal Eigenvectors)
-
-**Power Iteration** is the foundational iterative numerical algorithm used to find the dominant eigenvalue and its corresponding eigenvector (the algorithm behind Google's PageRank):
-
-```
-                        POWER ITERATION ALGORITHM
-       1. Initialize random unit vector: x_0 (||x_0||_2 = 1)
-       2. Repeat until convergence:
-              x_{k+1} = (A x_k) / ||A x_k||_2
-       3. Dominant Eigenvalue (Rayleigh Quotient):
-              λ_1 ≈ x_k^T A x_k
-```
-
-### Why It Works (Mathematical Convergence Proof):
-Express the initial guess $\mathbf{x}_0$ as a linear combination of the orthonormal eigenvectors of $A$: $\mathbf{x}_0 = c_1 \mathbf{q}_1 + c_2 \mathbf{q}_2 + \dots + c_n \mathbf{q}_n$.
-Applying matrix $A$ $k$ times:
-
-$$
-A^k \mathbf{x}_0 = c_1 \lambda_1^k \mathbf{q}_1 + c_2 \lambda_2^k \mathbf{q}_2 + \dots + c_n \lambda_n^k \mathbf{q}_n = \lambda_1^k \left[ c_1 \mathbf{q}_1 + c_2 \left(\frac{\lambda_2}{\lambda_1}\right)^k \mathbf{q}_2 + \dots + c_n \left(\frac{\lambda_n}{\lambda_1}\right)^k \mathbf{q}_n \right]
-$$
-
-Since $|\lambda_1| > |\lambda_2| \ge \dots \ge |\lambda_n|$, the ratio terms $\left(\frac{\lambda_i}{\lambda_1}\right)^k \to 0$ as $k \to \infty$. Normalizing at each step leaves purely the principal eigenvector $\mathbf{q}_1$!
-
----
-
-## 6.7 Essential Eigenvalue Properties & Algebraic Identities
-
-```
-                    MASTER EIGENVALUE ALGEBRAIC IDENTITIES
-  ┌────────────────────────────────────────────────────────────────────────┐
-  │ Matrix Operation         │ Resulting Eigenvalues                       │
-  ├──────────────────────────┼─────────────────────────────────────────────┤
-  │ Matrix Power A^k         │ λ_i^k                                       │
-  │ Matrix Inverse A^-1      │ 1 / λ_i  (if λ_i ≠ 0)                       │
-  │ Shifted Matrix (A + c I) │ λ_i + c                                     │
-  │ Scaled Matrix (c A)      │ c λ_i                                       │
-  │ Matrix Transpose A^T     │ λ_i (Identical eigenvalues!)                │
-  │ Similar Matrix P^-1 A P  │ λ_i (Eigenvalues are similarity invariants!) │
-  └──────────────────────────┴─────────────────────────────────────────────┘
-```
-
-* **Gershgorin Circle Theorem:** Every eigenvalue of $A \in \mathbb{C}^{n \times n}$ lies within at least one Gershgorin disk $D(A_{ii}, R_i)$ in the complex plane, where center is the diagonal entry $A_{ii}$ and radius is the off-diagonal absolute row sum $R_i = \sum_{j \neq i} |A_{ij}|$.
-
----
-
-> 📖 **Navigation:** [← Previous: Part 06: Linear Independence & Matrix Rank](./06_linear_independence_and_rank.md) | [🏠 Index](./README.md) | [Next: Part 08: Eigenvalues in Principal Component Analysis (PCA) →](./08_eigenvalues_in_pca.md)
+> 📖 **Navigation:** [← Previous: Part 06: Linear Independence, Basis & Rank](./06_linear_independence_and_rank.md) | [🏠 Index](./README.md) | [Next: Part 08: Eigenvalues in Principal Component Analysis (PCA) →](./08_eigenvalues_in_pca.md)

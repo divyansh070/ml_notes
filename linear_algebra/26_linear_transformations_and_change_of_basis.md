@@ -2,180 +2,143 @@
 
 ---
 
-# PART 26 — LINEAR TRANSFORMATIONS
+# PART 26 — LINEAR TRANSFORMATIONS & CHANGE OF BASIS
+
+Matrices are more than just grids of numbers: they are geometric engines that rotate, scale, shear, reflect, and project space. Changing the basis allows us to view these transformations from a perspective where their action becomes remarkably simple.
 
 ---
 
-## 26.1 Definition
+## 26.1 Definition of a Linear Transformation
 
-A **Transformation** $T: \mathbb{R}^n \to \mathbb{R}^m$ is a rule that takes an input vector $\mathbf{x} \in \mathbb{R}^n$ and produces an output vector $T(\mathbf{x}) \in \mathbb{R}^m$.
+A transformation $T: \mathbb{R}^n \to \mathbb{R}^m$ is **Linear** if and only if it preserves vector addition and scalar multiplication:
 
-A transformation is **Linear** if it can be represented entirely as a matrix multiplication:
+1. **Additivity:** $T(\mathbf{u} + \mathbf{v}) = T(\mathbf{u}) + T(\mathbf{v})$
+2. **Homogeneity (Scalar Scaling):** $T(c\mathbf{u}) = cT(\mathbf{u})$
+
+Combining both gives the linearity test:
+
+$$
+T(c\mathbf{u} + d\mathbf{v}) = cT(\mathbf{u}) + dT(\mathbf{v})
+$$
+
+### Fundamental Theorem of Linear Transformations
+Every linear transformation $T: \mathbb{R}^n \to \mathbb{R}^m$ is uniquely represented by matrix multiplication:
 
 $$
 T(\mathbf{x}) = A\mathbf{x}
 $$
 
+where the columns of $A$ are simply the outputs of $T$ acting on the standard unit basis vectors $\mathbf{e}_1, \dots, \mathbf{e}_n$:
+
+$$
+A = \begin{bmatrix} T(\mathbf{e}_1) & T(\mathbf{e}_2) & \cdots & T(\mathbf{e}_n) \end{bmatrix}
+$$
+
+---
+
+## 26.2 Linear vs Affine Transformations in Neural Networks
+
 ```
-                   LINEAR TRANSFORMATION AS MAPPING
-        Input Space R^2                             Output Space R^2
-               y                                           y
-               │     x = [1, 2]^T                          │           A @ x = [2, 6]^T
-             2 ┼────●                                    6 ┼──────────●
-               │    │                                      │          │
-               └───┴────► x                                └──────────┴────► x
-                   1                                                  2
+       LINEAR: T(x) = W x (Origin Fixed)            AFFINE: T(x) = W x + b (Origin Shifted)
+                y                                            y
+                │     ● T(v)                                 │          ● W v + b
+                │    ╱                                       │         ╱
+                │   ╱                                        │   b ───● (Shifted Origin)
+                └──●────► x                                  └───┴────► x
+                 Origin Fixed                                  Origin
+```
+
+* **Linear Transformation:** $T(\mathbf{x}) = W\mathbf{x}$. Must map the origin to the origin ($T(\mathbf{0}) = \mathbf{0}$).
+* **Affine Transformation:** $T(\mathbf{x}) = W\mathbf{x} + \mathbf{b}$. A linear transformation followed by a translation $\mathbf{b}$.
+* **Neural Network Dense Layer:** $\mathbf{z} = W\mathbf{x} + \mathbf{b}$ is an **affine map**. The bias vector $\mathbf{b}$ allows the decision hyperplane to shift away from the origin.
+
+---
+
+## 26.3 The 5 Elementary 2D Geometric Transformations
+
+Every $2 \times 2$ matrix transforms the standard unit square by mapping $\mathbf{i} = [1, 0]^T$ and $\mathbf{j} = [0, 1]^T$:
+
+1. **Scaling (Dilation/Contraction):**
+   $$
+   A_{\text{scale}} = \begin{bmatrix} s_x & 0 \\ 0 & s_y \end{bmatrix} \implies \begin{bmatrix} 2 & 0 \\ 0 & 3 \end{bmatrix} \begin{bmatrix} x \\ y \end{bmatrix} = \begin{bmatrix} 2x \\ 3y \end{bmatrix}
+   $$
+2. **Rotation (Counter-Clockwise by Angle $\theta$):**
+   $$
+   R_\theta = \begin{bmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{bmatrix} \implies R_{90^\circ} = \begin{bmatrix} 0 & -1 \\ 1 & 0 \end{bmatrix}
+   $$
+3. **Reflection (Across X-Axis):**
+   $$
+   A_{\text{reflect}} = \begin{bmatrix} 1 & 0 \\ 0 & -1 \end{bmatrix} \implies \begin{bmatrix} 1 & 0 \\ 0 & -1 \end{bmatrix} \begin{bmatrix} x \\ y \end{bmatrix} = \begin{bmatrix} x \\ -y \end{bmatrix}
+   $$
+4. **Shear (Horizontal Sliding):**
+   $$
+   A_{\text{shear}} = \begin{bmatrix} 1 & k \\ 0 & 1 \end{bmatrix} \implies \begin{bmatrix} 1 & 1.5 \\ 0 & 1 \end{bmatrix} \begin{bmatrix} x \\ y \end{bmatrix} = \begin{bmatrix} x + 1.5y \\ y \end{bmatrix}
+   $$
+5. **Projection (Onto X-Axis):**
+   $$
+   P = \begin{bmatrix} 1 & 0 \\ 0 & 0 \end{bmatrix} \implies \begin{bmatrix} 1 & 0 \\ 0 & 0 \end{bmatrix} \begin{bmatrix} x \\ y \end{bmatrix} = \begin{bmatrix} x \\ 0 \end{bmatrix}
+   $$
+
+---
+
+## 26.4 Change of Basis
+
+A **basis** $\mathcal{B} = \{\mathbf{v}_1, \dots, \mathbf{v}_n\}$ provides a coordinate system. A vector $\mathbf{x}$ has coordinates $[\mathbf{x}]_{\mathcal{B}} = [c_1, \dots, c_n]^T$ such that:
+
+$$
+\mathbf{x} = c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \dots + c_n \mathbf{v}_n = P [\mathbf{x}]_{\mathcal{B}}
+$$
+
+where $P = [\mathbf{v}_1 \dots \mathbf{v}_n]$ is the **change-of-basis matrix**.
+
+### Converting Between Coordinate Systems:
+* From new basis $\mathcal{B}$ to standard basis: $\mathbf{x} = P [\mathbf{x}]_{\mathcal{B}}$
+* From standard basis to new basis $\mathcal{B}$: $[\mathbf{x}]_{\mathcal{B}} = P^{-1} \mathbf{x}$
+
+### How a Matrix Transformation Changes Under a New Basis:
+If matrix $A$ represents a linear transformation in the standard basis, its representation in basis $\mathcal{B}$ is:
+
+$$
+B = P^{-1} A P
+$$
+
+```
+                   SIMILARITY TRANSFORMATION COMMUTATIVE DIAGRAM
+                    x (Standard)      ──── A ────►      Ax (Standard)
+                         │                                    ▲
+                      P^-1                                    P
+                         ▼                                    │
+                    [x]_B             ──── B ────►      B[x]_B = [Ax]_B
 ```
 
 ---
 
-## 26.2 The Two Defining Properties
+## 26.5 Diagonalization as the Optimal Change of Basis
 
-A transformation $T$ is linear if and only if it preserves vector addition and scalar multiplication:
-1. **Additivity:** $T(\mathbf{u} + \mathbf{v}) = T(\mathbf{u}) + T(\mathbf{v})$
-2. **Homogeneity (Scalar Scaling):** $T(c\mathbf{u}) = cT(\mathbf{u})$
-
-### Numerical Verification Example
-Let $\mathbf{u} = [1, 2]^T$, $\mathbf{v} = [3, 1]^T$, $c = 4$, and:
+When the basis vectors are chosen to be the **eigenvectors** of $A$ ($P = Q = [\mathbf{v}_1 \dots \mathbf{v}_n]$), the transformation matrix becomes purely **diagonal**:
 
 $$
-A =
+\Lambda = Q^{-1} A Q =
 \begin{bmatrix}
-2 & 0 \\
-0 & 3
+\lambda_1 & 0 & \cdots & 0 \\
+0 & \lambda_2 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & \lambda_n
 \end{bmatrix}
 $$
 
-* $T(\mathbf{u}) = A\mathbf{u} = [2, 6]^T$, $T(\mathbf{v}) = A\mathbf{v} = [6, 3]^T$.
-* $\mathbf{u} + \mathbf{v} = [4, 3]^T \implies T(\mathbf{u} + \mathbf{v}) = A[4, 3]^T = [8, 9]^T$.
-* Check Additivity: $T(\mathbf{u}) + T(\mathbf{v}) = [2+6, 6+3]^T = [8, 9]^T \quad \checkmark$.
-* Check Homogeneity: $T(4\mathbf{u}) = A[4, 8]^T = [8, 24]^T = 4[2, 6]^T = 4T(\mathbf{u}) \quad \checkmark$.
+* **Geometric Meaning:** In the eigenvector basis, the matrix transformation does not rotate or shear space at all — it simply stretches each coordinate axis independently by factor $\lambda_i$.
+* **ML Meaning:** In PCA, projecting data onto the covariance eigenvectors diagonalizes the covariance matrix, completely decorrelating all features!
 
 ---
 
-## 26.3 Matrices as Geometric Transformations
+## 26.6 Advanced / Optional — Do not study until Core track is complete
 
-Every 2D linear transformation is completely determined by where it sends the standard unit basis vectors $\mathbf{i} = [1, 0]^T$ and $\mathbf{j} = [0, 1]^T$:
-
-1. **Non-Uniform Scaling (Stretch/Shrink):**
-
-$$
-A_{\text{scale}} =
-\begin{bmatrix}
-s_x & 0 \\
-0 & s_y
-\end{bmatrix}
-\implies
-\begin{bmatrix}
-2 & 0 \\
-0 & 0.5
-\end{bmatrix}
-\begin{bmatrix}
-x \\
-y
-\end{bmatrix} =
-\begin{bmatrix}
-2x \\
-0.5y
-\end{bmatrix}
-$$
-
-2. **Rotation by Angle** $\theta$ **(Counter-Clockwise):**
-
-$$
-R_\theta =
-\begin{bmatrix}
-\cos\theta & -\sin\theta \\
-\sin\theta & \cos\theta
-\end{bmatrix}
-\implies R_{90^\circ} =
-\begin{bmatrix}
-0 & -1 \\
-1 & 0
-\end{bmatrix}
-$$
-
-   * Sends $\mathbf{i} = [1, 0]^T \to [0, 1]^T$ and $\mathbf{j} = [0, 1]^T \to [-1, 0]^T$.
-
-3. **Reflection over the x-axis:**
-
-$$
-A_{\text{reflect}} =
-\begin{bmatrix}
-1 & 0 \\
-0 & -1
-\end{bmatrix}
-\begin{bmatrix}
-x \\
-y
-\end{bmatrix} =
-\begin{bmatrix}
-x \\
--y
-\end{bmatrix}
-$$
-
-4. **Horizontal Shear (Sliding Layers):**
-
-$$
-A_{\text{shear}} =
-\begin{bmatrix}
-1 & k \\
-0 & 1
-\end{bmatrix}
-\implies
-\begin{bmatrix}
-1 & 1.5 \\
-0 & 1
-\end{bmatrix}
-\begin{bmatrix}
-x \\
-y
-\end{bmatrix} =
-\begin{bmatrix}
-x + 1.5y \\
-y
-\end{bmatrix}
-$$
-
----
-
-## 26.4 Connection to Eigenvectors
-
-* **Geometric Insight:** Under most linear transformations, vectors change both length and direction.
-* **The Eigenvector Exception:** An **eigenvector** is a direction where the linear transformation $A$ acts as a pure scalar stretch without rotating the vector at all:
-
-$$
-T(\mathbf{v}) = A\mathbf{v} = \lambda \mathbf{v}
-$$
-
----
-
-## 26.5 Connection to SVD
-
-Singular Value Decomposition factorizes ANY linear transformation $A = U \Sigma V^T$ into three pure geometric actions:
-
-$$
-\mathbf{x} \quad \xrightarrow{\quad V^T \quad} \quad \mathbf{x}' \quad \xrightarrow{\quad \Sigma \quad} \quad \mathbf{x}'' \quad \xrightarrow{\quad U \quad} \quad A\mathbf{x}
-$$
-
-1. **Rotate / Reflect** ($V^T$): Aligns the input coordinate system with the principal axes.
-2. **Scale** ($\Sigma$): Stretches or compresses along each principal axis by singular value factors $\sigma_i$.
-3. **Second Rotation** ($U$): Rotates the resulting ellipse into the target coordinate space.
-
----
-
-## 26.6 ML Connection
-
-* **Neural Network Dense Layers:** A fully connected neural network layer $\mathbf{z} = W\mathbf{x} + \mathbf{b}$ is an **affine transformation**: the weight matrix $W$ performs a linear transformation on the input features, and the bias vector $\mathbf{b}$ translates the origin. Non-linear activation functions (ReLU, GELU) then warp the space to learn non-linear decision boundaries.
-* **Embeddings & Latent Representations:** Learned weight matrices project raw inputs into lower-dimensional latent spaces where geometric relationships (like cosine angle and Euclidean distance) encode semantic meaning.
-
-> [!TIP]
-> **Common Interview Question:** *"How does Singular Value Decomposition decompose any arbitrary linear transformation geometrically?"*
-> **Answer:** SVD factorizes $A = U \Sigma V^T$ into three successive geometric operations: (1) an initial rotation/reflection in the domain by orthogonal matrix $V^T$, (2) an axis-aligned stretching/compression along coordinate axes by diagonal matrix $\Sigma$, and (3) a second rotation/reflection in the codomain by orthogonal matrix $U$.
-
-> [!WARNING]
-> **Common Mistake:** Confusing a **linear transformation** ($T(\mathbf{x}) = W\mathbf{x}$) with an **affine transformation** ($T(\mathbf{x}) = W\mathbf{x} + \mathbf{b}$). A linear transformation must map the origin to the origin ($T(\mathbf{0}) = \mathbf{0}$). A neural network dense layer is an affine transformation because the bias vector $\mathbf{b}$ shifts the origin.
+### Similarity Transformations and Matrix Invariants
+Two matrices $A$ and $B$ are **similar** ($B = P^{-1} A P$) if they represent the exact same linear transformation under different coordinate bases. Similar matrices share identical:
+1. **Determinant:** $\det(B) = \det(P^{-1} A P) = \det(P)^{-1} \det(A) \det(P) = \det(A)$.
+2. **Trace:** $\text{Tr}(B) = \text{Tr}(P^{-1} A P) = \text{Tr}(A P P^{-1}) = \text{Tr}(A)$.
+3. **Eigenvalues:** $\det(B - \lambda I) = \det(P^{-1}(A - \lambda I)P) = \det(A - \lambda I) = 0$.
 
 ---
 

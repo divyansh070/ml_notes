@@ -2,134 +2,138 @@
 
 ---
 
-# PART 25 — MOORE-PENROSE PSEUDOINVERSE
+# PART 25 — MOORE-PENROSE PSEUDOINVERSE ($A^+$)
+
+What do you do when a matrix is not square or not invertible, but you still need to solve $A\mathbf{x} = \mathbf{b}$? The **Moore-Penrose Pseudoinverse** $A^+$ generalizes matrix inversion to all rectangular, singular, and rank-deficient matrices.
 
 ---
 
-## 25.1 Why Ordinary Inverse Fails
+## 25.1 Why Ordinary Inverses Fail in Real ML
 
-The standard matrix inverse $A^{-1}$ only exists if $A$ is **square** ($n \times n$) and **full rank** ($\det(A) \neq 0$). It fails when:
-1. Matrix is **rectangular** ($m \times n$, e.g., $1000$ samples $\times 10$ features).
-2. Matrix is **square but singular** ($\det(A) = 0$, redundant features).
+The standard inverse $A^{-1}$ exists if and only if $A$ is **square** ($n \times n$) and **full rank** ($\det(A) \neq 0$). In machine learning:
 
----
-
-## 25.2 What the Pseudoinverse Does
-
-The **Moore-Penrose Pseudoinverse** $A^+$ is the unique matrix satisfying the 4 Moore-Penrose conditions:
-1. $A A^+ A = A$
-2. $A^+ A A^+ = A^+$
-3. $(A A^+)^T = A A^+$
-4. $(A^+ A)^T = A^+ A$
-
-* **Intuition:** $A^+$ provides the "best possible inverse":
-  * For **overdetermined systems** ($m \gt n$, more equations than unknowns), $A^+ \mathbf{b}$ gives the least-squares solution minimizing $\|\mathbf{y} - X\mathbf{w}\|_2^2$.
-  * For **underdetermined systems** ($m \lt n$, infinitely many solutions), $A^+ \mathbf{b}$ picks the unique solution with the minimum $L_2$ norm ($\|\mathbf{w}\|_2$).
+1. **Rectangular Feature Matrices ($m \neq n$):**
+   * Overdetermined ($m > n$, e.g., 10,000 samples and 10 features): No exact solution exists because $\mathbf{y} \notin C(X)$.
+   * Underdetermined ($m < n$, e.g., 50 samples and 500 gene features): Infinitely many exact solutions exist.
+2. **Singular Matrices ($\det(A) = 0$):**
+   * Multicollinear or duplicate features cause $X^T X$ to be non-invertible.
 
 ---
 
-## 25.3 Least Squares Connection
+## 25.2 What the Pseudoinverse Does Geometrically
 
-$$
-\mathbf{w}_{\text{LS}} = A^+ \mathbf{b}
-$$
+The pseudoinverse $A^+ \mathbf{b}$ gives the **optimal solution** in every possible scenario:
 
-* When $A$ has full column rank ($\text{rank}(A) = n$), the pseudoinverse formula is:
+1. **Overdetermined Systems ($m > n$):**
+   $$
+   \mathbf{x}_{\text{LS}} = A^+ \mathbf{b} \quad \text{minimizes the squared residual } \|\mathbf{b} - A\mathbf{x}\|_2^2
+   $$
+2. **Underdetermined Systems ($m < n$):**
+   $$
+   \mathbf{x}_{\text{min-norm}} = A^+ \mathbf{b} \quad \text{selects the unique solution with the smallest Euclidean norm } \|\mathbf{x}\|_2
+   $$
+
+---
+
+## 25.3 Practical Formulas for $A^+$
+
+Depending on the rank of $A \in \mathbb{R}^{m \times n}$:
+
+### 1. Full Column Rank ($\text{rank}(A) = n \le m$ — Left Inverse)
+When columns are linearly independent, $A^T A$ is invertible:
 
 $$
 A^+ = (A^T A)^{-1} A^T
 $$
 
-* When $A$ has full row rank ($\text{rank}(A) = m$), the right-inverse formula is:
+* Note: $A^+ A = (A^T A)^{-1} (A^T A) = I_n$ (acts as a left inverse).
+
+### 2. Full Row Rank ($\text{rank}(A) = m \le n$ — Right Inverse)
+When rows are linearly independent, $A A^T$ is invertible:
 
 $$
 A^+ = A^T (A A^T)^{-1}
 $$
 
-* **Universal SVD Formulation:** For ANY matrix of any rank, SVD $A = U \Sigma V^T$ gives:
+* Note: $A A^+ = (A A^T) (A A^T)^{-1} = I_m$ (acts as a right inverse).
+
+### 3. Universal Formula via SVD (Any Shape, Any Rank)
+For ANY matrix $A$ with SVD $A = U \Sigma V^T$:
 
 $$
 A^+ = V \Sigma^+ U^T
 $$
 
-  where $\Sigma^+$ transposes $\Sigma$ and inverts all non-zero singular values ($\sigma_i \to 1/\sigma_i$).
+where $\Sigma^+$ is formed by transposing $\Sigma$ and inverting all non-zero singular values:
+
+$$
+\sigma_i \to \frac{1}{\sigma_i} \quad (\text{if } \sigma_i > 0), \qquad 0 \to 0
+$$
 
 ---
 
 ## 25.4 Complete Step-by-Step Hand Calculation
 
-Find the pseudoinverse of the rectangular column vector $A = [1, 2]^T \in \mathbb{R}^{2 \times 1}$:
-1. Since $A$ has full column rank ($r = 1 = n$), use $A^+ = (A^T A)^{-1} A^T$:
-2. Compute $A^T A$:
+Find the pseudoinverse of the column vector $A = [1, 2]^T \in \mathbb{R}^{2 \times 1}$:
 
+### Step 1: Check Rank
+* $m = 2, n = 1$. Rank $r = 1 = n$ (full column rank).
+* Use the formula $A^+ = (A^T A)^{-1} A^T$.
+
+### Step 2: Compute $A^T A$
 $$
-A^T A =
-\begin{bmatrix}
-1 & 2
-\end{bmatrix}
-\begin{bmatrix}
-1 \\
-2
-\end{bmatrix} = 1^2 + 2^2 = 5
+A^T A = \begin{bmatrix} 1 & 2 \end{bmatrix} \begin{bmatrix} 1 \\ 2 \end{bmatrix} = 1^2 + 2^2 = 5
 $$
 
-3. Invert scalar $(A^T A)^{-1} = \frac{1}{5} = 0.2$.
-4. Multiply by $A^T$:
-
+### Step 3: Compute Scalar Inverse and Multiply by $A^T$
 $$
-A^+ = \frac{1}{5}
-\begin{bmatrix}
-1 & 2
-\end{bmatrix} =
-\begin{bmatrix}
-0.2 & 0.4
-\end{bmatrix}
+(A^T A)^{-1} = \frac{1}{5} = 0.2
+$$
+$$
+A^+ = \frac{1}{5} \begin{bmatrix} 1 & 2 \end{bmatrix} = \begin{bmatrix} 0.2 & 0.4 \end{bmatrix}
 $$
 
-5. **Verify Moore-Penrose Property** ($A^+ A = I_1$):
-
-$$
-A^+ A =
-\begin{bmatrix}
-0.2 & 0.4
-\end{bmatrix}
-\begin{bmatrix}
-1 \\
-2
-\end{bmatrix} = 0.2(1) + 0.4(2) = 0.2 + 0.8 = 1.0 = I_1 \quad \checkmark
-$$
-
-6. **Solve Least Squares Problem:**
-   Let target vector $\mathbf{b} = [3, 1]^T$. Find best scalar $x$:
-
-$$
-\hat{x} = A^+ \mathbf{b} =
-\begin{bmatrix}
-0.2 & 0.4
-\end{bmatrix}
-\begin{bmatrix}
-3 \\
-1
-\end{bmatrix} = 0.2(3) + 0.4(1) = 0.6 + 0.4 = \mathbf{1.0}
-$$
-
-   * Fitted point: $A\hat{x} = [1, 2]^T(1) = [1, 2]^T$.
-   * Residual error: $\mathbf{e} = \mathbf{b} - A\hat{x} = [3-1, 1-2]^T = [2, -1]^T$.
-   * Orthogonality check: $\mathbf{e} \cdot A = 2(1) + (-1)(2) = 0 \quad \checkmark$.
+### Step 4: Verify Properties
+* Left inverse check:
+  $$
+  A^+ A = \begin{bmatrix} 0.2 & 0.4 \end{bmatrix} \begin{bmatrix} 1 \\ 2 \end{bmatrix} = 0.2(1) + 0.4(2) = 0.2 + 0.8 = 1.0 = I_1 \quad \checkmark
+  $$
+* Least-squares fit for $\mathbf{b} = [3, 1]^T$:
+  $$
+  \hat{x} = A^+ \mathbf{b} = \begin{bmatrix} 0.2 & 0.4 \end{bmatrix} \begin{bmatrix} 3 \\ 1 \end{bmatrix} = 0.2(3) + 0.4(1) = 0.6 + 0.4 = 1.0
+  $$
+  * Model prediction: $A\hat{x} = [1, 2]^T(1.0) = [1, 2]^T$.
+  * Error: $\mathbf{e} = [3, 1]^T - [1, 2]^T = [2, -1]^T$.
+  * Orthogonality check: $\mathbf{e} \cdot A = 2(1) + (-1)(2) = 0 \quad \checkmark$.
 
 ---
 
-## 25.5 ML Applications
+## 25.5 ML Connection: Ridge Regularization Limit
 
-* **Linear Regression:** Directly computes $\mathbf{w} = X^+ \mathbf{y}$ even if $X$ contains collinear columns.
-* **Ridge Regularization Connection:** As regularization $\alpha \to 0$, Ridge solution $(X^T X + \alpha I)^{-1} X^T \mathbf{y}$ converges smoothly to the minimum-norm pseudoinverse solution $X^+ \mathbf{y}$.
+In Ridge Regression, the regularized solution is:
 
-> [!TIP]
-> **Common Interview Question:** *"When is the formula $A^+ = (A^T A)^{-1} A^T$ valid, and what should you use if $A$ does not have full column rank?"*
-> **Answer:** The normal-equation formula $(A^T A)^{-1} A^T$ is valid only when $A$ has full column rank ($A^T A$ is non-singular and invertible). When $A$ is rank-deficient or has collinear columns, you must use the universal SVD formulation $A^+ = V \Sigma^+ U^T$, which inverts only the non-zero singular values ($1/\sigma_i$) and sets zero singular values to zero.
+$$
+\mathbf{w}_{\text{ridge}} = (X^T X + \alpha I)^{-1} X^T \mathbf{y}
+$$
 
-> [!WARNING]
-> **Common Mistake:** Assuming $A^+ A = I$ is always the full identity matrix. For a rectangular matrix with $m \gt n$, $A^+ A = I_n$ (an $n \times n$ identity), but $A A^+ \neq I_m$ — instead, $A A^+$ is an orthogonal projection matrix onto the Column Space $C(A)$.
+When $X^T X$ is singular and multiple solutions achieve minimal training error, taking the limit as $\alpha \to 0^+$ yields:
+
+$$
+\lim_{\alpha \to 0^+} (X^T X + \alpha I)^{-1} X^T \mathbf{y} = X^+ \mathbf{y}
+$$
+
+Ridge regression smoothly converges to the **minimum-norm pseudoinverse solution**, preventing model weights from exploding along collinear directions!
+
+---
+
+## 25.6 Advanced / Optional — Do not study until Core track is complete
+
+### The 4 Formal Moore-Penrose Algebraic Conditions
+A matrix $A^+$ is the unique pseudoinverse of $A$ if and only if it satisfies all 4 conditions:
+1. $A A^+ A = A$ ($A A^+$ acts as identity on $C(A)$)
+2. $A^+ A A^+ = A^+$ ($A^+$ is consistent)
+3. $(A A^+)^T = A A^+$ ($A A^+$ is the symmetric orthogonal projection matrix onto $C(A)$)
+4. $(A^+ A)^T = A^+ A$ ($A^+ A$ is the symmetric orthogonal projection matrix onto $C(A^T)$)
 
 ---
 

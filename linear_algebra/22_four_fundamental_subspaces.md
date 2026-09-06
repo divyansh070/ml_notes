@@ -2,190 +2,21 @@
 
 ---
 
-# PART 22 — FOUR FUNDAMENTAL SUBSPACES
+# PART 22 — FOUR FUNDAMENTAL SUBSPACES (STRANG'S BIG PICTURE)
+
+Linear algebra reaches its conceptual pinnacle in the **Four Fundamental Subspaces** of a matrix $A \in \mathbb{R}^{m \times n}$. Developed and championed by Prof. Gilbert Strang (MIT 18.06), this unifying framework explains systems of linear equations, matrix rank, orthogonality, projections, least-squares regression, and SVD under one geometric roof.
 
 ---
 
-## 22.1 Column Space
+## 22.1 The Big Picture Overview
 
-```
-                   COLUMN SPACE C(A) in R^m
-        (All linear combinations of the columns of A)
-                             y
-                             │          Col(A) = span([1, 2]^T)
-                             │         ╱
-                           2 ┼────────● [1, 2]^T
-                             │       ╱
-                             │      ╱
-                             └─────┴─────► x
-                                   1
-```
-
-* **Definition:** The **Column Space** (or Range) of an $m \times n$ matrix $A$, denoted $C(A)$ or $\text{Col}(A)$, is the subspace of $\mathbb{R}^m$ spanned by the column vectors of $A$:
+Every matrix $A \in \mathbb{R}^{m \times n}$ acts as a linear map from an **Input Space $\mathbb{R}^n$** to an **Output Space $\mathbb{R}^m$**:
 
 $$
-C(A) = \left\lbrace A\mathbf{x} \mid \mathbf{x} \in \mathbb{R}^n \right\rbrace \subseteq \mathbb{R}^m
+\mathbf{x} \in \mathbb{R}^n \quad \xrightarrow{\quad A \quad} \quad A\mathbf{x} \in \mathbb{R}^m
 $$
 
-* **Geometric Meaning:** $C(A)$ contains every output vector $\mathbf{b}$ that can be reached by multiplying $A$ by some input vector $\mathbf{x}$. The linear system $A\mathbf{x} = \mathbf{b}$ is solvable if and only if $\mathbf{b} \in C(A)$.
-* **Dimension:** $\dim(C(A)) = r = \text{rank}(A)$.
-
-### Hand Calculation Example
-Let $A \in \mathbb{R}^{2 \times 2}$ be the matrix:
-
-$$
-A =
-\begin{bmatrix}
-1 & 2 \\
-2 & 4
-\end{bmatrix}
-$$
-
-* Column 1: $\mathbf{a}_1 = [1, 2]^T$, Column 2: $\mathbf{a}_2 = [2, 4]^T = 2\mathbf{a}_1$.
-* Column 2 is a scalar multiple of Column 1 (linearly dependent).
-* Therefore, the Column Space is the 1D line in $\mathbb{R}^2$ spanned by $[1, 2]^T$:
-
-$$
-C(A) = \text{span}\left( \begin{bmatrix} 1 \\ 2 \end{bmatrix} \right)
-$$
-
-* **Dimension:** $r = 1$.
-
----
-
-## 22.2 Row Space
-
-* **Definition:** The **Row Space** of $A$, denoted $C(A^T)$ or $\text{Row}(A)$, is the subspace of $\mathbb{R}^n$ spanned by the row vectors of $A$ (or the columns of $A^T$):
-
-$$
-C(A^T) = \left\lbrace A^T \mathbf{y} \mid \mathbf{y} \in \mathbb{R}^m \right\rbrace \subseteq \mathbb{R}^n
-$$
-
-* **Key Fundamental Theorem:** The Row Space and Column Space **always have the exact same dimension**, equal to the rank of the matrix:
-
-$$
-\dim(C(A^T)) = \dim(C(A)) = r = \text{rank}(A)
-$$
-
-### Hand Calculation Example
-For the matrix $A$ defined above:
-* Row 1: $[1, 2]$, Row 2: $[2, 4] = 2[1, 2]$.
-* The Row Space is the 1D line in $\mathbb{R}^2$ spanned by $[1, 2]^T$:
-
-$$
-C(A^T) = \text{span}\left( \begin{bmatrix} 1 \\ 2 \end{bmatrix} \right)
-$$
-
----
-
-## 22.3 Null Space
-
-* **Definition:** The **Null Space** (or Kernel) of $A$, denoted $N(A)$, is the set of all input vectors $\mathbf{x} \in \mathbb{R}^n$ that $A$ maps to the zero vector $\mathbf{0}$:
-
-$$
-N(A) = \left\lbrace \mathbf{x} \in \mathbb{R}^n \mid A\mathbf{x} = \mathbf{0} \right\rbrace \subseteq \mathbb{R}^n
-$$
-
-* **Geometric Meaning:** $N(A)$ represents all directions in the input space that are completely squashed/destroyed by the matrix transformation $A$.
-* **Dimension:** $\dim(N(A)) = n - r$ (the **nullity**).
-
-### Step-by-Step Hand Calculation Example
-Find the Null Space basis for $A$:
-1. Set up the homogeneous equation $A\mathbf{x} = \mathbf{0}$:
-
-$$
-\begin{bmatrix}
-1 & 2 \\
-2 & 4
-\end{bmatrix}
-\begin{bmatrix}
-x_1 \\
-x_2
-\end{bmatrix} =
-\begin{bmatrix}
-0 \\
-0
-\end{bmatrix}
-$$
-
-2. Write the scalar equations:
-   * Equation 1: $1x_1 + 2x_2 = 0 \implies x_1 = -2x_2$.
-   * Equation 2: $2x_1 + 4x_2 = 0 \implies 2(-2x_2) + 4x_2 = 0$ (redundant $0=0$).
-3. Identify the free variable:
-   * $x_2$ is free. Let $x_2 = t$ where $t \in \mathbb{R}$.
-4. Express the solution vector:
-
-$$
-\mathbf{x} =
-\begin{bmatrix}
-x_1 \\
-x_2
-\end{bmatrix} =
-\begin{bmatrix}
--2t \\
-t
-\end{bmatrix} =
-t
-\begin{bmatrix}
--2 \\
-1
-\end{bmatrix}
-$$
-
-5. **Null Space Basis:**
-
-$$
-N(A) = \text{span}\left( \begin{bmatrix} -2 \\ 1 \end{bmatrix} \right)
-$$
-
-* **Dimension:** $\text{nullity}(A) = 1$.
-
----
-
-## 22.4 Left Null Space
-
-* **Definition:** The **Left Null Space** of $A$, denoted $N(A^T)$, is the null space of the transpose matrix $A^T$:
-
-$$
-N(A^T) = \left\lbrace \mathbf{y} \in \mathbb{R}^m \mid A^T \mathbf{y} = \mathbf{0} \right\rbrace \subseteq \mathbb{R}^m
-$$
-
-* *(Why "Left"? Because transposing gives $\mathbf{y}^T A = \mathbf{0}^T$, so $\mathbf{y}^T$ multiplies $A$ from the left).*
-* **Dimension:** $\dim(N(A^T)) = m - r$.
-
-### Step-by-Step Hand Calculation Example
-For the matrix $A$ (where $A^T = A$ due to symmetry):
-1. Set up $A^T \mathbf{y} = \mathbf{0}$:
-
-$$
-\begin{bmatrix}
-1 & 2 \\
-2 & 4
-\end{bmatrix}
-\begin{bmatrix}
-y_1 \\
-y_2
-\end{bmatrix} =
-\begin{bmatrix}
-0 \\
-0
-\end{bmatrix}
-\implies y_1 + 2y_2 = 0 \implies y_1 = -2y_2
-$$
-
-2. Let $y_2 = s$ (free variable):
-
-$$
-\mathbf{y} = s
-\begin{bmatrix}
--2 \\
-1
-\end{bmatrix} \implies N(A^T) = \text{span}\left( \begin{bmatrix} -2 \\ 1 \end{bmatrix} \right)
-$$
-
----
-
-## 22.5 The Four Fundamental Subspaces (Big Picture)
+These two Euclidean spaces each split into **two mutually perpendicular (orthogonal complement) subspaces**:
 
 ```
         INPUT SPACE R^n (n dimensions)                     OUTPUT SPACE R^m (m dimensions)
@@ -193,62 +24,254 @@ $$
    │                                     │            │                                     │
    │           ROW SPACE                 │            │          COLUMN SPACE               │
    │           C(A^T)                    │   ──A──►   │          C(A)                       │
-   │         Dimension = r               │            │        Dimension = r                │
-   │                                     │            │                                     │
+   │         Dimension = r               │  1-to-1    │        Dimension = r                │
+   │                                     │  isomorphic│                                     │
    │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ │            │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ │
    │           NULL SPACE                │            │       LEFT NULL SPACE               │
    │           N(A)                      │   ──A──►   │          N(A^T)                     │
-   │        Dimension = n - r            │   maps to  │        Dimension = m - r            │
-   │                                     │   vector 0 │                                     │
+   │        Dimension = n - r            │  maps to   │        Dimension = m - r            │
+   │                                     │  vector 0  │                                     │
    └─────────────────────────────────────┘            └─────────────────────────────────────┘
         Orthogonal Complements:                            Orthogonal Complements:
            C(A^T) ⊥ N(A)                                      C(A) ⊥ N(A^T)
+           C(A^T) ⊕ N(A) = R^n                                C(A) ⊕ N(A^T) = R^m
 ```
 
-| Subspace | Notation | Ambient Space | Dimension | Orthogonal Complement |
-| :--- | :--- | :--- | :--- | :--- |
-| **Column Space** | $C(A)$ | $\mathbb{R}^m$ | $r$ | $N(A^T)$ |
-| **Row Space** | $C(A^T)$ | $\mathbb{R}^n$ | $r$ | $N(A)$ |
-| **Null Space** | $N(A)$ | $\mathbb{R}^n$ | $n - r$ | $C(A^T)$ |
-| **Left Null Space** | $N(A^T)$ | $\mathbb{R}^m$ | $m - r$ | $C(A)$ |
+### Summary Table of the Four Subspaces
 
-### Orthogonality Verification
-Notice that any vector in the Row Space $C(A^T)$ is perpendicular to any vector in the Null Space $N(A)$:
-* Row vector: $\mathbf{r} = [1, 2]^T \in C(A^T)$.
-* Null vector: $\mathbf{n} = [-2, 1]^T \in N(A)$.
-* Dot product: $\mathbf{r} \cdot \mathbf{n} = (1)(-2) + (2)(1) = -2 + 2 = 0 \implies \mathbf{r} \perp \mathbf{n} \quad \checkmark$.
+| Subspace | Symbol | Ambient Space | Dimension | Orthogonal Complement | Meaning in ML / Systems |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Column Space** | $C(A)$ | $\mathbb{R}^m$ | $r = \text{rank}(A)$ | $N(A^T)$ | All reachable outputs $A\mathbf{x}$; model predictions $\hat{\mathbf{y}}$ |
+| **Null Space** | $N(A)$ | $\mathbb{R}^n$ | $n - r$ | $C(A^T)$ | Feature directions squashed to zero; collinear redundancies |
+| **Row Space** | $C(A^T)$ | $\mathbb{R}^n$ | $r = \text{rank}(A)$ | $N(A)$ | True information directions in the feature space |
+| **Left Null Space** | $N(A^T)$ | $\mathbb{R}^m$ | $m - r$ | $C(A)$ | Unreachable output directions; residual error vectors $\mathbf{e} = \mathbf{y} - \hat{\mathbf{y}}$ |
 
 ---
 
-## 22.6 Rank-Nullity Theorem
+## 22.2 Deep Dive into Each Subspace
 
-For any matrix $A \in \mathbb{R}^{m \times n}$ with $n$ columns:
+### 1. Column Space $C(A)$
+* **Definition:** The set of all linear combinations of the columns of $A$:
+  $$
+  C(A) = \{\mathbf{b} \in \mathbb{R}^m \mid \mathbf{b} = A\mathbf{x} \text{ for some } \mathbf{x} \in \mathbb{R}^n\}
+  $$
+* **Solvability Condition:** The linear system $A\mathbf{x} = \mathbf{b}$ has an exact solution if and only if $\mathbf{b} \in C(A)$.
+* **Dimension:** $\dim(C(A)) = r$ (column rank).
 
-$$
-\text{rank}(A) + \text{nullity}(A) = n
-$$
+### 2. Null Space $N(A)$ (Kernel)
+* **Definition:** The set of all input vectors $\mathbf{x} \in \mathbb{R}^n$ that $A$ sends to the zero vector $\mathbf{0} \in \mathbb{R}^m$:
+  $$
+  N(A) = \{\mathbf{x} \in \mathbb{R}^n \mid A\mathbf{x} = \mathbf{0}\}
+  $$
+* **Dimension:** $\dim(N(A)) = n - r$ (**nullity**).
+* **Rank-Nullity Theorem:**
+  $$
+  \text{rank}(A) + \text{nullity}(A) = n
+  $$
 
-* **Intuition:** The total number of columns ($n$) is divided between:
-  1. Directions that produce meaningful outputs ($\text{rank} = r$).
-  2. Directions that are squashed into zero ($\text{nullity} = n - r$).
-* *Concrete Check:* For our $2 \times 2$ matrix $A$, $\text{rank}(A) = 1$, $\text{nullity}(A) = 1$, and $n = 2$:
-  $1 + 1 = 2 \quad \checkmark$.
+### 3. Row Space $C(A^T)$
+* **Definition:** The span of the row vectors of $A$ (which are the columns of $A^T$):
+  $$
+  C(A^T) = \{\mathbf{v} \in \mathbb{R}^n \mid \mathbf{v} = A^T \mathbf{y} \text{ for some } \mathbf{y} \in \mathbb{R}^m\}
+  $$
+* **Fundamental Miracle:** Row rank equals column rank:
+  $$
+  \dim(C(A^T)) = \dim(C(A)) = r
+  $$
+
+### 4. Left Null Space $N(A^T)$ (Cokernel)
+* **Definition:** The null space of $A^T$:
+  $$
+  N(A^T) = \{\mathbf{y} \in \mathbb{R}^m \mid A^T \mathbf{y} = \mathbf{0}\} \iff \{\mathbf{y} \in \mathbb{R}^m \mid \mathbf{y}^T A = \mathbf{0}^T\}
+  $$
+* **Why "Left"?** Multiplying both sides shows that $\mathbf{y}^T$ multiplies $A$ from the *left*.
+* **Dimension:** $\dim(N(A^T)) = m - r$.
 
 ---
 
-## 22.7 ML Connection
+## 22.3 Orthogonal Complements and Vector Decomposition
 
-* **Redundant Features & Multicollinearity:** If a dataset has $n = 100$ features but $\text{rank}(X) = 80$, then $\text{nullity}(X) = 20$. Exactly 20 feature combinations lie in the Null Space $N(X)$, meaning they have zero predictive power and make $(X^T X)$ singular.
-* **Least Squares Projection** ($\mathbf{b} = \mathbf{p} + \mathbf{e}$): In linear regression, the target $\mathbf{y} \in \mathbb{R}^m$ rarely lies in the Column Space $C(X)$. The model decomposes $\mathbf{y}$ into:
-  * Prediction $\hat{\mathbf{y}} = \mathbf{p} \in C(X)$ (orthogonal projection onto column space).
-  * Residual error $\mathbf{e} = \mathbf{y} - \hat{\mathbf{y}} \in N(X^T)$ (perpendicular error living in the Left Null Space!).
+The two pairs of subspaces are **orthogonal complements**:
+
+$$
+C(A^T) \perp N(A) \quad \text{in } \mathbb{R}^n, \qquad C(A) \perp N(A^T) \quad \text{in } \mathbb{R}^m
+$$
+
+### Why $C(A^T) \perp N(A)$?
+Let $\mathbf{x} \in N(A)$. By definition, $A\mathbf{x} = \mathbf{0}$:
+
+$$
+\begin{bmatrix}
+\text{---} & \mathbf{r}_1^T & \text{---} \\
+\text{---} & \mathbf{r}_2^T & \text{---} \\
+& \vdots & \\
+\text{---} & \mathbf{r}_m^T & \text{---}
+\end{bmatrix}
+\mathbf{x} =
+\begin{bmatrix}
+\mathbf{r}_1 \cdot \mathbf{x} \\
+\mathbf{r}_2 \cdot \mathbf{x} \\
+\vdots \\
+\mathbf{r}_m \cdot \mathbf{x}
+\end{bmatrix} =
+\begin{bmatrix}
+0 \\
+0 \\
+\vdots \\
+0
+\end{bmatrix}
+$$
+
+Every row $\mathbf{r}_i$ has dot product 0 with $\mathbf{x}$. Since any vector in the row space is a linear combination of rows, **every row vector is perpendicular to every null vector**.
+
+### Orthogonal Decomposition of Any Input Vector $\mathbf{x}$
+Every vector $\mathbf{x} \in \mathbb{R}^n$ splits uniquely into:
+
+$$
+\mathbf{x} = \mathbf{x}_{\text{row}} + \mathbf{x}_{\text{null}}
+$$
+
+where $\mathbf{x}_{\text{row}} \in C(A^T)$ and $\mathbf{x}_{\text{null}} \in N(A)$. When $A$ multiplies $\mathbf{x}$:
+
+$$
+A\mathbf{x} = A(\mathbf{x}_{\text{row}} + \mathbf{x}_{\text{null}}) = A\mathbf{x}_{\text{row}} + A\mathbf{x}_{\text{null}} = A\mathbf{x}_{\text{row}} + \mathbf{0} = A\mathbf{x}_{\text{row}}
+$$
+
+> [!IMPORTANT]
+> $A$ is a **bijective (1-to-1 and onto) linear map** from the Row Space $C(A^T)$ to the Column Space $C(A)$. The Null Space $N(A)$ contributes nothing to the output.
+
+---
+
+## 22.4 Non-Square Hand Calculation Example ($2 \times 3$ Matrix)
+
+To clearly see how the ambient spaces $\mathbb{R}^n$ and $\mathbb{R}^m$ differ, let's analyze a rectangular matrix where $m = 2$ and $n = 3$:
+
+$$
+A =
+\begin{bmatrix}
+1 & 0 & 2 \\
+0 & 1 & -1
+\end{bmatrix} \in \mathbb{R}^{2 \times 3}
+$$
+
+### Step 1: Identify Dimensions and Rank
+* $m = 2$ (output space is $\mathbb{R}^2$).
+* $n = 3$ (input space is $\mathbb{R}^3$).
+* The rows are clearly linearly independent, so rank $r = 2$.
+
+### Step 2: Row Space $C(A^T) \subset \mathbb{R}^3$
+* Spanned by the two independent rows of $A$:
+  $$
+  C(A^T) = \text{span}\left( \begin{bmatrix} 1 \\ 0 \\ 2 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \\ -1 \end{bmatrix} \right) \subset \mathbb{R}^3
+  $$
+* $\dim(C(A^T)) = r = 2$ (a 2D plane in 3D space).
+
+### Step 3: Null Space $N(A) \subset \mathbb{R}^3$
+Solve $A\mathbf{x} = \mathbf{0}$:
+
+$$
+\begin{bmatrix}
+1 & 0 & 2 \\
+0 & 1 & -1
+\end{bmatrix}
+\begin{bmatrix}
+x_1 \\ x_2 \\ x_3
+\end{bmatrix} =
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix}
+\implies
+\begin{cases}
+x_1 + 2x_3 = 0 \implies x_1 = -2x_3 \\
+x_2 - x_3 = 0 \implies x_2 = x_3
+\end{cases}
+$$
+
+$x_3$ is a free variable ($x_3 = t$):
+
+$$
+\mathbf{x} = t \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} \implies N(A) = \text{span}\left( \begin{bmatrix} -2 \\ 1 \\ 1 \end{bmatrix} \right) \subset \mathbb{R}^3
+$$
+
+* $\dim(N(A)) = n - r = 3 - 2 = 1$ (a 1D line in 3D space).
+* **Orthogonality Check in $\mathbb{R}^3$:**
+  * Row 1 dot Null: $(1)(-2) + (0)(1) + (2)(1) = -2 + 0 + 2 = 0 \quad \checkmark$
+  * Row 2 dot Null: $(0)(-2) + (1)(1) + (-1)(1) = 0 + 1 - 1 = 0 \quad \checkmark$
+
+### Step 4: Column Space $C(A) \subset \mathbb{R}^2$
+* The columns span all of $\mathbb{R}^2$:
+  $$
+  C(A) = \text{span}\left( \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \end{bmatrix} \right) = \mathbb{R}^2
+  $$
+* $\dim(C(A)) = r = 2$.
+
+### Step 5: Left Null Space $N(A^T) \subset \mathbb{R}^2$
+Solve $A^T \mathbf{y} = \mathbf{0}$:
+
+$$
+\begin{bmatrix}
+1 & 0 \\
+0 & 1 \\
+2 & -1
+\end{bmatrix}
+\begin{bmatrix}
+y_1 \\ y_2
+\end{bmatrix} =
+\begin{bmatrix}
+0 \\ 0 \\ 0
+\end{bmatrix}
+\implies y_1 = 0, y_2 = 0
+$$
+
+* $N(A^T) = \{\mathbf{0}\} \subset \mathbb{R}^2$.
+* $\dim(N(A^T)) = m - r = 2 - 2 = 0$.
+* Check: $\dim(C(A)) + \dim(N(A^T)) = 2 + 0 = 2 = m \quad \checkmark$.
+
+---
+
+## 22.5 ML Connection: Least Squares and Residual Errors
+
+In linear regression, we observe features $X \in \mathbb{R}^{n \times d}$ and targets $\mathbf{y} \in \mathbb{R}^n$.
+
+1. **Target Decomposition:**
+   The observed target vector $\mathbf{y} \in \mathbb{R}^n$ splits into an in-subspace prediction and an out-of-subspace error:
+   $$
+   \mathbf{y} = \hat{\mathbf{y}} + \mathbf{e}
+   $$
+   * $\hat{\mathbf{y}} = X\mathbf{w}_{\text{LS}} \in C(X)$ (the projection onto the Column Space).
+   * $\mathbf{e} = \mathbf{y} - \hat{\mathbf{y}} \in N(X^T)$ (the residual error vector in the **Left Null Space**).
+
+2. **Why Normal Equations Hold:**
+   Because the error $\mathbf{e}$ is orthogonal to $C(X)$, it must lie in $N(X^T)$:
+   $$
+   X^T \mathbf{e} = \mathbf{0} \implies X^T (\mathbf{y} - X\mathbf{w}) = \mathbf{0} \implies X^T X \mathbf{w} = X^T \mathbf{y}
+   $$
+
+```
+                           THE GEOMETRY OF LEAST SQUARES
+                                        y (Target in R^m)
+                                       ╱│
+                                      ╱ │
+                                     ╱  │  e = y - y_hat ∈ N(X^T)
+                                    ╱   │  (Residual Error in Left Null Space)
+                                   ╱    │
+                                  ▼     ▼
+                                 0 ─────●────────────► C(X) in R^m
+                                     y_hat = X w       (Column Space / Model Predictions)
+```
 
 > [!TIP]
 > **Common Interview Question:** *"Where does the residual error vector $\mathbf{e} = \mathbf{y} - X\mathbf{w}$ live in the four fundamental subspaces?"*
-> **Answer:** It lives in the **Left Null Space** $N(X^T)$, because $\mathbf{e}$ is perpendicular to every column of $X$, satisfying $X^T \mathbf{e} = \mathbf{0}$.
+> **Answer:** It lives in the **Left Null Space** $N(X^T)$. The normal equations require $\mathbf{e}$ to be orthogonal to every feature column in $X$, which means $X^T \mathbf{e} = \mathbf{0}$, the exact definition of $N(X^T)$.
 
-> [!WARNING]
-> **Common Mistake:** Confusing the ambient spaces: the Column Space $C(A)$ lives in $\mathbb{R}^m$ (output space), while the Row Space $C(A^T)$ and Null Space $N(A)$ live in $\mathbb{R}^n$ (input space).
+---
+
+## 22.6 Summary Checklist
+
+- [x] Know the ambient space and dimension of each of the 4 subspaces.
+- [x] Know that $C(A^T) \perp N(A)$ in $\mathbb{R}^n$ and $C(A) \perp N(A^T)$ in $\mathbb{R}^m$.
+- [x] Know that $\dim(C(A)) = \dim(C(A^T)) = r = \text{rank}(A)$.
+- [x] Understand how $\mathbf{y} = \hat{\mathbf{y}} + \mathbf{e}$ decomposes the regression target between $C(X)$ and $N(X^T)$.
 
 ---
 

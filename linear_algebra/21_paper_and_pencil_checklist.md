@@ -2,105 +2,54 @@
 
 ---
 
-# PART 20 — "WHAT I SHOULD BE ABLE TO DO ON PAPER" CHECKLIST
+# PART 21 — "WHAT I SHOULD BE ABLE TO DO ON PAPER" CHECKLIST
 
-Before technical interviews and coding assessments, test yourself on a blank sheet of paper:
-
-- [ ] **1. Vector Dot Product:** Given $\mathbf{a} = [2, 3]^T, \mathbf{b} = [4, 1]^T$, compute $\mathbf{a} \cdot \mathbf{b} = 11$.
-- [ ] **2. Vector Norms:** Given $\mathbf{v} = [3, -4]^T$, compute $\|\mathbf{v}\|_2 = 5$ and $\|\mathbf{v}\|_1 = 7$.
-- [ ] **3. Euclidean Distance:** Given $\mathbf{p} = [1, 2]^T, \mathbf{q} = [4, 6]^T$, compute $d(\mathbf{p}, \mathbf{q}) = 5$.
-- [ ] **4. Cosine Similarity:** Given $\mathbf{u} = [1, 2]^T, \mathbf{v} = [2, 4]^T$, prove similarity $= 1.0$.
-- [ ] **5. Matrix Multiplication:** Given $A$ and $B$, compute $AB$:
-
-$$
-A =
-\begin{bmatrix}
-1 & 2 \\
-3 & 4
-\end{bmatrix},
-\quad
-B =
-\begin{bmatrix}
-5 & 6 \\
-7 & 8
-\end{bmatrix}
-\implies
-AB =
-\begin{bmatrix}
-19 & 22 \\
-43 & 50
-\end{bmatrix}
-$$
-
-- [ ] **6. Matrix Transpose:** Transpose a non-square matrix and prove $(AB)^T = B^T A^T$.
-- [ ] **7. 2x2 Determinant:** Given $A$, compute $\det(A) = 14$:
-
-$$
-A =
-\begin{bmatrix}
-5 & 3 \\
-2 & 4
-\end{bmatrix}
-$$
-
-- [ ] **8. 2x2 Matrix Inverse:** Given $A$, compute $A^{-1}$ and verify $A A^{-1} = I$:
-
-$$
-A =
-\begin{bmatrix}
-4 & 7 \\
-2 & 6
-\end{bmatrix}
-\implies
-A^{-1} =
-\begin{bmatrix}
-0.6 & -0.7 \\
--0.2 & 0.4
-\end{bmatrix}
-$$
-
-- [ ] **9. Solve Linear System:** Convert $2x+y=5, x-y=1$ into $A\mathbf{x}=\mathbf{b}$ and solve $\mathbf{x} = [2, 1]^T$.
-- [ ] **10. Check Linear Independence:** Prove that $[1, 2]^T$ and $[2, 4]^T$ are dependent ($\det = 0$).
-- [ ] **11. Sample Covariance Table:** Given $X = [1, 2, 3], Y = [2, 3, 7]$, compute $\text{Var}(X)=1, \text{Var}(Y)=7, \text{Cov}(X,Y)=2.5$.
-- [ ] **12. Build Covariance Matrix:** Construct $\Sigma$ from scratch:
-
-$$
-\Sigma =
-\begin{bmatrix}
-1.0 & 2.5 \\
-2.5 & 7.0
-\end{bmatrix}
-$$
-
-- [ ] **13. Characteristic Equation:** Set up $\det(A - \lambda I) = 0$ for $A$ and get $\lambda^2 - 4\lambda + 3 = 0$:
-
-$$
-A =
-\begin{bmatrix}
-2 & 1 \\
-1 & 2
-\end{bmatrix}
-$$
-
-- [ ] **14. Derive Eigenvalues:** Solve $\lambda_1 = 3, \lambda_2 = 1$.
-- [ ] **15. Derive Eigenvectors:** Substitute $\lambda=3$ to find $\mathbf{v}_1 = [1, 1]^T$ and $\lambda=1$ to find $\mathbf{v}_2 = [1, -1]^T$.
-- [ ] **16. Verify Eigenvectors:** Multiply $A \mathbf{v}_1$ and show it equals $3 \mathbf{v}_1$.
-- [ ] **17. Project Vector:** Project $\mathbf{a} = [3, 4]^T$ onto $\mathbf{b} = [4, 0]^T$ to get $\mathbf{p} = [3, 0]^T$.
-- [ ] **18. Normal Equation:** Write $\mathbf{w} = (X^T X)^{-1} X^T \mathbf{y}$ and explain every term.
-- [ ] **19. Partial Derivatives:** Compute $\frac{\partial}{\partial x}[x^2 + 3xy + y^2] = 2x + 3y$.
-- [ ] **20. Gradient Descent Step:** Given $f(x)=x^2, x_0=4, \alpha=0.1$, compute step $x_1 = 3.2, x_2 = 2.56$.
-- [ ] **21. Chain Rule:** Differentiate $y = (3x + 2)^2 \implies \frac{dy}{dx} = 18x + 12$.
-- [ ] **22. Entropy Calculation:** Compute $H(0.5, 0.5) = 1.0 \text{ Bit}$ and $H(1.0, 0.0) = 0.0 \text{ Bits}$.
-- [ ] **23. Four Subspaces & Null Space:** For the $2 \times 2$ matrix with rows $[1, 2]$ and $[2, 4]$, find $N(A) = \text{span}([-2, 1]^T)$ and verify $\text{rank}(A) + \text{nullity}(A) = 2$.
-- [ ] **24. Gram-Schmidt Orthogonalization:** Orthonormalize $\mathbf{a}_1 = [1, 1]^T, \mathbf{a}_2 = [1, 0]^T$ to find $\mathbf{q}_1 = [1/\sqrt{2}, 1/\sqrt{2}]^T, \mathbf{q}_2 = [1/\sqrt{2}, -1/\sqrt{2}]^T$.
-- [ ] **25. Construct QR Decomposition:** Factor $A = QR$ and construct the upper-triangular matrix $R$ with diagonal entries $[\sqrt{2}, 1/\sqrt{2}]$.
-- [ ] **26. Positive Definite Test:** Compute quadratic form $\mathbf{x}^T A \mathbf{x} = 2x_1^2 + 2x_1 x_2 + 2x_2^2$ for matrix $A$ (eigenvalues $\lambda_1=3, \lambda_2=1 \gt 0$) and prove it is Positive Definite.
-- [ ] **27. Why Covariance is PSD:** Prove $\mathbf{x}^T \Sigma \mathbf{x} = \frac{1}{n-1} \|X_c \mathbf{x}\|_2^2 \ge 0$ for any vector $\mathbf{x}$.
-- [ ] **28. Moore-Penrose Pseudoinverse:** For column vector $A = [1, 2]^T$, compute $A^+ = (A^T A)^{-1} A^T = [0.2, 0.4]$ and verify $A^+ A = [1.0]$.
-- [ ] **29. Linear Transformation Geometry:** Apply 2D Rotation $R_{90^\circ}$ (mapping $[1, 0]^T \to [0, 1]^T$) and Scaling to vectors on paper.
-- [ ] **30. SVD Geometric Decomposition:** Interpret $A = U \Sigma V^T$ as Rotate $\to$ Stretch $\to$ Rotate.
+Before technical interviews and coding assessments, test yourself on a blank sheet of paper with no calculator or libraries. The skills are divided into **three progressive mastery tiers**.
 
 ---
+
+## 🟢 Level A: Hand Calculations on $2 \times 2$ Matrices (Crunch the Numbers)
+
+- [ ] **1. Vector Dot Product & Angle:** Given $\mathbf{a} = [2, 3]^T, \mathbf{b} = [4, 1]^T$, compute $\mathbf{a} \cdot \mathbf{b} = 11$ and $\cos\theta = 11 / (\sqrt{13}\sqrt{17})$.
+- [ ] **2. Vector Norms:** Given $\mathbf{v} = [3, -4]^T$, compute $\|\mathbf{v}\|_2 = 5$, $\|\mathbf{v}\|_1 = 7$, and $\|\mathbf{v}\|_\infty = 4$.
+- [ ] **3. Cosine Similarity:** Given $\mathbf{u} = [1, 2]^T, \mathbf{v} = [2, 4]^T$, show that $\text{sim}(\mathbf{u}, \mathbf{v}) = 1.0$ (parallel vectors).
+- [ ] **4. Matrix Multiplication:** Given $A = \left[\begin{smallmatrix} 1 & 2 \\ 3 & 4 \end{smallmatrix}\right]$ and $B = \left[\begin{smallmatrix} 5 & 6 \\ 7 & 8 \end{smallmatrix}\right]$, compute $AB = \left[\begin{smallmatrix} 19 & 22 \\ 43 & 50 \end{smallmatrix}\right]$.
+- [ ] **5. Matrix Transpose Product:** Verify on small matrices that $(AB)^T = B^T A^T \neq A^T B^T$.
+- [ ] **6. 2x2 Determinant:** Given $A = \left[\begin{smallmatrix} 5 & 3 \\ 2 & 4 \end{smallmatrix}\right]$, compute $\det(A) = (5)(4) - (3)(2) = 14$.
+- [ ] **7. 2x2 Matrix Inversion:** Invert $A = \left[\begin{smallmatrix} 4 & 7 \\ 2 & 6 \end{smallmatrix}\right] \implies A^{-1} = \frac{1}{10}\left[\begin{smallmatrix} 6 & -7 \\ -2 & 4 \end{smallmatrix}\right] = \left[\begin{smallmatrix} 0.6 & -0.7 \\ -0.2 & 0.4 \end{smallmatrix}\right]$.
+- [ ] **8. 2x2 Linear System ($A\mathbf{x} = \mathbf{b}$):** Solve $2x_1 + x_2 = 5$ and $x_1 - x_2 = 1$ using Gaussian elimination to find $\mathbf{x} = [2, 1]^T$.
+- [ ] **9. Check Linear Independence:** Prove that $\mathbf{a}_1 = [1, 2]^T$ and $\mathbf{a}_2 = [2, 4]^T$ are linearly dependent by showing $c_1 \mathbf{a}_1 + c_2 \mathbf{a}_2 = \mathbf{0}$ for $c_1 = -2, c_2 = 1$.
+- [ ] **10. Sample Covariance Calculation:** For $X = [1, 2, 3]$ and $Y = [2, 3, 7]$, compute $\text{Var}(X) = 1.0$, $\text{Var}(Y) = 7.0$, and $\text{Cov}(X, Y) = 2.5$ using Bessel's $n-1$ denominator.
+- [ ] **11. Characteristic Polynomial:** For $A = \left[\begin{smallmatrix} 2 & 1 \\ 1 & 2 \end{smallmatrix}\right]$, write $\det(A - \lambda I) = \lambda^2 - 4\lambda + 3 = 0$.
+- [ ] **12. Eigenvalues & Eigenvectors:** Factor $\lambda_1 = 3, \lambda_2 = 1$. Find eigenvectors $\mathbf{v}_1 = [1, 1]^T$ and $\mathbf{v}_2 = [1, -1]^T$.
+- [ ] **13. Vector Projection:** Project $\mathbf{a} = [3, 4]^T$ onto line $\mathbf{b} = [4, 0]^T$ to find $\mathbf{p} = [3, 0]^T$ and residual $\mathbf{e} = [0, 4]^T$.
+- [ ] **14. 1D Gradient Descent Step:** For $f(x) = x^2$, start at $x_0 = 4$ with learning rate $\alpha = 0.1$. Compute $x_1 = 4 - 0.1(8) = 3.2$ and $x_2 = 2.56$.
+- [ ] **15. Shannon Entropy Calculation:** Compute $H(0.5, 0.5) = 1.0 \text{ Bit}$ and $H(1.0, 0.0) = 0.0 \text{ Bits}$.
+
+---
+
+## 🔵 Level B: Conceptual & Geometric Explanations (Explain & Draw)
+
+- [ ] **16. Column Picture vs. Row Picture:** Draw the column picture of $A\mathbf{x} = \mathbf{b}$ as a linear combination of column vectors landing on $\mathbf{b}$.
+- [ ] **17. Geometric Meaning of Determinant:** Explain why $\det(A) = 0$ means the transformation flattens space, causing information loss.
+- [ ] **18. Geometry of PCA:** Draw a 2D data ellipse, sketch the first principal component $\mathbf{v}_1$ along the major axis, and show why $\text{Var}(Z_1) = \lambda_1$.
+- [ ] **19. SVD as Three Transformations:** Draw the unit circle transformed via $A = U \Sigma V^T$: Rotate by $V^T \to$ Stretch along axes by $\sigma_i \to$ Rotate into target space by $U$.
+- [ ] **20. Geometry of $L_1$ vs. $L_2$ Regularization:** Draw the diamond $L_1$ ball and circular $L_2$ ball intersecting elliptical loss contours to explain why $L_1$ causes sparsity.
+- [ ] **21. Strang's 4 Subspaces on Paper:** Draw the master diagram showing $C(A^T) \perp N(A)$ in $\mathbb{R}^n$ and $C(A) \perp N(A^T)$ in $\mathbb{R}^m$.
+- [ ] **22. Geometry of Linear Regression:** Draw $\mathbf{y}$ splitting into prediction $\hat{\mathbf{y}} \in C(X)$ and residual error $\mathbf{e} \in N(X^T)$.
+- [ ] **23. Why We Don't Invert $(X^T X)$:** Explain why QR decomposition avoids squaring the condition number $\kappa(X^T X) = \kappa(X)^2$.
+- [ ] **24. Definiteness Surfaces:** Sketch the 3D surface of a Positive Definite matrix (bowl), Negative Definite (dome), and Indefinite (saddle point).
+
+---
+
+## 🟣 Level C: Step-by-Step Derivations (From First Principles)
+
+- [ ] **25. Normal Equation Derivation:** Starting from $\mathcal{L}(\mathbf{w}) = \|\mathbf{y} - X\mathbf{w}\|_2^2$, expand to $\mathbf{y}^T\mathbf{y} - 2\mathbf{w}^T X^T\mathbf{y} + \mathbf{w}^T X^T X \mathbf{w}$, take gradient $\nabla_{\mathbf{w}} \mathcal{L} = \mathbf{0}$, and derive $(X^T X)\mathbf{w} = X^T \mathbf{y}$.
+- [ ] **26. PCA Variance Maximization Derivation:** Set up Lagrangian $\mathcal{L}(\mathbf{w}, \lambda) = \mathbf{w}^T \Sigma \mathbf{w} - \lambda(\mathbf{w}^T\mathbf{w} - 1)$, compute $\nabla_{\mathbf{w}} \mathcal{L} = \mathbf{0}$, and derive $\Sigma\mathbf{w} = \lambda\mathbf{w}$.
+- [ ] **27. Proof that Covariance $\Sigma$ is PSD:** Show that for any non-zero vector $\mathbf{u}$, $\mathbf{u}^T \Sigma \mathbf{u} = \frac{1}{n-1}\|X_c \mathbf{u}\|_2^2 \ge 0$.
+- [ ] **28. Gram-Schmidt to QR Derivation:** Orthonormalize $\mathbf{a}_1 = [1, 1]^T, \mathbf{a}_2 = [1, 0]^T$ to find $\mathbf{q}_1, \mathbf{q}_2$ and construct upper-triangular matrix $R = Q^T A$.
+- [ ] **29. Moore-Penrose Pseudoinverse via Normal Equation:** Derive $A^+ = (A^T A)^{-1} A^T$ by solving the least-squares normal equations for full column rank matrix $A$.
+- [ ] **30. Neural Network Backprop via Chain Rule:** Derive $\frac{\partial \mathcal{L}}{\partial W_1} = \frac{\partial \mathcal{L}}{\partial \hat{y}} \cdot \sigma'(z_2) \cdot W_2^T \cdot \phi'(z_1) \cdot \mathbf{x}^T$ for a 2-layer MLP.
 
 ---
 

@@ -2,7 +2,7 @@
 
 ---
 
-# FINAL SECTION — MASTER FORMULA CHEAT SHEET & QUICK-REFERENCE
+# PART 28 — MASTER FORMULA CHEAT SHEET & QUICK REFERENCE
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐

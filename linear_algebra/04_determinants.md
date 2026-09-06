@@ -1,21 +1,18 @@
-> 📖 **Navigation:** [← Previous: Part 03: Matrix Inverses, Gauss-Jordan & Adjugate](./03_matrix_inverses_and_gauss_jordan.md) | [🏠 Index](./README.md) | [Next: Part 05: Systems of Linear Equations (Ax = b) →](./05_systems_of_linear_equations.md)
+> 📖 **Navigation:** [← Previous: Part 03: Matrix Inverses, Gauss-Jordan & Systems](./03_matrix_inverses_and_gauss_jordan.md) | [🏠 Index](./README.md) | [Next: Part 05: Systems of Linear Equations (Ax = b) →](./05_systems_of_linear_equations.md)
 
 ---
 
-# PART 3 — DETERMINANTS
+# PART 4 — DETERMINANTS & GEOMETRIC SCALING
+
+The **determinant** $\det(A)$ (or $|A|$) is a single scalar value associated with a square matrix that measures the **factor by which the linear transformation scales area or volume**.
 
 ---
 
-## 3.1 The 2x2 Determinant Formula
+## 4.1 The 2x2 Determinant Formula
 
 For a $2 \times 2$ matrix:
-
 $$
-A =
-\begin{bmatrix}
-a & b \\
-c & d
-\end{bmatrix}
+A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}
 $$
 
 $$
@@ -26,22 +23,17 @@ $$
 Let:
 
 $$
-A =
-\begin{bmatrix}
-5 & 3 \\
-2 & 4
-\end{bmatrix}
+A = \begin{bmatrix} 5 & 3 \\ 2 & 4 \end{bmatrix}
 $$
 
 $$
 \det(A) = (5 \times 4) - (3 \times 2) = 20 - 6 = 14
 $$
+*(The transformation expands any 2D region by a factor of 14!).*
 
 ---
 
-## 3.2 Geometric Meaning: Area & Volume Scaling
-
-The determinant represents the **factor by which a linear transformation scales area (in 2D) or volume (in 3D)**.
+## 4.2 Geometric Meaning: Area & Volume Scaling
 
 ```
        ORIGINAL UNIT SQUARE (Area = 1)               TRANSFORMED PARALLELOGRAM (Area = det(A))
@@ -54,66 +46,35 @@ The determinant represents the **factor by which a linear transformation scales 
                     1                                                 b    a
 ```
 
-* **Unit Square:** The unit square formed by basis vectors $\mathbf{i} = [1, 0]^T$ and $\mathbf{j} = [0, 1]^T$ has an initial area of $1 \times 1 = 1$.
-* **After Transformation:**
-
-$$
-A =
-\begin{bmatrix}
-a & b \\
-c & d
-\end{bmatrix}
-$$
-
-  * $\mathbf{i}$ moves to $[a, c]^T$
-  * $\mathbf{j}$ moves to $[b, d]^T$
-  * The resulting parallelogram has an exact geometric area equal to $|ad - bc| = \det(A)$.
-* **Negative Determinant ($\det(A) \lt 0$):** Indicates the transformation flipped the orientation of space (like looking at an image in a mirror).
+* **Unit Square:** Formed by standard basis vectors $\mathbf{i} = [1, 0]^T$ and $\mathbf{j} = [0, 1]^T$, with initial area $= 1 \times 1 = 1$.
+* **Transformed Parallelogram:** Formed by transformed columns $\mathbf{a}_1 = [a, c]^T$ and $\mathbf{a}_2 = [b, d]^T$. The geometric area of this parallelogram is exactly $|\det(A)|$.
+* **3D Volume Scaling:** For a $3 \times 3$ matrix, $|\det(A)|$ is the volume of the parallelepiped formed by the 3 column vectors.
+* **Negative Determinant ($\det(A) < 0$):** Indicates an **orientation reversal** (like flipping a glove inside-out or viewing an image in a mirror).
 
 ---
 
-## 3.3 Why Determinants Matter in ML (Invertibility & Singularities)
-
-| Determinant Value | Geometric Meaning | Algebraic Meaning | Machine Learning Impact |
-| :--- | :--- | :--- | :--- |
-| **$\det(A) \neq 0$** | Area/volume is scaled by non-zero factor; no dimensions lost. | Matrix is **full rank** and **invertible** ($A^{-1}$ exists). | Linear Regression normal equation $(X^T X)^{-1}$ has a unique, stable solution. |
-| **$\det(A) = 0$** | Transformation collapses 2D space into a 1D line or 0D point. | Matrix is **singular / degenerate** ($A^{-1}$ does NOT exist). | **Multicollinearity bug:** Redundant features cause $(X^T X)$ to have determinant 0; OLS fails. |
-
----
-
-## 3.4 Gilbert Strang's 10 Fundamental Determinant Properties
-
-In MIT 18.06, Prof. Gilbert Strang establishes the 10 foundational mathematical axioms and rules governing determinants:
+## 4.3 Strang's Fundamental Determinant Properties
 
 ```
-                    STRANG'S 10 DETERMINANT RULES
-  1. det(I) = 1 (Unit cube has volume 1)
-  2. Row swap reverses sign: det(P A) = -det(A) (for odd permutation)
-  3. Linearity in each individual row: det(c * row_i) = c * det(A)
-     -> Corollary: For n x n matrix, det(c A) = c^n det(A)
-  4. Two identical rows -> det(A) = 0
-  5. Row operations (Row_i - k * Row_j) leave det(A) UNCHANGED
-  6. Row of all zeros -> det(A) = 0
-  7. Triangular / Diagonal matrix: det(A) = d_1 * d_2 * ... * d_n (product of pivots)
-  8. A is Invertible <==> det(A) ≠ 0
-  9. Multiplicative Rule: det(AB) = det(A) * det(B)
-     -> Corollary: det(A^-1) = 1 / det(A)
-  10. Transpose Rule: det(A^T) = det(A)
+                    CORE DETERMINANT PROPERTIES
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ 1. Identity Matrix:     det(I) = 1                                     │
+  │ 2. Row Swap:            det(P A) = -det(A) (sign flips)                │
+  │ 3. Scalar Multiplication:det(c A) = c^n det(A)  (For n x n matrix!)    │
+  │ 4. Matrix Product:      det(A B) = det(A) det(B)                       │
+  │ 5. Matrix Inverse:      det(A^-1) = 1 / det(A)                         │
+  │ 6. Transpose:           det(A^T) = det(A)                              │
+  │ 7. Triangular Matrix:   det(A) = d_1 * d_2 * ... * d_n (Product of diag)│
+  └────────────────────────────────────────────────────────────────────────┘
 ```
 
 > [!WARNING]
-> **Classic Test Trap: $\det(cA) \neq c \det(A)$!**
-> For an $n \times n$ matrix $A$ scaled by scalar $c$:
-> 
-> $$
-> \det(c A) = c^n \det(A)
-> $$
-> 
-> * *Hand Proof:* Scaling the whole matrix scales all $n$ rows by $c$. By Rule 3, factoring out $c$ from each of the $n$ rows yields $c^n$.
+> **Data Science Exam Trap: $\det(cA) \neq c \det(A)$!**
+> Scaling an $n \times n$ matrix by scalar $c$ scales all $n$ rows by $c$. Factoring out $c$ from each row yields $c^n \det(A)$.
 
 ---
 
-## 3.5 Determinant as the Product of Eigenvalues
+## 4.4 Determinant as the Product of Eigenvalues
 
 For any square matrix $A \in \mathbb{R}^{n \times n}$ with eigenvalues $\lambda_1, \lambda_2, \dots, \lambda_n$:
 
@@ -121,67 +82,51 @@ $$
 \det(A) = \prod_{i=1}^{n} \lambda_i = \lambda_1 \times \lambda_2 \times \dots \times \lambda_n
 $$
 
-* *Why this is true:* The characteristic polynomial is $p(\lambda) = \det(A - \lambda I) = (-1)^n \prod (\lambda - \lambda_i)$. Setting $\lambda = 0$ gives $\det(A) = \prod \lambda_i$.
-* *Singularity connection:* If any single eigenvalue $\lambda_i = 0$, then $\det(A) = 0 \implies$ matrix is singular!
+* **Why this is true:** The characteristic polynomial is $p(\lambda) = \det(A - \lambda I) = (-1)^n \prod (\lambda - \lambda_i)$. Setting $\lambda = 0$ yields $\det(A) = \prod \lambda_i$.
 
 ---
 
-## 3.6 The Jacobian Determinant & Change of Variables in ML
+## 4.5 The Singularity & Dimensional Collapse
 
-When transforming a continuous random vector $\mathbf{x} \sim p_X(\mathbf{x})$ through an invertible, differentiable mapping $\mathbf{y} = f(\mathbf{x})$, probability density transforms via the **Jacobian Determinant**:
-
-$$
-p_Y(\mathbf{y}) = p_X(f^{-1}(\mathbf{y})) \cdot \left| \det \left( \frac{\partial f^{-1}(\mathbf{y})}{\partial \mathbf{y}} \right) \right| = p_X(\mathbf{x}) \cdot \left| \det \left( \frac{\partial f(\mathbf{x})}{\partial \mathbf{x}} \right) \right|^{-1}
-$$
+The single most important concept regarding determinants in Machine Learning is what happens when $\det(A) = 0$:
 
 ```
-                   NORMALIZING FLOW VOLUME TRANSFORMATION
-                 p_X(x)                                  p_Y(y)
-               (Base Gaussian)                         (Complex Target)
-                   ╭───╮                                   ╭─╮   ╭─╮
-                   │   │             y = f(x)              │ │   │ │
-                 ──┴───┴──          ─────────►           ──┴─┴───┴─┴──
-                 Unit Volume                         Scaled by |det(J)|
+                           THE ZERO-DETERMINANT COLLAPSE
+                 Full 2D Space                               Collapsed 1D Line
+                       y                                              y
+                       │       /                                      │       / (Area = 0!)
+                       │      /                                       │      /
+                       │     ●                                        │     ●
+                       └───┴────────► x                               └───┴────────► x
+                        det(A) ≠ 0                                     det(A) = 0
 ```
 
-* **ML Application (Generative Flow Models / RealNVP):** Normalizing Flows design neural network layers with **triangular Jacobian matrices**. Because the determinant of a triangular matrix is simply the product of its diagonal entries (Rule 7), computing $|\det(J)|$ requires only $\mathcal{O}(n)$ operations instead of $\mathcal{O}(n^3)$, making exact log-likelihood training tractable!
+### The Fundamental Equivalence Chain:
+$$
+\det(A) = 0 \iff A \text{ is singular} \iff \text{columns are linearly dependent} \iff \text{rank}(A) < n \iff A^{-1} \text{ does not exist}
+$$
+
+* **Geometric Meaning:** $\det(A) = 0$ means the transformation **collapses dimensional volume to zero** (e.g. squashes a 2D plane into a 1D line or a 3D space into a 2D plane). Information is permanently destroyed; no mathematical function can undo the collapse.
+* **ML Impact (Multicollinearity):** In Ordinary Least Squares regression, if two features are linearly dependent, $\det(X^T X) = 0$. The normal equations $(X^T X)^{-1}$ cannot be solved because division by $\det(X^T X) = 0$ is impossible!
 
 ---
 
-## 3.7 Cramer's Rule for Solving Linear Systems
+## Advanced / Optional — Do not study until Core track is complete
 
-For an invertible system $A\mathbf{x} = \mathbf{b}$, **Cramer's Rule** provides an explicit analytical formula for each unknown variable:
-
+### A.1 Cramer's Rule for Analytical System Solving
+For an invertible system $A\mathbf{x} = \mathbf{b}$, each variable $x_i$ can be solved analytically:
 $$
 x_i = \frac{\det(A_i)}{\det(A)}
 $$
+where $A_i$ is formed by replacing the $i$-th column of $A$ with $\mathbf{b}$.
 
-Where $A_i$ is the matrix formed by replacing the $i$-th column of $A$ with the target vector $\mathbf{b}$.
-
-### Hand Calculation Example
-Solve:
-
+### A.2 The Jacobian Determinant in Normalizing Flows & Generative AI
+When mapping probability densities $\mathbf{y} = f(\mathbf{x})$, the change of variables formula requires the Jacobian determinant:
 $$
-\begin{bmatrix} 2 & 1 \\ 1 & 3 \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} = \begin{bmatrix} 5 \\ 5 \end{bmatrix}
+p_Y(\mathbf{y}) = p_X(f^{-1}(\mathbf{y})) \cdot \left| \det \left( \frac{\partial f^{-1}(\mathbf{y})}{\partial \mathbf{y}} \right) \right|
 $$
-
-1. $\det(A) = (2 \times 3) - (1 \times 1) = 6 - 1 = 5$.
-2. Replace Column 1 with $\mathbf{b}$:
-
-$$
-A_1 = \begin{bmatrix} 5 & 1 \\ 5 & 3 \end{bmatrix} \implies \det(A_1) = (5 \times 3) - (1 \times 5) = 15 - 5 = 10
-$$
-3. Replace Column 2 with $\mathbf{b}$:
-
-$$
-A_2 = \begin{bmatrix} 2 & 5 \\ 1 & 5 \end{bmatrix} \implies \det(A_2) = (2 \times 5) - (5 \times 1) = 10 - 5 = 5
-$$
-4. Solve:
-
-$$
-x_1 = \frac{\det(A_1)}{\det(A)} = \frac{10}{5} = 2, \quad x_2 = \frac{\det(A_2)}{\det(A)} = \frac{5}{5} = 1
-$$
+*(Normalizing Flows like RealNVP design neural network layers with triangular Jacobians so that $\det(J)$ is simply the $\mathcal{O}(n)$ product of diagonal elements instead of an $\mathcal{O}(n^3)$ determinant computation).*
 
 ---
 
-> 📖 **Navigation:** [← Previous: Part 03: Matrix Inverses, Gauss-Jordan & Adjugate](./03_matrix_inverses_and_gauss_jordan.md) | [🏠 Index](./README.md) | [Next: Part 05: Systems of Linear Equations (Ax = b) →](./05_systems_of_linear_equations.md)
+> 📖 **Navigation:** [← Previous: Part 03: Matrix Inverses, Gauss-Jordan & Systems](./03_matrix_inverses_and_gauss_jordan.md) | [🏠 Index](./README.md) | [Next: Part 05: Systems of Linear Equations (Ax = b) →](./05_systems_of_linear_equations.md)

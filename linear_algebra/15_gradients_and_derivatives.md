@@ -2,179 +2,82 @@
 
 ---
 
-# PART 14 — GRADIENTS & DERIVATIVES FOR OPTIMIZATION
+# PART 15 — GRADIENTS & DERIVATIVES FOR OPTIMIZATION
+
+Optimization is the process of adjusting parameters to minimize a loss function. **Gradients** provide the downhill compass directing this optimization.
 
 ---
 
-## 14.1 1D Derivatives & Slope of Tangent Line
+## 15.1 1D Derivatives & Partial Derivatives
 
-The derivative $\frac{df}{dx}$ measures the instantaneous rate of change of $f(x)$ with respect to $x$:
-
-$$
-f'(x) = \lim_{h \to 0} \frac{f(x + h) - f(x)}{h}
-$$
-
-* *Hand Example:* For $f(x) = x^2$:
-
-$$
-f'(x) = \lim_{h \to 0} \frac{(x+h)^2 - x^2}{h} = \lim_{h \to 0} \frac{x^2 + 2xh + h^2 - x^2}{h} = \lim_{h \to 0} (2x + h) = 2x
-$$
-
-  * At $x = 3$: Slope $= 2(3) = +6$ (Function is increasing steeply).
-  * At $x = 0$: Slope $= 2(0) = 0$ (Minimum point / flat slope).
-  * At $x = -2$: Slope $= 2(-2) = -4$ (Function is decreasing).
+* **1D Derivative:** Rate of instantaneous change: $f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}$.
+* **Partial Derivative ($\frac{\partial f}{\partial x_i}$):** Measures the rate of change along one variable $x_i$ while holding all other variables constant.
 
 ---
 
-## 14.2 Partial Derivatives (Multivariable Functions)
+## 15.2 The Gradient Vector ($\nabla f$) & Steepest Descent
 
-When a function depends on multiple variables $f(x_1, x_2, \dots, x_n)$, the **partial derivative** $\frac{\partial f}{\partial x_i}$ measures how $f$ changes when varying $x_i$ while treating **all other variables as constants**.
-
-### Hand Calculation Example
-Let $f(x, y) = x^2 + 3xy + y^2$:
-1. **Compute $\frac{\partial f}{\partial x}$ (treat $y$ as a constant number):**
+The **Gradient** $\nabla f(\mathbf{x})$ bundles all partial derivatives into a single vector:
 
 $$
-\frac{\partial f}{\partial x} = \frac{d}{dx}[x^2] + \frac{d}{dx}[3y \cdot x] + \frac{d}{dx}[y^2] = 2x + 3y + 0 = 2x + 3y
+\nabla f(\mathbf{x}) = \begin{bmatrix} \frac{\partial f}{\partial x_1} \\ \frac{\partial f}{\partial x_2} \\ \vdots \\ \frac{\partial f}{\partial x_d} \end{bmatrix}
 $$
-
-2. **Compute $\frac{\partial f}{\partial y}$ (treat $x$ as a constant number):**
-
-$$
-\frac{\partial f}{\partial y} = \frac{d}{dy}[x^2] + \frac{d}{dy}[3x \cdot y] + \frac{d}{dy}[y^2] = 0 + 3x + 2y = 3x + 2y
-$$
-
----
-
-## 14.3 The Gradient Vector (Direction of Steepest Ascent)
-
-The **Gradient** $\nabla f$ bundles all partial derivatives into a single vector:
-
-$$
-\nabla f(x, y) =
-\begin{bmatrix}
-\frac{\partial f}{\partial x} \\
-\frac{\partial f}{\partial y}
-\end{bmatrix}
-$$
-
-* **Fundamental Theorem:** The gradient vector $\nabla f$ points in the **direction of greatest rate of increase (steepest uphill slope)**.
-* **Negative Gradient ($-\nabla f$):** Points in the **direction of steepest descent (fastest downhill path to the minimum)**.
-
----
-
-## 14.4 Gradient Descent: 3-Step Numerical Hand Trace
-
-We wish to find the minimum of $f(x) = x^2$ using Gradient Descent.
-* Update Rule: $x_{t+1} = x_t - \alpha \nabla f(x_t)$
-* Gradient: $\nabla f(x) = 2x$
-* Settings: Start at initial guess $x_0 = 4.0$, Learning Rate $\alpha = 0.1$.
 
 ```
-     Iteration 0: x = 4.0  ──►  f(x) = 16.0   (Gradient = 8.0)
-     Iteration 1: x = 3.2  ──►  f(x) = 10.24  (Gradient = 6.4)
-     Iteration 2: x = 2.56 ──►  f(x) = 6.55   (Gradient = 5.12)
-     Iteration 3: x = 2.05 ──►  f(x) = 4.19   (Converging smoothly toward x=0!)
+                         THE GRADIENT DESCENT DIRECTION
+                                     Loss L
+                                       │       ● Start (w_0)
+                                       │      /
+                   -∇L (Steepest) ◄────┼─────●  (Downhill Step)
+                                       │    /
+                                       └───┴────────► Parameter w
 ```
 
-### Iteration 1:
-1. Compute gradient at $x_0 = 4.0$:
-
-$$
-\nabla f(4.0) = 2(4.0) = 8.0
-$$
-
-2. Update parameter:
-
-$$
-x_1 = 4.0 - 0.1(8.0) = 4.0 - 0.8 = \mathbf{3.2}
-$$
-
-### Iteration 2:
-1. Compute gradient at $x_1 = 3.2$:
-
-$$
-\nabla f(3.2) = 2(3.2) = 6.4
-$$
-
-2. Update parameter:
-
-$$
-x_2 = 3.2 - 0.1(6.4) = 3.2 - 0.64 = \mathbf{2.56}
-$$
-
-### Iteration 3:
-1. Compute gradient at $x_2 = 2.56$:
-
-$$
-\nabla f(2.56) = 2(2.56) = 5.12
-$$
-
-2. Update parameter:
-
-$$
-x_3 = 2.56 - 0.1(5.12) = 2.56 - 0.512 = \mathbf{2.048}
-$$
+* **Steepest Ascent:** $\nabla f(\mathbf{x})$ points in the direction of **maximum rate of increase**.
+* **Steepest Descent:** $-\nabla f(\mathbf{x})$ points in the direction of **maximum rate of decrease**.
+* **Gradient Descent Update Rule:**
+  $$
+  \mathbf{w}_{t+1} = \mathbf{w}_t - \alpha \nabla \mathcal{L}(\mathbf{w}_t)
+  $$
+  where $\alpha > 0$ is the scalar learning rate.
 
 ---
 
-## 14.5 Matrix Calculus Master Identities (Matrix Cookbook Reference)
+## 15.3 Deriving the Linear Regression Loss Gradient
 
-In ML derivations and technical interviews, manipulating vector and matrix gradients using scalar index summation is too slow. Memorize the **7 Master Matrix Calculus Identities**:
+For MSE loss $\mathcal{L}(\mathbf{w}) = \|\mathbf{y} - X\mathbf{w}\|_2^2 = (\mathbf{y} - X\mathbf{w})^T (\mathbf{y} - X\mathbf{w})$:
+
+$$
+\nabla_{\mathbf{w}} \mathcal{L}(\mathbf{w}) = 2 X^T (X\mathbf{w} - \mathbf{y}) = 2 X^T (\hat{\mathbf{y}} - \mathbf{y}) = -2 X^T \mathbf{e}
+$$
+
+* **Batch Gradient Descent Step for Linear Regression:**
+  $$
+  \mathbf{w}_{t+1} = \mathbf{w}_t - \alpha \cdot \frac{2}{n} X^T (X\mathbf{w}_t - \mathbf{y})
+  $$
+
+---
+
+## 15.4 Master Matrix Calculus Identities (Quick Reference)
 
 ```
-                    MASTER MATRIX CALCULUS CHEAT SHEET
+                    ESSENTIAL MATRIX CALCULUS IDENTITIES
   ┌──────────────────────────────────────────┬─────────────────────────────┐
-  │ Scalar Function f(x) or f(X)             │ Gradient                    │
+  │ Scalar Function f                        │ Gradient                    │
   ├──────────────────────────────────────────┼─────────────────────────────┤
   │ a^T x                                    │ ∇_x = a                     │
-  │ x^T A x  (General A)                     │ ∇_x = (A + A^T) x           │
-  │ x^T A x  (Symmetric A = A^T)             │ ∇_x = 2 A x                 │
+  │ x^T A x  (for symmetric A = A^T)         │ ∇_x = 2 A x                 │
   │ ||A x - b||_2^2                          │ ∇_x = 2 A^T (A x - b)       │
-  │ Tr(A X) or Tr(X A)                       │ ∇_X = A^T                   │
-  │ Tr(X^T A X)                              │ ∇_X = (A + A^T) X           │
-  │ log det(X)  (for X > 0)                  │ ∇_X = X^-T = (X^-1)^T       │
-  │ Tr(A X^-1 B)                             │ ∇_X = -(X^-1 B A X^-1)^T    │
+  │ Tr(A X)                                  │ ∇_X = A^T                   │
+  │ log det(X)  (for X ≻ 0)                  │ ∇_X = X^-T                  │
   └──────────────────────────────────────────┴─────────────────────────────┘
 ```
 
-### Hand Derivation Example: Gradient of Quadratic Form $\mathbf{x}^T A \mathbf{x}$
-Let $f(\mathbf{x}) = \mathbf{x}^T A \mathbf{x} = \sum_{i} \sum_{j} A_{ij} x_i x_j$.
-Take partial derivative with respect to $x_k$:
-
-$$
-\frac{\partial f}{\partial x_k} = \sum_{j} A_{kj} x_j + \sum_{i} A_{ik} x_i = (A\mathbf{x})_k + (A^T \mathbf{x})_k
-$$
-
-Assembling into vector form:
-
-$$
-\nabla_{\mathbf{x}} (\mathbf{x}^T A \mathbf{x}) = (A + A^T)\mathbf{x}
-$$
-
-*When $A$ is symmetric ($A = A^T$), this simplifies to $2A\mathbf{x}$.*
-
 ---
 
-## 14.6 The Hessian Matrix & Multivariable Taylor Expansion
+## 15.5 The Hessian Matrix & Multivariable Curvature
 
-For a scalar function of multiple variables $f(\mathbf{x}): \mathbb{R}^n \to \mathbb{R}$, the **Hessian Matrix** $H \in \mathbb{R}^{n \times n}$ collects all second-order partial derivatives:
-
-$$
-H_{ij} = \frac{\partial^2 f}{\partial x_i \partial x_j}
-$$
-
-*(By Schwarz's Theorem, $H$ is symmetric $H = H^T$ for all twice continuously differentiable functions).*
-
-### Multivariable Second-Order Taylor Expansion
-Around a local operating point $\mathbf{x}_0$:
-
-$$
-f(\mathbf{x}) \approx f(\mathbf{x}_0) + \nabla f(\mathbf{x}_0)^T (\mathbf{x} - \mathbf{x}_0) + \frac{1}{2}(\mathbf{x} - \mathbf{x}_0)^T H(\mathbf{x}_0) (\mathbf{x} - \mathbf{x}_0)
-$$
-
-### The Second-Derivative Test in Multiple Dimensions:
-At any critical point where $\nabla f(\mathbf{x}^*) = \mathbf{0}$:
+The **Hessian** $H \in \mathbb{R}^{d \times d}$ collects all second-order partial derivatives ($H_{ij} = \frac{\partial^2 f}{\partial x_i \partial x_j}$), measuring the **local curvature** of the loss surface:
 
 ```
                         CRITICAL POINT CLASSIFICATION
@@ -182,37 +85,19 @@ At any critical point where $\nabla f(\mathbf{x}^*) = \mathbf{0}$:
    ────────────────────────────────────────────────────────────────────────
    All λ_i > 0  (H ≻ 0, Positive Definite)  Strict Local Minimum (Upward Bowl)
    All λ_i < 0  (H ≺ 0, Negative Definite)  Strict Local Maximum (Downward Dome)
-   Mixed signs  (H is Indefinite)           SADDLE POINT (Pass / Ridge)
-   Some λ_i = 0 (H ⪰ 0 or H ⪯ 0)            Degenerate / Flat Valley
+   Mixed signs  (H is Indefinite)           SADDLE POINT (Mountain Pass)
 ```
-
-> [!NOTE]
-> **Deep Learning Saddle Point Reality:**
-> In high-dimensional neural network loss surfaces ($n > 10^6$), local minima are rare; almost all critical points with $\nabla \mathcal{L} = \mathbf{0}$ are **saddle points** (having millions of positive and negative curvature directions).
 
 ---
 
-## 14.7 Newton-Raphson Optimization & Second-Order Methods
+## Advanced / Optional — Do not study until Core track is complete
 
-**Newton's Method** minimizes $f(\mathbf{x})$ by fitting an osculating quadratic model at each step and jumping directly to its minimum:
-
+### A.1 Newton-Raphson Second-Order Optimization
+Newton's Method fits a local quadratic model and jumps directly to its minimum:
 $$
 \mathbf{x}_{k+1} = \mathbf{x}_k - [H(\mathbf{x}_k)]^{-1} \nabla f(\mathbf{x}_k)
 $$
-
-```
-              GRADIENT DESCENT (First Order) vs. NEWTON'S METHOD (Second Order)
-  ┌──────────────────────────┬────────────────────────────┬────────────────────────────┐
-  │ Metric                   │ Gradient Descent           │ Newton's Method            │
-  ├──────────────────────────┼────────────────────────────┼────────────────────────────┤
-  │ Update Equation          │ x - α ∇f                   │ x - H^-1 ∇f                │
-  │ Convergence Rate         │ Linear (O(1/t))            │ Quadratic (doubles digits) │
-  │ Step Cost                │ O(n) FLOPs                 │ O(n^3) FLOPs (H inversion) │
-  │ Memory Complexity        │ O(n)                       │ O(n^2) (Stores Hessian)    │
-  │ Sensitivity to Scaling   │ High (needs tuning α)      │ Invariant to affine scales │
-  │ Deep Learning Viability  │ Industry Standard (SGD/Adam)│ Impractical for large DL  │
-  └──────────────────────────┴────────────────────────────┴────────────────────────────┘
-```
+*(Quadratic convergence rate, but requires $\mathcal{O}(d^3)$ FLOPs to invert the Hessian, making it impractical for deep learning with millions of parameters).*
 
 ---
 

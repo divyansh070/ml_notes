@@ -2,128 +2,105 @@
 
 ---
 
-# PART 12 — VECTOR PROJECTIONS
+# PART 13 — VECTOR PROJECTIONS & PROJECTION MATRICES
+
+**Projection** drops an orthogonal shadow from a vector onto a target line or subspace. In data science, projection is the mathematical engine behind Linear Regression, PCA, and dimensionality reduction.
 
 ---
 
-## 12.1 Derivation of the Scalar & Vector Projection Formula
+## 13.1 Projection onto a Line (Vector onto Vector)
 
 ```
                                       a
                                      ╱│
-                                    ╱ │ Error (a - p) is orthogonal to b!
+                                    ╱ │ Error e = (a - p) is orthogonal to b!
                                    ╱  │
                                   ●───┴──────────► b
                                   0   p = proj_b(a)
 ```
 
-We wish to drop a perpendicular shadow from vector $\mathbf{a}$ onto vector $\mathbf{b}$.
-1. The projection $\mathbf{p} = \text{proj}_{\mathbf{b}}(\mathbf{a})$ lies along the direction of $\mathbf{b}$, so $\mathbf{p} = c \mathbf{b}$ for some scalar $c$.
-2. The error vector $(\mathbf{a} - c\mathbf{b})$ must be **orthogonal** to $\mathbf{b}$:
+We wish to project vector $\mathbf{a}$ onto vector $\mathbf{b}$:
+1. The projection $\mathbf{p} = \text{proj}_{\mathbf{b}}(\mathbf{a})$ lies along $\mathbf{b}$, so $\mathbf{p} = c \mathbf{b}$ for scalar $c$.
+2. The error vector $\mathbf{e} = (\mathbf{a} - c\mathbf{b})$ must be **orthogonal** to $\mathbf{b}$:
+   $$
+   \mathbf{b} \cdot (\mathbf{a} - c\mathbf{b}) = 0 \implies \mathbf{b}^T \mathbf{a} - c(\mathbf{b}^T \mathbf{b}) = 0 \implies c = \frac{\mathbf{a}^T \mathbf{b}}{\mathbf{b}^T \mathbf{b}}
+   $$
+3. Therefore:
+   $$
+   \mathbf{p} = \text{proj}_{\mathbf{b}}(\mathbf{a}) = \left( \frac{\mathbf{a}^T \mathbf{b}}{\mathbf{b}^T \mathbf{b}} \right) \mathbf{b}
+   $$
 
-$$
-\mathbf{b} \cdot (\mathbf{a} - c\mathbf{b}) = 0
-$$
-
-3. Expand the dot product:
-
-$$
-\mathbf{b} \cdot \mathbf{a} - c(\mathbf{b} \cdot \mathbf{b}) = 0 \implies c = \frac{\mathbf{a} \cdot \mathbf{b}}{\mathbf{b} \cdot \mathbf{b}} = \frac{\mathbf{a} \cdot \mathbf{b}}{\|\mathbf{b}\|_2^2}
-$$
-
-4. Multiply scalar $c$ by vector $\mathbf{b}$:
-
-$$
-\text{proj}_{\mathbf{b}}(\mathbf{a}) = \left(\frac{\mathbf{a} \cdot \mathbf{b}}{\mathbf{b} \cdot \mathbf{b}}\right) \mathbf{b}
-$$
+### Hand Calculation Example:
+Project $\mathbf{a} = [3, 4]^T$ onto $\mathbf{b} = [4, 0]^T$:
+* $\mathbf{a}^T \mathbf{b} = (3 \times 4) + (4 \times 0) = 12$
+* $\mathbf{b}^T \mathbf{b} = (4 \times 4) + (0 \times 0) = 16$
+* $\mathbf{p} = \frac{12}{16} [4, 0]^T = [3, 0]^T$
+* Error: $\mathbf{e} = \mathbf{a} - \mathbf{p} = [0, 4]^T \implies \mathbf{e} \cdot \mathbf{b} = (0 \times 4) + (4 \times 0) = 0 \quad \checkmark$.
 
 ---
 
-## 12.2 Step-by-Step Numerical Hand Calculation
+## 13.2 Optimization Interpretation: Projection is the Closest Point
 
-Project vector $\mathbf{a} = [3, 4]^T$ onto vector $\mathbf{b} = [4, 0]^T$:
-1. Compute $\mathbf{a} \cdot \mathbf{b} = (3 \times 4) + (4 \times 0) = 12 + 0 = 12$.
-2. Compute $\mathbf{b} \cdot \mathbf{b} = (4 \times 4) + (0 \times 0) = 16 + 0 = 16$.
-3. Compute projection vector:
+> [!IMPORTANT]
+> **The Closest Point Theorem:**
+> The projection $\mathbf{p} = \text{proj}_S(\mathbf{x})$ is the **unique point in subspace $S$ that minimizes the Euclidean distance to $\mathbf{x}$**:
+> $$
+> \text{proj}_S(\mathbf{x}) = \arg\min_{\mathbf{z} \in S} \|\mathbf{x} - \mathbf{z}\|_2^2
+> $$
 
-$$
-\mathbf{p} = \frac{12}{16}
-\begin{bmatrix}
-4 \\
-0
-\end{bmatrix}
-= \frac{3}{4}
-\begin{bmatrix}
-4 \\
-0
-\end{bmatrix} =
-\begin{bmatrix}
-3 \\
-0
-\end{bmatrix}
-$$
-
-4. Verification of Orthogonal Error: $\mathbf{e} = \mathbf{a} - \mathbf{p} = [3, 4]^T - [3, 0]^T = [0, 4]^T$.
-   * $\mathbf{e} \cdot \mathbf{b} = (0 \times 4) + (4 \times 0) = 0 \quad \checkmark$
+* The shortest distance from a point to a plane is along the perpendicular line. Thus, the error $(\mathbf{x} - \mathbf{p})$ is strictly orthogonal to subspace $S$.
 
 ---
 
-## 12.3 Projection Matrices & Subspaces
+## 13.3 Projection Matrix onto a Multi-Dimensional Subspace ($P$)
 
-The **Projection Matrix** $P$ that projects any arbitrary vector onto the column space of a matrix $X$:
+When projecting onto the column space of a matrix $X \in \mathbb{R}^{n \times d}$ (where $n > d$ and $X$ has full column rank):
 
 $$
 P = X (X^T X)^{-1} X^T
 $$
 
-* **Property:** $P^2 = P$ (Projecting a second time changes nothing).
-* **ML Connection:** Linear regression predictions $\hat{\mathbf{y}} = X \mathbf{w} = X(X^T X)^{-1} X^T \mathbf{y} = P \mathbf{y}$ is the orthogonal projection of target vector $\mathbf{y}$ onto the column space of feature matrix $X$.
+* **Projected vector:** $\hat{\mathbf{y}} = P \mathbf{y} = X (X^T X)^{-1} X^T \mathbf{y}$.
 
 ---
 
-## 12.4 Master Properties of Projection Matrices
-
-For any subspace $S \subseteq \mathbb{R}^m$, the matrix $P$ that projects vectors orthogonally onto $S$ satisfies:
+## 13.4 Master Properties of Projection Matrices
 
 ```
                   THE 4 PROJECTION MATRIX PROPERTIES
   ┌────────────────────────────────────────────────────────────────────────┐
   │ 1. Symmetry:           P^T = P                                         │
-  │ 2. Idempotency:        P^2 = P                                         │
+  │ 2. Idempotency:        P^2 = P  (Projecting a second time changes zero)│
   │ 3. Binary Spectrum:    Eigenvalues λ_i ∈ {0, 1} strictly               │
   │ 4. Rank equals Trace:  rank(P) = Tr(P) = dim(Subspace S)               │
   └────────────────────────────────────────────────────────────────────────┘
 ```
 
-* **Projection onto a Line:** The projection matrix onto the 1D line spanned by unit vector $\mathbf{u}$ ($\|\mathbf{u}\|_2 = 1$):
+---
+
+## 13.5 The Orthogonal Complement Projector ($I - P$)
+
+If $P$ projects onto subspace $S = \text{Col}(X)$, then $(I - P)$ is the **orthogonal projection matrix onto the residual subspace $S^\perp = \text{Null}(X^T)$**:
 
 $$
-P = \mathbf{u} \mathbf{u}^T
-$$
-
-* **Projection onto Subspace $\text{Col}(X)$:** When $X \in \mathbb{R}^{n \times p}$ has full column rank:
-
-$$
-P = X (X^T X)^{-1} X^T
+\mathbf{y} = \underbrace{P \mathbf{y}}_{\hat{\mathbf{y}} \text{ (Fitted Prediction)}} + \underbrace{(I - P) \mathbf{y}}_{\mathbf{e} \text{ (Residual Error)}}
 $$
 
 ---
 
-## 12.5 The Orthogonal Complement Projector $(I - P)$
+## 13.6 Direct Connection to Linear Regression Geometry
 
-If $P$ is the orthogonal projection matrix onto subspace $S = \text{Col}(X)$, then $(I - P)$ is the **orthogonal projection matrix onto the orthogonal complement $S^\perp = \text{Null}(X^T)$**:
+```
+                                 y (Actual Target)
+                                ╱│
+                               ╱ │ Residual e = (I - P)y
+                              ╱  │ (Orthogonal to Feature Space!)
+                             ╱   │
+                            ●────┴────────► Col(X) (Feature Subspace)
+                            0    ŷ = Py = Xw
+```
 
-$$
-(I - P)^T = I - P \quad \text{and} \quad (I - P)^2 = I - 2P + P^2 = I - P
-$$
-
-* **Vector Decomposition:** Every vector $\mathbf{y} \in \mathbb{R}^n$ can be uniquely split into parallel and perpendicular components:
-
-$$
-\mathbf{y} = P\mathbf{y} + (I - P)\mathbf{y} = \hat{\mathbf{y}} + \mathbf{e}
-$$
-
-* In Linear Regression, $\hat{\mathbf{y}} = P\mathbf{y}$ is the explained prediction, and $\mathbf{e} = (I - P)\mathbf{y}$ is the residual error vector ($P \mathbf{e} = \mathbf{0}$).
+In Ordinary Least Squares, because $X\mathbf{w} = \mathbf{y}$ has no exact solution ($\mathbf{y} \notin \text{Col}(X)$), we solve for the **closest point in feature space** $\hat{\mathbf{y}} = P\mathbf{y} = X(X^T X)^{-1} X^T \mathbf{y}$, giving normal equation weights $\mathbf{w} = (X^T X)^{-1} X^T \mathbf{y}$!
 
 ---
 
