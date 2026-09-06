@@ -1,7 +1,7 @@
 # LINEAR ALGEBRA & MATHEMATICS FOR MACHINE LEARNING — PART 2
 ### Advanced Subspaces, Matrix Decompositions, Positive Definite Forms, Pseudoinverse & Interview Q&A
 
-> 📖 **Navigation:** [← Return to Part 1: Fundamentals, Eigendecomposition, Calculus & Optimization](LINEAR_ALGEBRA_AND_MATH.md)
+> 📖 **Navigation:** [← Return to Part 1: Fundamentals](LINEAR_ALGEBRA_AND_MATH.md) | [📁 Browse Modular Topic Files (linear_algebra/)](linear_algebra/README.md)
 
 ---
 

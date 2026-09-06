@@ -6,6 +6,8 @@
 > * Every core concept begins with **geometric intuition**.
 > * Every formula is followed by a **complete step-by-step hand calculation** on small numbers ($2\times 2$ matrices and 2D vectors).
 > * The focus is on **understanding derivations**, not blindly memorizing definitions or running Python libraries.
+>
+> 📁 **Modular Topic Files:** For faster loading and topic-by-topic reading on GitHub, browse the organized individual modules in the **[linear_algebra/](./linear_algebra/README.md)** directory.
 
 ---
 
