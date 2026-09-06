@@ -297,4 +297,103 @@ $$
 
 ---
 
+## 6.4 The Spectral Theorem & Orthogonal Diagonalization
+
+The **Spectral Theorem** is the crowning jewel of symmetric matrix theory in machine learning.
+
+### The Spectral Theorem Statement
+For any real symmetric matrix $A = A^T \in \mathbb{R}^{n \times n}$:
+1. All $n$ eigenvalues $\lambda_1, \lambda_2, \dots, \lambda_n$ are strictly **real numbers** ($\lambda_i \in \mathbb{R}$).
+2. Eigenvectors corresponding to distinct eigenvalues are mutually **orthogonal**.
+3. There exists an orthonormal matrix $Q = [\mathbf{q}_1, \dots, \mathbf{q}_n]$ ($Q^T Q = I$) such that $A$ can be **orthogonally diagonalized**:
+
+$$
+A = Q \Lambda Q^T = \sum_{i=1}^{n} \lambda_i \mathbf{q}_i \mathbf{q}_i^T
+$$
+
+```
+                    SPECTRAL DECOMPOSITION (Outer Product Form)
+           A = λ_1 (q_1 q_1^T) + λ_2 (q_2 q_2^T) + ... + λ_n (q_n q_n^T)
+               └──────┬──────┘   └──────┬──────┘
+                  Rank-1 Matrix     Rank-1 Matrix
+                   (Weight λ_1)      (Weight λ_2)
+```
+
+* **Why this is fundamental in ML:** Every covariance matrix $\Sigma = \frac{1}{n-1}X_c^TX_c$ is symmetric, guaranteeing that PCA finds a complete, orthogonal coordinate system of variance axes!
+
+---
+
+## 6.5 Spectral Radius ($\rho(A)$) & System Stability in ML
+
+The **Spectral Radius** $\rho(A)$ of a square matrix $A$ is the maximum absolute value of its eigenvalues:
+
+$$
+\rho(A) = \max_{1 \le i \le n} |\lambda_i|
+$$
+
+```
+                         SPECTRAL RADIUS & STABILITY
+    ┌──────────────────────────┬──────────────────────────────────────────┐
+    │ Condition                │ System Behavior as k -> ∞                │
+    ├──────────────────────────┼──────────────────────────────────────────┤
+    │ ρ(A) < 1.0               │ lim A^k = 0 (Asymptotically Stable /     │
+    │                          │ Vanishing Dynamics)                      │
+    ├──────────────────────────┼──────────────────────────────────────────┤
+    │ ρ(A) = 1.0               │ Steady State Convergence (Markov Chains, │
+    │                          │ PageRank)                                │
+    ├──────────────────────────┼──────────────────────────────────────────┤
+    │ ρ(A) > 1.0               │ lim ||A^k|| = ∞ (Exploding Dynamics /    │
+    │                          │ Instability)                             │
+    └──────────────────────────┴──────────────────────────────────────────┘
+```
+
+* **Application to Recurrent Neural Networks (RNNs):** In an unrolled RNN with recurrent weight matrix $W_{\text{rec}}$, hidden state propagation involves powers $W_{\text{rec}}^t$. If $\rho(W_{\text{rec}}) > 1$, gradients explode exponentially; if $\rho(W_{\text{rec}}) < 1$, gradients vanish exponentially.
+
+---
+
+## 6.6 The Power Iteration Algorithm (Finding Principal Eigenvectors)
+
+**Power Iteration** is the foundational iterative numerical algorithm used to find the dominant eigenvalue and its corresponding eigenvector (the algorithm behind Google's PageRank):
+
+```
+                        POWER ITERATION ALGORITHM
+       1. Initialize random unit vector: x_0 (||x_0||_2 = 1)
+       2. Repeat until convergence:
+              x_{k+1} = (A x_k) / ||A x_k||_2
+       3. Dominant Eigenvalue (Rayleigh Quotient):
+              λ_1 ≈ x_k^T A x_k
+```
+
+### Why It Works (Mathematical Convergence Proof):
+Express the initial guess $\mathbf{x}_0$ as a linear combination of the orthonormal eigenvectors of $A$: $\mathbf{x}_0 = c_1 \mathbf{q}_1 + c_2 \mathbf{q}_2 + \dots + c_n \mathbf{q}_n$.
+Applying matrix $A$ $k$ times:
+
+$$
+A^k \mathbf{x}_0 = c_1 \lambda_1^k \mathbf{q}_1 + c_2 \lambda_2^k \mathbf{q}_2 + \dots + c_n \lambda_n^k \mathbf{q}_n = \lambda_1^k \left[ c_1 \mathbf{q}_1 + c_2 \left(\frac{\lambda_2}{\lambda_1}\right)^k \mathbf{q}_2 + \dots + c_n \left(\frac{\lambda_n}{\lambda_1}\right)^k \mathbf{q}_n \right]
+$$
+
+Since $|\lambda_1| > |\lambda_2| \ge \dots \ge |\lambda_n|$, the ratio terms $\left(\frac{\lambda_i}{\lambda_1}\right)^k \to 0$ as $k \to \infty$. Normalizing at each step leaves purely the principal eigenvector $\mathbf{q}_1$!
+
+---
+
+## 6.7 Essential Eigenvalue Properties & Algebraic Identities
+
+```
+                    MASTER EIGENVALUE ALGEBRAIC IDENTITIES
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ Matrix Operation         │ Resulting Eigenvalues                       │
+  ├──────────────────────────┼─────────────────────────────────────────────┤
+  │ Matrix Power A^k         │ λ_i^k                                       │
+  │ Matrix Inverse A^-1      │ 1 / λ_i  (if λ_i ≠ 0)                       │
+  │ Shifted Matrix (A + c I) │ λ_i + c                                     │
+  │ Scaled Matrix (c A)      │ c λ_i                                       │
+  │ Matrix Transpose A^T     │ λ_i (Identical eigenvalues!)                │
+  │ Similar Matrix P^-1 A P  │ λ_i (Eigenvalues are similarity invariants!) │
+  └──────────────────────────┴─────────────────────────────────────────────┘
+```
+
+* **Gershgorin Circle Theorem:** Every eigenvalue of $A \in \mathbb{C}^{n \times n}$ lies within at least one Gershgorin disk $D(A_{ii}, R_i)$ in the complex plane, where center is the diagonal entry $A_{ii}$ and radius is the off-diagonal absolute row sum $R_i = \sum_{j \neq i} |A_{ij}|$.
+
+---
+
 > 📖 **Navigation:** [← Previous: Part 06: Linear Independence & Matrix Rank](./06_linear_independence_and_rank.md) | [🏠 Index](./README.md) | [Next: Part 08: Eigenvalues in Principal Component Analysis (PCA) →](./08_eigenvalues_in_pca.md)

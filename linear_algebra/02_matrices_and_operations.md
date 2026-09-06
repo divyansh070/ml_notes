@@ -247,4 +247,142 @@ $$
 
 ---
 
+## 2.7 Matrix Trace ($\text{Tr}(A)$) & 5 Master Properties
+
+The **Trace** of a square matrix $A \in \mathbb{R}^{n \times n}$ is the sum of its main diagonal elements:
+
+$$
+\text{Tr}(A) = \sum_{i=1}^{n} A_{ii} = A_{11} + A_{22} + \dots + A_{nn}
+$$
+
+### Hand Calculation Example
+For matrix $A = \begin{bmatrix} 5 & 2 & 9 \\ 1 & 8 & 3 \\ 4 & 7 & 6 \end{bmatrix}$:
+
+$$
+\text{Tr}(A) = 5 + 8 + 6 = 19
+$$
+
+```
+                         MATRIX TRACE PROPERTIES
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ 1. Linearity:           Tr(A + B) = Tr(A) + Tr(B),  Tr(cA) = c Tr(A)   │
+  │ 2. Transpose Invariance:Tr(A^T) = Tr(A)                                │
+  │ 3. Cyclic Permutation:  Tr(ABC) = Tr(BCA) = Tr(CAB)                    │
+  │ 4. Similarity Invariant:Tr(P^-1 A P) = Tr(A)                           │
+  │ 5. Sum of Eigenvalues:  Tr(A) = λ_1 + λ_2 + ... + λ_n                  │
+  │ 6. Frobenius Norm Link: ||A||_F^2 = Tr(A^T A) = Tr(A A^T)              │
+  └────────────────────────────────────────────────────────────────────────┘
+```
+
+> [!IMPORTANT]
+> **The Cyclic Permutation Property:**
+> For matrices of compatible dimensions:
+> 
+> $$
+> \text{Tr}(ABCD) = \text{Tr}(BCDA) = \text{Tr}(CDAB) = \text{Tr}(DABC)
+> $$
+> 
+> * **Exam Caution:** Cyclic order must be preserved! In general: $\text{Tr}(ABC) \neq \text{Tr}(BAC)$.
+> * **Vector Dot Product as Trace:** For vectors $\mathbf{u}, \mathbf{v} \in \mathbb{R}^n$:
+> 
+> $$
+> \mathbf{u}^T \mathbf{v} = \text{Tr}(\mathbf{u}^T \mathbf{v}) = \text{Tr}(\mathbf{v} \mathbf{u}^T)
+> $$
+
+---
+
+## 2.8 Special Matrix Families in Machine Learning
+
+### 1. Symmetric & Skew-Symmetric Matrices
+* **Symmetric Matrix:** $A^T = A \iff A_{ij} = A_{ji}$. (All eigenvalues are real; eigenvectors are orthogonal).
+* **Skew-Symmetric (Anti-Symmetric) Matrix:** $A^T = -A \iff A_{ij} = -A_{ji}$. (Diagonal elements are all $0$; eigenvalues are purely imaginary).
+* **Universal Decomposition Theorem:** Any square matrix $M$ can be uniquely decomposed into the sum of a symmetric and a skew-symmetric matrix:
+
+$$
+M = M_{\text{sym}} + M_{\text{skew}} = \frac{1}{2}(M + M^T) + \frac{1}{2}(M - M^T)
+$$
+
+### 2. Orthogonal Matrices ($Q$)
+A square matrix $Q \in \mathbb{R}^{n \times n}$ is **Orthogonal** if its columns (and rows) form an orthonormal basis:
+
+$$
+Q^T Q = Q Q^T = I \quad \iff \quad Q^{-1} = Q^T
+$$
+
+* **Length Preservation (Isometry):** Multiplying any vector by an orthogonal matrix preserves its Euclidean length:
+
+$$
+\|Q\mathbf{x}\|_2^2 = (Q\mathbf{x})^T (Q\mathbf{x}) = \mathbf{x}^T Q^T Q \mathbf{x} = \mathbf{x}^T I \mathbf{x} = \|\mathbf{x}\|_2^2
+$$
+
+* **Angle Preservation:** $\langle Q\mathbf{u}, Q\mathbf{v} \rangle = \mathbf{u}^T Q^T Q \mathbf{v} = \mathbf{u}^T \mathbf{v}$.
+* **Determinant:** $\det(Q) = \pm 1$ ($+1$ for pure rotations, $-1$ for reflections).
+
+### 3. Idempotent Matrices (Projection Matrices)
+A matrix $P$ is **Idempotent** if multiplying by itself leaves it unchanged:
+
+$$
+P^2 = P
+$$
+
+* **Eigenvalues:** If $P\mathbf{v} = \lambda\mathbf{v}$, then $P^2\mathbf{v} = \lambda^2\mathbf{v} = \lambda\mathbf{v} \implies \lambda^2 = \lambda \implies \lambda \in \{0, 1\}$.
+* **ML Connection:** The OLS Hat matrix $H = X(X^T X)^{-1} X^T$ is symmetric and idempotent ($H^2 = H$), projecting data onto $\text{Col}(X)$.
+
+### 4. Involutory Matrices
+A matrix $A$ is **Involutory** if it is its own inverse:
+
+$$
+A^2 = I \quad \iff \quad A^{-1} = A
+$$
+
+* *Examples:* Reflection matrices (Householder reflections $H = I - 2\mathbf{u}\mathbf{u}^T$).
+
+### 5. Nilpotent Matrices
+A square matrix $N$ is **Nilpotent** if $N^k = 0$ for some positive integer $k$. All eigenvalues of a nilpotent matrix are identically $0$.
+
+---
+
+## 2.9 Matrix Norms (Frobenius, Spectral, Nuclear)
+
+Just as vectors have lengths, matrices have norms measuring their overall magnitude or operator stretch.
+
+| Matrix Norm | Mathematical Formula | Spectral Formulation | Machine Learning Role |
+| :--- | :--- | :--- | :--- |
+| **Frobenius Norm** ($\|A\|_F$) | $\sqrt{\sum_{i=1}^m \sum_{j=1}^n A_{ij}^2}$ | $\sqrt{\sum_{i=1}^{\min(m,n)} \sigma_i^2} = \sqrt{\text{Tr}(A^T A)}$ | Matrix generalization of Euclidean norm; used in matrix factorization loss ($\|X - WH\|_F^2$). |
+| **Spectral Norm** ($\|A\|_2$) | $\max_{\mathbf{x} \neq \mathbf{0}} \frac{\|A\mathbf{x}\|_2}{\|\mathbf{x}\|_2}$ | $\sigma_{\max}(A) = \sqrt{\lambda_{\max}(A^T A)}$ | Maximum stretch factor; used in Spectral Normalization for GAN stability. |
+| **Nuclear Norm** ($\|A\|_*$) | $\sum_{i=1}^{\min(m,n)} \sigma_i(A)$ | Sum of all singular values | Convex relaxation of matrix rank; used in **Matrix Completion** (Netflix Prize collaborative filtering). |
+
+---
+
+## 2.10 Specialized Matrix Products: Hadamard vs. Kronecker
+
+### 1. Hadamard Product (Element-Wise Multiplication: $A \odot B$)
+For matrices of the **exact same shape** $(M \times N)$:
+
+$$
+(A \odot B)_{ij} = A_{ij} \times B_{ij}
+$$
+
+* *ML Application:* Gating mechanisms in Recurrent Neural Networks (LSTM forget/input gates: $\mathbf{c}_t = \mathbf{f}_t \odot \mathbf{c}_{t-1} + \mathbf{i}_t \odot \tilde{\mathbf{c}}_t$) and Dropout masks ($X \odot M$).
+
+### 2. Kronecker Product (Block Outer Product: $A \otimes B$)
+If $A \in \mathbb{R}^{m \times n}$ and $B \in \mathbb{R}^{p \times q}$, then $A \otimes B \in \mathbb{R}^{mp \times nq}$:
+
+$$
+A \otimes B =
+\begin{bmatrix}
+a_{11} B & a_{12} B & \dots & a_{1n} B \\
+a_{21} B & a_{22} B & \dots & a_{2n} B \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{m1} B & a_{m2} B & \dots & a_{mn} B
+\end{bmatrix}
+$$
+
+* *Key Properties:*
+  * $\text{Tr}(A \otimes B) = \text{Tr}(A) \text{Tr}(B)$
+  * $\det(A \otimes B) = (\det A)^p (\det B)^m$
+  * $(A \otimes B)(C \otimes D) = (AC) \otimes (BD)$
+
+---
+
 > 📖 **Navigation:** [← Previous: Part 01: Vectors & Vector Spaces](./01_vectors_and_vector_spaces.md) | [🏠 Index](./README.md) | [Next: Part 03: Matrix Inverses, Gauss-Jordan & Adjugate →](./03_matrix_inverses_and_gauss_jordan.md)

@@ -118,4 +118,102 @@ $$
 
 ---
 
+## 14.5 Matrix Calculus Master Identities (Matrix Cookbook Reference)
+
+In ML derivations and technical interviews, manipulating vector and matrix gradients using scalar index summation is too slow. Memorize the **7 Master Matrix Calculus Identities**:
+
+```
+                    MASTER MATRIX CALCULUS CHEAT SHEET
+  ┌──────────────────────────────────────────┬─────────────────────────────┐
+  │ Scalar Function f(x) or f(X)             │ Gradient                    │
+  ├──────────────────────────────────────────┼─────────────────────────────┤
+  │ a^T x                                    │ ∇_x = a                     │
+  │ x^T A x  (General A)                     │ ∇_x = (A + A^T) x           │
+  │ x^T A x  (Symmetric A = A^T)             │ ∇_x = 2 A x                 │
+  │ ||A x - b||_2^2                          │ ∇_x = 2 A^T (A x - b)       │
+  │ Tr(A X) or Tr(X A)                       │ ∇_X = A^T                   │
+  │ Tr(X^T A X)                              │ ∇_X = (A + A^T) X           │
+  │ log det(X)  (for X > 0)                  │ ∇_X = X^-T = (X^-1)^T       │
+  │ Tr(A X^-1 B)                             │ ∇_X = -(X^-1 B A X^-1)^T    │
+  └──────────────────────────────────────────┴─────────────────────────────┘
+```
+
+### Hand Derivation Example: Gradient of Quadratic Form $\mathbf{x}^T A \mathbf{x}$
+Let $f(\mathbf{x}) = \mathbf{x}^T A \mathbf{x} = \sum_{i} \sum_{j} A_{ij} x_i x_j$.
+Take partial derivative with respect to $x_k$:
+
+$$
+\frac{\partial f}{\partial x_k} = \sum_{j} A_{kj} x_j + \sum_{i} A_{ik} x_i = (A\mathbf{x})_k + (A^T \mathbf{x})_k
+$$
+
+Assembling into vector form:
+
+$$
+\nabla_{\mathbf{x}} (\mathbf{x}^T A \mathbf{x}) = (A + A^T)\mathbf{x}
+$$
+
+*When $A$ is symmetric ($A = A^T$), this simplifies to $2A\mathbf{x}$.*
+
+---
+
+## 14.6 The Hessian Matrix & Multivariable Taylor Expansion
+
+For a scalar function of multiple variables $f(\mathbf{x}): \mathbb{R}^n \to \mathbb{R}$, the **Hessian Matrix** $H \in \mathbb{R}^{n \times n}$ collects all second-order partial derivatives:
+
+$$
+H_{ij} = \frac{\partial^2 f}{\partial x_i \partial x_j}
+$$
+
+*(By Schwarz's Theorem, $H$ is symmetric $H = H^T$ for all twice continuously differentiable functions).*
+
+### Multivariable Second-Order Taylor Expansion
+Around a local operating point $\mathbf{x}_0$:
+
+$$
+f(\mathbf{x}) \approx f(\mathbf{x}_0) + \nabla f(\mathbf{x}_0)^T (\mathbf{x} - \mathbf{x}_0) + \frac{1}{2}(\mathbf{x} - \mathbf{x}_0)^T H(\mathbf{x}_0) (\mathbf{x} - \mathbf{x}_0)
+$$
+
+### The Second-Derivative Test in Multiple Dimensions:
+At any critical point where $\nabla f(\mathbf{x}^*) = \mathbf{0}$:
+
+```
+                        CRITICAL POINT CLASSIFICATION
+   Hessian Eigenvalues                     Geometry & Classification
+   ────────────────────────────────────────────────────────────────────────
+   All λ_i > 0  (H ≻ 0, Positive Definite)  Strict Local Minimum (Upward Bowl)
+   All λ_i < 0  (H ≺ 0, Negative Definite)  Strict Local Maximum (Downward Dome)
+   Mixed signs  (H is Indefinite)           SADDLE POINT (Pass / Ridge)
+   Some λ_i = 0 (H ⪰ 0 or H ⪯ 0)            Degenerate / Flat Valley
+```
+
+> [!NOTE]
+> **Deep Learning Saddle Point Reality:**
+> In high-dimensional neural network loss surfaces ($n > 10^6$), local minima are rare; almost all critical points with $\nabla \mathcal{L} = \mathbf{0}$ are **saddle points** (having millions of positive and negative curvature directions).
+
+---
+
+## 14.7 Newton-Raphson Optimization & Second-Order Methods
+
+**Newton's Method** minimizes $f(\mathbf{x})$ by fitting an osculating quadratic model at each step and jumping directly to its minimum:
+
+$$
+\mathbf{x}_{k+1} = \mathbf{x}_k - [H(\mathbf{x}_k)]^{-1} \nabla f(\mathbf{x}_k)
+$$
+
+```
+              GRADIENT DESCENT (First Order) vs. NEWTON'S METHOD (Second Order)
+  ┌──────────────────────────┬────────────────────────────┬────────────────────────────┐
+  │ Metric                   │ Gradient Descent           │ Newton's Method            │
+  ├──────────────────────────┼────────────────────────────┼────────────────────────────┤
+  │ Update Equation          │ x - α ∇f                   │ x - H^-1 ∇f                │
+  │ Convergence Rate         │ Linear (O(1/t))            │ Quadratic (doubles digits) │
+  │ Step Cost                │ O(n) FLOPs                 │ O(n^3) FLOPs (H inversion) │
+  │ Memory Complexity        │ O(n)                       │ O(n^2) (Stores Hessian)    │
+  │ Sensitivity to Scaling   │ High (needs tuning α)      │ Invariant to affine scales │
+  │ Deep Learning Viability  │ Industry Standard (SGD/Adam)│ Impractical for large DL  │
+  └──────────────────────────┴────────────────────────────┴────────────────────────────┘
+```
+
+---
+
 > 📖 **Navigation:** [← Previous: Part 14: Linear Regression Matrix Mathematics](./14_linear_regression_matrix_math.md) | [🏠 Index](./README.md) | [Next: Part 16: The Chain Rule & Backpropagation →](./16_chain_rule_and_backprop.md)

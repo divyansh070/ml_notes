@@ -463,4 +463,156 @@ In technical interviews and theoretical mathematics, invertibility connects acro
 
 ---
 
+### 2.7.6 — The Sherman-Morrison Formula (Rank-1 Inverse Update)
+
+In real-time machine learning (e.g. streaming data, online regression, Kalman filtering), data points arrive one by one. Inverting an updated matrix $(A + \mathbf{u}\mathbf{v}^T)$ from scratch costs $\mathcal{O}(n^3)$ operations. 
+
+The **Sherman-Morrison Formula** computes the exact inverse of a rank-1 perturbed matrix in $\mathcal{O}(n^2)$ matrix-vector operations:
+
+$$
+(A + \mathbf{u}\mathbf{v}^T)^{-1} = A^{-1} - \frac{A^{-1} \mathbf{u} \mathbf{v}^T A^{-1}}{1 + \mathbf{v}^T A^{-1} \mathbf{u}}
+$$
+
+*(Condition: Valid as long as the scalar denominator $1 + \mathbf{v}^T A^{-1} \mathbf{u} \neq 0$).*
+
+```
+                    SHERMAN-MORRISON RANK-1 UPDATE SPEEDUP
+   Full Inversion from Scratch:               Sherman-Morrison Online Update:
+        (A + u v^T)^-1                                  A^-1 known
+              │                                              │
+              ▼                                              ▼
+          O(n^3) FLOPs                                  O(n^2) FLOPs
+  (e.g., n=1000 -> 1,000,000,000 ops)             (e.g., n=1000 -> 1,000,000 ops)
+                                                  >>> 1000x FASTER! <<<
+```
+
+#### Step-by-Step Hand Calculation Example
+Let $A = \begin{bmatrix} 2 & 0 \\ 0 & 2 \end{bmatrix} \implies A^{-1} = \begin{bmatrix} 1/2 & 0 \\ 0 & 1/2 \end{bmatrix}$, with update vectors $\mathbf{u} = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$ and $\mathbf{v} = \begin{bmatrix} 3 \\ 1 \end{bmatrix}$.
+
+1. Compute $A^{-1} \mathbf{u}$:
+
+$$
+A^{-1} \mathbf{u} = \begin{bmatrix} 1/2 & 0 \\ 0 & 1/2 \end{bmatrix} \begin{bmatrix} 1 \\ 2 \end{bmatrix} = \begin{bmatrix} 1/2 \\ 1 \end{bmatrix}
+$$
+
+2. Compute $\mathbf{v}^T A^{-1}$:
+
+$$
+\mathbf{v}^T A^{-1} = \begin{bmatrix} 3 & 1 \end{bmatrix} \begin{bmatrix} 1/2 & 0 \\ 0 & 1/2 \end{bmatrix} = \begin{bmatrix} 3/2 & 1/2 \end{bmatrix}
+$$
+
+3. Compute scalar denominator $1 + \mathbf{v}^T A^{-1} \mathbf{u}$:
+
+$$
+1 + \begin{bmatrix} 3 & 1 \end{bmatrix} \begin{bmatrix} 1/2 \\ 1 \end{bmatrix} = 1 + (3/2 + 1) = 1 + 2.5 = 3.5 = \frac{7}{2}
+$$
+
+4. Compute outer product matrix $(A^{-1} \mathbf{u})(\mathbf{v}^T A^{-1})$:
+
+$$
+\begin{bmatrix} 1/2 \\ 1 \end{bmatrix} \begin{bmatrix} 3/2 & 1/2 \end{bmatrix} = \begin{bmatrix} 3/4 & 1/4 \\ 3/2 & 1/2 \end{bmatrix}
+$$
+
+5. Assemble $(A + \mathbf{u}\mathbf{v}^T)^{-1}$:
+
+$$
+(A + \mathbf{u}\mathbf{v}^T)^{-1} = \begin{bmatrix} 1/2 & 0 \\ 0 & 1/2 \end{bmatrix} - \frac{2}{7} \begin{bmatrix} 3/4 & 1/4 \\ 3/2 & 1/2 \end{bmatrix} = \begin{bmatrix} 1/2 - 3/14 & 0 - 1/14 \\ 0 - 3/7 & 1/2 - 1/7 \end{bmatrix} = \begin{bmatrix} 2/7 & -1/14 \\ -3/7 & 5/14 \end{bmatrix}
+$$
+
+* **ML Role:** Recursive Least Squares (RLS) adaptive filters, quasi-Newton optimization (BFGS Hessian updates).
+
+---
+
+### 2.7.7 — The Woodbury Matrix Identity (Low-Rank Inversion Update)
+
+The **Woodbury Formula** generalizes Sherman-Morrison to rank-$k$ updates where $U \in \mathbb{R}^{n \times k}, C \in \mathbb{R}^{k \times k}, V \in \mathbb{R}^{k \times n}$:
+
+$$
+(A + U C V)^{-1} = A^{-1} - A^{-1} U (C^{-1} + V A^{-1} U)^{-1} V A^{-1}
+$$
+
+> [!TIP]
+> **Why Woodbury Powers Gaussian Processes & Kernel Methods:**
+> * If $A$ is $N \times N$ with $N = 1,000,000$ (massive dataset) and we approximate the kernel using $k = 100$ inducing points:
+> * Inverting $(A + UCV)$ directly requires inverting an $(N \times N)$ matrix $\to \mathcal{O}(N^3) = 10^{18}$ FLOPs (impossible!).
+> * Using Woodbury, we only invert $(C^{-1} + VA^{-1}U)$, which is a tiny **$(k \times k) = (100 \times 100)$ matrix** $\to \mathcal{O}(k^3) = 10^6$ FLOPs!
+
+---
+
+### 2.7.8 — Block Matrix Inversion & The Schur Complement
+
+For a partitioned $2 \times 2$ block matrix $M$:
+
+$$
+M =
+\begin{bmatrix}
+A & B \\
+C & D
+\end{bmatrix}
+$$
+
+Assuming $D$ is invertible, the **Schur Complement of $D$** in $M$ is defined as:
+
+$$
+S_D = A - B D^{-1} C
+$$
+
+The exact block inverse is:
+
+$$
+\begin{bmatrix}
+A & B \\
+C & D
+\end{bmatrix}^{-1}
+=
+\begin{bmatrix}
+S_D^{-1} & -S_D^{-1} B D^{-1} \\
+-D^{-1} C S_D^{-1} & D^{-1} + D^{-1} C S_D^{-1} B D^{-1}
+\end{bmatrix}
+$$
+
+* **Multivariate Gaussian Conditional Distribution:** For jointly Gaussian vectors $\begin{bmatrix} \mathbf{x}_1 \\ \mathbf{x}_2 \end{bmatrix} \sim \mathcal{N}\left( \begin{bmatrix} \boldsymbol{\mu}_1 \\ \boldsymbol{\mu}_2 \end{bmatrix}, \begin{bmatrix} \Sigma_{11} & \Sigma_{12} \\ \Sigma_{21} & \Sigma_{22} \end{bmatrix} \right)$, the conditional distribution $p(\mathbf{x}_1 \mid \mathbf{x}_2)$ has covariance matrix equal to the **Schur complement**:
+
+$$
+\Sigma_{1|2} = \Sigma_{11} - \Sigma_{12} \Sigma_{22}^{-1} \Sigma_{21}
+$$
+
+---
+
+### 2.7.9 — Left Inverses vs. Right Inverses (Non-Square Matrices)
+
+Rectangular matrices ($M \times N$) do not have standard two-sided inverses. However, depending on their rank:
+
+```
+                  LEFT INVERSE vs. RIGHT INVERSE
+        Tall Matrix (M > N)                 Wide Matrix (M < N)
+      Full Column Rank (rank=N)             Full Row Rank (rank=M)
+          ┌       ┐                             ┌                   ┐
+          │       │                             │                   │
+          │   A   │                             └                   ┘
+          │       │                                    A
+          └       ┘                            A_right^-1 = A^T (A A^T)^-1
+     A_left^-1 = (A^T A)^-1 A^T                       A A_right^-1 = I_M
+            A_left^-1 A = I_N                   (Minimum Norm Solution)
+      (Ordinary Least Squares)
+```
+
+1. **Left Inverse (Tall Matrices, $M > N$, $\text{rank}=N$):**
+
+$$
+A_{\text{left}}^{-1} = (A^T A)^{-1} A^T \implies A_{\text{left}}^{-1} A = (A^T A)^{-1} (A^T A) = I_N
+$$
+
+   * *Role in ML:* The exact OLS regression normal equation weight solver $\mathbf{w} = A_{\text{left}}^{-1} \mathbf{y}$!
+
+2. **Right Inverse (Wide Matrices, $M < N$, $\text{rank}=M$):**
+
+$$
+A_{\text{right}}^{-1} = A^T (A A^T)^{-1} \implies A A_{\text{right}}^{-1} = (A A^T)(A A^T)^{-1} = I_M
+$$
+
+   * *Role in ML:* Finds the underdetermined solution $\mathbf{x} = A_{\text{right}}^{-1} \mathbf{b}$ that has the **minimum Euclidean norm** $\|\mathbf{x}\|_2$ (foundation of deep learning over-parameterized interpolation).
+
+---
+
 > 📖 **Navigation:** [← Previous: Part 02: Matrices & Matrix Operations](./02_matrices_and_operations.md) | [🏠 Index](./README.md) | [Next: Part 04: Determinants & Geometric Scaling →](./04_determinants.md)

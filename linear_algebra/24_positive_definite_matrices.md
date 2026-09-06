@@ -151,4 +151,114 @@ $$
 
 ---
 
+## 24.7 Gilbert Strang's 5 Equivalent Tests for Positive Definiteness
+
+In MIT 18.06, Prof. Strang presents the **5 Equivalent Mathematical Tests for Positive Definiteness ($A \succ 0$)** for a symmetric matrix $A = A^T \in \mathbb{R}^{n \times n}$:
+
+```
+                   5 EQUIVALENT TESTS FOR POSITIVE DEFINITENESS
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ 1. Quadratic Form Test:  x^T A x > 0 for all non-zero vectors x ≠ 0    │
+  │ 2. Eigenvalue Test:      All eigenvalues λ_1, ..., λ_n > 0 strictly    │
+  │ 3. Sylvester's Minors:   All n leading principal sub-determinants > 0  │
+  │ 4. Pivot Test:           All n pivots in Gaussian elimination > 0      │
+  │ 5. Cholesky Factor:      A = L L^T where L is lower triangular with   │
+  │                          strictly positive diagonal entries (l_ii > 0) │
+  └────────────────────────────────────────────────────────────────────────┘
+```
+
+### Hand Calculation: Testing Matrix $A = \begin{bmatrix} 4 & 2 \\ 2 & 3 \end{bmatrix}$
+1. **Test 3 (Sylvester's Minors):**
+   * Minor 1: $\det([4]) = 4 > 0 \quad \checkmark$
+   * Minor 2: $\det\begin{bmatrix} 4 & 2 \\ 2 & 3 \end{bmatrix} = (4 \times 3) - (2 \times 2) = 12 - 4 = 8 > 0 \quad \checkmark$
+   * *Conclusion: $A$ is strictly Positive Definite ($A \succ 0$)*.
+
+---
+
+## 24.8 The Rayleigh Quotient & Principal Components Derivation
+
+For a symmetric matrix $A$, the **Rayleigh Quotient** $R_A(\mathbf{x})$ is defined as:
+
+$$
+R_A(\mathbf{x}) = \frac{\mathbf{x}^T A \mathbf{x}}{\mathbf{x}^T \mathbf{x}} \quad (\mathbf{x} \neq \mathbf{0})
+$$
+
+### The Rayleigh-Ritz Theorem (Fundamental Bounds):
+
+$$
+\lambda_{\min}(A) \le \frac{\mathbf{x}^T A \mathbf{x}}{\mathbf{x}^T \mathbf{x}} \le \lambda_{\max}(A)
+$$
+
+* **Maximum Achieved:** When $\mathbf{x} = \mathbf{q}_{\max}$ (eigenvector corresponding to $\lambda_{\max}$).
+* **Minimum Achieved:** When $\mathbf{x} = \mathbf{q}_{\min}$ (eigenvector corresponding to $\lambda_{\min}$).
+
+```
+                     PCA AS RAYLEIGH QUOTIENT MAXIMIZATION
+         Maximize Projected Variance:  max  u^T Σ u  subject to  ||u||_2 = 1
+                                         u
+                                         ▼
+                 Lagrangian:  L(u, λ) = u^T Σ u - λ (u^T u - 1)
+                                         ▼
+                 Set Gradient to 0:  ∇_u L = 2 Σ u - 2 λ u = 0
+                                         ▼
+                                   >>> Σ u = λ u <<<
+      (Principal directions are exactly the eigenvectors of Covariance matrix!)
+```
+
+---
+
+## 24.9 Mercer's Theorem & Kernel Gram Matrices in SVMs
+
+In Support Vector Machines (SVMs), a kernel function $k(\mathbf{x}, \mathbf{x}')$ computes an inner product in feature space $\phi(\mathbf{x})^T \phi(\mathbf{x}')$.
+
+* **Mercer's Theorem:** A kernel function $k(\cdot, \cdot)$ is a valid Mercer Kernel if and only if for any dataset $\{\mathbf{x}_1, \dots, \mathbf{x}_N\}$, the resulting **Gram Matrix $K$** ($K_{ij} = k(\mathbf{x}_i, \mathbf{x}_j)$) is **Positive Semidefinite ($K \succeq 0$)**.
+
+### Hand Proof: Why Every Gram Matrix is PSD
+For any arbitrary vector $\mathbf{c} \in \mathbb{R}^N$:
+
+$$
+\mathbf{c}^T K \mathbf{c} = \sum_{i=1}^{N} \sum_{j=1}^{N} c_i c_j (\phi(\mathbf{x}_i)^T \phi(\mathbf{x}_j)) = \left( \sum_{i=1}^{N} c_i \phi(\mathbf{x}_i) \right)^T \left( \sum_{j=1}^{N} c_j \phi(\mathbf{x}_j) \right) = \left\| \sum_{i=1}^{N} c_i \phi(\mathbf{x}_i) \right\|_2^2 \ge 0 \quad \blacksquare
+$$
+
+* **Optimization Guarantee:** Because $K \succeq 0$, the dual SVM optimization objective is a **strictly convex quadratic program (QP)**, guaranteeing that gradient/SMO solvers converge to the **global optimum with zero local minima**!
+
+---
+
+## 24.10 Cholesky Factorization & Multivariate Gaussian Sampling
+
+Every Positive Definite matrix $A \succ 0$ can be uniquely factored into:
+
+$$
+A = L L^T
+$$
+
+Where $L$ is a lower triangular matrix with strictly positive diagonal elements ($l_{ii} > 0$).
+
+```
+                    CHOLESKY REPARAMETERIZATION SAMPLING
+       Standard Isotropic Gaussian                  Correlated Multivariate Gaussian
+            z ~ N(0, I)                                      x ~ N(μ, Σ)
+                 │                                                │
+                 ▼                                                ▼
+               ╭───╮                                            ╭───╮
+               │ ● │           x = μ + L z                      │  ╱│
+               ╰───╯          ─────────────►                    │ ╱ │
+           Unit Sphere                                          ╰───╯
+        (Uncorrelated Noise)                             Elongated Covariance
+```
+
+### Algorithm for Sampling $\mathbf{x} \sim \mathcal{N}(\boldsymbol{\mu}, \Sigma)$ (The VAE Reparameterization Trick):
+1. Compute the Cholesky factor of the covariance matrix: $\Sigma = L L^T$.
+2. Sample an uncorrelated standard normal vector $\mathbf{z} \sim \mathcal{N}(\mathbf{0}, I)$.
+3. Transform linearly:
+
+$$
+\mathbf{x} = \boldsymbol{\mu} + L \mathbf{z}
+$$
+
+* *Mean verification:* $\mathbb{E}[\mathbf{x}] = \boldsymbol{\mu} + L \mathbb{E}[\mathbf{z}] = \boldsymbol{\mu} + \mathbf{0} = \boldsymbol{\mu}$.
+* *Covariance verification:* $\text{Cov}(\mathbf{x}) = \mathbb{E}[L\mathbf{z} \mathbf{z}^T L^T] = L \mathbb{E}[\mathbf{z}\mathbf{z}^T] L^T = L I L^T = L L^T = \Sigma \quad \checkmark$.
+
+---
+
 > 📖 **Navigation:** [← Previous: Part 23: Gram-Schmidt Orthogonalization & QR Decomposition](./23_gram_schmidt_and_qr_decomposition.md) | [🏠 Index](./README.md) | [Next: Part 25: Moore-Penrose Pseudoinverse (A^+) →](./25_moore_penrose_pseudoinverse.md)

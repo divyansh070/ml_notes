@@ -64,4 +64,111 @@ $$
 
 ---
 
+## 10.4 The 4 Fundamental Subspaces from SVD (Strang's Master Picture)
+
+SVD provides explicit orthonormal bases for all **Four Fundamental Subspaces** of any matrix $A \in \mathbb{R}^{m \times n}$ with rank $r$:
+
+```
+                         THE SVD FOUR-SUBSPACE CONNECTION
+       Input Space R^n                                 Output Space R^m
+  ┌─────────────────────────┐                     ┌─────────────────────────┐
+  │  Row Space Row(A)       │                     │  Column Space Col(A)    │
+  │  span{v_1, ..., v_r}    │  ───── A v_i ─────► │  span{u_1, ..., u_r}    │
+  │  Dimension: r           │     = σ_i u_i       │  Dimension: r           │
+  ├─────────────────────────┤                     ├─────────────────────────┤
+  │  Nullspace Null(A)      │                     │  Left Null Null(A^T)    │
+  │  span{v_{r+1}, ..., v_n}│  ───── A v_i ─────► │  span{u_{r+1}, ..., u_m}│
+  │  Dimension: n - r       │       = 0           │  Dimension: m - r       │
+  └─────────────────────────┘                     └─────────────────────────┘
+```
+
+1. **Column Space $\text{Col}(A)$:** First $r$ left singular vectors $\{\mathbf{u}_1, \dots, \mathbf{u}_r\}$.
+2. **Left Nullspace $\text{Null}(A^T)$:** Remaining $(m - r)$ left singular vectors $\{\mathbf{u}_{r+1}, \dots, \mathbf{u}_m\}$.
+3. **Row Space $\text{Row}(A)$:** First $r$ right singular vectors $\{\mathbf{v}_1, \dots, \mathbf{v}_r\}$.
+4. **Nullspace $\text{Null}(A)$:** Remaining $(n - r)$ right singular vectors $\{\mathbf{v}_{r+1}, \dots, \mathbf{v}_n\}$.
+
+---
+
+## 10.5 The Eckart-Young-Mirsky Theorem (Optimal Low-Rank Approximation)
+
+The **Eckart-Young-Mirsky Theorem** is the mathematical foundation of data compression, dimensionality reduction, and Low-Rank Adaptation (LoRA) in LLMs.
+
+### Theorem Statement:
+Let $A = \sum_{i=1}^r \sigma_i \mathbf{u}_i \mathbf{v}_i^T$ be the SVD of $A$. The **truncated SVD of rank $k < r$**:
+
+$$
+A_k = \sum_{i=1}^{k} \sigma_i \mathbf{u}_i \mathbf{v}_i^T
+$$
+
+is the **provably optimal rank-$k$ approximation** of matrix $A$ under both the Frobenius Norm and the Spectral Norm:
+
+$$
+\min_{\text{rank}(B) \le k} \|A - B\|_F = \|A - A_k\|_F = \sqrt{\sum_{i=k+1}^{r} \sigma_i^2}
+$$
+
+$$
+\min_{\text{rank}(B) \le k} \|A - B\|_2 = \|A - A_k\|_2 = \sigma_{k+1}
+$$
+
+```
+                  LOW-RANK ADAPTATION (LoRA) VIA SVD FACTORIZATION
+          Weight Update ΔW (d x k)               Factored Rank-r Matrices
+             ┌               ┐                      ┌   ┐
+             │               │          ≈           │ B │  ×  ┌───────────┐
+             │               │                      │   │     │     A     │
+             └               ┘                      └───┘     └───────────┘
+              (d x k params)                     (d x r)         (r x k)
+           Full Rank Parameterization          Parameters reduced by >90%!
+```
+
+* **ML Applications:**
+  * **LoRA (Low-Rank Adaptation):** Freezes pre-trained LLM weights $W_0$ and trains low-rank factor matrices $\Delta W = B A$ where $r \ll d$.
+  * **Latent Semantic Analysis (LSA):** Compressing term-document matrices for NLP topic modeling.
+  * **Image Compression:** Keeping top $k$ singular values reconstructs $>95\%$ of visual information with a fraction of storage.
+
+---
+
+## 10.6 Condition Number ($\kappa(A)$) & Optimization Geometry
+
+The **Condition Number** $\kappa(A)$ measures the sensitivity of matrix operations to numerical perturbations:
+
+$$
+\kappa(A) = \|A\|_2 \|A^{-1}\|_2 = \frac{\sigma_{\max}(A)}{\sigma_{\min}(A)} = \frac{\sigma_1}{\sigma_r} \ge 1.0
+$$
+
+```
+         WELL-CONDITIONED (κ ≈ 1)                 ILL-CONDITIONED (κ >> 1)
+           Isotropic Contours                       Highly Elongated Ravine
+                  x2                                       x2
+                  │                                        │
+                ╭─┼─╮                                    ╭─┴────────────────╮
+                │ │ │                                    │                  │
+               ─┼─●─┼─► x1                              ─┼────────●─────────┼─► x1
+                │ │ │                                    │                  │
+                ╰─┼─╯                                    ╰─┬────────────────╯
+                  │                                        │
+         (Fast SGD Convergence)                    (Severe Oscillations & Zig-Zagging)
+```
+
+* **Impact on Gradient Descent:** For quadratic optimization $\mathcal{L}(\mathbf{w}) = \frac{1}{2}\mathbf{w}^T H \mathbf{w}$, the convergence rate of Gradient Descent depends directly on the condition number of the Hessian $H$:
+
+$$
+\|\mathbf{w}^{(t)} - \mathbf{w}^*\| \le \left( \frac{\kappa(H) - 1}{\kappa(H) + 1} \right)^t \|\mathbf{w}^{(0)} - \mathbf{w}^*\|
+$$
+
+* If $\kappa(H) \approx 1$, convergence is instantaneous.
+* If $\kappa(H) = 10,000$ (ill-conditioned), convergence slows to a crawl, motivating **Adam**, **Momentum**, and **Batch Normalization** (which precondition the feature space to make $\kappa \approx 1$).
+
+---
+
+## 10.7 Full SVD vs. Compact SVD vs. Truncated SVD
+
+| SVD Variant | Factorization Format | Shapes ($m \ge n$, rank $r$) | Primary Use Case |
+| :--- | :--- | :--- | :--- |
+| **Full SVD** | $A = U \Sigma V^T$ | $U \in \mathbb{R}^{m \times m}, \Sigma \in \mathbb{R}^{m \times n}, V \in \mathbb{R}^{n \times n}$ | Theoretical proofs, complete subspace geometry. |
+| **Compact (Thin) SVD** | $A = U_r \Sigma_r V_r^T$ | $U_r \in \mathbb{R}^{m \times r}, \Sigma_r \in \mathbb{R}^{r \times r}, V_r \in \mathbb{R}^{n \times r}$ | Exact matrix reconstruction without storing zero singular values. |
+| **Truncated SVD** | $A \approx U_k \Sigma_k V_k^T$ | $U_k \in \mathbb{R}^{m \times k}, \Sigma_k \in \mathbb{R}^{k \times k}, V_k \in \mathbb{R}^{n \times k}$ ($k < r$) | **LoRA, PCA, TruncatedSVD in Scikit-Learn**, image compression. |
+
+---
+
 > 📖 **Navigation:** [← Previous: Part 10: Complete PCA Walkthrough from Scratch](./10_pca_scratch_walkthrough.md) | [🏠 Index](./README.md) | [Next: Part 12: Orthogonality & Orthonormal Bases →](./12_orthogonality_and_bases.md)

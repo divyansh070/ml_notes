@@ -314,4 +314,199 @@ $$
 
 ---
 
+## 1.7 Vector Space Axioms & Subspaces
+
+A **Vector Space** $V$ over the field of real numbers $\mathbb{R}$ is a set of objects (vectors) equipped with two operations: **Vector Addition** ($+$) and **Scalar Multiplication** ($\cdot$).
+
+```
+                         THE 8 VECTOR SPACE AXIOMS
+  Addition Axioms:                        Scalar Multiplication Axioms:
+  1. Associativity: (u + v) + w = u + (v + w)  5. Compatibility: a(bv) = (ab)v
+  2. Commutativity: u + v = v + u              6. Identity: 1 * v = v
+  3. Identity: u + 0 = u                       7. Distributivity 1: a(u + v) = au + av
+  4. Inverse: u + (-u) = 0                     8. Distributivity 2: (a + b)v = av + bv
+```
+
+### Subspace Definition & The 3-Step Verification Test
+A subset $S \subseteq V$ is a **Vector Subspace** if $S$ is itself a vector space under the same operations. To prove that $S$ is a valid subspace, verify the **3 Subspace Axioms**:
+1. **Contains Zero Vector:** $\mathbf{0} \in S$.
+2. **Closed under Addition:** If $\mathbf{u}, \mathbf{v} \in S$, then $\mathbf{u} + \mathbf{v} \in S$.
+3. **Closed under Scalar Multiplication:** If $\mathbf{u} \in S$ and $c \in \mathbb{R}$, then $c\mathbf{u} \in S$.
+
+> [!IMPORTANT]
+> **Subspace Rule in Data Science:**
+> * Any hyperplane or line that **does NOT pass through the origin $(0, 0, \dots, 0)$ is NOT a vector subspace** (it fails the zero-vector axiom $\mathbf{0} \in S$).
+> * In linear regression, when we include a bias term $w_0$, the model fits an affine hyperplane (a translated subspace).
+
+---
+
+## 1.8 Inner Product Spaces & Inner Product Axioms
+
+An **Inner Product Space** is a vector space $V$ equipped with an inner product function $\langle \mathbf{u}, \mathbf{v} \rangle: V \times V \to \mathbb{R}$ that generalizes the dot product.
+
+### The 3 Formal Inner Product Axioms (for real vector spaces):
+1. **Symmetry (Commutativity):**
+
+$$
+\langle \mathbf{u}, \mathbf{v} \rangle = \langle \mathbf{v}, \mathbf{u} \rangle \quad \forall \mathbf{u}, \mathbf{v} \in V
+$$
+
+2. **Linearity in the First Argument:**
+
+$$
+\langle a\mathbf{u} + b\mathbf{v}, \mathbf{w} \rangle = a\langle \mathbf{u}, \mathbf{w} \rangle + b\langle \mathbf{v}, \mathbf{w} \rangle \quad \forall a, b \in \mathbb{R}, \; \mathbf{u}, \mathbf{v}, \mathbf{w} \in V
+$$
+
+3. **Positive-Definiteness:**
+
+$$
+\langle \mathbf{u}, \mathbf{u} \rangle \ge 0 \quad \text{and} \quad \langle \mathbf{u}, \mathbf{u} \rangle = 0 \iff \mathbf{u} = \mathbf{0}
+$$
+
+* **Induced Norm:** Every valid inner product automatically defines an induced vector norm (geometric length):
+
+$$
+\|\mathbf{u}\| = \sqrt{\langle \mathbf{u}, \mathbf{u} \rangle}
+$$
+
+* **ML Connection (Kernel Trick):** In Support Vector Machines (SVMs) and Gaussian Processes, a valid Mercer Kernel $k(\mathbf{x}, \mathbf{x}') = \langle \phi(\mathbf{x}), \phi(\mathbf{x}') \rangle$ computes an inner product in a high-dimensional (or infinite-dimensional) Hilbert feature space without explicitly computing the coordinates $\phi(\mathbf{x})$.
+
+---
+
+## 1.9 The Cauchy-Schwarz Inequality (Complete Proof & DS Applications)
+
+The **Cauchy-Schwarz Inequality** is one of the most fundamental inequalities in all of mathematics and data science:
+
+$$
+|\mathbf{u} \cdot \mathbf{v}| \le \|\mathbf{u}\|_2 \|\mathbf{v}\|_2
+$$
+
+*(The absolute value of the inner product of two vectors is always less than or equal to the product of their Euclidean lengths. Equality holds if and only if $\mathbf{u}$ and $\mathbf{v}$ are linearly dependent: $\mathbf{u} = c\mathbf{v}$.)*
+
+```
+                       CAUCHY-SCHWARZ GEOMETRIC BOUND
+                          |u · v| = ||u|| ||v|| |cos(θ)|
+                             Since |cos(θ)| ≤ 1.0
+                                      ▼
+                           |u · v| ≤ ||u|| ||v||
+```
+
+### Complete Mathematical Proof (Discriminant Method)
+Consider an arbitrary real scalar $t \in \mathbb{R}$ and the squared norm of vector $(\mathbf{u} - t\mathbf{v})$. By the positive-definiteness axiom of norms, this squared length is always non-negative:
+
+$$
+\|\mathbf{u} - t\mathbf{v}\|_2^2 \ge 0 \quad \forall t \in \mathbb{R}
+$$
+
+Expand using dot products:
+
+$$
+(\mathbf{u} - t\mathbf{v}) \cdot (\mathbf{u} - t\mathbf{v}) = (\mathbf{u} \cdot \mathbf{u}) - 2t(\mathbf{u} \cdot \mathbf{v}) + t^2(\mathbf{v} \cdot \mathbf{v}) \ge 0
+$$
+
+Rewrite as a quadratic polynomial in $t$:
+
+$$
+A t^2 + B t + C \ge 0
+$$
+
+Where:
+* $A = \|\mathbf{v}\|_2^2 = \mathbf{v} \cdot \mathbf{v}$
+* $B = -2(\mathbf{u} \cdot \mathbf{v})$
+* $C = \|\mathbf{u}\|_2^2 = \mathbf{u} \cdot \mathbf{u}$
+
+Since this quadratic polynomial is non-negative for **all** real numbers $t$, it cannot have two distinct real roots. Therefore, its algebraic discriminant $\Delta = B^2 - 4AC$ must be less than or equal to zero:
+
+$$
+\Delta = B^2 - 4AC \le 0
+$$
+
+Substitute $A, B, C$:
+
+$$
+[-2(\mathbf{u} \cdot \mathbf{v})]^2 - 4(\|\mathbf{v}\|_2^2)(\|\mathbf{u}\|_2^2) \le 0
+$$
+
+$$
+4(\mathbf{u} \cdot \mathbf{v})^2 \le 4 \|\mathbf{u}\|_2^2 \|\mathbf{v}\|_2^2
+$$
+
+Divide by 4 and take the square root of both sides:
+
+$$
+|\mathbf{u} \cdot \mathbf{v}| \le \|\mathbf{u}\|_2 \|\mathbf{v}\|_2 \quad \blacksquare
+$$
+
+### Critical Applications in Machine Learning & Data Science Tests:
+1. **Cosine Similarity Boundedness:** Dividing both sides by $\|\mathbf{u}\|_2 \|\mathbf{v}\|_2$ proves that:
+
+$$
+-1.0 \le \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\|_2 \|\mathbf{v}\|_2} \le +1.0
+$$
+
+   *(Guarantees that cosine similarity is strictly bounded between $-1$ and $+1$).*
+
+2. **Pearson Correlation Coefficient Range:** Applying Cauchy-Schwarz to random variables $X$ and $Y$ with inner product $\langle X, Y \rangle = \mathbb{E}[(X - \mu_X)(Y - \mu_Y)] = \text{Cov}(X, Y)$:
+
+$$
+|\text{Cov}(X, Y)| \le \sqrt{\text{Var}(X)} \sqrt{\text{Var}(Y)} = \sigma_X \sigma_Y \implies -1.0 \le \rho_{XY} \le +1.0
+$$
+
+   *(Guarantees that correlation coefficient $\rho$ is always bounded in $[-1, 1]$).*
+
+---
+
+## 1.10 General $L_p$ Norms, Minkowski Inequality, and the $L_0$ Pseudo-Norm
+
+### 1. General $L_p$ Norm Definition ($p \ge 1$)
+
+$$
+\|\mathbf{x}\|_p = \left( \sum_{i=1}^{n} |x_i|^p \right)^{1/p}
+$$
+
+* For $p=1$: $L_1$ Norm (Manhattan / Taxicab): $\|\mathbf{x}\|_1 = \sum |x_i|$.
+* For $p=2$: $L_2$ Norm (Euclidean): $\|\mathbf{x}\|_2 = \sqrt{\sum x_i^2}$.
+* For $p \to \infty$: $L_\infty$ Norm (Max Norm / Chebyshev Norm):
+
+$$
+\|\mathbf{x}\|_\infty = \lim_{p \to \infty} \left( \sum_{i=1}^{n} |x_i|^p \right)^{1/p} = \max_{1 \le i \le n} |x_i|
+$$
+
+* *Hand Example:* For $\mathbf{x} = [-3, 7, -2]^T$:
+  * $\|\mathbf{x}\|_\infty = \max(|-3|, |7|, |-2|) = 7$.
+
+### 2. The Minkowski Inequality (Triangle Inequality for $L_p$ Norms)
+For any $p \ge 1$ and vectors $\mathbf{u}, \mathbf{v} \in \mathbb{R}^n$:
+
+$$
+\|\mathbf{u} + \mathbf{v}\|_p \le \|\mathbf{u}\|_p + \|\mathbf{v}\|_p
+$$
+
+### 3. Why the "$L_0$ Norm" is NOT a True Mathematical Norm
+In sparse modeling, the $L_0$ "norm" counts the number of non-zero entries in a vector:
+
+$$
+\|\mathbf{x}\|_0 = \sum_{i=1}^{n} \mathbb{I}(x_i \neq 0)
+$$
+
+> [!WARNING]
+> **Data Science Exam Trap: Is $L_0$ a True Norm?**
+> **Answer: NO!** $L_0$ is a **pseudo-norm** because it violates the **Absolute Homogeneity (Scalability) Axiom** of norms:
+> * For a true norm, scaling a vector by scalar $c$ must scale the norm: $\|c\mathbf{x}\| = |c| \|\mathbf{x}\|$.
+> * For $L_0$, if $\mathbf{x} = [3, 0]^T$, then $\|\mathbf{x}\|_0 = 1$.
+> * Scaling by $c = 5$: $\|5\mathbf{x}\|_0 = \|[15, 0]^T\|_0 = 1 \neq 5 \times \|\mathbf{x}\|_0 = 5$.
+> * Because $\|c\mathbf{x}\|_0 \neq |c|\|\mathbf{x}\|_0$, $L_0$ is non-convex and NP-hard to optimize. $L_1$ (Lasso) is used as the tightest **convex surrogate relaxation** for $L_0$ sparsity!
+
+### 4. Hölder's Inequality (Dual Norms)
+For conjugate exponents $p, q \in [1, \infty]$ satisfying $\frac{1}{p} + \frac{1}{q} = 1$:
+
+$$
+|\mathbf{x}^T \mathbf{y}| \le \|\mathbf{x}\|_p \|\mathbf{y}\|_q
+$$
+
+* When $p=2, q=2$: Reduces to the Cauchy-Schwarz inequality.
+* When $p=1, q=\infty$: $|\mathbf{x}^T \mathbf{y}| \le \|\mathbf{x}\|_1 \|\mathbf{y}\|_\infty$.
+
+---
+
 > 📖 **Navigation:** [← Return to Index](./README.md) | [🏠 Index](./README.md) | [Next: Part 02: Matrices & Matrix Operations →](./02_matrices_and_operations.md)

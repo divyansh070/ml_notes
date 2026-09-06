@@ -57,4 +57,77 @@ $$
 
 ---
 
+## 17.4 Spectral / SVD View of Ridge Shrinkage
+
+Expressing Ridge Regression through the SVD of the centered design matrix $X = U \Sigma V^T$ reveals exactly how $L_2$ regularization handles ill-conditioned data:
+
+$$
+\mathbf{w}_{\text{Ridge}} = (X^T X + \lambda I)^{-1} X^T \mathbf{y} = \sum_{i=1}^{p} \left( \frac{\sigma_i}{\sigma_i^2 + \lambda} \right) (\mathbf{u}_i^T \mathbf{y}) \mathbf{v}_i
+$$
+
+Compare this directly with unregularized OLS:
+
+$$
+\mathbf{w}_{\text{OLS}} = (X^T X)^{-1} X^T \mathbf{y} = \sum_{i=1}^{p} \left( \frac{1}{\sigma_i} \right) (\mathbf{u}_i^T \mathbf{y}) \mathbf{v}_i
+$$
+
+```
+                   OLS vs. RIDGE COEFFICIENT SHRINKAGE FILTER
+       Singular Value σ_i           OLS Filter (1 / σ_i)     Ridge Filter (σ_i / (σ_i^2 + λ))
+    ──────────────────────────────────────────────────────────────────────────────────────────
+    Large Signal (σ_i = 100, λ=1)       0.010                     100 / 10001 ≈ 0.010 (Preserved!)
+    Small Noise  (σ_i = 0.01, λ=1)    100.000 (Explodes!)         0.01 / 1.0001 ≈ 0.010 (DAMPED!)
+```
+
+* **The Takeaway:** For large singular values ($\sigma_i^2 \gg \lambda$), Ridge acts like OLS. For small singular values ($\sigma_i^2 \ll \lambda$, corresponding to collinear noise directions), Ridge shrinks the filter weight toward zero, preventing variance explosion!
+
+---
+
+## 17.5 Lasso Subgradient Analysis & Soft-Thresholding Operator
+
+Because the $L_1$ penalty $|w_j|$ is non-differentiable at $w_j = 0$, we use **Subgradient Calculus**.
+The subdifferential of absolute value $|w|$ is:
+
+$$
+\partial |w| =
+\begin{cases}
+\{+1\} & \text{if } w > 0 \\
+[-1, +1] & \text{if } w = 0 \\
+\{-1\} & \text{if } w < 0
+\end{cases}
+$$
+
+For an orthonormal feature matrix ($X^T X = I$), the closed-form Lasso solution is the **Soft-Thresholding Operator**:
+
+$$
+\hat{w}_j^{\text{Lasso}} = S_\lambda(\hat{w}_j^{\text{OLS}}) = \text{sign}(\hat{w}_j^{\text{OLS}}) \cdot \max\left( |\hat{w}_j^{\text{OLS}}| - \lambda, 0 \right)
+$$
+
+```
+             HARD THRESHOLDING (L0) vs. SOFT THRESHOLDING (L1 - Lasso)
+          w_hat                                    w_hat
+            ▲      /                                 ▲        /
+            │     /                                  │       /
+            │    /                                   │      /
+         ───┼───●───► w_ols                       ───┼─────●────► w_ols
+           /│                                       /│    -λ  +λ
+          / │                                      / │
+      Hard jump at 0.0                    Continuous soft shrinkage to 0.0!
+```
+
+---
+
+## 17.6 ElasticNet Regularization ($L_1 + L_2$)
+
+When features are highly correlated (e.g. gene expressions, financial indicators), Lasso arbitrarily picks one feature and zeroes the others. **ElasticNet** combines both penalties:
+
+$$
+\mathcal{L}_{\text{ElasticNet}} = \text{MSE}(\mathbf{w}) + \lambda_1 \|\mathbf{w}\|_1 + \frac{\lambda_2}{2} \|\mathbf{w}\|_2^2
+$$
+
+* **Grouping Effect:** ElasticNet encourages grouped selection—correlated features enter or leave the model together.
+* **Strict Convexity:** Adding the strictly convex $L_2$ penalty guarantees a unique global minimum even when $p > N$.
+
+---
+
 > 📖 **Navigation:** [← Previous: Part 17: Distance & Similarity Metrics](./17_distance_and_similarity_metrics.md) | [🏠 Index](./README.md) | [Next: Part 19: Entropy & Information Gain Mathematics →](./19_entropy_and_information_gain.md)

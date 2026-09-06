@@ -103,4 +103,72 @@ $$
 
 ---
 
+## 13.5 The Hat Matrix ($H$) & Statistical Properties
+
+The projection matrix in OLS regression is called the **Hat Matrix ($H$)** because it "puts the hat on $\mathbf{y}$" ($\hat{\mathbf{y}} = H\mathbf{y}$):
+
+$$
+H = X (X^T X)^{-1} X^T
+$$
+
+```
+                         THE HAT MATRIX GEOMETRY
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ • Fitted Values:       ŷ = H y                                         │
+  │ • Residuals:           e = (I - H) y                                   │
+  │ • Leverage Score:      h_ii = H_ii (Leverage of data point i)          │
+  │ • Degrees of Freedom:  Tr(H) = p (Parameters),  Tr(I - H) = N - p      │
+  └────────────────────────────────────────────────────────────────────────┘
+```
+
+* **Leverage in Outlier Analysis ($h_{ii}$):** Diagonal element $H_{ii}$ measures how far observation $i$'s features are from the feature mean. High leverage points ($h_{ii} > \frac{2p}{N}$) exert disproportionate influence on the fitted regression plane (used in Cook's Distance).
+
+---
+
+## 13.6 Geometric Orthogonality of Residuals ($X^T \mathbf{e} = \mathbf{0}$)
+
+The normal equations $X^T X \mathbf{w} = X^T \mathbf{y}$ can be rewritten as:
+
+$$
+X^T (\mathbf{y} - X\mathbf{w}) = X^T \mathbf{e} = \mathbf{0}
+$$
+
+```
+                     RESIDUAL ORTHOGONALITY GEOMETRY
+                                 y
+                                ╱│
+                               ╱ │ Residual e = y - Xw
+                              ╱  │ (Orthogonal to Col(X)!)
+                             ╱   │
+                            ●────┴────────► Col(X)
+                            0    ŷ = Xw
+```
+
+* **Key Mathematical Implications:**
+  1. The residual vector $\mathbf{e}$ is **strictly orthogonal to every column in the design matrix $X$**.
+  2. Because the first column of $X$ is a vector of ones $\mathbf{1}$ (the intercept), $\mathbf{1}^T \mathbf{e} = \sum_{i=1}^N e_i = 0$. **The sum (and mean) of OLS residuals is always exactly zero!**
+  3. Predicted values $\hat{\mathbf{y}}$ and residuals $\mathbf{e}$ are uncorrelated: $\hat{\mathbf{y}}^T \mathbf{e} = (X\mathbf{w})^T \mathbf{e} = \mathbf{w}^T (X^T \mathbf{e}) = \mathbf{0}$.
+
+---
+
+## 13.7 The Gauss-Markov Theorem & BLUE Property
+
+The **Gauss-Markov Theorem** states that under standard OLS assumptions ($\mathbb{E}[\boldsymbol{\epsilon}] = \mathbf{0}$, $\text{Cov}(\boldsymbol{\epsilon}) = \sigma^2 I$), the OLS estimator $\hat{\mathbf{w}} = (X^T X)^{-1} X^T \mathbf{y}$ is **BLUE** (**Best Linear Unbiased Estimator**).
+
+1. **Unbiasedness:**
+
+$$
+\mathbb{E}[\hat{\mathbf{w}}] = \mathbb{E}[(X^T X)^{-1} X^T (X\mathbf{w} + \boldsymbol{\epsilon})] = \mathbf{w} + (X^T X)^{-1} X^T \mathbb{E}[\boldsymbol{\epsilon}] = \mathbf{w}
+$$
+
+2. **Parameter Covariance Matrix:**
+
+$$
+\text{Cov}(\hat{\mathbf{w}}) = \sigma^2 (X^T X)^{-1}
+$$
+
+3. **"Best" (Minimum Variance):** For any other linear unbiased estimator $\tilde{\mathbf{w}}$, $\text{Cov}(\tilde{\mathbf{w}}) - \text{Cov}(\hat{\mathbf{w}})$ is a Positive Semidefinite matrix.
+
+---
+
 > 📖 **Navigation:** [← Previous: Part 13: Vector Projections](./13_vector_projections.md) | [🏠 Index](./README.md) | [Next: Part 15: Gradients & Derivatives for Optimization →](./15_gradients_and_derivatives.md)
