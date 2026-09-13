@@ -1,4 +1,4 @@
-> 📖 **Navigation:** [← Previous: Part 22: Four Fundamental Subspaces (Strang's Big Picture)](./22_four_fundamental_subspaces.md) | [🏠 Index](./README.md) | [Next: Part 24: Positive Definite & Positive Semidefinite Matrices →](./24_positive_definite_matrices.md)
+> 📖 **Navigation:** [← Previous: Part 22: Complete PCA & Covariance Walkthrough](./22_pca_and_covariance_walkthrough.md) | [🏠 Index](./README.md) | [Next: Part 24: Optimization & Derivatives for ML →](./24_optimization_and_derivatives.md)
 
 ---
 
@@ -180,4 +180,4 @@ In floating-point arithmetic, standard Gram-Schmidt (CGS) suffers from severe lo
 
 ---
 
-> 📖 **Navigation:** [← Previous: Part 22: Four Fundamental Subspaces (Strang's Big Picture)](./22_four_fundamental_subspaces.md) | [🏠 Index](./README.md) | [Next: Part 24: Positive Definite & Positive Semidefinite Matrices →](./24_positive_definite_matrices.md)
+> 📖 **Navigation:** [← Previous: Part 22: Complete PCA & Covariance Walkthrough](./22_pca_and_covariance_walkthrough.md) | [🏠 Index](./README.md) | [Next: Part 24: Optimization & Derivatives for ML →](./24_optimization_and_derivatives.md)
