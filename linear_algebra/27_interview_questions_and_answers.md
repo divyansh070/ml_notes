@@ -33,8 +33,8 @@ Structured specifically for Data Science and Machine Learning Engineer technical
 * **ML Connection:** Internal solver in sparse linear equation packages, LU/LUP decomposition solvers.
 
 ### Q4: What is matrix rank and what does rank deficiency mean for a dataset?
-* **Direct Answer:** Rank is the maximum number of linearly independent rows or columns. Rank deficiency ($\operatorname{rank}(X) < d$) means redundant, collinear features exist.
-* **Why It Matters:** If $\operatorname{rank}(X) < d$, the normal equation matrix $X^T X$ is singular and non-invertible.
+* **Direct Answer:** Rank is the maximum number of linearly independent rows or columns. Rank deficiency ($\text{rank}(X) < d$) means redundant, collinear features exist.
+* **Why It Matters:** If $\text{rank}(X) < d$, the normal equation matrix $X^T X$ is singular and non-invertible.
 * **Geometric Picture:** Feature columns span a lower-dimensional subspace (e.g., a flat 2D plane inside 3D space).
 * **ML Connection:** Multicollinearity in regression, feature redundancy requiring PCA or Ridge regularization.
 
@@ -47,9 +47,9 @@ Structured specifically for Data Science and Machine Learning Engineer technical
 * **Why It Matters:** Overdetermined systems ($m > n$) have no exact solution but admit least-squares solutions via left inverse; underdetermined systems ($m < n$) have infinite solutions, and the right inverse selects the minimum-norm solution.
 * **ML Connection:** OLS linear regression ($A_{\text{left}}^{-1}\mathbf{y}$), minimum-norm interpolators in deep learning and kernel methods.
 
-### Q6: How does the adjugate/cofactor inverse formula work and why does $A \operatorname{adj}(A) = \det(A) I$?
-* **Direct Answer:** $A^{-1} = \frac{1}{\det(A)}\operatorname{adj}(A)$, where $\operatorname{adj}(A) = C^T$ is the transpose of the cofactor matrix $C_{ij} = (-1)^{i+j}M_{ij}$.
-* **Why It Matters:** The $(i, i)$-th entry of $A C^T$ is the dot product of row $i$ of $A$ with cofactors of row $i$, which is Laplace's cofactor expansion yielding $\det(A)$. The off-diagonal entries $(i, k)$ ($i \neq k$) correspond to the cofactor expansion of a matrix with two identical rows, which has determinant 0. Thus $A \operatorname{adj}(A) = \det(A) I$.
+### Q6: How does the adjugate/cofactor inverse formula work and why does $A \text{adj}(A) = \det(A) I$?
+* **Direct Answer:** $A^{-1} = \frac{1}{\det(A)}\text{adj}(A)$, where $\text{adj}(A) = C^T$ is the transpose of the cofactor matrix $C_{ij} = (-1)^{i+j}M_{ij}$.
+* **Why It Matters:** The $(i, i)$-th entry of $A C^T$ is the dot product of row $i$ of $A$ with cofactors of row $i$, which is Laplace's cofactor expansion yielding $\det(A)$. The off-diagonal entries $(i, k)$ ($i \neq k$) correspond to the cofactor expansion of a matrix with two identical rows, which has determinant 0. Thus $A \text{adj}(A) = \det(A) I$.
 * **ML Connection:** Closed-form symbolic inversion for $2 \times 2$ and $3 \times 3$ matrices in computer vision (camera matrices, affine transformations).
 
 ### Q7: What does the determinant of a matrix represent geometrically?
@@ -105,7 +105,7 @@ Structured specifically for Data Science and Machine Learning Engineer technical
 ### Q14: What is the difference between Full, Compact, and Truncated SVD?
 * **Direct Answer:**
   * **Full SVD:** $U \in \mathbb{R}^{m \times m}, \Sigma \in \mathbb{R}^{m \times n}, V \in \mathbb{R}^{n \times n}$. Contains full orthonormal bases for domain and codomain.
-  * **Compact SVD:** Keeps only the $r = \operatorname{rank}(A)$ non-zero singular values: $U_r \in \mathbb{R}^{m \times r}, \Sigma_r \in \mathbb{R}^{r \times r}, V_r \in \mathbb{R}^{n \times r}$. Exactly reproduces $A$.
+  * **Compact SVD:** Keeps only the $r = \text{rank}(A)$ non-zero singular values: $U_r \in \mathbb{R}^{m \times r}, \Sigma_r \in \mathbb{R}^{r \times r}, V_r \in \mathbb{R}^{n \times r}$. Exactly reproduces $A$.
   * **Truncated SVD:** Keeps only top $k < r$ singular values: $A_k = U_k \Sigma_k V_k^T$. Gives the optimal rank-$k$ approximation under the Eckart-Young Theorem.
 * **ML Connection:** Truncated SVD powers LoRA (Low-Rank Adaptation in LLMs), latent semantic indexing, and image compression.
 

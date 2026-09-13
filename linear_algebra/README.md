@@ -42,10 +42,10 @@
 | Part | Module | Key Topics Covered |
 | :---: | :--- | :--- |
 | **01** | [Vectors and Vector Spaces](./01_vectors_and_vector_spaces.md) | Vector operations, dot products, geometric cosine angle proof, $L_1, L_2, L_\infty, L_p$ norms, unit vectors, Euclidean distance |
-| **02** | [Matrices and Operations](./02_matrices_and_operations.md) | Matrices as operators, row/column views of $A\mathbf{x}$, non-commutativity ($AB \neq BA$), transpose rules, trace $\operatorname{Tr}(A)$, Frobenius norm |
+| **02** | [Matrices and Operations](./02_matrices_and_operations.md) | Matrices as operators, row/column views of $A\mathbf{x}$, non-commutativity ($AB \neq BA$), transpose rules, trace $\text{Tr}(A)$, Frobenius norm |
 | **03** | [Systems of Linear Equations](./03_systems_of_linear_equations.md) | $A\mathbf{x} = \mathbf{b}$, row vs column picture, 3 solution cases (unique, infinite with free variables, inconsistent contradiction) |
 | **04** | [Gaussian and Gauss-Jordan Elimination](./04_gaussian_and_gauss_jordan_elimination.md) | Forward elimination, Row Echelon Form (REF) vs Reduced REF (RREF), back-substitution, $[A \mid I] \to [I \mid A^{-1}]$ $3\times 3$ trace |
-| **05** | [Matrix Inverses](./05_matrix_inverses.md) | Two-sided, left, right, and pseudoinverse distinctions; full $2\times 2$ derivation; complete $3\times 3$ adjugate/cofactor method; $A \operatorname{adj}(A) = \det(A)I$ |
+| **05** | [Matrix Inverses](./05_matrix_inverses.md) | Two-sided, left, right, and pseudoinverse distinctions; full $2\times 2$ derivation; complete $3\times 3$ adjugate/cofactor method; $A \text{adj}(A) = \det(A)I$ |
 | **06** | [Determinants](./06_determinants.md) | Volume/area scaling, 2D/3D determinants, Laplace expansion, triangular matrices, 6 fundamental rules, $\det(A) = \prod \lambda_i$ |
 | **07** | [Matrix Rank](./07_matrix_rank.md) | Row rank = column rank, pivot counting in REF, full rank vs rank deficiency, dimension of span, solvability connections |
 | **08** | [Linear Independence, Span, and Basis](./08_linear_independence_span_basis.md) | Linear combinations, span geometry, linear independence test, basis minimal spanning set, dimension, span vs basis contrast |
@@ -107,7 +107,7 @@ After completing the **Core Track (Parts 01–21)**, you should be able to perfo
   * *ML Connection:* Analytic solution for 2D Gaussian distributions and bivariate regression.
 * [ ] **Inverse by Gauss-Jordan:** Augment $[A \mid I]$ and apply row operations to row-reduce $A$ to $I$, producing $[I \mid A^{-1}]$.
   * *ML Connection:* Exact numerical inversion algorithm implemented in linear algebra libraries.
-* [ ] **Inverse by Adjugate / Cofactors:** Calculate all minors $M_{ij}$, cofactors $C_{ij} = (-1)^{i+j}M_{ij}$, transpose cofactor matrix $C$ to form $\operatorname{adj}(A) = C^T$, and compute $A^{-1} = \frac{1}{\det(A)}\operatorname{adj}(A)$ on a $3 \times 3$ matrix.
+* [ ] **Inverse by Adjugate / Cofactors:** Calculate all minors $M_{ij}$, cofactors $C_{ij} = (-1)^{i+j}M_{ij}$, transpose cofactor matrix $C$ to form $\text{adj}(A) = C^T$, and compute $A^{-1} = \frac{1}{\det(A)}\text{adj}(A)$ on a $3 \times 3$ matrix.
   * *ML Connection:* Closed-form analytic inverse in camera calibration, robotics, and small-dimensional spatial transforms.
 * [ ] **Linear Independence, Span, and Basis:** Test whether a set of vectors is linearly independent ($c_1 \mathbf{v}_1 + \cdots + c_k \mathbf{v}_k = \mathbf{0} \implies c_i = 0$); find a minimal basis spanning a subspace.
   * *ML Connection:* Identifying non-redundant feature subsets; latent coordinate representation.
@@ -136,7 +136,7 @@ After completing the **Core Track (Parts 01–21)**, you should be able to perfo
 
 ### 2. Conceptual & Geometric Explanations
 * [ ] **Row Picture vs. Column Picture:** Explain $A\mathbf{x} = \mathbf{b}$ both as the intersection of hyperplanes and as a linear combination of feature columns landing on target $\mathbf{b}$.
-* [ ] **Why $A \operatorname{adj}(A) = \det(A) I$:** Explain why diagonal entries yield Laplace cofactor expansions while off-diagonal entries expand matrices with repeated rows (yielding zero).
+* [ ] **Why $A \text{adj}(A) = \det(A) I$:** Explain why diagonal entries yield Laplace cofactor expansions while off-diagonal entries expand matrices with repeated rows (yielding zero).
 * [ ] **Two-Sided vs. Left vs. Right vs. Pseudoinverse:** Explain why tall matrices ($m > n$, full column rank) have left inverses, wide matrices ($m < n$, full row rank) have right inverses, and only square full-rank matrices have two-sided inverses.
 * [ ] **Geometric Derivation of Least Squares:** Explain why the residual error $\mathbf{e} = \mathbf{y} - X\mathbf{w}^*$ must be perpendicular to every column of $X$, immediately yielding $X^T \mathbf{e} = \mathbf{0} \implies (X^T X)\mathbf{w}^* = X^T \mathbf{y}$.
 * [ ] **Full vs. Compact vs. Truncated SVD:** Explain the geometric action of SVD (Rotate $\to$ Scale $\to$ Rotate) and how truncated SVD provides the optimal rank-$k$ approximation under the Eckart-Young Theorem.

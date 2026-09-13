@@ -31,14 +31,18 @@ A common misconception is that non-square matrices cannot have inverses. In line
 
 1. **Two-Sided Inverse ($A^{-1}$):** Exists if and only if $A$ is **square** ($n \times n$) and **non-singular** ($\det(A) \neq 0$).
 2. **Left Inverse ($A_{\text{left}}^{-1}$):** For tall matrices with independent columns ($m > n$, rank $n$). The left inverse is:
-   $$
-   A_{\text{left}}^{-1} = (A^T A)^{-1} A^T \implies A_{\text{left}}^{-1} A = (A^T A)^{-1} (A^T A) = I_n
-   $$
+
+$$
+A_{\text{left}}^{-1} = (A^T A)^{-1} A^T \implies A_{\text{left}}^{-1} A = (A^T A)^{-1} (A^T A) = I_n
+$$
+
    *(This is the exact Ordinary Least Squares regression formula!)*
 3. **Right Inverse ($A_{\text{right}}^{-1}$):** For wide matrices with independent rows ($m < n$, rank $m$). The right inverse is:
-   $$
-   A_{\text{right}}^{-1} = A^T (A A^T)^{-1} \implies A A_{\text{right}}^{-1} = (A A^T) (A A^T)^{-1} = I_m
-   $$
+
+$$
+A_{\text{right}}^{-1} = A^T (A A^T)^{-1} \implies A A_{\text{right}}^{-1} = (A A^T) (A A^T)^{-1} = I_m
+$$
+
    *(This is the minimum-norm interpolator in overparameterized models).*
 4. **Moore-Penrose Pseudoinverse ($A^+$):** Generalizes inversion to any rectangular or rank-deficient matrix via Singular Value Decomposition (covered fully in [Part 20](./20_moore_penrose_pseudoinverse.md)).
 
@@ -66,33 +70,43 @@ $$
 This expands into two independent linear systems:
 
 ### System 1 (Column 1):
+
 $$
 \begin{aligned}
 a x_1 + b x_3 &= 1 \quad \times d \implies a d x_1 + b d x_3 = d \\
 c x_1 + d x_3 &= 0 \quad \times b \implies b c x_1 + b d x_3 = 0
 \end{aligned}
 $$
+
 Subtracting the second equation from the first:
+
 $$
 (a d - b c) x_1 = d \implies x_1 = \frac{d}{a d - b c}
 $$
+
 Substitute $x_1$ back into $c x_1 + d x_3 = 0$:
+
 $$
 d x_3 = -c x_1 = \frac{-c d}{a d - b c} \implies x_3 = \frac{-c}{a d - b c}
 $$
 
 ### System 2 (Column 2):
+
 $$
 \begin{aligned}
 a x_2 + b x_4 &= 0 \quad \times d \implies a d x_2 + b d x_4 = 0 \\
 c x_2 + d x_4 &= 1 \quad \times b \implies b c x_2 + b d x_4 = b
 \end{aligned}
 $$
+
 Subtracting the second equation from the first:
+
 $$
 (a d - b c) x_2 = -b \implies x_2 = \frac{-b}{a d - b c}
 $$
+
 Substitute $x_2$ back into $a x_2 + b x_4 = 0$:
+
 $$
 b x_4 = -a x_2 = \frac{a b}{a d - b c} \implies x_4 = \frac{a}{a d - b c}
 $$
@@ -119,22 +133,27 @@ For matrices of size $3 \times 3$ and larger, the **Adjugate (or Cofactor) Metho
 
 1. **Minor of an Element ($M_{ij}$):** The determinant of the $(n-1) \times (n-1)$ submatrix left after crossing out Row $i$ and Column $j$ of matrix $A$.
 2. **Cofactor ($C_{ij}$):** The minor signed by the checkerboard pattern:
-   $$
-   C_{ij} = (-1)^{i+j} M_{ij}
-   $$
+
+$$
+C_{ij} = (-1)^{i+j} M_{ij}
+$$
+
 3. **Cofactor Matrix ($C$):** The $n \times n$ matrix containing all cofactors $C_{ij}$.
-4. **Adjugate Matrix ($\operatorname{adj}(A)$):** The **transpose** of the cofactor matrix:
-   $$
-   \operatorname{adj}(A) = C^T
-   $$
+4. **Adjugate Matrix ($\text{adj}(A)$):** The **transpose** of the cofactor matrix:
+
+$$
+\text{adj}(A) = C^T
+$$
+
 5. **The Final Inverse Formula:**
-   $$
-   A^{-1} = \frac{1}{\det(A)} \operatorname{adj}(A) = \frac{1}{\det(A)} C^T
-   $$
+
+$$
+A^{-1} = \frac{1}{\det(A)} \text{adj}(A) = \frac{1}{\det(A)} C^T
+$$
 
 ---
 
-### Why $A \operatorname{adj}(A) = \det(A) I$ (Why We Transpose the Cofactor Matrix)
+### Why $A \text{adj}(A) = \det(A) I$ (Why We Transpose the Cofactor Matrix)
 
 Consider the matrix product $A C^T$. The entry at Row $i$, Column $j$ is the dot product of Row $i$ of $A$ and Row $j$ of $C$:
 
@@ -143,20 +162,24 @@ $$
 $$
 
 * **When $i = j$ (Diagonal Entries):**
-  $$
-  \sum_{k=1}^{n} a_{ik} C_{ik} = a_{i1} C_{i1} + a_{i2} C_{i2} + \dots + a_{in} C_{in} = \det(A)
-  $$
+
+$$
+\sum_{k=1}^{n} a_{ik} C_{ik} = a_{i1} C_{i1} + a_{i2} C_{i2} + \dots + a_{in} C_{in} = \det(A)
+$$
+
   This is literally the definition of Laplace cofactor expansion of $\det(A)$ along Row $i$!
 * **When $i \neq j$ (Off-Diagonal Entries):**
-  $$
-  \sum_{k=1}^{n} a_{ik} C_{jk} = 0
-  $$
+
+$$
+\sum_{k=1}^{n} a_{ik} C_{jk} = 0
+$$
+
   This corresponds to evaluating the determinant of a matrix whose $j$-th row has been replaced by its $i$-th row. Because this hypothetical matrix has two identical rows ($i$ and $j$), its determinant is **identically zero**!
 
 Therefore, every diagonal entry of $A C^T$ is $\det(A)$ and every off-diagonal entry is $0$:
 
 $$
-A C^T = A \operatorname{adj}(A) = \begin{bmatrix}
+A C^T = A \text{adj}(A) = \begin{bmatrix}
 \det(A) & 0 & \dots & 0 \\
 0 & \det(A) & \dots & 0 \\
 \vdots & \vdots & \ddots & \vdots \\
@@ -165,9 +188,12 @@ A C^T = A \operatorname{adj}(A) = \begin{bmatrix}
 $$
 
 Dividing both sides by $\det(A)$ gives:
+
 $$
-A \left( \frac{1}{\det(A)} \operatorname{adj}(A) \right) = I_n \implies A^{-1} = \frac{1}{\det(A)} \operatorname{adj}(A) \quad \blacksquare
+A \left( \frac{1}{\det(A)} \text{adj}(A) \right) = I_n \implies A^{-1} = \frac{1}{\det(A)} \text{adj}(A)
 $$
+
+■
 
 > [!NOTE]
 > **Terminology: Adjugate vs. Adjoint**
@@ -178,6 +204,7 @@ $$
 ## 5.5 Complete $3 \times 3$ Worked Numerical Example
 
 Invert the matrix:
+
 $$
 A = \begin{bmatrix}
 2 & 1 & 1 \\
@@ -211,6 +238,7 @@ The sign pattern is $\begin{bmatrix} + & - & + \\ - & + & - \\ + & - & + \end{bm
 * $C_{33} = +1$
 
 ### Step 3: Assemble Cofactor Matrix $C$
+
 $$
 C = \begin{bmatrix}
 3 & -4 & -1 \\
@@ -219,9 +247,10 @@ C = \begin{bmatrix}
 \end{bmatrix}
 $$
 
-### Step 4: Transpose $C$ to get the Adjugate Matrix $\operatorname{adj}(A) = C^T$
+### Step 4: Transpose $C$ to get the Adjugate Matrix $\text{adj}(A) = C^T$
+
 $$
-\operatorname{adj}(A) = C^T = \begin{bmatrix}
+\text{adj}(A) = C^T = \begin{bmatrix}
 3 & -1 & -1 \\
 -4 & 2 & 1 \\
 -1 & 0 & 1
@@ -230,12 +259,14 @@ $$
 
 ### Step 5: Compute the Determinant $\det(A)$
 Using cofactor expansion along Row 1:
+
 $$
 \det(A) = a_{11} C_{11} + a_{12} C_{12} + a_{13} C_{13} = 2(3) + 1(-4) + 1(-1) = 6 - 4 - 1 = 1
 $$
 
-### Step 6: Assemble Final Inverse $A^{-1} = \frac{1}{\det(A)} \operatorname{adj}(A)$
+### Step 6: Assemble the Final Inverse
 Because $\det(A) = 1$:
+
 $$
 A^{-1} = \frac{1}{1} \begin{bmatrix}
 3 & -1 & -1 \\
@@ -251,6 +282,7 @@ A^{-1} = \frac{1}{1} \begin{bmatrix}
 $$
 
 ### Step 7: Verification ($A A^{-1} = I$)
+
 $$
 A A^{-1} = \begin{bmatrix}
 2 & 1 & 1 \\
@@ -273,14 +305,16 @@ A A^{-1} = \begin{bmatrix}
 1 & 0 & 0 \\
 0 & 1 & 0 \\
 0 & 0 & 1
-\end{bmatrix} \quad \checkmark
+\end{bmatrix}
 $$
+
+✓ **Verified**.
 
 ---
 
 ## 5.6 Why this matters in ML
 
-1. **Analytical vs. Numerical Inverses:** While production libraries use Gaussian/LU elimination ($\mathcal{O}(n^3)$) for computation, the adjugate formula $A^{-1} = \frac{1}{\det(A)} \operatorname{adj}(A)$ is vital for symbolic derivations and proving properties of parameter estimates in statistics and ML.
+1. **Analytical vs. Numerical Inverses:** While production libraries use Gaussian/LU elimination ($\mathcal{O}(n^3)$) for computation, the adjugate formula $A^{-1} = \frac{1}{\det(A)} \text{adj}(A)$ is vital for symbolic derivations and proving properties of parameter estimates in statistics and ML.
 2. **Left Inverses in OLS:** The normal equation solution $\mathbf{w} = (X^T X)^{-1} X^T \mathbf{y}$ is precisely the **left inverse** of the feature design matrix $X$ applied to $\mathbf{y}$.
 
 ---

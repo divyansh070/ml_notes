@@ -55,9 +55,11 @@ For any symmetric matrix $A = A^T \in \mathbb{R}^{n \times n}$, the following fo
 1. **Eigenvalue Test:** All eigenvalues are strictly positive: $\lambda_i > 0$ for all $i$.
 2. **Pivot Test:** All $n$ pivots in Gaussian elimination (without row swaps) are strictly positive: $d_i > 0$.
 3. **Sylvester's Criterion (Leading Principal Minors):** The determinants of all upper-left $k \times k$ submatrices are strictly positive:
-   $$
-   \det(A_1) > 0, \quad \det(A_2) > 0, \quad \dots, \quad \det(A_n) = \det(A) > 0
-   $$
+
+$$
+\det(A_1) > 0, \quad \det(A_2) > 0, \quad \dots, \quad \det(A_n) = \det(A) > 0
+$$
+
 4. **Cholesky Factorization:** $A$ can be factored uniquely into $A = L L^T$ where $L$ is lower-triangular with strictly positive diagonal entries.
 
 ---
@@ -65,20 +67,25 @@ For any symmetric matrix $A = A^T \in \mathbb{R}^{n \times n}$, the following fo
 ## 18.4 Proof: Why Covariance Matrices Are ALWAYS Positive Semidefinite
 
 Let $X_c \in \mathbb{R}^{n \times d}$ be a mean-centered data matrix. The sample covariance matrix is:
+
 $$
 \Sigma = \frac{1}{n-1} X_c^T X_c
 $$
 
 ### Mathematical Proof:
 For any arbitrary test vector $\mathbf{u} \in \mathbb{R}^d$:
+
 $$
 \mathbf{u}^T \Sigma \mathbf{u} = \mathbf{u}^T \left( \frac{1}{n-1} X_c^T X_c \right) \mathbf{u} = \frac{1}{n-1} (X_c \mathbf{u})^T (X_c \mathbf{u}) = \frac{1}{n-1} \|X_c \mathbf{u}\|_2^2
 $$
 
 Because the squared Euclidean norm of any real vector is strictly non-negative ($\|X_c \mathbf{u}\|_2^2 \ge 0$):
+
 $$
-\mathbf{u}^T \Sigma \mathbf{u} \ge 0 \implies \Sigma \succeq 0 \quad \blacksquare
+\mathbf{u}^T \Sigma \mathbf{u} \ge 0 \implies \Sigma \succeq 0
 $$
+
+■
 
 > [!IMPORTANT]
 > **Data Science Intuition:**
@@ -91,21 +98,25 @@ $$
 Test whether matrix $A = \begin{bmatrix} 2 & -1 \\ -1 & 2 \end{bmatrix}$ is Positive Definite using all three main tests.
 
 ### Test 1: Sylvester's Criterion (Leading Principal Minors)
-* Submatrix 1 ($1 \times 1$): $A_1 = [2] \implies \det(A_1) = 2 > 0 \quad \checkmark$
-* Submatrix 2 ($2 \times 2$): $A_2 = A \implies \det(A_2) = (2)(2) - (-1)(-1) = 4 - 1 = 3 > 0 \quad \checkmark$
+* Submatrix 1 ($1 \times 1$): $A_1 = [2] \implies \det(A_1) = 2 > 0$ ✓
+* Submatrix 2 ($2 \times 2$): $A_2 = A \implies \det(A_2) = (2)(2) - (-1)(-1) = 4 - 1 = 3 > 0$ ✓
 * Both leading principal minors are positive $\implies A \succ 0$.
 
 ### Test 2: Eigenvalue Test
+
 $$
 \det(A - \lambda I) = (2 - \lambda)^2 - (-1)^2 = \lambda^2 - 4\lambda + 3 = (\lambda - 3)(\lambda - 1) = 0
 $$
+
 * $\lambda_1 = 3 > 0, \quad \lambda_2 = 1 > 0$.
 * All eigenvalues are strictly positive $\implies A \succ 0$.
 
 ### Test 3: Quadratic Form Test
+
 $$
 \mathbf{x}^T A \mathbf{x} = 2x_1^2 - 2x_1 x_2 + 2x_2^2 = (x_1 - x_2)^2 + x_1^2 + x_2^2
 $$
+
 Because this is a sum of squares, $\mathbf{x}^T A \mathbf{x} \ge 0$, and equals $0$ if and only if $x_1 = x_2 = 0$. For all $\mathbf{x} \neq \mathbf{0}$, $\mathbf{x}^T A \mathbf{x} > 0 \implies A \succ 0$.
 
 ---
@@ -123,9 +134,11 @@ Because this is a sum of squares, $\mathbf{x}^T A \mathbf{x} \ge 0$, and equals 
 ## 18.7 Common mistakes
 
 * **Assuming Positive Entries Implies Positive Definiteness:** A matrix with all positive entries can easily be indefinite! For example:
-  $$
-  A = \begin{bmatrix} 1 & 5 \\ 5 & 1 \end{bmatrix} \implies \det(A) = 1 - 25 = -24 < 0 \implies \text{Indefinite (Eigenvalues } 6 \text{ and } -4\text{)}
-  $$
+
+$$
+A = \begin{bmatrix} 1 & 5 \\ 5 & 1 \end{bmatrix} \implies \det(A) = 1 - 25 = -24 < 0 \implies \text{Indefinite (Eigenvalues } 6 \text{ and } -4\text{)}
+$$
+
   Positive definiteness requires strong diagonal dominance over off-diagonal entries.
 * **Confusing Positive Semidefinite ($A \succeq 0$) with Strictly Positive Definite ($A \succ 0$):** Positive semidefinite matrices can have eigenvalues equal to $0$ (meaning they are singular and non-invertible). Positive definite matrices have eigenvalues strictly $> 0$ and are always invertible.
 

@@ -23,15 +23,19 @@ When a real matrix is symmetric ($A = A^T$), three remarkable mathematical guara
 > [!IMPORTANT]
 > **The Spectral Theorem:**
 > Every real symmetric matrix $A \in \mathbb{R}^{n \times n}$ can be **orthogonally diagonalized**:
+>
 > $$
 > A = Q \Lambda Q^T
 > $$
-> where $Q = [\mathbf{q}_1 \dots \mathbf{q}_n]$ is an **orthogonal matrix** of normalized eigenvectors ($Q^T Q = I_n$), and $\Lambda = \operatorname{diag}(\lambda_1, \dots, \lambda_n)$ is the diagonal matrix of real eigenvalues.
+>
+> where $Q = [\mathbf{q}_1 \dots \mathbf{q}_n]$ is an **orthogonal matrix** of normalized eigenvectors ($Q^T Q = I_n$), and $\Lambda = \text{diag}(\lambda_1, \dots, \lambda_n)$ is the diagonal matrix of real eigenvalues.
 
 ### Geometric Interpretation: Rotate $\to$ Stretch $\to$ Rotate Back
+
 $$
 A\mathbf{x} = Q \Lambda Q^T \mathbf{x}
 $$
+
 1. **$Q^T$ (Rotate):** Rotates the coordinate system to align the eigenvector axes with the standard coordinate axes.
 2. **$\Lambda$ (Stretch):** Stretches or compresses each coordinate independently by its eigenvalue $\lambda_i$.
 3. **$Q$ (Rotate Back):** Rotates space back to the original orientation.
@@ -54,36 +58,48 @@ $$
 ## 17.4 Complete Worked Numerical Example ($2 \times 2$)
 
 Orthogonally diagonalize the symmetric matrix:
+
 $$
 A = \begin{bmatrix} 3 & 1 \\ 1 & 3 \end{bmatrix}
 $$
 
 ### Step 1: Solve Characteristic Equation
+
 $$
 \det(A - \lambda I) = (3 - \lambda)^2 - (1)(1) = \lambda^2 - 6\lambda + 8 = 0
 $$
+
 Factor the quadratic:
+
 $$
 (\lambda - 4)(\lambda - 2) = 0 \implies \lambda_1 = 4, \quad \lambda_2 = 2
 $$
-Both eigenvalues are real numbers $\checkmark$.
+
+Both eigenvalues are real numbers ✓.
 
 ---
 
 ### Step 2: Find Eigenvectors & Verify Orthogonality
 * **For $\lambda_1 = 4$:**
-  $$
-  (A - 4I)\mathbf{v}_1 = \begin{bmatrix} -1 & 1 \\ 1 & -1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \mathbf{0} \implies -v_1 + v_2 = 0 \implies \mathbf{v}_1 = \begin{bmatrix} 1 \\ 1 \end{bmatrix}
-  $$
+
+$$
+(A - 4I)\mathbf{v}_1 = \begin{bmatrix} -1 & 1 \\ 1 & -1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \mathbf{0} \implies -v_1 + v_2 = 0 \implies \mathbf{v}_1 = \begin{bmatrix} 1 \\ 1 \end{bmatrix}
+$$
+
 * **For $\lambda_2 = 2$:**
-  $$
-  (A - 2I)\mathbf{v}_2 = \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \mathbf{0} \implies v_1 + v_2 = 0 \implies \mathbf{v}_2 = \begin{bmatrix} -1 \\ 1 \end{bmatrix}
-  $$
+
+$$
+(A - 2I)\mathbf{v}_2 = \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \mathbf{0} \implies v_1 + v_2 = 0 \implies \mathbf{v}_2 = \begin{bmatrix} -1 \\ 1 \end{bmatrix}
+$$
 
 #### Check Orthogonality:
+
 $$
-\mathbf{v}_1 \cdot \mathbf{v}_2 = (1)(-1) + (1)(1) = -1 + 1 = 0 \quad \checkmark
+\mathbf{v}_1 \cdot \mathbf{v}_2 = (1)(-1) + (1)(1) = -1 + 1 = 0
 $$
+
+✓ **Verified**.
+
 The eigenvectors are strictly perpendicular!
 
 ---
@@ -99,6 +115,7 @@ $$
 ---
 
 ### Step 4: Verify $A = Q \Lambda Q^T$
+
 $$
 Q \Lambda = \frac{1}{\sqrt{2}} \begin{bmatrix} 1 & -1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} 4 & 0 \\ 0 & 2 \end{bmatrix} = \frac{1}{\sqrt{2}} \begin{bmatrix} 4 & -2 \\ 4 & 2 \end{bmatrix}
 $$
@@ -106,23 +123,30 @@ $$
 $$
 (Q \Lambda) Q^T = \left(\frac{1}{\sqrt{2}} \begin{bmatrix} 4 & -2 \\ 4 & 2 \end{bmatrix}\right) \left(\frac{1}{\sqrt{2}} \begin{bmatrix} 1 & 1 \\ -1 & 1 \end{bmatrix}\right) =
 \frac{1}{2} \begin{bmatrix} 4(1) - 2(-1) & 4(1) - 2(1) \\ 4(1) + 2(-1) & 4(1) + 2(1) \end{bmatrix} =
-\frac{1}{2} \begin{bmatrix} 6 & 2 \\ 2 & 6 \end{bmatrix} = \begin{bmatrix} 3 & 1 \\ 1 & 3 \end{bmatrix} = A \quad \checkmark
+\frac{1}{2} \begin{bmatrix} 6 & 2 \\ 2 & 6 \end{bmatrix} = \begin{bmatrix} 3 & 1 \\ 1 & 3 \end{bmatrix} = A
 $$
+
+✓ **Verified**.
 
 ---
 
 ### Step 5: Verify Spectral Decomposition
+
 $$
 \lambda_1 \mathbf{q}_1 \mathbf{q}_1^T = 4 \left(\frac{1}{2} \begin{bmatrix} 1 \\ 1 \end{bmatrix} [1, 1]\right) = 2 \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} = \begin{bmatrix} 2 & 2 \\ 2 & 2 \end{bmatrix}
 $$
+
 $$
 \lambda_2 \mathbf{q}_2 \mathbf{q}_2^T = 2 \left(\frac{1}{2} \begin{bmatrix} -1 \\ 1 \end{bmatrix} [-1, 1]\right) = 1 \begin{bmatrix} 1 & -1 \\ -1 & 1 \end{bmatrix} = \begin{bmatrix} 1 & -1 \\ -1 & 1 \end{bmatrix}
 $$
 
 Summing both rank-1 projection matrices:
+
 $$
-\lambda_1 \mathbf{q}_1 \mathbf{q}_1^T + \lambda_2 \mathbf{q}_2 \mathbf{q}_2^T = \begin{bmatrix} 2 + 1 & 2 - 1 \\ 2 - 1 & 2 + 1 \end{bmatrix} = \begin{bmatrix} 3 & 1 \\ 1 & 3 \end{bmatrix} = A \quad \checkmark
+\lambda_1 \mathbf{q}_1 \mathbf{q}_1^T + \lambda_2 \mathbf{q}_2 \mathbf{q}_2^T = \begin{bmatrix} 2 + 1 & 2 - 1 \\ 2 - 1 & 2 + 1 \end{bmatrix} = \begin{bmatrix} 3 & 1 \\ 1 & 3 \end{bmatrix} = A
 $$
+
+✓ **Verified**.
 
 ---
 

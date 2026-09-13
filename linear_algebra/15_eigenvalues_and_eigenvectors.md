@@ -36,11 +36,13 @@ $$
 ## 15.1 The Characteristic Equation: Deriving $\det(A - \lambda I) = 0$
 
 Starting from the fundamental definition:
+
 $$
 A\mathbf{v} = \lambda\mathbf{v}
 $$
 
 Subtract $\lambda\mathbf{v} = \lambda I\mathbf{v}$ to move all terms to the left:
+
 $$
 (A - \lambda I)\mathbf{v} = \mathbf{0}
 $$
@@ -77,13 +79,16 @@ Every non-zero vector in $E_{\lambda_i}$ is a valid eigenvector. Scaling an eige
 For any $n \times n$ matrix $A$ with eigenvalues $\lambda_1, \dots, \lambda_n$:
 
 1. **The Sum of Eigenvalues is the Trace:**
-   $$
-   \operatorname{Tr}(A) = \sum_{i=1}^{n} \lambda_i = \lambda_1 + \lambda_2 + \dots + \lambda_n
-   $$
+
+$$
+\text{Tr}(A) = \sum_{i=1}^{n} \lambda_i = \lambda_1 + \lambda_2 + \dots + \lambda_n
+$$
+
 2. **The Product of Eigenvalues is the Determinant:**
-   $$
-   \det(A) = \prod_{i=1}^{n} \lambda_i = \lambda_1 \times \lambda_2 \times \dots \times \lambda_n
-   $$
+
+$$
+\det(A) = \prod_{i=1}^{n} \lambda_i = \lambda_1 \times \lambda_2 \times \dots \times \lambda_n
+$$
 
 *(These identities allow instantaneous verification of hand-calculated eigenvalues!).*
 
@@ -92,11 +97,13 @@ For any $n \times n$ matrix $A$ with eigenvalues $\lambda_1, \dots, \lambda_n$:
 ## 15.4 Complete Worked Numerical Example ($2 \times 2$)
 
 Find all eigenvalues and eigenvectors for:
+
 $$
 A = \begin{bmatrix} 4 & 2 \\ 1 & 3 \end{bmatrix}
 $$
 
 ### Step 1: Set Up the Characteristic Equation
+
 $$
 A - \lambda I = \begin{bmatrix} 4 - \lambda & 2 \\ 1 & 3 - \lambda \end{bmatrix}
 $$
@@ -106,35 +113,45 @@ $$
 $$
 
 ### Step 2: Expand and Solve the Quadratic Polynomial
+
 $$
 \lambda^2 - 7\lambda + 12 - 2 = \lambda^2 - 7\lambda + 10 = 0
 $$
+
 Factor the quadratic:
+
 $$
 (\lambda - 5)(\lambda - 2) = 0 \implies \lambda_1 = 5, \quad \lambda_2 = 2
 $$
 
 #### Sanity Check via Trace and Determinant:
-* $\operatorname{Tr}(A) = 4 + 3 = 7$; Sum of eigenvalues: $5 + 2 = 7 \quad \checkmark$
-* $\det(A) = (4)(3) - (2)(1) = 10$; Product of eigenvalues: $5 \times 2 = 10 \quad \checkmark$
+* $\text{Tr}(A) = 4 + 3 = 7$; Sum of eigenvalues: $5 + 2 = 7$ ✓
+* $\det(A) = (4)(3) - (2)(1) = 10$; Product of eigenvalues: $5 \times 2 = 10$ ✓
 
 ---
 
 ### Step 3: Find Eigenvector 1 for $\lambda_1 = 5$
 Substitute $\lambda_1 = 5$ into $(A - 5I)\mathbf{v}_1 = \mathbf{0}$:
+
 $$
 \begin{bmatrix} 4 - 5 & 2 \\ 1 & 3 - 5 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} =
 \begin{bmatrix} -1 & 2 \\ 1 & -2 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}
 $$
+
 Both rows yield the identical constraint:
+
 $$
 -v_1 + 2v_2 = 0 \implies v_1 = 2v_2
 $$
+
 Choose $v_2 = 1 \implies v_1 = 2$:
+
 $$
 \mathbf{v}_1 = \begin{bmatrix} 2 \\ 1 \end{bmatrix}
 $$
+
 Normalize to unit length:
+
 $$
 \mathbf{u}_1 = \frac{1}{\sqrt{2^2 + 1^2}} \begin{bmatrix} 2 \\ 1 \end{bmatrix} = \frac{1}{\sqrt{5}} \begin{bmatrix} 2 \\ 1 \end{bmatrix}
 $$
@@ -143,19 +160,26 @@ $$
 
 ### Step 4: Find Eigenvector 2 for $\lambda_2 = 2$
 Substitute $\lambda_2 = 2$ into $(A - 2I)\mathbf{v}_2 = \mathbf{0}$:
+
 $$
 \begin{bmatrix} 4 - 2 & 2 \\ 1 & 3 - 2 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} =
 \begin{bmatrix} 2 & 2 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}
 $$
+
 Row constraint:
+
 $$
 v_1 + v_2 = 0 \implies v_1 = -v_2
 $$
+
 Choose $v_2 = 1 \implies v_1 = -1$:
+
 $$
 \mathbf{v}_2 = \begin{bmatrix} -1 \\ 1 \end{bmatrix}
 $$
+
 Normalize to unit length:
+
 $$
 \mathbf{u}_2 = \frac{1}{\sqrt{(-1)^2 + 1^2}} \begin{bmatrix} -1 \\ 1 \end{bmatrix} = \frac{1}{\sqrt{2}} \begin{bmatrix} -1 \\ 1 \end{bmatrix}
 $$
@@ -164,15 +188,22 @@ $$
 
 ### Step 5: Verification ($A\mathbf{v} = \lambda\mathbf{v}$)
 * For $\lambda_1 = 5$:
-  $$
-  A\mathbf{v}_1 = \begin{bmatrix} 4 & 2 \\ 1 & 3 \end{bmatrix} \begin{bmatrix} 2 \\ 1 \end{bmatrix} =
-  \begin{bmatrix} 8 + 2 \\ 2 + 3 \end{bmatrix} = \begin{bmatrix} 10 \\ 5 \end{bmatrix} = 5 \begin{bmatrix} 2 \\ 1 \end{bmatrix} = \lambda_1 \mathbf{v}_1 \quad \checkmark
-  $$
+
+$$
+A\mathbf{v}_1 = \begin{bmatrix} 4 & 2 \\ 1 & 3 \end{bmatrix} \begin{bmatrix} 2 \\ 1 \end{bmatrix} =
+\begin{bmatrix} 8 + 2 \\ 2 + 3 \end{bmatrix} = \begin{bmatrix} 10 \\ 5 \end{bmatrix} = 5 \begin{bmatrix} 2 \\ 1 \end{bmatrix} = \lambda_1 \mathbf{v}_1
+$$
+
+✓ **Verified**.
+
 * For $\lambda_2 = 2$:
-  $$
-  A\mathbf{v}_2 = \begin{bmatrix} 4 & 2 \\ 1 & 3 \end{bmatrix} \begin{bmatrix} -1 \\ 1 \end{bmatrix} =
-  \begin{bmatrix} -4 + 2 \\ -1 + 3 \end{bmatrix} = \begin{bmatrix} -2 \\ 2 \end{bmatrix} = 2 \begin{bmatrix} -1 \\ 1 \end{bmatrix} = \lambda_2 \mathbf{v}_2 \quad \checkmark
-  $$
+
+$$
+A\mathbf{v}_2 = \begin{bmatrix} 4 & 2 \\ 1 & 3 \end{bmatrix} \begin{bmatrix} -1 \\ 1 \end{bmatrix} =
+\begin{bmatrix} -4 + 2 \\ -1 + 3 \end{bmatrix} = \begin{bmatrix} -2 \\ 2 \end{bmatrix} = 2 \begin{bmatrix} -1 \\ 1 \end{bmatrix} = \lambda_2 \mathbf{v}_2
+$$
+
+✓ **Verified**.
 
 ---
 

@@ -13,11 +13,13 @@ Diagonal matrices are the simplest possible matrices to work with: multiplying b
 Let $A \in \mathbb{R}^{n \times n}$ possess $n$ linearly independent eigenvectors $\mathbf{v}_1, \dots, \mathbf{v}_n$ with corresponding eigenvalues $\lambda_1, \dots, \lambda_n$.
 
 Package the eigenvectors into the columns of matrix $P$:
+
 $$
 P = \begin{bmatrix} \mid & \mid & & \mid \\ \mathbf{v}_1 & \mathbf{v}_2 & \dots & \mathbf{v}_n \\ \mid & \mid & & \mid \end{bmatrix}
 $$
 
 Package the eigenvalues into the diagonal matrix $D$:
+
 $$
 D = \begin{bmatrix}
 \lambda_1 & 0 & \dots & 0 \\
@@ -29,10 +31,13 @@ $$
 
 ### The Algebraic Derivation:
 Multiply $A$ by eigenvector matrix $P$:
+
 $$
 AP = A \begin{bmatrix} \mathbf{v}_1 & \dots & \mathbf{v}_n \end{bmatrix} = \begin{bmatrix} A\mathbf{v}_1 & \dots & A\mathbf{v}_n \end{bmatrix}
 $$
+
 Because $A\mathbf{v}_i = \lambda_i \mathbf{v}_i$:
+
 $$
 AP = \begin{bmatrix} \lambda_1 \mathbf{v}_1 & \dots & \lambda_n \mathbf{v}_n \end{bmatrix} = \begin{bmatrix} \mathbf{v}_1 & \dots & \mathbf{v}_n \end{bmatrix} \begin{bmatrix} \lambda_1 & 0 \\ 0 & \lambda_2 \end{bmatrix} = P D
 $$
@@ -44,6 +49,7 @@ A = P D P^{-1}
 $$
 
 Equivalently, pre-multiplying by $P^{-1}$:
+
 $$
 D = P^{-1} A P
 $$
@@ -55,11 +61,13 @@ $$
 Computing a high power of a matrix $A^k = A \times A \times \dots \times A$ directly is computationally expensive ($\mathcal{O}(k n^3)$).
 
 Using diagonalization, all interior terms collapse:
+
 $$
 A^k = (P D P^{-1}) (P D P^{-1}) \dots (P D P^{-1}) = P D (P^{-1} P) D \dots D P^{-1} = P D^k P^{-1}
 $$
 
 Because $D$ is diagonal, raising it to the power $k$ simply raises each diagonal eigenvalue to the power $k$:
+
 $$
 D^k = \begin{bmatrix}
 \lambda_1^k & 0 & \dots & 0 \\
@@ -100,17 +108,20 @@ Diagonalize $A = \begin{bmatrix} 4 & 2 \\ 1 & 3 \end{bmatrix}$ and compute $A^4$
 * $\lambda_2 = 2 \implies \mathbf{v}_2 = \begin{bmatrix} -1 \\ 1 \end{bmatrix}$
 
 ### Step 2: Assemble $P$ and $D$
+
 $$
 P = \begin{bmatrix} 2 & -1 \\ 1 & 1 \end{bmatrix}, \quad D = \begin{bmatrix} 5 & 0 \\ 0 & 2 \end{bmatrix}
 $$
 
 ### Step 3: Invert $P$ using $2 \times 2$ formula
 $\det(P) = (2)(1) - (-1)(1) = 2 + 1 = 3$.
+
 $$
 P^{-1} = \frac{1}{3} \begin{bmatrix} 1 & 1 \\ -1 & 2 \end{bmatrix}
 $$
 
 ### Step 4: Verify $A = P D P^{-1}$
+
 $$
 P D = \begin{bmatrix} 2 & -1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} 5 & 0 \\ 0 & 2 \end{bmatrix} = \begin{bmatrix} 10 & -2 \\ 5 & 2 \end{bmatrix}
 $$
@@ -118,8 +129,10 @@ $$
 $$
 (P D) P^{-1} = \frac{1}{3} \begin{bmatrix} 10 & -2 \\ 5 & 2 \end{bmatrix} \begin{bmatrix} 1 & 1 \\ -1 & 2 \end{bmatrix} =
 \frac{1}{3} \begin{bmatrix} 10(1) - 2(-1) & 10(1) - 2(2) \\ 5(1) + 2(-1) & 5(1) + 2(2) \end{bmatrix} =
-\frac{1}{3} \begin{bmatrix} 12 & 6 \\ 3 & 9 \end{bmatrix} = \begin{bmatrix} 4 & 2 \\ 1 & 3 \end{bmatrix} = A \quad \checkmark
+\frac{1}{3} \begin{bmatrix} 12 & 6 \\ 3 & 9 \end{bmatrix} = \begin{bmatrix} 4 & 2 \\ 1 & 3 \end{bmatrix} = A
 $$
+
+✓ **Verified**.
 
 ---
 
@@ -127,10 +140,11 @@ $$
 * $D^4 = \begin{bmatrix} 5^4 & 0 \\ 0 & 2^4 \end{bmatrix} = \begin{bmatrix} 625 & 0 \\ 0 & 16 \end{bmatrix}$
 * $P D^4 = \begin{bmatrix} 2 & -1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} 625 & 0 \\ 0 & 16 \end{bmatrix} = \begin{bmatrix} 1250 & -16 \\ 625 & 16 \end{bmatrix}$
 * $A^4 = (P D^4) P^{-1} = \frac{1}{3} \begin{bmatrix} 1250 & -16 \\ 625 & 16 \end{bmatrix} \begin{bmatrix} 1 & 1 \\ -1 & 2 \end{bmatrix}$:
-  $$
-  A^4 = \frac{1}{3} \begin{bmatrix} 1250(1) - 16(-1) & 1250(1) - 16(2) \\ 625(1) + 16(-1) & 625(1) + 16(2) \end{bmatrix} =
-  \frac{1}{3} \begin{bmatrix} 1266 & 1218 \\ 609 & 657 \end{bmatrix} = \begin{bmatrix} 422 & 406 \\ 203 & 219 \end{bmatrix}
-  $$
+
+$$
+A^4 = \frac{1}{3} \begin{bmatrix} 1250(1) - 16(-1) & 1250(1) - 16(2) \\ 625(1) + 16(-1) & 625(1) + 16(2) \end{bmatrix} =
+\frac{1}{3} \begin{bmatrix} 1266 & 1218 \\ 609 & 657 \end{bmatrix} = \begin{bmatrix} 422 & 406 \\ 203 & 219 \end{bmatrix}
+$$
 
 ---
 

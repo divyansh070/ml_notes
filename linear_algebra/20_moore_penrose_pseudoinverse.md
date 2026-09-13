@@ -12,7 +12,7 @@ What do you do when a matrix is not square or not invertible, but you still need
 
 The standard two-sided inverse $A^{-1}$ exists if and only if $A$ is square ($n \times n$) and non-singular ($\det(A) \neq 0$). In machine learning:
 
-1. **Overdetermined Systems ($m > n$, e.g. 10,000 samples and 10 features):** No exact solution exists because $\mathbf{y} \notin \operatorname{Col}(X)$.
+1. **Overdetermined Systems ($m > n$, e.g. 10,000 samples and 10 features):** No exact solution exists because $\mathbf{y} \notin \text{Col}(X)$.
 2. **Underdetermined Systems ($m < n$, e.g. 50 samples and 5,000 gene features):** Infinitely many exact interpolating solutions exist.
 3. **Rank-Deficient Matrices ($\det(X^T X) = 0$):** Multicollinear or duplicated features make the normal equations uninvertible.
 
@@ -69,14 +69,18 @@ The valid formulas depend strictly on the rank and shape of $A$:
 In every possible situation, the pseudoinverse solution $\mathbf{x}^* = A^+ \mathbf{b}$ gives the **mathematically optimal answer**:
 
 1. **Overdetermined Systems ($m > n$, 0 exact solutions):**
-   $$
-   \mathbf{x}^* = A^+ \mathbf{b} \quad \text{minimizes the sum of squared errors } \|\mathbf{b} - A\mathbf{x}\|_2^2
-   $$
+
+$$
+\mathbf{x}^* = A^+ \mathbf{b} \quad \text{minimizes the sum of squared errors } \|\mathbf{b} - A\mathbf{x}\|_2^2
+$$
+
    *(It reproduces the Ordinary Least Squares projection).*
 2. **Underdetermined Systems ($m < n$, $\infty$ exact solutions):**
-   $$
-   \mathbf{x}^* = A^+ \mathbf{b} \quad \text{selects the UNIQUE solution with the MINIMUM Euclidean norm } \|\mathbf{x}\|_2
-   $$
+
+$$
+\mathbf{x}^* = A^+ \mathbf{b} \quad \text{selects the UNIQUE solution with the MINIMUM Euclidean norm } \|\mathbf{x}\|_2
+$$
+
    *(It finds the weights that fit the data perfectly while keeping parameters as close to zero as possible).*
 
 ---
@@ -86,23 +90,29 @@ In every possible situation, the pseudoinverse solution $\mathbf{x}^* = A^+ \mat
 Find the pseudoinverse of $A = \begin{bmatrix} 1 \\ 2 \end{bmatrix} \in \mathbb{R}^{2 \times 1}$.
 
 ### Method 1: Using the Full Column Rank Formula
-* $m = 2, n = 1$. $\operatorname{rank}(A) = 1 = n$ (Full column rank).
+* $m = 2, n = 1$. $\text{rank}(A) = 1 = n$ (Full column rank).
 * $A^T A = [1, 2] \begin{bmatrix} 1 \\ 2 \end{bmatrix} = 1^2 + 2^2 = 5$.
 * $(A^T A)^{-1} = \frac{1}{5} = 0.2$.
 * Compute $A^+ = (A^T A)^{-1} A^T$:
-  $$
-  A^+ = \frac{1}{5} [1, 2] = \begin{bmatrix} 0.2 & 0.4 \end{bmatrix} \in \mathbb{R}^{1 \times 2}
-  $$
+
+$$
+A^+ = \frac{1}{5} [1, 2] = \begin{bmatrix} 0.2 & 0.4 \end{bmatrix} \in \mathbb{R}^{1 \times 2}
+$$
 
 ### Verification of Left Inverse Property ($A^+ A = I_1$):
+
 $$
-A^+ A = \begin{bmatrix} 0.2 & 0.4 \end{bmatrix} \begin{bmatrix} 1 \\ 2 \end{bmatrix} = (0.2)(1) + (0.4)(2) = 0.2 + 0.8 = 1.0 = I_1 \quad \checkmark
+A^+ A = \begin{bmatrix} 0.2 & 0.4 \end{bmatrix} \begin{bmatrix} 1 \\ 2 \end{bmatrix} = (0.2)(1) + (0.4)(2) = 0.2 + 0.8 = 1.0 = I_1
 $$
 
+✓ **Verified**.
+
 ### Checking the Projection Matrix $P = A A^+$:
+
 $$
 A A^+ = \begin{bmatrix} 1 \\ 2 \end{bmatrix} \begin{bmatrix} 0.2 & 0.4 \end{bmatrix} = \begin{bmatrix} 0.2 & 0.4 \\ 0.4 & 0.8 \end{bmatrix}
 $$
+
 *(Notice that $A A^+ \neq I_2$; it is the orthogonal projection matrix onto the column space of $A$!).*
 
 ---
@@ -112,8 +122,8 @@ $$
 A matrix $A^+$ is the unique Moore-Penrose pseudoinverse of $A$ if and only if it satisfies all four conditions:
 1. $A A^+ A = A$ (Transforms column space consistently).
 2. $A^+ A A^+ = A^+$ (Acts as a valid weak inverse).
-3. $(A A^+)^T = A A^+$ ($A A^+$ is the symmetric projector onto $\operatorname{Col}(A)$).
-4. $(A^+ A)^T = A^+ A$ ($A^+ A$ is the symmetric projector onto $\operatorname{Row}(A)$).
+3. $(A A^+)^T = A A^+$ ($A A^+$ is the symmetric projector onto $\text{Col}(A)$).
+4. $(A^+ A)^T = A^+ A$ ($A^+ A$ is the symmetric projector onto $\text{Row}(A)$).
 
 ---
 

@@ -69,19 +69,25 @@ $$
 ### Proof: Why the Null Space is ALWAYS a Subspace of $\mathbb{R}^n$
 1. **Contains $\mathbf{0}$:** $A\mathbf{0} = \mathbf{0} \implies \mathbf{0} \in N(A)$.
 2. **Closed under Addition:** If $\mathbf{u}, \mathbf{v} \in N(A)$, then $A\mathbf{u} = \mathbf{0}$ and $A\mathbf{v} = \mathbf{0}$. Therefore:
-   $$
-   A(\mathbf{u} + \mathbf{v}) = A\mathbf{u} + A\mathbf{v} = \mathbf{0} + \mathbf{0} = \mathbf{0} \implies (\mathbf{u} + \mathbf{v}) \in N(A)
-   $$
+
+$$
+A(\mathbf{u} + \mathbf{v}) = A\mathbf{u} + A\mathbf{v} = \mathbf{0} + \mathbf{0} = \mathbf{0} \implies (\mathbf{u} + \mathbf{v}) \in N(A)
+$$
+
 3. **Closed under Scaling:** If $\mathbf{u} \in N(A)$ and $c \in \mathbb{R}$, then:
-   $$
-   A(c\mathbf{u}) = c(A\mathbf{u}) = c\mathbf{0} = \mathbf{0} \implies c\mathbf{u} \in N(A) \quad \blacksquare
-   $$
+
+$$
+A(c\mathbf{u}) = c(A\mathbf{u}) = c\mathbf{0} = \mathbf{0} \implies c\mathbf{u} \in N(A)
+$$
+
+■
 
 ---
 
 ## 9.5 Complete Worked Example: Finding the Null Space & Basis
 
 Find the null space and a basis for $N(A)$ for:
+
 $$
 A = \begin{bmatrix}
 1 & 3 & 1 & 4 \\
@@ -90,6 +96,7 @@ A = \begin{bmatrix}
 $$
 
 ### Step 1: Set Up and Row Reduce $A\mathbf{x} = \mathbf{0}$
+
 $$
 \left[\begin{array}{cccc|c}
 1 & 3 & 1 & 4 & 0 \\
@@ -98,11 +105,13 @@ $$
 $$
 
 Eliminate Column 1 in Row 2 ($R_2 \leftarrow R_2 - 2R_1$):
+
 $$
 [2, 6, 3, 9 \mid 0] - 2[1, 3, 1, 4 \mid 0] = [0, 0, 1, 1 \mid 0]
 $$
 
 Matrix becomes:
+
 $$
 \left[\begin{array}{cccc|c}
 1 & 3 & 1 & 4 & 0 \\
@@ -111,6 +120,7 @@ $$
 $$
 
 Eliminate Column 3 in Row 1 ($R_1 \leftarrow R_1 - R_2$):
+
 $$
 [1, 3, 1, 4 \mid 0] - [0, 0, 1, 1 \mid 0] = [1, 3, 0, 3 \mid 0]
 $$
@@ -139,6 +149,7 @@ $$
 
 ### Step 4: Extract the Null Space Basis
 The two direction vectors form the **basis for $N(A)$**:
+
 $$
 \mathcal{B}_{N(A)} = \left\lbrace \begin{bmatrix} -3 \\ 1 \\ 0 \\ 0 \end{bmatrix}, \begin{bmatrix} -3 \\ 0 \\ -1 \\ 1 \end{bmatrix} \right\rbrace
 $$

@@ -94,17 +94,23 @@ $$
 > [!NOTE]
 > **Where does this formula come from?**
 > Consider the triangle formed by $\mathbf{a}$, $\mathbf{b}$, and $\mathbf{c} = \mathbf{a} - \mathbf{b}$. By the geometric Law of Cosines:
+>
 > $$
 > \|\mathbf{a} - \mathbf{b}\|_2^2 = \|\mathbf{a}\|_2^2 + \|\mathbf{b}\|_2^2 - 2 \|\mathbf{a}\|_2 \|\mathbf{b}\|_2 \cos\theta
 > $$
+>
 > Expanding the left side algebraically using dot products:
+>
 > $$
 > \|\mathbf{a} - \mathbf{b}\|_2^2 = (\mathbf{a} - \mathbf{b})^T (\mathbf{a} - \mathbf{b}) = \mathbf{a}^T \mathbf{a} - 2\mathbf{a}^T \mathbf{b} + \mathbf{b}^T \mathbf{b} = \|\mathbf{a}\|_2^2 - 2(\mathbf{a} \cdot \mathbf{b}) + \|\mathbf{b}\|_2^2
 > $$
+>
 > Equating both expansions directly yields:
+>
 > $$
 > -2(\mathbf{a} \cdot \mathbf{b}) = -2 \|\mathbf{a}\|_2 \|\mathbf{b}\|_2 \cos\theta \implies \mathbf{a} \cdot \mathbf{b} = \|\mathbf{a}\|_2 \|\mathbf{b}\|_2 \cos\theta
 > $$
+>
 
 ### 3. What the Dot Product Tells Us
 The sign of $\mathbf{a} \cdot \mathbf{b}$ directly reveals the directional alignment of two vectors:
@@ -166,9 +172,11 @@ $$
 A **unit vector** $\mathbf{u}$ is a vector with length exactly equal to 1: $\|\mathbf{u}\|_2 = 1$.
 
 * **Vector Normalization:** Any non-zero vector $\mathbf{v} \neq \mathbf{0}$ can be normalized into a unit vector pointing in the identical direction by dividing by its Euclidean norm:
-  $$
-  \mathbf{u} = \frac{\mathbf{v}}{\|\mathbf{v}\|_2}
-  $$
+
+$$
+\mathbf{u} = \frac{\mathbf{v}}{\|\mathbf{v}\|_2}
+$$
+
 * **Verification:** $\left\|\frac{\mathbf{v}}{\|\mathbf{v}\|_2}\right\|_2 = \frac{1}{\|\mathbf{v}\|_2} \|\mathbf{v}\|_2 = 1$.
 
 ---
@@ -197,11 +205,13 @@ $$
 ## 1.7 Complete Worked Numerical Example
 
 Let:
+
 $$
 \mathbf{a} = \begin{bmatrix} 3 \\ 4 \end{bmatrix}, \quad \mathbf{b} = \begin{bmatrix} 4 \\ -3 \end{bmatrix}, \quad \mathbf{c} = \begin{bmatrix} 1 \\ 2 \end{bmatrix}
 $$
 
 ### Step 1: Vector Addition and Subtraction
+
 $$
 \mathbf{a} + \mathbf{c} = \begin{bmatrix} 3 + 1 \\ 4 + 2 \end{bmatrix} = \begin{bmatrix} 4 \\ 6 \end{bmatrix}, \quad \mathbf{a} - \mathbf{c} = \begin{bmatrix} 3 - 1 \\ 4 - 2 \end{bmatrix} = \begin{bmatrix} 2 \\ 2 \end{bmatrix}
 $$
@@ -212,28 +222,35 @@ $$
 * $L_\infty$ Norm: $\|\mathbf{a}\|_\infty = \max(|3|, |4|) = 4$
 
 ### Step 3: Normalizing Vector a into a Unit Vector
+
 $$
 \mathbf{u}_{\mathbf{a}} = \frac{\mathbf{a}}{\|\mathbf{a}\|_2} = \frac{1}{5} \begin{bmatrix} 3 \\ 4 \end{bmatrix} = \begin{bmatrix} 0.6 \\ 0.8 \end{bmatrix}
 $$
-* Check unit length: $\|\mathbf{u}_{\mathbf{a}}\|_2 = \sqrt{0.6^2 + 0.8^2} = \sqrt{0.36 + 0.64} = \sqrt{1.0} = 1 \quad \checkmark$
+
+* Check unit length: $\|\mathbf{u}_{\mathbf{a}}\|_2 = \sqrt{0.6^2 + 0.8^2} = \sqrt{0.36 + 0.64} = \sqrt{1.0} = 1$ ✓
 
 ### Step 4: Dot Product and Orthogonality Check for a and b
+
 $$
 \mathbf{a} \cdot \mathbf{b} = (3)(4) + (4)(-3) = 12 - 12 = 0
 $$
+
 * Because $\mathbf{a} \cdot \mathbf{b} = 0$, vectors $\mathbf{a}$ and $\mathbf{b}$ are **strictly orthogonal** ($\theta = 90^\circ$).
 
 ### Step 5: Angle and Distance Between a and c
 * Dot product: $\mathbf{a} \cdot \mathbf{c} = (3)(1) + (4)(2) = 3 + 8 = 11$
 * Norm of $\mathbf{c}$: $\|\mathbf{c}\|_2 = \sqrt{1^2 + 2^2} = \sqrt{5} \approx 2.236$
 * Cosine similarity:
-  $$
-  \cos\theta = \frac{11}{(5)(\sqrt{5})} = \frac{11}{5\sqrt{5}} = \frac{11}{11.18} \approx 0.9838 \implies \theta \approx 10.3^\circ
-  $$
+
+$$
+\cos\theta = \frac{11}{(5)(\sqrt{5})} = \frac{11}{5\sqrt{5}} = \frac{11}{11.18} \approx 0.9838 \implies \theta \approx 10.3^\circ
+$$
+
 * Euclidean distance:
-  $$
-  d(\mathbf{a}, \mathbf{c}) = \|\mathbf{a} - \mathbf{c}\|_2 = \sqrt{(3 - 1)^2 + (4 - 2)^2} = \sqrt{2^2 + 2^2} = \sqrt{8} \approx 2.828
-  $$
+
+$$
+d(\mathbf{a}, \mathbf{c}) = \|\mathbf{a} - \mathbf{c}\|_2 = \sqrt{(3 - 1)^2 + (4 - 2)^2} = \sqrt{2^2 + 2^2} = \sqrt{8} \approx 2.828
+$$
 
 ---
 
@@ -241,9 +258,11 @@ $$
 
 1. **Feature Vectors & Embeddings:** Every document, image, or user profile in machine learning is converted into a vector in $\mathbb{R}^d$.
 2. **Attention in Transformers:** The core self-attention query-key score is a scaled dot product:
-   $$
-   \text{Attention Logit} = \frac{\mathbf{q}^T \mathbf{k}}{\sqrt{d_k}}
-   $$
+
+$$
+\text{Attention Logit} = \frac{\mathbf{q}^T \mathbf{k}}{\sqrt{d_k}}
+$$
+
    High dot products indicate strong semantic affinity between tokens.
 3. **Cosine Similarity in Vector Databases:** When searching for nearest neighbors in vector databases (Pinecone, Milvus, Chroma), cosine similarity compares the direction of text embeddings without being distorted by document length.
 4. **Regularization ($L_1$ vs $L_2$):** Ridge regression penalizes the squared $L_2$ norm of weights ($\lambda \|\mathbf{w}\|_2^2$), preventing weights from growing too large. Lasso penalizes the $L_1$ norm ($\lambda \|\mathbf{w}\|_1$), forcing irrelevant weights to exact 0.0.

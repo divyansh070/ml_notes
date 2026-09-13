@@ -16,12 +16,14 @@ A mapping $T: \mathbb{R}^n \to \mathbb{R}^m$ is a **Linear Transformation** if a
 2. **Homogeneity (Scalar Scaling):** $T(c\mathbf{u}) = c T(\mathbf{u})$ for all $c \in \mathbb{R}, \mathbf{u} \in \mathbb{R}^n$.
 
 Combining both gives the single linearity condition:
+
 $$
 T(c\mathbf{u} + d\mathbf{v}) = c T(\mathbf{u}) + d T(\mathbf{v})
 $$
 
 ### The Origin Invariant:
 A strictly linear transformation must **always map the origin to the origin**:
+
 $$
 T(\mathbf{0}) = T(0 \cdot \mathbf{v}) = 0 \cdot T(\mathbf{v}) = \mathbf{0}
 $$
@@ -72,30 +74,35 @@ Every $2 \times 2$ matrix transforms 2D space by repositioning the basis vectors
 
 ### 1. Scaling (Dilation / Contraction):
 Stretches or compresses axes by factors $s_x, s_y$:
+
 $$
 A_{\text{scale}} = \begin{bmatrix} s_x & 0 \\ 0 & s_y \end{bmatrix} \implies \begin{bmatrix} 2 & 0 \\ 0 & 3 \end{bmatrix} \begin{bmatrix} x \\ y \end{bmatrix} = \begin{bmatrix} 2x \\ 3y \end{bmatrix}
 $$
 
 ### 2. Rotation (Counter-Clockwise by Angle $\theta$):
 Rotates all vectors by angle $\theta$ around the origin without changing their lengths:
+
 $$
 R_\theta = \begin{bmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{bmatrix} \implies R_{90^\circ} = \begin{bmatrix} 0 & -1 \\ 1 & 0 \end{bmatrix}
 $$
 
 ### 3. Reflection (Across Coordinate Axes):
 Flips vectors across an axis:
+
 $$
 A_{\text{reflect (x-axis)}} = \begin{bmatrix} 1 & 0 \\ 0 & -1 \end{bmatrix}, \quad A_{\text{reflect (y-axis)}} = \begin{bmatrix} -1 & 0 \\ 0 & 1 \end{bmatrix}
 $$
 
 ### 4. Shear (Sliding Parallel to an Axis):
 Slides points parallel to an axis proportionally to their perpendicular coordinate:
+
 $$
 A_{\text{shear (horizontal)}} = \begin{bmatrix} 1 & k \\ 0 & 1 \end{bmatrix} \implies \begin{bmatrix} 1 & 1.5 \\ 0 & 1 \end{bmatrix} \begin{bmatrix} x \\ y \end{bmatrix} = \begin{bmatrix} x + 1.5y \\ y \end{bmatrix}
 $$
 
 ### 5. Projection (Onto an Axis):
 Flattens space by dropping perpendicular shadows onto a coordinate line:
+
 $$
 P_x = \begin{bmatrix} 1 & 0 \\ 0 & 0 \end{bmatrix} \implies \begin{bmatrix} 1 & 0 \\ 0 & 0 \end{bmatrix} \begin{bmatrix} x \\ y \end{bmatrix} = \begin{bmatrix} x \\ 0 \end{bmatrix}
 $$
@@ -132,11 +139,13 @@ Construct the transformation matrix $A$ that:
 2. Then scales the x-axis by $2$ and the y-axis by $3$.
 
 ### Step 1: Write Individual Transformation Matrices
+
 $$
 R_{90^\circ} = \begin{bmatrix} 0 & -1 \\ 1 & 0 \end{bmatrix}, \quad S = \begin{bmatrix} 2 & 0 \\ 0 & 3 \end{bmatrix}
 $$
 
 ### Step 2: Compose Transformations ($S$ after $R$)
+
 $$
 A = S R_{90^\circ} = \begin{bmatrix} 2 & 0 \\ 0 & 3 \end{bmatrix} \begin{bmatrix} 0 & -1 \\ 1 & 0 \end{bmatrix} =
 \begin{bmatrix}
@@ -147,6 +156,7 @@ A = S R_{90^\circ} = \begin{bmatrix} 2 & 0 \\ 0 & 3 \end{bmatrix} \begin{bmatrix
 $$
 
 ### Step 3: Test on Input Vector $\mathbf{v} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$
+
 $$
 A\mathbf{v} = \begin{bmatrix} 0 & -2 \\ 3 & 0 \end{bmatrix} \begin{bmatrix} 1 \\ 1 \end{bmatrix} =
 \begin{bmatrix} 0 - 2 \\ 3 + 0 \end{bmatrix} = \begin{bmatrix} -2 \\ 3 \end{bmatrix}
@@ -155,7 +165,7 @@ $$
 #### Geometric Check:
 * Initial vector: $[1, 1]^T$ (length $\sqrt{2}$, angle $45^\circ$).
 * Rotated $90^\circ$: $[-1, 1]^T$ (angle $135^\circ$).
-* Scaled by $s_x = 2, s_y = 3$: $[-2, 3]^T \quad \checkmark$.
+* Scaled by $s_x = 2, s_y = 3$: $[-2, 3]^T$ ✓.
 
 ---
 

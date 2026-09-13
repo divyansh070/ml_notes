@@ -14,19 +14,24 @@ When basis vectors $\mathbf{q}_1, \mathbf{q}_2, \dots, \mathbf{q}_k$ are **ortho
 
 1. **Instant Coordinates (No Matrix Inversion):**
    Expanding any vector $\mathbf{x}$ in an orthonormal basis requires only dot products:
-   $$
-   \mathbf{x} = c_1 \mathbf{q}_1 + c_2 \mathbf{q}_2 + \dots + c_k \mathbf{q}_k \quad \text{where } c_i = \mathbf{x} \cdot \mathbf{q}_i
-   $$
+
+$$
+\mathbf{x} = c_1 \mathbf{q}_1 + c_2 \mathbf{q}_2 + \dots + c_k \mathbf{q}_k \quad \text{where } c_i = \mathbf{x} \cdot \mathbf{q}_i
+$$
+
 2. **Trivial Matrix Inversion:**
    Any square orthogonal matrix $Q = [\mathbf{q}_1, \dots, \mathbf{q}_n]$ satisfies:
-   $$
-   Q^T Q = I \implies Q^{-1} = Q^T
-   $$
+
+$$
+Q^T Q = I \implies Q^{-1} = Q^T
+$$
+
 3. **Length and Angle Preservation:**
    Orthogonal matrices act as rigid rotations and reflections:
-   $$
-   \|Q\mathbf{x}\|_2 = \|\mathbf{x}\|_2, \qquad (Q\mathbf{x})^T (Q\mathbf{y}) = \mathbf{x}^T \mathbf{y}
-   $$
+
+$$
+\|Q\mathbf{x}\|_2 = \|\mathbf{x}\|_2, \qquad (Q\mathbf{x})^T (Q\mathbf{y}) = \mathbf{x}^T \mathbf{y}
+$$
 
 ---
 
@@ -47,19 +52,24 @@ The **Gram-Schmidt Process** takes a linearly independent set of vectors $\mathb
 
 ### The Three-Step Recipe:
 1. **First vector:**
-   $$
-   \mathbf{u}_1 = \mathbf{a}_1, \qquad \mathbf{q}_1 = \frac{\mathbf{u}_1}{\|\mathbf{u}_1\|_2}
-   $$
+
+$$
+\mathbf{u}_1 = \mathbf{a}_1, \qquad \mathbf{q}_1 = \frac{\mathbf{u}_1}{\|\mathbf{u}_1\|_2}
+$$
+
 2. **Second vector:**
    Subtract the projection of $\mathbf{a}_2$ onto $\mathbf{u}_1$:
-   $$
-   \mathbf{u}_2 = \mathbf{a}_2 - (\mathbf{a}_2 \cdot \mathbf{q}_1)\mathbf{q}_1, \qquad \mathbf{q}_2 = \frac{\mathbf{u}_2}{\|\mathbf{u}_2\|_2}
-   $$
+
+$$
+\mathbf{u}_2 = \mathbf{a}_2 - (\mathbf{a}_2 \cdot \mathbf{q}_1)\mathbf{q}_1, \qquad \mathbf{q}_2 = \frac{\mathbf{u}_2}{\|\mathbf{u}_2\|_2}
+$$
+
 3. **General $k$-th vector:**
    Subtract the projections of $\mathbf{a}_k$ onto all previous $\mathbf{q}_1, \dots, \mathbf{q}_{k-1}$:
-   $$
-   \mathbf{u}_k = \mathbf{a}_k - \sum_{i=1}^{k-1} (\mathbf{a}_k \cdot \mathbf{q}_i)\mathbf{q}_i, \qquad \mathbf{q}_k = \frac{\mathbf{u}_k}{\|\mathbf{u}_k\|_2}
-   $$
+
+$$
+\mathbf{u}_k = \mathbf{a}_k - \sum_{i=1}^{k-1} (\mathbf{a}_k \cdot \mathbf{q}_i)\mathbf{q}_i, \qquad \mathbf{q}_k = \frac{\mathbf{u}_k}{\|\mathbf{u}_k\|_2}
+$$
 
 ---
 
@@ -83,27 +93,34 @@ $$
 * $\mathbf{u}_1 = \mathbf{a}_1 = [1, 1]^T$
 * $\|\mathbf{u}_1\|_2 = \sqrt{1^2 + 1^2} = \sqrt{2}$
 * Normalized $\mathbf{q}_1$:
-  $$
-  \mathbf{q}_1 = \frac{1}{\sqrt{2}} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = \begin{bmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \end{bmatrix}
-  $$
+
+$$
+\mathbf{q}_1 = \frac{1}{\sqrt{2}} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = \begin{bmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \end{bmatrix}
+$$
 
 ### Step 2: Compute $\mathbf{u}_2$ and $\mathbf{q}_2$
 * Project $\mathbf{a}_2$ onto $\mathbf{q}_1$:
-  $$
-  \mathbf{a}_2 \cdot \mathbf{q}_1 = (1)\left(\frac{1}{\sqrt{2}}\right) + (0)\left(\frac{1}{\sqrt{2}}\right) = \frac{1}{\sqrt{2}}
-  $$
+
+$$
+\mathbf{a}_2 \cdot \mathbf{q}_1 = (1)\left(\frac{1}{\sqrt{2}}\right) + (0)\left(\frac{1}{\sqrt{2}}\right) = \frac{1}{\sqrt{2}}
+$$
+
 * Subtract projection:
-  $$
-  \mathbf{u}_2 = \mathbf{a}_2 - (\mathbf{a}_2 \cdot \mathbf{q}_1)\mathbf{q}_1 = \begin{bmatrix} 1 \\ 0 \end{bmatrix} - \frac{1}{\sqrt{2}} \begin{bmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \end{bmatrix} = \begin{bmatrix} 1 \\ 0 \end{bmatrix} - \begin{bmatrix} 1/2 \\ 1/2 \end{bmatrix} = \begin{bmatrix} 1/2 \\ -1/2 \end{bmatrix}
-  $$
-* Check orthogonality: $\mathbf{u}_1 \cdot \mathbf{u}_2 = (1)(1/2) + (1)(-1/2) = 0 \quad \checkmark$
+
+$$
+\mathbf{u}_2 = \mathbf{a}_2 - (\mathbf{a}_2 \cdot \mathbf{q}_1)\mathbf{q}_1 = \begin{bmatrix} 1 \\ 0 \end{bmatrix} - \frac{1}{\sqrt{2}} \begin{bmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \end{bmatrix} = \begin{bmatrix} 1 \\ 0 \end{bmatrix} - \begin{bmatrix} 1/2 \\ 1/2 \end{bmatrix} = \begin{bmatrix} 1/2 \\ -1/2 \end{bmatrix}
+$$
+
+* Check orthogonality: $\mathbf{u}_1 \cdot \mathbf{u}_2 = (1)(1/2) + (1)(-1/2) = 0$ ✓
 * Normalize $\mathbf{u}_2$:
-  $$
-  \|\mathbf{u}_2\|_2 = \sqrt{(1/2)^2 + (-1/2)^2} = \sqrt{1/4 + 1/4} = \sqrt{1/2} = \frac{1}{\sqrt{2}}
-  $$
-  $$
-  \mathbf{q}_2 = \frac{\mathbf{u}_2}{\|\mathbf{u}_2\|_2} = \sqrt{2} \begin{bmatrix} 1/2 \\ -1/2 \end{bmatrix} = \begin{bmatrix} 1/\sqrt{2} \\ -1/\sqrt{2} \end{bmatrix}
-  $$
+
+$$
+\|\mathbf{u}_2\|_2 = \sqrt{(1/2)^2 + (-1/2)^2} = \sqrt{1/4 + 1/4} = \sqrt{1/2} = \frac{1}{\sqrt{2}}
+$$
+
+$$
+\mathbf{q}_2 = \frac{\mathbf{u}_2}{\|\mathbf{u}_2\|_2} = \sqrt{2} \begin{bmatrix} 1/2 \\ -1/2 \end{bmatrix} = \begin{bmatrix} 1/\sqrt{2} \\ -1/\sqrt{2} \end{bmatrix}
+$$
 
 ---
 
@@ -118,27 +135,35 @@ $$
 where:
 * $Q \in \mathbb{R}^{m \times n}$ has **orthonormal columns** ($Q^T Q = I$).
 * $R \in \mathbb{R}^{n \times n}$ is an **upper-triangular matrix** containing the projection dot products:
-  $$
-  R_{ij} = \mathbf{q}_i^T \mathbf{a}_j \quad (R_{ij} = 0 \text{ for } i > j)
-  $$
+
+$$
+R_{ij} = \mathbf{q}_i^T \mathbf{a}_j \quad (R_{ij} = 0 \text{ for } i > j)
+$$
 
 ### Constructing $Q$ and $R$ from the Hand Example:
 1. Matrix $Q$:
-   $$
-   Q = \begin{bmatrix} \mathbf{q}_1 & \mathbf{q}_2 \end{bmatrix} = \begin{bmatrix} 1/\sqrt{2} & 1/\sqrt{2} \\ 1/\sqrt{2} & -1/\sqrt{2} \end{bmatrix}
-   $$
+
+$$
+Q = \begin{bmatrix} \mathbf{q}_1 & \mathbf{q}_2 \end{bmatrix} = \begin{bmatrix} 1/\sqrt{2} & 1/\sqrt{2} \\ 1/\sqrt{2} & -1/\sqrt{2} \end{bmatrix}
+$$
+
 2. Matrix $R = Q^T A$:
    * $R_{11} = \mathbf{q}_1^T \mathbf{a}_1 = \frac{1}{\sqrt{2}}(1) + \frac{1}{\sqrt{2}}(1) = \sqrt{2}$
    * $R_{12} = \mathbf{q}_1^T \mathbf{a}_2 = \frac{1}{\sqrt{2}}(1) + \frac{1}{\sqrt{2}}(0) = 1/\sqrt{2}$
    * $R_{21} = 0$
    * $R_{22} = \mathbf{q}_2^T \mathbf{a}_2 = \frac{1}{\sqrt{2}}(1) - \frac{1}{\sqrt{2}}(0) = 1/\sqrt{2}$
-   $$
-   R = \begin{bmatrix} \sqrt{2} & 1/\sqrt{2} \\ 0 & 1/\sqrt{2} \end{bmatrix}
-   $$
+
+$$
+R = \begin{bmatrix} \sqrt{2} & 1/\sqrt{2} \\ 0 & 1/\sqrt{2} \end{bmatrix}
+$$
+
 3. Verify $QR = A$:
-   $$
-   QR = \begin{bmatrix} 1/\sqrt{2} & 1/\sqrt{2} \\ 1/\sqrt{2} & -1/\sqrt{2} \end{bmatrix} \begin{bmatrix} \sqrt{2} & 1/\sqrt{2} \\ 0 & 1/\sqrt{2} \end{bmatrix} = \begin{bmatrix} 1 + 0 & 1/2 + 1/2 \\ 1 + 0 & 1/2 - 1/2 \end{bmatrix} = \begin{bmatrix} 1 & 1 \\ 1 & 0 \end{bmatrix} = A \quad \checkmark
-   $$
+
+$$
+QR = \begin{bmatrix} 1/\sqrt{2} & 1/\sqrt{2} \\ 1/\sqrt{2} & -1/\sqrt{2} \end{bmatrix} \begin{bmatrix} \sqrt{2} & 1/\sqrt{2} \\ 0 & 1/\sqrt{2} \end{bmatrix} = \begin{bmatrix} 1 + 0 & 1/2 + 1/2 \\ 1 + 0 & 1/2 - 1/2 \end{bmatrix} = \begin{bmatrix} 1 & 1 \\ 1 & 0 \end{bmatrix} = A
+$$
+
+✓ **Verified**.
 
 ---
 

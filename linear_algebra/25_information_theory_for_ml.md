@@ -30,17 +30,23 @@ $$
 Where $\sum_{i=1}^C p_i = 1$ and by convention $0 \log_2 0 = 0$.
 
 * **Pure Distribution (Certainty):** $p_1 = 1$, all other $p_i = 0$.
-  $$
-  H(X) = -(1 \log_2 1) = 0 \text{ bits}
-  $$
+
+$$
+H(X) = -(1 \log_2 1) = 0 \text{ bits}
+$$
+
 * **Uniform Distribution (Maximum Uncertainty):** $p_i = \frac{1}{C}$ for all $i$.
-  $$
-  H_{\max}(X) = -\sum_{i=1}^C \frac{1}{C} \log_2 \frac{1}{C} = \log_2 C
-  $$
+
+$$
+H_{\max}(X) = -\sum_{i=1}^C \frac{1}{C} \log_2 \frac{1}{C} = \log_2 C
+$$
+
 * **Binary Entropy Function:** For a binary label with $P(y=1) = p$ and $P(y=0) = 1-p$:
-  $$
-  H(p) = -p \log_2 p - (1-p) \log_2 (1-p)
-  $$
+
+$$
+H(p) = -p \log_2 p - (1-p) \log_2 (1-p)
+$$
+
   * When $p = 0.5$, $H(0.5) = -(0.5(-1) + 0.5(-1)) = \mathbf{1.0\text{ bit}}$ (maximum).
   * When $p = 0$ or $p = 1$, $H = 0\text{ bits}$.
 
@@ -57,9 +63,10 @@ $$
 * **Meaning:** The probability that a randomly chosen element from the set would be incorrectly labeled if it were randomly labeled according to the distribution of labels in the subset.
 * **Pure node:** $\text{Gini} = 1 - (1.0)^2 = \mathbf{0.0}$.
 * **Balanced binary split ($p = 0.5$):**
-  $$
-  \text{Gini} = 1 - (0.5^2 + 0.5^2) = 1 - 0.50 = \mathbf{0.50}
-  $$
+
+$$
+\text{Gini} = 1 - (0.5^2 + 0.5^2) = 1 - 0.50 = \mathbf{0.50}
+$$
 
 > **Entropy vs. Gini:** Gini impurity is computationally faster because it avoids expensive $\log_2$ evaluations. In practice, both lead to very similar decision tree structures.
 
@@ -75,26 +82,36 @@ $$
 
 ### Complete Step-by-Step Hand Calculation:
 * **Parent Dataset $S$:** 14 total samples: 9 Positive ($+$), 5 Negative ($-$).
-  $$
-  H(S) = -\left(\frac{9}{14}\log_2\frac{9}{14} + \frac{5}{14}\log_2\frac{5}{14}\right) \approx - (0.643 \times (-0.637) + 0.357 \times (-1.485)) \approx \mathbf{0.940\text{ bits}}
-  $$
+
+$$
+H(S) = -\left(\frac{9}{14}\log_2\frac{9}{14} + \frac{5}{14}\log_2\frac{5}{14}\right) \approx - (0.643 \times (-0.637) + 0.357 \times (-1.485)) \approx \mathbf{0.940\text{ bits}}
+$$
+
 * **Proposed Split on Feature $A$:**
   * **Left branch ($S_L$):** 8 samples (6 Positive, 2 Negative).
-    $$
-    H(S_L) = -\left(\frac{6}{8}\log_2\frac{6}{8} + \frac{2}{8}\log_2\frac{2}{8}\right) = -(0.75(-0.415) + 0.25(-2)) \approx \mathbf{0.811\text{ bits}}
-    $$
+
+$$
+H(S_L) = -\left(\frac{6}{8}\log_2\frac{6}{8} + \frac{2}{8}\log_2\frac{2}{8}\right) = -(0.75(-0.415) + 0.25(-2)) \approx \mathbf{0.811\text{ bits}}
+$$
+
   * **Right branch ($S_R$):** 6 samples (3 Positive, 3 Negative).
-    $$
-    H(S_R) = -(0.5\log_2 0.5 + 0.5\log_2 0.5) = \mathbf{1.000\text{ bit}}
-    $$
+
+$$
+H(S_R) = -(0.5\log_2 0.5 + 0.5\log_2 0.5) = \mathbf{1.000\text{ bit}}
+$$
+
 * **Weighted Conditional Entropy:**
-  $$
-  H(S \mid A) = \frac{8}{14}(0.811) + \frac{6}{14}(1.000) = 0.463 + 0.429 = \mathbf{0.892\text{ bits}}
-  $$
+
+$$
+H(S \mid A) = \frac{8}{14}(0.811) + \frac{6}{14}(1.000) = 0.463 + 0.429 = \mathbf{0.892\text{ bits}}
+$$
+
 * **Information Gain:**
-  $$
-  IG(S, A) = H(S) - H(S \mid A) = 0.940 - 0.892 = \mathbf{0.048\text{ bits}}
-  $$
+
+$$
+IG(S, A) = H(S) - H(S \mid A) = 0.940 - 0.892 = \mathbf{0.048\text{ bits}}
+$$
+
 The tree chooses the split feature $A^*$ that maximizes $IG(S, A^*)$.
 
 ---

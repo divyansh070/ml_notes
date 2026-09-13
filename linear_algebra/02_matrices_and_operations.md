@@ -51,13 +51,17 @@ $$
 * **Square Matrix:** Number of rows equals number of columns ($m = n$).
 * **Zero Matrix ($0$):** All entries are zero ($0_{ij} = 0$). Adding $0$ leaves any matrix unchanged: $A + 0 = A$.
 * **Identity Matrix ($I$ or $I_n$):** A square matrix with $1$s on the main diagonal and $0$s elsewhere:
-  $$
-  I = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}, \quad A I = I A = A
-  $$
+
+$$
+I = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}, \quad A I = I A = A
+$$
+
 * **Diagonal Matrix ($D$):** Non-zero entries exist only along the main diagonal ($d_{ij} = 0$ for $i \neq j$):
-  $$
-  D = \operatorname{diag}(d_1, d_2, \dots, d_n) = \begin{bmatrix} d_1 & 0 & 0 \\ 0 & d_2 & 0 \\ 0 & 0 & d_3 \end{bmatrix}
-  $$
+
+$$
+D = \text{diag}(d_1, d_2, \dots, d_n) = \begin{bmatrix} d_1 & 0 & 0 \\ 0 & d_2 & 0 \\ 0 & 0 & d_3 \end{bmatrix}
+$$
+
   Multiplying by a diagonal matrix scales each coordinate independently.
 * **Upper Triangular Matrix ($U$):** All entries strictly below the main diagonal are zero ($u_{ij} = 0$ for $i > j$).
 * **Lower Triangular Matrix ($L$):** All entries strictly above the main diagonal are zero ($l_{ij} = 0$ for $i < j$).
@@ -68,13 +72,16 @@ $$
 ## 2.3 Matrix Addition & Scalar Multiplication
 
 * **Matrix Addition:** Matrices must have identical dimensions $(m \times n)$. Add corresponding entries:
-  $$
-  (A + B)_{ij} = A_{ij} + B_{ij}
-  $$
+
+$$
+(A + B)_{ij} = A_{ij} + B_{ij}
+$$
+
 * **Scalar Multiplication:** Multiplies every entry by scalar $c \in \mathbb{R}$:
-  $$
-  (c A)_{ij} = c A_{ij}
-  $$
+
+$$
+(c A)_{ij} = c A_{ij}
+$$
 
 ---
 
@@ -92,9 +99,12 @@ $$
 3. $(cA)^T = c A^T$
 4. **Product Transpose Reversal:** $(AB)^T = B^T A^T$ *(Crucial for backpropagation in neural networks)*.
 5. **The Covariance / Gram Matrix $X^T X$:** For any real data matrix $X \in \mathbb{R}^{n \times d}$, the matrix $X^T X$ is **always a square, symmetric matrix ($d \times d$)**:
-   $$
-   (X^T X)^T = X^T (X^T)^T = X^T X \quad \checkmark
-   $$
+
+$$
+(X^T X)^T = X^T (X^T)^T = X^T X
+$$
+
+✓ **Verified**.
 
 ---
 
@@ -132,14 +142,17 @@ $$
 To multiply $A \in \mathbb{R}^{m \times k}$ and $B \in \mathbb{R}^{k \times n}$, the **inner dimensions must match** ($k = k$). The output is $C \in \mathbb{R}^{m \times n}$.
 
 ### 1. Row-Column (Entry-by-Entry) Formula:
+
 $$
 C_{ij} = \sum_{r=1}^{k} A_{ir} B_{rj} = (\text{Row } i \text{ of } A) \cdot (\text{Column } j \text{ of } B)
 $$
 
 ### 2. Column-by-Column View:
+
 $$
 AB = A \begin{bmatrix} \mathbf{b}_1 & \mathbf{b}_2 & \dots & \mathbf{b}_n \end{bmatrix} = \begin{bmatrix} A\mathbf{b}_1 & A\mathbf{b}_2 & \dots & A\mathbf{b}_n \end{bmatrix}
 $$
+
 Every column of $C$ is the transformation $A$ applied to the corresponding column of $B$.
 
 ---
@@ -150,11 +163,13 @@ Matrix multiplication represents the sequential composition of transformations. 
 
 ### Concrete Numerical Proof:
 Let:
+
 $$
 A = \begin{bmatrix} 1 & 2 \\ 0 & 1 \end{bmatrix}, \quad B = \begin{bmatrix} 2 & 0 \\ 3 & 4 \end{bmatrix}
 $$
 
 ### Compute $AB$:
+
 $$
 AB = \begin{bmatrix} 1 & 2 \\ 0 & 1 \end{bmatrix} \begin{bmatrix} 2 & 0 \\ 3 & 4 \end{bmatrix} =
 \begin{bmatrix} (1)(2) + (2)(3) & (1)(0) + (2)(4) \\ (0)(2) + (1)(3) & (0)(0) + (1)(4) \end{bmatrix} =
@@ -162,6 +177,7 @@ AB = \begin{bmatrix} 1 & 2 \\ 0 & 1 \end{bmatrix} \begin{bmatrix} 2 & 0 \\ 3 & 4
 $$
 
 ### Compute $BA$:
+
 $$
 BA = \begin{bmatrix} 2 & 0 \\ 3 & 4 \end{bmatrix} \begin{bmatrix} 1 & 2 \\ 0 & 1 \end{bmatrix} =
 \begin{bmatrix} (2)(1) + (0)(0) & (2)(2) + (0)(1) \\ (3)(1) + (4)(0) & (3)(2) + (4)(1) \end{bmatrix} =
@@ -174,24 +190,26 @@ Clearly, $\begin{bmatrix} 8 & 8 \\ 3 & 4 \end{bmatrix} \neq \begin{bmatrix} 2 & 
 
 ## 2.8 Matrix Trace & Frobenius Norm
 
-### 1. Matrix Trace ($\operatorname{Tr}(A)$)
+### 1. Matrix Trace ($\text{Tr}(A)$)
 The sum of the diagonal entries of a square matrix $A \in \mathbb{R}^{n \times n}$:
 
 $$
-\operatorname{Tr}(A) = \sum_{i=1}^{n} A_{ii}
+\text{Tr}(A) = \sum_{i=1}^{n} A_{ii}
 $$
 
 * **Cyclic Permutation Property:** For matrices of compatible dimensions:
-  $$
-  \operatorname{Tr}(ABC) = \operatorname{Tr}(BCA) = \operatorname{Tr}(CAB)
-  $$
-  *(Caution: Non-cyclic swaps such as $\operatorname{Tr}(BAC)$ are generally not equal!).*
+
+$$
+\text{Tr}(ABC) = \text{Tr}(BCA) = \text{Tr}(CAB)
+$$
+
+  *(Caution: Non-cyclic swaps such as $\text{Tr}(BAC)$ are generally not equal!).*
 
 ### 2. Frobenius Norm ($\|A\|_F$)
 The total energy / magnitude of a matrix (equivalent to the Euclidean length of the flattened matrix):
 
 $$
-\|A\|_F = \sqrt{\sum_{i=1}^{m} \sum_{j=1}^{n} A_{ij}^2} = \sqrt{\operatorname{Tr}(A^T A)}
+\|A\|_F = \sqrt{\sum_{i=1}^{m} \sum_{j=1}^{n} A_{ij}^2} = \sqrt{\text{Tr}(A^T A)}
 $$
 
 ---
@@ -199,23 +217,29 @@ $$
 ## 2.9 Complete Worked Numerical Example
 
 Let:
+
 $$
 A = \begin{bmatrix} 1 & 3 \\ 2 & 4 \end{bmatrix}, \quad \mathbf{x} = \begin{bmatrix} 5 \\ 6 \end{bmatrix}
 $$
 
 ### 1. Matrix-Vector Product via Row View (Dot Products):
+
 $$
 A\mathbf{x} = \begin{bmatrix} (1)(5) + (3)(6) \\ (2)(5) + (4)(6) \end{bmatrix} = \begin{bmatrix} 5 + 18 \\ 10 + 24 \end{bmatrix} = \begin{bmatrix} 23 \\ 34 \end{bmatrix}
 $$
 
 ### 2. Matrix-Vector Product via Column View (Linear Combination):
+
 $$
-A\mathbf{x} = 5 \begin{bmatrix} 1 \\ 2 \end{bmatrix} + 6 \begin{bmatrix} 3 \\ 4 \end{bmatrix} = \begin{bmatrix} 5 \\ 10 \end{bmatrix} + \begin{bmatrix} 18 \\ 24 \end{bmatrix} = \begin{bmatrix} 23 \\ 34 \end{bmatrix} \quad \checkmark
+A\mathbf{x} = 5 \begin{bmatrix} 1 \\ 2 \end{bmatrix} + 6 \begin{bmatrix} 3 \\ 4 \end{bmatrix} = \begin{bmatrix} 5 \\ 10 \end{bmatrix} + \begin{bmatrix} 18 \\ 24 \end{bmatrix} = \begin{bmatrix} 23 \\ 34 \end{bmatrix}
 $$
+
+✓ **Verified**.
+
 *(Both interpretations yield the identical result, but the column view explains feature space geometry).*
 
 ### 3. Trace and Frobenius Norm of Matrix A:
-* Trace: $\operatorname{Tr}(A) = 1 + 4 = 5$
+* Trace: $\text{Tr}(A) = 1 + 4 = 5$
 * Frobenius Norm: $\|A\|_F = \sqrt{1^2 + 3^2 + 2^2 + 4^2} = \sqrt{1 + 9 + 4 + 16} = \sqrt{30} \approx 5.477$
 
 ---
@@ -225,9 +249,10 @@ $$
 1. **Neural Network Layers:** A fully-connected layer is defined by $\mathbf{z} = W\mathbf{x} + \mathbf{b}$. Weight matrix $W$ linearly transforms the input representation $\mathbf{x}$.
 2. **Batch Processing:** Passing a batch of $B$ inputs through a model bundles sample vectors into matrix $X \in \mathbb{R}^{B \times d}$. The layer computation $X W^T$ evaluates all $B$ predictions simultaneously via hardware-accelerated BLAS matrix multiplication.
 3. **Loss Functions for Matrix Factorization:** In recommendation systems and Latent Semantic Analysis, we approximate a user-item rating matrix $R \approx U V^T$ by minimizing the Frobenius norm reconstruction loss:
-   $$
-   \mathcal{L} = \|R - U V^T\|_F^2
-   $$
+
+$$
+\mathcal{L} = \|R - U V^T\|_F^2
+$$
 
 ---
 

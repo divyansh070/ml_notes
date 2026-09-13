@@ -48,14 +48,14 @@ How do the 20 foundational topics of linear algebra directly power modern machin
 
 | Machine Learning Model | Core Linear Algebra Foundations | Key Governing Equations | Geometric Picture |
 | :--- | :--- | :--- | :--- |
-| **Linear Regression (OLS)** | Subspaces, Orthogonal Projection, Normal Equations | $\mathbf{w} = (X^T X)^{-1} X^T \mathbf{y}$<br>$R\mathbf{w} = Q^T \mathbf{y}$ | Projects target $\mathbf{y}$ orthogonally onto $\operatorname{Col}(X)$; residuals $\mathbf{e} \in N(X^T)$. |
+| **Linear Regression (OLS)** | Subspaces, Orthogonal Projection, Normal Equations | $\mathbf{w} = (X^T X)^{-1} X^T \mathbf{y}$<br>$R\mathbf{w} = Q^T \mathbf{y}$ | Projects target $\mathbf{y}$ orthogonally onto $\text{Col}(X)$; residuals $\mathbf{e} \in N(X^T)$. |
 | **Ridge Regression ($L_2$)** | Quadratic Forms, Positive Definite Matrices | $\mathbf{w}_{\text{Ridge}} = (X^T X + \lambda I)^{-1} X^T \mathbf{y}$ | Adds $\lambda I$ to ensure $X^T X + \lambda I \succ 0$ is strictly invertible. |
 | **Lasso Regression ($L_1$)** | Vector Norms, Polytope Geometry | $\min \frac{1}{2n}\|X\mathbf{w} - \mathbf{y}\|_2^2 + \lambda \|\mathbf{w}\|_1$ | Diamond $L_1$ constraint ball has sharp axis corners, forcing redundant weights to exact $0.0$. |
 | **Principal Component Analysis** | Sample Covariance (PSD), Spectral Theorem, SVD | $\Sigma = \frac{1}{n-1} X_c^T X_c = Q \Lambda Q^T$<br>$X_c = U \Sigma V^T$ | Rotates axes to align with directions of maximum data variance ($\mathbf{v}_i$); variance $= \lambda_i$. |
 | **Singular Value Decomposition** | Orthonormal Bases, Low-Rank Approximation | $A = U \Sigma V^T$<br>$A_k = \sum_{i=1}^k \sigma_i \mathbf{u}_i \mathbf{v}_i^T$ | Decomposes any matrix into Rotate $\to$ Scale $\to$ Rotate; optimal rank-$k$ compression (LoRA). |
 | **Support Vector Machines** | Hyperplane Geometry, Mercer Kernels | $\text{Margin} = \frac{2}{\|\mathbf{w}\|_2}$<br>Gram matrix $K_{ij} = k(\mathbf{x}_i, \mathbf{x}_j) \succeq 0$ | Maximizes orthogonal distance between margin hyperplanes; uses PSD kernel Gram matrix. |
 | **Neural Network Layer** | Affine Transformations, Matrix Transpose Products | $\mathbf{z} = W\mathbf{x} + \mathbf{b}$<br>$\nabla_W \mathcal{L} = \boldsymbol{\delta} \mathbf{x}^T$ | Affine map shifts decision boundary via bias $\mathbf{b}$; backprop reverses products $(AB)^T = B^T A^T$. |
-| **Transformer Self-Attention** | Scaled Dot Products, Matrix Multiplication | $\operatorname{Attention}(Q, K, V) = \operatorname{softmax}\left(\frac{Q K^T}{\sqrt{d_k}}\right) V$ | Computes all pairwise token similarities via dot products $Q K^T$; outputs linear combinations of values. |
+| **Transformer Self-Attention** | Scaled Dot Products, Matrix Multiplication | $\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}}\right) V$ | Computes all pairwise token similarities via dot products $Q K^T$; outputs linear combinations of values. |
 | **K-Means Clustering** | Euclidean Norms, Voronoi Partitioning | $\arg\min_S \sum_{k=1}^K \sum_{\mathbf{x} \in S_k} \|\mathbf{x} - \boldsymbol{\mu}_k\|_2^2$ | Partitions space into convex polyhedral cells based on closest Euclidean distance to centroids. |
 
 ---

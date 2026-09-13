@@ -74,7 +74,7 @@ x_1 \mathbf{a}_1 + x_2 \mathbf{a}_2 + \dots + x_n \mathbf{a}_n = \mathbf{b}
 $$
 
 * Solving $A\mathbf{x} = \mathbf{b}$ means finding the **scalar weights $(x_1, \dots, x_n)$ required to combine the feature columns of $A$ to reach the target vector $\mathbf{b}$**.
-* **Solvability Rule:** $A\mathbf{x} = \mathbf{b}$ has a solution if and only if **$\mathbf{b}$ lies within the Column Space $\operatorname{Col}(A)$** (the span of the columns of $A$).
+* **Solvability Rule:** $A\mathbf{x} = \mathbf{b}$ has a solution if and only if **$\mathbf{b}$ lies within the Column Space $\text{Col}(A)$** (the span of the columns of $A$).
 
 ---
 
@@ -130,6 +130,7 @@ Every linear system $A\mathbf{x} = \mathbf{b}$ has either:
 ### Example 1: Unique Solution ($3 \times 3$ System)
 
 Solve the system:
+
 $$
 \begin{aligned}
 x_1 + 2x_2 - x_3 &= 3 \\
@@ -139,6 +140,7 @@ x_1 + 2x_2 - x_3 &= 3 \\
 $$
 
 #### Step 1: Set up Augmented Matrix
+
 $$
 \left[\begin{array}{ccc|c}
 1 & 2 & -1 & 3 \\
@@ -149,6 +151,7 @@ $$
 
 #### Step 2: Forward Elimination (Gaussian Elimination to REF)
 * Eliminate below pivot 1: $R_2 \leftarrow R_2 - 2R_1$ and $R_3 \leftarrow R_3 + R_1$:
+
 $$
 \left[\begin{array}{ccc|c}
 1 & 2 & -1 & 3 \\
@@ -156,8 +159,10 @@ $$
 0 & 1 & 3 & 3
 \end{array}\right]
 $$
+
 * Wait, let's fix the third equation so it has a unique solution: change third row target to $2$:
 Let $R_3 \leftarrow R_3 - R_2$ on $\left[\begin{array}{ccc|c} 1 & 2 & -1 & 3 \\ 0 & 1 & 3 & 5 \\ 0 & 1 & 2 & 1 \end{array}\right]$:
+
 $$
 \left[\begin{array}{ccc|c}
 1 & 2 & -1 & 3 \\
@@ -165,7 +170,9 @@ $$
 0 & 0 & -1 & -4
 \end{array}\right]
 $$
+
 * Scale $R_3 \leftarrow -1 R_3$:
+
 $$
 \left[\begin{array}{ccc|c}
 1 & 2 & -1 & 3 \\
@@ -186,6 +193,7 @@ $$
 ### Example 2: Infinitely Many Solutions (Underdetermined System)
 
 Solve the system:
+
 $$
 \begin{aligned}
 x_1 + 2x_2 + 3x_3 &= 6 \\
@@ -194,6 +202,7 @@ x_1 + 2x_2 + 3x_3 &= 6 \\
 $$
 
 #### Step 1: Set up Augmented Matrix
+
 $$
 \left[\begin{array}{ccc|c}
 1 & 2 & 3 & 6 \\
@@ -203,13 +212,16 @@ $$
 
 #### Step 2: Row Reduce to RREF
 * $R_2 \leftarrow R_2 - 2R_1$:
+
 $$
 \left[\begin{array}{ccc|c}
 1 & 2 & 3 & 6 \\
 0 & 0 & 1 & 2
 \end{array}\right]
 $$
+
 * Eliminate above pivot in Column 3: $R_1 \leftarrow R_1 - 3R_2$:
+
 $$
 \left[\begin{array}{ccc|c}
 1 & 2 & 0 & 0 \\
@@ -240,6 +252,7 @@ $$
 ### Example 3: No Solution (Inconsistent System)
 
 Solve the system:
+
 $$
 \begin{aligned}
 x_1 + 2x_2 &= 4 \\
@@ -248,6 +261,7 @@ x_1 + 2x_2 &= 4 \\
 $$
 
 #### Step 1: Set up Augmented Matrix
+
 $$
 \left[\begin{array}{cc|c}
 1 & 2 & 4 \\
@@ -257,6 +271,7 @@ $$
 
 #### Step 2: Row Reduce
 * $R_2 \leftarrow R_2 - 2R_1$:
+
 $$
 \left[\begin{array}{cc|c}
 1 & 2 & 4 \\
@@ -266,12 +281,14 @@ $$
 
 #### Step 3: Interpret the Contradiction Row
 Row 2 states:
+
 $$
 0 x_1 + 0 x_2 = 3 \implies 0 = 3 \quad (\text{IMPOSSIBLE!})
 $$
+
 * **Result:** **No solution exists** (Inconsistent system).
 * **Geometric Picture:** The two equations represent distinct parallel lines in 2D space with slope $-1/2$ and different y-intercepts ($y = -0.5x + 2$ and $y = -0.5x + 2.75$). They never intersect.
-* **Column Picture:** The target $\mathbf{b} = \begin{bmatrix} 4 \\ 11 \end{bmatrix}$ does NOT lie in the span of the columns of $A$ ($\mathbf{b} \notin \operatorname{Col}(A)$).
+* **Column Picture:** The target $\mathbf{b} = \begin{bmatrix} 4 \\ 11 \end{bmatrix}$ does NOT lie in the span of the columns of $A$ ($\mathbf{b} \notin \text{Col}(A)$).
 
 ---
 
@@ -281,15 +298,15 @@ Comparing the rank of coefficient matrix $A$ to the rank of augmented matrix $[A
 
 | Condition | System State | Solution Nature | Geometric Meaning |
 | :--- | :--- | :--- | :--- |
-| $\operatorname{rank}(A) < \operatorname{rank}([A \mid \mathbf{b}])$ | **Inconsistent** | **No Solution** | Target $\mathbf{b}$ lies outside $\operatorname{Col}(A)$ |
-| $\operatorname{rank}(A) = \operatorname{rank}([A \mid \mathbf{b}]) = n$ | **Consistent** | **Unique Solution** | All columns are independent; $\mathbf{b} \in \operatorname{Col}(A)$ |
-| $\operatorname{rank}(A) = \operatorname{rank}([A \mid \mathbf{b}]) < n$ | **Consistent** | **Infinitely Many** | Redundant columns; $\mathbf{b} \in \operatorname{Col}(A)$ with $(n - r)$ free variables |
+| $\text{rank}(A) < \text{rank}([A \mid \mathbf{b}])$ | **Inconsistent** | **No Solution** | Target $\mathbf{b}$ lies outside $\text{Col}(A)$ |
+| $\text{rank}(A) = \text{rank}([A \mid \mathbf{b}]) = n$ | **Consistent** | **Unique Solution** | All columns are independent; $\mathbf{b} \in \text{Col}(A)$ |
+| $\text{rank}(A) = \text{rank}([A \mid \mathbf{b}]) < n$ | **Consistent** | **Infinitely Many** | Redundant columns; $\mathbf{b} \in \text{Col}(A)$ with $(n - r)$ free variables |
 
 ---
 
 ## 3.7 Why this matters in ML
 
-1. **Why Overdetermined Systems Dominate ML ($m \gg n$):** In supervised machine learning, we routinely have thousands of observations ($m$ samples) but only tens or hundreds of features ($n$). Almost universally, the true target $\mathbf{y}$ does not lie in the column space of the feature matrix ($\mathbf{y} \notin \operatorname{Col}(X)$). The system $X\mathbf{w} = \mathbf{y}$ is **inconsistent (Scenario 3)**! This is precisely why machine learning uses **Least Squares regression** to find the closest possible approximate solution.
+1. **Why Overdetermined Systems Dominate ML ($m \gg n$):** In supervised machine learning, we routinely have thousands of observations ($m$ samples) but only tens or hundreds of features ($n$). Almost universally, the true target $\mathbf{y}$ does not lie in the column space of the feature matrix ($\mathbf{y} \notin \text{Col}(X)$). The system $X\mathbf{w} = \mathbf{y}$ is **inconsistent (Scenario 3)**! This is precisely why machine learning uses **Least Squares regression** to find the closest possible approximate solution.
 2. **Underdetermined Systems in Deep Learning ($n \gg m$):** Modern deep networks have far more parameters ($n$) than training samples ($m$). Such systems have **infinitely many exact interpolating solutions (Scenario 2)**. Gradient descent with weight decay selects the minimum-norm solution among them.
 
 ---

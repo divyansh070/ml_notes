@@ -13,14 +13,17 @@ Optimization is the process of adjusting parameters to minimize a loss function.
 ## 24.1 1D Derivatives, Partial Derivatives & The Gradient
 
 * **1D Derivative:** Rate of instantaneous change:
-  $$
-  f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}
-  $$
+
+$$
+f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}
+$$
+
 * **Partial Derivative ($\frac{\partial f}{\partial x_i}$):** Measures the rate of change along one coordinate axis $x_i$ while holding all other variables constant.
 * **The Gradient Vector ($\nabla f$):** Packages all partial derivatives into a single vector pointing in the **direction of steepest ascent**:
-  $$
-  \nabla f(\mathbf{x}) = \begin{bmatrix} \frac{\partial f}{\partial x_1} \\ \frac{\partial f}{\partial x_2} \\ \vdots \\ \frac{\partial f}{\partial x_d} \end{bmatrix} \in \mathbb{R}^d
-  $$
+
+$$
+\nabla f(\mathbf{x}) = \begin{bmatrix} \frac{\partial f}{\partial x_1} \\ \frac{\partial f}{\partial x_2} \\ \vdots \\ \frac{\partial f}{\partial x_d} \end{bmatrix} \in \mathbb{R}^d
+$$
 
 ```
                          THE GRADIENT DESCENT DIRECTION
@@ -34,9 +37,11 @@ Optimization is the process of adjusting parameters to minimize a loss function.
 
 ### Gradient Descent Update Rule:
 To minimize loss $\mathcal{L}(\mathbf{w})$, step in the direction of **steepest descent** ($-\nabla \mathcal{L}$):
+
 $$
 \mathbf{w}_{t+1} = \mathbf{w}_t - \alpha \nabla \mathcal{L}(\mathbf{w}_t)
 $$
+
 where $\alpha > 0$ is the learning rate.
 
 ---
@@ -52,7 +57,7 @@ In machine learning derivations, working with scalar summation indices is slow a
 | $\mathbf{x}^T A \mathbf{x}$ | $2A\mathbf{x}$ | When $A$ is symmetric ($A = A^T$) |
 | $\|\mathbf{x}\|_2^2 = \mathbf{x}^T \mathbf{x}$ | $2\mathbf{x}$ | Squared Euclidean norm |
 | $\|\mathbf{y} - X\mathbf{w}\|_2^2$ | $-2X^T (\mathbf{y} - X\mathbf{w})$ | OLS loss gradient w.r.t $\mathbf{w}$ |
-| $\operatorname{Tr}(A X)$ | $A^T$ | Trace derivative w.r.t matrix $X$ |
+| $\text{Tr}(A X)$ | $A^T$ | Trace derivative w.r.t matrix $X$ |
 | $\log \det(X)$ | $X^{-1}$ | Log-determinant for symmetric $X \succ 0$ |
 
 ---
@@ -66,9 +71,11 @@ H_{ij} = \frac{\partial^2 \mathcal{L}}{\partial w_i \partial w_j}
 $$
 
 * **Second-Order Taylor Approximation:**
-  $$
-  \mathcal{L}(\mathbf{w} + \Delta \mathbf{w}) \approx \mathcal{L}(\mathbf{w}) + \nabla \mathcal{L}^T \Delta \mathbf{w} + \frac{1}{2} \Delta \mathbf{w}^T H \Delta \mathbf{w}
-  $$
+
+$$
+\mathcal{L}(\mathbf{w} + \Delta \mathbf{w}) \approx \mathcal{L}(\mathbf{w}) + \nabla \mathcal{L}^T \Delta \mathbf{w} + \frac{1}{2} \Delta \mathbf{w}^T H \Delta \mathbf{w}
+$$
+
 * **Eigenvalues of $H$ Govern Optimization:**
   * If $\lambda_{\max}(H) \gg \lambda_{\min}(H)$ (Condition number $\kappa(H) \gg 1$), the loss surface is an **elongated ravine**. Gradient descent oscillates wildly across the canyon walls rather than progressing down the valley floor.
   * Momentum and Adam resolve this by scaling step sizes adaptively along each principal curvature axis.
@@ -89,6 +96,7 @@ $$
 ```
 
 For composite function $\mathcal{L}(a(z(w)))$:
+
 $$
 \frac{\partial \mathcal{L}}{\partial w} = \frac{\partial \mathcal{L}}{\partial a} \cdot \frac{\partial a}{\partial z} \cdot \frac{\partial z}{\partial w}
 $$
@@ -109,26 +117,35 @@ $$
 
 ### Backward Pass (Backprop):
 1. **Loss gradient w.r.t activation $a$:**
-   $$
-   \frac{\partial \mathcal{L}}{\partial a} = a - y = 0.750 - 1.0 = \mathbf{-0.250}
-   $$
+
+$$
+\frac{\partial \mathcal{L}}{\partial a} = a - y = 0.750 - 1.0 = \mathbf{-0.250}
+$$
+
 2. **Activation gradient w.r.t pre-activation $z$:**
-   $$
-   \frac{\partial a}{\partial z} = a(1 - a) = (0.750)(1 - 0.750) = (0.750)(0.250) = \mathbf{0.1875}
-   $$
+
+$$
+\frac{\partial a}{\partial z} = a(1 - a) = (0.750)(1 - 0.750) = (0.750)(0.250) = \mathbf{0.1875}
+$$
+
 3. **Pre-activation gradient w.r.t parameter weight $w$:**
-   $$
-   \frac{\partial z}{\partial w} = x = \mathbf{2.0}
-   $$
+
+$$
+\frac{\partial z}{\partial w} = x = \mathbf{2.0}
+$$
+
 4. **Pre-activation gradient w.r.t bias $b$:**
-   $$
-   \frac{\partial z}{\partial b} = 1.0
-   $$
+
+$$
+\frac{\partial z}{\partial b} = 1.0
+$$
 
 ### Assemble Gradients via Chain Rule:
+
 $$
 \frac{\partial \mathcal{L}}{\partial w} = \frac{\partial \mathcal{L}}{\partial a} \cdot \frac{\partial a}{\partial z} \cdot \frac{\partial z}{\partial w} = (-0.250) \times (0.1875) \times (2.0) = \mathbf{-0.09375}
 $$
+
 $$
 \frac{\partial \mathcal{L}}{\partial b} = \frac{\partial \mathcal{L}}{\partial a} \cdot \frac{\partial a}{\partial z} \cdot \frac{\partial z}{\partial b} = (-0.250) \times (0.1875) \times (1.0) = \mathbf{-0.046875}
 $$

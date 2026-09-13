@@ -36,7 +36,7 @@ Varying the scalar coefficients $c_1, \dots, c_k$ slides along each vector direc
 The **Span** of a set of vectors is the set of **ALL possible linear combinations** that can be formed using them:
 
 $$
-\operatorname{span}(\mathbf{v}_1, \mathbf{v}_2, \dots, \mathbf{v}_k) = \left\lbrace \sum_{i=1}^{k} c_i \mathbf{v}_i \;\middle|\; c_i \in \mathbb{R} \right\rbrace
+\text{span}(\mathbf{v}_1, \mathbf{v}_2, \dots, \mathbf{v}_k) = \left\lbrace \sum_{i=1}^{k} c_i \mathbf{v}_i \;\middle|\; c_i \in \mathbb{R} \right\rbrace
 $$
 
 ### Geometric Examples in $\mathbb{R}^2$ and $\mathbb{R}^3$:
@@ -81,6 +81,7 @@ c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \dots + c_k \mathbf{v}_k = \mathbf{0}
 $$
 
 has **ONLY the trivial solution**:
+
 $$
 c_1 = c_2 = \dots = c_k = 0
 $$
@@ -90,7 +91,7 @@ $$
 
 ### 2. Computational Test via Matrix Ranks:
 Pack the vectors into columns of a matrix $A = \begin{bmatrix} \mathbf{v}_1 & \dots & \mathbf{v}_k \end{bmatrix}$.
-* Independent $\iff A\mathbf{c} = \mathbf{0}$ has only $\mathbf{c} = \mathbf{0} \iff \operatorname{rank}(A) = k$ (Full Column Rank).
+* Independent $\iff A\mathbf{c} = \mathbf{0}$ has only $\mathbf{c} = \mathbf{0} \iff \text{rank}(A) = k$ (Full Column Rank).
 
 ---
 
@@ -102,7 +103,7 @@ A **basis** is the minimal, non-redundant coordinate scaffolding for a vector sp
 > **Definition of a Basis:**
 > A set of vectors $\mathcal{B} = \{\mathbf{v}_1, \mathbf{v}_2, \dots, \mathbf{v}_k\}$ is a **Basis** for space $V$ if and only if:
 > 1. **Linearly Independent:** No vector in $\mathcal{B}$ is redundant.
-> 2. **Spans the Space:** $\operatorname{span}(\mathbf{v}_1, \dots, \mathbf{v}_k) = V$.
+> 2. **Spans the Space:** $\text{span}(\mathbf{v}_1, \dots, \mathbf{v}_k) = V$.
 
 * **Standard Basis for $\mathbb{R}^2$:** $\mathbf{e}_1 = \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \mathbf{e}_2 = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$.
 * **Bases are NOT Unique:** Any two non-collinear vectors in $\mathbb{R}^2$ form a completely valid basis for $\mathbb{R}^2$.
@@ -142,6 +143,7 @@ This distinction is essential:
 ## 8.7 Complete Worked Numerical Example
 
 Test whether the following vectors form a basis for $\mathbb{R}^3$:
+
 $$
 \mathbf{v}_1 = \begin{bmatrix} 1 \\ 0 \\ 2 \end{bmatrix}, \quad
 \mathbf{v}_2 = \begin{bmatrix} 0 \\ 1 \\ 1 \end{bmatrix}, \quad
@@ -149,6 +151,7 @@ $$
 $$
 
 ### Step 1: Form Matrix $A$ and Check Independence
+
 $$
 A = \begin{bmatrix}
 1 & 0 & 1 \\
@@ -159,11 +162,13 @@ $$
 
 ### Step 2: Row Reduce to Check Pivots
 Eliminate Column 1 below pivot 1: $R_3 \leftarrow R_3 - 2R_1$:
+
 $$
 [2, 1, 4] - 2[1, 0, 1] = [0, 1, 2]
 $$
 
 Matrix becomes:
+
 $$
 \begin{bmatrix}
 1 & 0 & 1 \\
@@ -173,6 +178,7 @@ $$
 $$
 
 Eliminate Column 2 below pivot 2: $R_3 \leftarrow R_3 - R_2$:
+
 $$
 \begin{bmatrix}
 1 & 0 & 1 \\
@@ -182,12 +188,14 @@ $$
 $$
 
 ### Step 3: Analyze the Result
-* There are only **2 pivots** $\implies \operatorname{rank}(A) = 2 < 3$.
+* There are only **2 pivots** $\implies \text{rank}(A) = 2 < 3$.
 * The vectors are **Linearly Dependent**:
-  $$
-  \mathbf{v}_3 = 1 \mathbf{v}_1 + 2 \mathbf{v}_2 = \begin{bmatrix} 1 \\ 0 \\ 2 \end{bmatrix} + \begin{bmatrix} 0 \\ 2 \\ 2 \end{bmatrix} = \begin{bmatrix} 1 \\ 2 \\ 4 \end{bmatrix}
-  $$
-* **Span:** $\operatorname{span}(\mathbf{v}_1, \mathbf{v}_2, \mathbf{v}_3)$ is only a **2D plane** embedded in 3D space ($\text{dimension} = 2$).
+
+$$
+\mathbf{v}_3 = 1 \mathbf{v}_1 + 2 \mathbf{v}_2 = \begin{bmatrix} 1 \\ 0 \\ 2 \end{bmatrix} + \begin{bmatrix} 0 \\ 2 \\ 2 \end{bmatrix} = \begin{bmatrix} 1 \\ 2 \\ 4 \end{bmatrix}
+$$
+
+* **Span:** $\text{span}(\mathbf{v}_1, \mathbf{v}_2, \mathbf{v}_3)$ is only a **2D plane** embedded in 3D space ($\text{dimension} = 2$).
 * **Conclusion:** Because the vectors are linearly dependent, they **DO NOT form a basis for $\mathbb{R}^3$**.
 
 ---

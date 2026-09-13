@@ -27,8 +27,8 @@ A one-page high-density reference sheet of essential mathematical formulas, iden
 | Concept | Formula | Key Properties |
 |---|---|---|
 | **Transpose of Product** | $(A B)^T = B^T A^T$ | Reverse order: $(A B C)^T = C^T B^T A^T$ |
-| **Trace** | $\operatorname{Tr}(A) = \sum_{i=1}^n A_{ii} = \sum_{i=1}^n \lambda_i$ | Cyclic: $\operatorname{Tr}(A B C) = \operatorname{Tr}(B C A) = \operatorname{Tr}(C A B)$ |
-| **Frobenius Norm** | $\|A\|_F = \sqrt{\sum_{i,j} A_{ij}^2} = \sqrt{\operatorname{Tr}(A^T A)} = \sqrt{\sum_{i=1}^r \sigma_i^2}$ | Matrix Euclidean norm; invariant under orthogonal transforms |
+| **Trace** | $\text{Tr}(A) = \sum_{i=1}^n A_{ii} = \sum_{i=1}^n \lambda_i$ | Cyclic: $\text{Tr}(A B C) = \text{Tr}(B C A) = \text{Tr}(C A B)$ |
+| **Frobenius Norm** | $\|A\|_F = \sqrt{\sum_{i,j} A_{ij}^2} = \sqrt{\text{Tr}(A^T A)} = \sqrt{\sum_{i=1}^r \sigma_i^2}$ | Matrix Euclidean norm; invariant under orthogonal transforms |
 | **Spectral Norm** | $\|A\|_2 = \sigma_{\max}(A) = \sqrt{\lambda_{\max}(A^T A)}$ | Maximum magnification factor $\|A\mathbf{x}\|_2 / \|\mathbf{x}\|_2$ |
 | **Nuclear Norm** | $\|A\|_* = \sum_{i=1}^r \sigma_i$ | Convex relaxation of matrix rank |
 | **Hadamard Product** | $[A \odot B]_{ij} = A_{ij} B_{ij}$ | Element-wise product (used in LSTM gates, activations) |
@@ -43,52 +43,69 @@ A one-page high-density reference sheet of essential mathematical formulas, iden
 * **Gaussian Elimination:** $[A \mid \mathbf{b}] \to [U \mid \mathbf{c}]$ (Row Echelon Form) via forward elimination ($O(\frac{1}{3}n^3)$), followed by back-substitution.
 * **Gauss-Jordan Elimination:** Forward and backward elimination to Reduced Row Echelon Form (RREF) $[R \mid \mathbf{d}]$ where pivots are $1$ and pivot columns are standard basis vectors ($O(\frac{1}{2}n^3)$).
 * **Solvability Criteria:**
-  * Consistent $\iff \operatorname{rank}(A) = \operatorname{rank}([A \mid \mathbf{b}])$.
-  * Unique solution $\iff \operatorname{rank}(A) = \operatorname{rank}([A \mid \mathbf{b}]) = n$.
-  * Infinite solutions $\iff \operatorname{rank}(A) = \operatorname{rank}([A \mid \mathbf{b}]) < n$ (has $n - r$ free variables).
-  * Inconsistent (no solution) $\iff \operatorname{rank}(A) < \operatorname{rank}([A \mid \mathbf{b}])$ (pivot in augmented column: $0 = 1$).
+  * Consistent $\iff \text{rank}(A) = \text{rank}([A \mid \mathbf{b}])$.
+  * Unique solution $\iff \text{rank}(A) = \text{rank}([A \mid \mathbf{b}]) = n$.
+  * Infinite solutions $\iff \text{rank}(A) = \text{rank}([A \mid \mathbf{b}]) < n$ (has $n - r$ free variables).
+  * Inconsistent (no solution) $\iff \text{rank}(A) < \text{rank}([A \mid \mathbf{b}])$ (pivot in augmented column: $0 = 1$).
 
 ---
 
 ## 4. Matrix Inverses & Identities
 
 * **Two-Sided Inverse ($n \times n$ Square, Full Rank):**
-  $$
-  A A^{-1} = A^{-1} A = I_n, \quad (A B)^{-1} = B^{-1} A^{-1}, \quad (A^T)^{-1} = (A^{-1})^T
-  $$
+
+$$
+A A^{-1} = A^{-1} A = I_n, \quad (A B)^{-1} = B^{-1} A^{-1}, \quad (A^T)^{-1} = (A^{-1})^T
+$$
+
 * **$2 \times 2$ Inverse Formula:**
-  $$
-  \begin{bmatrix} a & b \\ c & d \end{bmatrix}^{-1} = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}
-  $$
+
+$$
+\begin{bmatrix} a & b \\ c & d \end{bmatrix}^{-1} = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}
+$$
+
 * **Inversion by Adjugate / Cofactors:**
-  $$
-  A^{-1} = \frac{1}{\det(A)}\operatorname{adj}(A) = \frac{1}{\det(A)} C^T
-  $$
-  where $C_{ij} = (-1)^{i+j} M_{ij}$ are the cofactors, satisfying $A \operatorname{adj}(A) = \det(A) I$.
+
+$$
+A^{-1} = \frac{1}{\det(A)}\text{adj}(A) = \frac{1}{\det(A)} C^T
+$$
+
+  where $C_{ij} = (-1)^{i+j} M_{ij}$ are the cofactors, satisfying $A \text{adj}(A) = \det(A) I$.
 * **Gauss-Jordan Matrix Inversion:**
-  $$
-  [A \mid I] \xrightarrow{\text{row operations}} [I \mid A^{-1}]
-  $$
+
+$$
+[A \mid I] \xrightarrow{\text{row operations}} [I \mid A^{-1}]
+$$
+
 * **Left Inverse (Tall $m > n$, Full Column Rank):**
-  $$
-  A_{\text{left}}^{-1} = (A^T A)^{-1} A^T \implies A_{\text{left}}^{-1} A = I_n \quad (\text{Least Squares: } \mathbf{x}_{\text{LS}} = A_{\text{left}}^{-1}\mathbf{b})
-  $$
+
+$$
+A_{\text{left}}^{-1} = (A^T A)^{-1} A^T \implies A_{\text{left}}^{-1} A = I_n \quad (\text{Least Squares: } \mathbf{x}_{\text{LS}} = A_{\text{left}}^{-1}\mathbf{b})
+$$
+
 * **Right Inverse (Wide $m < n$, Full Row Rank):**
-  $$
-  A_{\text{right}}^{-1} = A^T (A A^T)^{-1} \implies A A_{\text{right}}^{-1} = I_m \quad (\text{Minimum Norm: } \mathbf{x}_{\text{min}} = A_{\text{right}}^{-1}\mathbf{b})
-  $$
+
+$$
+A_{\text{right}}^{-1} = A^T (A A^T)^{-1} \implies A A_{\text{right}}^{-1} = I_m \quad (\text{Minimum Norm: } \mathbf{x}_{\text{min}} = A_{\text{right}}^{-1}\mathbf{b})
+$$
+
 * **Moore-Penrose Pseudoinverse ($A^+$ for ANY matrix):**
-  $$
-  A^+ = V \Sigma^+ U^T \quad \text{where } [\Sigma^+]_{ii} = \begin{cases} 1/\sigma_i & \text{if } \sigma_i > 0 \\ 0 & \text{if } \sigma_i = 0 \end{cases}
-  $$
+
+$$
+A^+ = V \Sigma^+ U^T \quad \text{where } [\Sigma^+]_{ii} = \begin{cases} 1/\sigma_i & \text{if } \sigma_i > 0 \\ 0 & \text{if } \sigma_i = 0 \end{cases}
+$$
+
 * **Sherman-Morrison Formula (Rank-1 Update):**
-  $$
-  (A + \mathbf{u}\mathbf{v}^T)^{-1} = A^{-1} - \frac{A^{-1}\mathbf{u}\mathbf{v}^T A^{-1}}{1 + \mathbf{v}^T A^{-1}\mathbf{u}}
-  $$
+
+$$
+(A + \mathbf{u}\mathbf{v}^T)^{-1} = A^{-1} - \frac{A^{-1}\mathbf{u}\mathbf{v}^T A^{-1}}{1 + \mathbf{v}^T A^{-1}\mathbf{u}}
+$$
+
 * **Woodbury Matrix Identity (Rank-$k$ Update):**
-  $$
-  (A + U C V)^{-1} = A^{-1} - A^{-1} U (C^{-1} + V A^{-1} U)^{-1} V A^{-1}
-  $$
+
+$$
+(A + U C V)^{-1} = A^{-1} - A^{-1} U (C^{-1} + V A^{-1} U)^{-1} V A^{-1}
+$$
 
 ---
 
@@ -109,7 +126,7 @@ A one-page high-density reference sheet of essential mathematical formulas, iden
 
 ## 6. Four Fundamental Subspaces (Strang's Big Picture)
 
-For matrix $A \in \mathbb{R}^{m \times n}$ with $\operatorname{rank}(A) = r$:
+For matrix $A \in \mathbb{R}^{m \times n}$ with $\text{rank}(A) = r$:
 
 | Subspace | Notation | Lives in | Dimension | Orthogonal Complement |
 |---|---|---|---|---|
@@ -126,22 +143,30 @@ For matrix $A \in \mathbb{R}^{m \times n}$ with $\operatorname{rank}(A) = r$:
 ## 7. Projections & Least Squares
 
 * **Projection of vector $\mathbf{b}$ onto vector $\mathbf{a}$:**
-  $$
-  \mathbf{p} = \frac{\mathbf{a}^T \mathbf{b}}{\mathbf{a}^T \mathbf{a}}\mathbf{a}, \quad \text{Error: } \mathbf{e} = \mathbf{b} - \mathbf{p} \perp \mathbf{a}
-  $$
+
+$$
+\mathbf{p} = \frac{\mathbf{a}^T \mathbf{b}}{\mathbf{a}^T \mathbf{a}}\mathbf{a}, \quad \text{Error: } \mathbf{e} = \mathbf{b} - \mathbf{p} \perp \mathbf{a}
+$$
+
 * **Projection Matrix onto Column Space $C(X)$:**
-  $$
-  P = X(X^T X)^{-1} X^T \quad (P^T = P, \; P^2 = P)
-  $$
+
+$$
+P = X(X^T X)^{-1} X^T \quad (P^T = P, \; P^2 = P)
+$$
+
 * **Orthogonal Complement Projector:** $P_\perp = I - P$ (projects onto $N(X^T)$).
 * **Normal Equation:**
-  $$
-  (X^T X)\mathbf{w}^* = X^T \mathbf{y} \implies \mathbf{w}^* = (X^T X)^{-1}X^T \mathbf{y}
-  $$
+
+$$
+(X^T X)\mathbf{w}^* = X^T \mathbf{y} \implies \mathbf{w}^* = (X^T X)^{-1}X^T \mathbf{y}
+$$
+
 * **Residual Orthogonality:**
-  $$
-  \mathbf{e} = \mathbf{y} - X\mathbf{w}^* \in N(X^T) \implies X^T \mathbf{e} = \mathbf{0}
-  $$
+
+$$
+\mathbf{e} = \mathbf{y} - X\mathbf{w}^* \in N(X^T) \implies X^T \mathbf{e} = \mathbf{0}
+$$
+
 * **Ridge Regularization:** $\mathbf{w}_{\text{ridge}}^* = (X^T X + \lambda I)^{-1} X^T \mathbf{y}$ (always invertible for $\lambda > 0$).
 
 ---
@@ -150,13 +175,15 @@ For matrix $A \in \mathbb{R}^{m \times n}$ with $\operatorname{rank}(A) = r$:
 
 * **Eigenvalue Equation:** $A\mathbf{v} = \lambda \mathbf{v}$ with $\mathbf{v} \neq \mathbf{0}$.
 * **Characteristic Equation:** $\det(A - \lambda I) = 0$.
-* **Diagonalization:** $A = P D P^{-1}$ where $P = [\mathbf{v}_1 \mid \cdots \mid \mathbf{v}_n]$ and $D = \operatorname{diag}(\lambda_1, \dots, \lambda_n)$.
-* **Matrix Power:** $A^k = P D^k P^{-1} = P \operatorname{diag}(\lambda_1^k, \dots, \lambda_n^k) P^{-1}$.
+* **Diagonalization:** $A = P D P^{-1}$ where $P = [\mathbf{v}_1 \mid \cdots \mid \mathbf{v}_n]$ and $D = \text{diag}(\lambda_1, \dots, \lambda_n)$.
+* **Matrix Power:** $A^k = P D^k P^{-1} = P \text{diag}(\lambda_1^k, \dots, \lambda_n^k) P^{-1}$.
 * **Spectral Theorem for Real Symmetric Matrices ($A = A^T$):**
-  $$
-  A = Q \Lambda Q^T = \sum_{i=1}^n \lambda_i \mathbf{q}_i \mathbf{q}_i^T \quad (Q^T Q = I, \; \lambda_i \in \mathbb{R})
-  $$
-* **Trace & Determinant:** $\operatorname{Tr}(A) = \sum \lambda_i$, $\det(A) = \prod \lambda_i$.
+
+$$
+A = Q \Lambda Q^T = \sum_{i=1}^n \lambda_i \mathbf{q}_i \mathbf{q}_i^T \quad (Q^T Q = I, \; \lambda_i \in \mathbb{R})
+$$
+
+* **Trace & Determinant:** $\text{Tr}(A) = \sum \lambda_i$, $\det(A) = \prod \lambda_i$.
 * **Rayleigh Quotient:** $R(A, \mathbf{x}) = \frac{\mathbf{x}^T A \mathbf{x}}{\mathbf{x}^T \mathbf{x}} \in [\lambda_{\min}, \lambda_{\max}]$.
 
 ---
@@ -179,13 +206,15 @@ For real symmetric matrix $A \in \mathbb{R}^{n \times n}$:
 ## 10. Singular Value Decomposition (SVD) & PCA
 
 * **Full SVD:** $A = U \Sigma V^T$ where $U \in \mathbb{R}^{m \times m}$ ($U^T U = I_m$), $\Sigma \in \mathbb{R}^{m \times n}$, $V \in \mathbb{R}^{n \times n}$ ($V^T V = I_n$).
-* **Compact SVD:** $A = U_r \Sigma_r V_r^T = \sum_{i=1}^r \sigma_i \mathbf{u}_i \mathbf{v}_i^T$ with $r = \operatorname{rank}(A)$.
+* **Compact SVD:** $A = U_r \Sigma_r V_r^T = \sum_{i=1}^r \sigma_i \mathbf{u}_i \mathbf{v}_i^T$ with $r = \text{rank}(A)$.
 * **Singular Values:** $\sigma_i = \sqrt{\lambda_i(A^T A)} = \sqrt{\lambda_i(A A^T)}$, ordered $\sigma_1 \ge \sigma_2 \ge \cdots \ge \sigma_r > 0$.
 * **Geometric Action:** Rotate ($V^T$) $\to$ Scale by $\sigma_i$ ($\Sigma$) $\to$ Rotate ($U$).
 * **Eckart-Young Optimal Low-Rank Approximation:**
-  $$
-  A_k = \sum_{i=1}^k \sigma_i \mathbf{u}_i \mathbf{v}_i^T \implies \min_{\operatorname{rank}(B)=k}\|A - B\|_F = \sqrt{\sum_{i=k+1}^r \sigma_i^2}, \quad \|A - A_k\|_2 = \sigma_{k+1}
-  $$
+
+$$
+A_k = \sum_{i=1}^k \sigma_i \mathbf{u}_i \mathbf{v}_i^T \implies \min_{\text{rank}(B)=k}\|A - B\|_F = \sqrt{\sum_{i=k+1}^r \sigma_i^2}, \quad \|A - A_k\|_2 = \sigma_{k+1}
+$$
+
 * **PCA via SVD:** For centered data $X_c = U \Sigma V^T$:
   * Principal directions: Columns of $V$ (eigenvectors of $\Sigma_{\text{cov}}$).
   * Principal variances: $\lambda_i = \frac{\sigma_i^2}{n-1}$.
@@ -202,7 +231,7 @@ For real symmetric matrix $A \in \mathbb{R}^{n \times n}$:
 | $\mathbf{x}^T A \mathbf{x}$ ($A = A^T$ symmetric) | $2 A \mathbf{x}$ |
 | $\|\mathbf{x}\|_2^2 = \mathbf{x}^T \mathbf{x}$ | $2 \mathbf{x}$ |
 | $\|A\mathbf{x} - \mathbf{b}\|_2^2$ | $2 A^T (A\mathbf{x} - \mathbf{b})$ |
-| $\operatorname{Tr}(A X)$ with respect to matrix $X$ | $A^T$ |
+| $\text{Tr}(A X)$ with respect to matrix $X$ | $A^T$ |
 | $\log \det(X)$ with respect to matrix $X$ | $X^{-T}$ |
 | Linear layer backprop $\mathbf{z} = W\mathbf{x} + \mathbf{b}$ | $\frac{\partial \mathcal{L}}{\partial W} = \boldsymbol{\delta} \mathbf{x}^T, \quad \frac{\partial \mathcal{L}}{\partial \mathbf{x}} = W^T \boldsymbol{\delta} \quad \left(\boldsymbol{\delta} = \frac{\partial \mathcal{L}}{\partial \mathbf{z}}\right)$ |
 
