@@ -17,7 +17,11 @@ f(\mathbf{x}) = \mathbf{x}^T A \mathbf{x} = \sum_{i=1}^{n} \sum_{j=1}^{n} A_{ij}
 $$
 
 ### Example ($2 \times 2$):
-Let $A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$ and $\mathbf{x} = \begin{bmatrix} x_1 \\ x_2 \end{bmatrix}$:
+Let:
+
+$$
+A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}, \quad \mathbf{x} = \begin{bmatrix} x_1 \\ x_2 \end{bmatrix}
+$$
 
 $$
 \mathbf{x}^T A \mathbf{x} = \begin{bmatrix} x_1 & x_2 \end{bmatrix} \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} =
@@ -95,7 +99,13 @@ $$
 
 ## 18.5 Complete Worked Numerical Example
 
-Test whether matrix $A = \begin{bmatrix} 2 & -1 \\ -1 & 2 \end{bmatrix}$ is Positive Definite using all three main tests.
+Test whether matrix:
+
+$$
+A = \begin{bmatrix} 2 & -1 \\ -1 & 2 \end{bmatrix}
+$$
+
+is Positive Definite using all three main tests.
 
 ### Test 1: Sylvester's Criterion (Leading Principal Minors)
 * Submatrix 1 ($1 \times 1$): $A_1 = [2] \implies \det(A_1) = 2 > 0$ ✓

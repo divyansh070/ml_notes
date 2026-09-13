@@ -103,7 +103,7 @@ After completing the **Core Track (Parts 01–21)**, you should be able to perfo
   * *ML Connection:* Detecting feature redundancy and multicollinearity; low-rank model architectures.
 * [ ] **Determinants:** Compute $2 \times 2$ determinants ($ad - bc$) and $3 \times 3$ determinants using cofactor expansion or row reduction.
   * *ML Connection:* Invertibility check; volume scaling factor in Normalizing Flow generative models.
-* [ ] **Inverse by $2 \times 2$ Formula:** Compute $A^{-1} = \frac{1}{ad-bc}\begin{bmatrix} d & -b \\ -c & a \end{bmatrix}$ and verify $A A^{-1} = I$.
+* [ ] **Inverse by $2 \times 2$ Formula:** Compute $A^{-1} = \frac{1}{ad-bc}\begin{bmatrix} d & -b \\\\ -c & a \end{bmatrix}$ and verify $A A^{-1} = I$.
   * *ML Connection:* Analytic solution for 2D Gaussian distributions and bivariate regression.
 * [ ] **Inverse by Gauss-Jordan:** Augment $[A \mid I]$ and apply row operations to row-reduce $A$ to $I$, producing $[I \mid A^{-1}]$.
   * *ML Connection:* Exact numerical inversion algorithm implemented in linear algebra libraries.

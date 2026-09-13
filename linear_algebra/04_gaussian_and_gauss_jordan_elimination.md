@@ -129,7 +129,7 @@ $$
 x_1 + 2(1) + 1(2) = 8 \implies x_1 + 4 = 8 \implies x_1 = 4
 $$
 
-**Solution:** $\mathbf{x} = \begin{bmatrix} 4 \\ 1 \\ 2 \end{bmatrix}$.
+**Solution:** $\mathbf{x} = [4, 1, 2]^T$.
 
 ---
 

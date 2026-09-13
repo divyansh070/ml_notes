@@ -105,7 +105,7 @@ A **basis** is the minimal, non-redundant coordinate scaffolding for a vector sp
 > 1. **Linearly Independent:** No vector in $\mathcal{B}$ is redundant.
 > 2. **Spans the Space:** $\text{span}(\mathbf{v}_1, \dots, \mathbf{v}_k) = V$.
 
-* **Standard Basis for $\mathbb{R}^2$:** $\mathbf{e}_1 = \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \mathbf{e}_2 = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$.
+* **Standard Basis for $\mathbb{R}^2$:** $\mathbf{e}_1 = [1, 0]^T, \mathbf{e}_2 = [0, 1]^T$.
 * **Bases are NOT Unique:** Any two non-collinear vectors in $\mathbb{R}^2$ form a completely valid basis for $\mathbb{R}^2$.
 * **Coordinates Relative to a Basis:** If $\mathcal{B}$ is a basis, every vector $\mathbf{x} \in V$ can be written uniquely as $\mathbf{x} = c_1 \mathbf{v}_1 + \dots + c_k \mathbf{v}_k$. The scalar weights $[c_1, \dots, c_k]^T$ are the **coordinates of $\mathbf{x}$ in basis $\mathcal{B}$**.
 

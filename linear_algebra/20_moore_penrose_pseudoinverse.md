@@ -87,11 +87,11 @@ $$
 
 ## 20.5 Complete Worked Numerical Example
 
-Find the pseudoinverse of $A = \begin{bmatrix} 1 \\ 2 \end{bmatrix} \in \mathbb{R}^{2 \times 1}$.
+Find the pseudoinverse of $A = [1, 2]^T \in \mathbb{R}^{2 \times 1}$.
 
 ### Method 1: Using the Full Column Rank Formula
 * $m = 2, n = 1$. $\text{rank}(A) = 1 = n$ (Full column rank).
-* $A^T A = [1, 2] \begin{bmatrix} 1 \\ 2 \end{bmatrix} = 1^2 + 2^2 = 5$.
+* $A^T A = [1, 2] [1, 2]^T = 1^2 + 2^2 = 5$.
 * $(A^T A)^{-1} = \frac{1}{5} = 0.2$.
 * Compute $A^+ = (A^T A)^{-1} A^T$:
 

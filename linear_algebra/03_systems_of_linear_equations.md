@@ -161,7 +161,7 @@ $$
 $$
 
 * Wait, let's fix the third equation so it has a unique solution: change third row target to $2$:
-Let $R_3 \leftarrow R_3 - R_2$ on $\left[\begin{array}{ccc|c} 1 & 2 & -1 & 3 \\ 0 & 1 & 3 & 5 \\ 0 & 1 & 2 & 1 \end{array}\right]$:
+Apply row operation $R_3 \leftarrow R_3 - R_2$:
 
 $$
 \left[\begin{array}{ccc|c}
@@ -186,7 +186,7 @@ $$
 * From Row 2: $x_2 + 3(4) = 5 \implies x_2 = 5 - 12 = -7$.
 * From Row 1: $x_1 + 2(-7) - (4) = 3 \implies x_1 - 18 = 3 \implies x_1 = 21$.
 
-**Unique Solution:** $\mathbf{x} = \begin{bmatrix} 21 \\ -7 \\ 4 \end{bmatrix}$.
+**Unique Solution:** $\mathbf{x} = [21, -7, 4]^T$.
 
 ---
 
@@ -288,7 +288,7 @@ $$
 
 * **Result:** **No solution exists** (Inconsistent system).
 * **Geometric Picture:** The two equations represent distinct parallel lines in 2D space with slope $-1/2$ and different y-intercepts ($y = -0.5x + 2$ and $y = -0.5x + 2.75$). They never intersect.
-* **Column Picture:** The target $\mathbf{b} = \begin{bmatrix} 4 \\ 11 \end{bmatrix}$ does NOT lie in the span of the columns of $A$ ($\mathbf{b} \notin \text{Col}(A)$).
+* **Column Picture:** The target $\mathbf{b} = [4, 11]^T$ does NOT lie in the span of the columns of $A$ ($\mathbf{b} \notin \text{Col}(A)$).
 
 ---
 

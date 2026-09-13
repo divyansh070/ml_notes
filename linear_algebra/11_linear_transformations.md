@@ -70,7 +70,7 @@ $$
 
 ## 11.4 The 5 Elementary 2D Geometric Transformations
 
-Every $2 \times 2$ matrix transforms 2D space by repositioning the basis vectors $\mathbf{i} = \begin{bmatrix} 1 \\ 0 \end{bmatrix}$ and $\mathbf{j} = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$:
+Every $2 \times 2$ matrix transforms 2D space by repositioning the basis vectors $\mathbf{i} = [1, 0]^T$ and $\mathbf{j} = [0, 1]^T$:
 
 ### 1. Scaling (Dilation / Contraction):
 Stretches or compresses axes by factors $s_x, s_y$:
@@ -155,7 +155,7 @@ A = S R_{90^\circ} = \begin{bmatrix} 2 & 0 \\ 0 & 3 \end{bmatrix} \begin{bmatrix
 = \begin{bmatrix} 0 & -2 \\ 3 & 0 \end{bmatrix}
 $$
 
-### Step 3: Test on Input Vector $\mathbf{v} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$
+### Step 3: Test on Input Vector $\mathbf{v} = [1, 1]^T$
 
 $$
 A\mathbf{v} = \begin{bmatrix} 0 & -2 \\ 3 & 0 \end{bmatrix} \begin{bmatrix} 1 \\ 1 \end{bmatrix} =

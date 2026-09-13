@@ -23,7 +23,7 @@ A matrix transformation maps the standard unit coordinate hypercube into a paral
                    1                                                 b    a
 ```
 
-* **2D Area Scaling:** The unit square (area $= 1$) transformed by $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$ becomes a parallelogram with geometric area $= |\det(A)| = |ad - bc|$.
+* **2D Area Scaling:** The unit square (area $= 1$) transformed by matrix $A = \begin{bmatrix} a & b \\\\ c & d \end{bmatrix}$ becomes a parallelogram with geometric area $= |\det(A)| = |ad - bc|$.
 * **3D Volume Scaling:** For a $3 \times 3$ matrix, $|\det(A)|$ is the volume of the parallelepiped spanned by its three column vectors.
 * **Negative Determinant ($\det(A) < 0$):** Indicates an **orientation reversal** (a reflection across an axis, like looking in a mirror).
 * **Zero Determinant ($\det(A) = 0$):** Indicates **dimensional collapse**. The transformation squashes space into a lower dimension (e.g., a 2D plane into a 1D line or point; 3D space into a 2D flat sheet). Volume collapses to $0$, information is permanently destroyed, and the matrix is **singular (non-invertible)**.

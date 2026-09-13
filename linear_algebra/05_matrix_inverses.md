@@ -61,7 +61,13 @@ Mathematically, if $A\mathbf{x} = \mathbf{b}$, multiplying both sides by $A^{-1}
 
 ## 5.3 Derivation of the $2 \times 2$ Inverse Formula
 
-Let $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$. We seek matrix $X = \begin{bmatrix} x_1 & x_2 \\ x_3 & x_4 \end{bmatrix}$ such that $A X = I_2$:
+Let:
+
+$$
+A = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \in \mathbb{R}^{2 \times 2}, \quad X = \begin{bmatrix} x_1 & x_2 \\ x_3 & x_4 \end{bmatrix}
+$$
+
+We seek matrix $X$ such that $A X = I_2$:
 
 $$
 \begin{bmatrix} a & b \\ c & d \end{bmatrix} \begin{bmatrix} x_1 & x_2 \\ x_3 & x_4 \end{bmatrix} = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}
@@ -215,18 +221,32 @@ $$
 
 ### Step 1: Compute All 9 Minors ($M_{ij}$)
 Cross out row $i$ and column $j$, then compute the $2 \times 2$ determinant:
-* $M_{11} = \det\begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix} = (2)(2) - (1)(1) = 3$
-* $M_{12} = \det\begin{bmatrix} 3 & 1 \\ 2 & 2 \end{bmatrix} = (3)(2) - (1)(2) = 4$
-* $M_{13} = \det\begin{bmatrix} 3 & 2 \\ 2 & 1 \end{bmatrix} = (3)(1) - (2)(2) = -1$
-* $M_{21} = \det\begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix} = (1)(2) - (1)(1) = 1$
-* $M_{22} = \det\begin{bmatrix} 2 & 1 \\ 2 & 2 \end{bmatrix} = (2)(2) - (1)(2) = 2$
-* $M_{23} = \det\begin{bmatrix} 2 & 1 \\ 2 & 1 \end{bmatrix} = (2)(1) - (1)(2) = 0$
-* $M_{31} = \det\begin{bmatrix} 1 & 1 \\ 2 & 1 \end{bmatrix} = (1)(1) - (1)(2) = -1$
-* $M_{32} = \det\begin{bmatrix} 2 & 1 \\ 3 & 1 \end{bmatrix} = (2)(1) - (1)(3) = -1$
-* $M_{33} = \det\begin{bmatrix} 2 & 1 \\ 3 & 2 \end{bmatrix} = (2)(2) - (1)(3) = 1$
+
+$$
+\begin{aligned}
+M_{11} &= \det\begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix} = 3, &
+M_{12} &= \det\begin{bmatrix} 3 & 1 \\ 2 & 2 \end{bmatrix} = 4, &
+M_{13} &= \det\begin{bmatrix} 3 & 2 \\ 2 & 1 \end{bmatrix} = -1 \\[1em]
+M_{21} &= \det\begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix} = 1, &
+M_{22} &= \det\begin{bmatrix} 2 & 1 \\ 2 & 2 \end{bmatrix} = 2, &
+M_{23} &= \det\begin{bmatrix} 2 & 1 \\ 2 & 1 \end{bmatrix} = 0 \\[1em]
+M_{31} &= \det\begin{bmatrix} 1 & 1 \\ 2 & 1 \end{bmatrix} = -1, &
+M_{32} &= \det\begin{bmatrix} 2 & 1 \\ 3 & 1 \end{bmatrix} = -1, &
+M_{33} &= \det\begin{bmatrix} 2 & 1 \\ 3 & 2 \end{bmatrix} = 1
+\end{aligned}
+$$
 
 ### Step 2: Apply Checkerboard Signs to Form Cofactors ($C_{ij} = (-1)^{i+j} M_{ij}$)
-The sign pattern is $\begin{bmatrix} + & - & + \\ - & + & - \\ + & - & + \end{bmatrix}$:
+The checkerboard sign pattern is:
+
+$$
+\begin{bmatrix}
++ & - & + \\
+- & + & - \\
++ & - & +
+\end{bmatrix}
+$$
+
 * $C_{11} = +3$
 * $C_{12} = -4$
 * $C_{13} = -1$

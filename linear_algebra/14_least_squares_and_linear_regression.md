@@ -145,10 +145,23 @@ $$
 Model equation: $\hat{y} = 0.67 + 1.0 x$.
 
 ### Step 5: Verify Predictions and Residuals
-* Predictions: $\hat{\mathbf{y}} = X\mathbf{w} = \begin{bmatrix} 2/3 + 1(1) \\ 2/3 + 1(2) \\ 2/3 + 1(3) \end{bmatrix} = \begin{bmatrix} 5/3 \\ 8/3 \\ 11/3 \end{bmatrix}$
-* Residuals: $\mathbf{e} = \mathbf{y} - \hat{\mathbf{y}} = \begin{bmatrix} 2 - 5/3 \\ 2 - 8/3 \\ 4 - 11/3 \end{bmatrix} = \begin{bmatrix} 1/3 \\ -2/3 \\ 1/3 \end{bmatrix}$
+* Predictions:
+
+$$
+\hat{\mathbf{y}} = X\mathbf{w} = \begin{bmatrix} 2/3 + 1(1) \\ 2/3 + 1(2) \\ 2/3 + 1(3) \end{bmatrix} = \begin{bmatrix} 5/3 \\ 8/3 \\ 11/3 \end{bmatrix}
+$$$
+* Residuals:
+
+$$
+
+\mathbf{e} = \mathbf{y} - \hat{\mathbf{y}} = \begin{bmatrix} 2 - 5/3 \\ 2 - 8/3 \\ 4 - 11/3 \end{bmatrix} = \begin{bmatrix} 1/3 \\ -2/3 \\ 1/3 \end{bmatrix}
+$$$
 * Check sum of residuals: $1/3 - 2/3 + 1/3 = 0$ ✓
-* Check feature orthogonality: $X^T \mathbf{e} = \begin{bmatrix} 1/3 - 2/3 + 1/3 \\ 1(1/3) + 2(-2/3) + 3(1/3) \end{bmatrix} = \begin{bmatrix} 0 \\ 1/3 - 4/3 + 3/3 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$ ✓
+* Check feature orthogonality:
+
+$$
+X^T \mathbf{e} = \begin{bmatrix} 1/3 - 2/3 + 1/3 \\ 1(1/3) + 2(-2/3) + 3(1/3) \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}
+$$ ✓
 
 ---
 
@@ -160,7 +173,9 @@ What happens if feature columns are collinear (e.g. `x2 = 2 * x1`)?
   1. **Ridge Regression ($L_2$):** Adds $\lambda I$ to shift eigenvalues:
 
 $$
+
 \mathbf{w}_{\text{Ridge}} = (X^T X + \lambda I)^{-1} X^T \mathbf{y}
+
 $$
 
      Because all eigenvalues of $(X^T X + \lambda I)$ are strictly $\ge \lambda > 0$, it is **always positive definite and invertible**.

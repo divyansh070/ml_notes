@@ -129,7 +129,7 @@ $$
 ## 13.6 Complete Worked Numerical Example
 
 ### Task 1: Project a vector onto a line
-Project $\mathbf{b} = \begin{bmatrix} 3 \\ 4 \end{bmatrix}$ onto $\mathbf{a} = \begin{bmatrix} 4 \\ 0 \end{bmatrix}$:
+Project $\mathbf{b} = [3, 4]^T$ onto $\mathbf{a} = [4, 0]^T$:
 * $\mathbf{a}^T \mathbf{b} = (4)(3) + (0)(4) = 12$
 * $\mathbf{a}^T \mathbf{a} = 4^2 + 0^2 = 16$
 * Projection:
@@ -149,10 +149,15 @@ $$
 ---
 
 ### Task 2: Construct Projection Matrix for Subspace
-Let $A = \begin{bmatrix} 1 \\ 2 \end{bmatrix} \in \mathbb{R}^{2 \times 1}$. Compute $P$:
-1. $A^T A = [1, 2] \begin{bmatrix} 1 \\ 2 \end{bmatrix} = 1^2 + 2^2 = 5$.
+Let $A = [1, 2]^T \in \mathbb{R}^{2 \times 1}$. Compute $P$:
+1. $A^T A = [1, 2] [1, 2]^T = 1^2 + 2^2 = 5$.
 2. $(A^T A)^{-1} = \frac{1}{5} = 0.2$.
-3. $P = A (A^T A)^{-1} A^T = \frac{1}{5} \begin{bmatrix} 1 \\ 2 \end{bmatrix} [1, 2] = \frac{1}{5} \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix} = \begin{bmatrix} 0.2 & 0.4 \\ 0.4 & 0.8 \end{bmatrix}$.
+3. Compute projection matrix $P$:
+
+$$
+P = A (A^T A)^{-1} A^T = \frac{1}{5} \begin{bmatrix} 1 \\ 2 \end{bmatrix} \begin{bmatrix} 1 & 2 \end{bmatrix} = \frac{1}{5} \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix} = \begin{bmatrix} 0.2 & 0.4 \\ 0.4 & 0.8 \end{bmatrix}
+$$
+
 4. Check symmetry: $P^T = P$ ✓.
 5. Check idempotency:
 

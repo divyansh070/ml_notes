@@ -23,8 +23,8 @@ $$
 
 * **Dimensions ($m \times n$):** $m$ rows (height) by $n$ columns (width).
 * **Elements and Indexing ($a_{ij}$ or $A_{ij}$):** The entry at Row $i$, Column $j$.
-* **Row Vector ($1 \times n$):** A matrix with a single row: $\mathbf{r} = \begin{bmatrix} r_1 & r_2 & \dots & r_n \end{bmatrix}$.
-* **Column Vector ($m \times 1$):** A matrix with a single column: $\mathbf{c} = \begin{bmatrix} c_1 \\ c_2 \\ \vdots \\ c_m \end{bmatrix}$.
+* **Row Vector ($1 \times n$):** A matrix with a single row: $\mathbf{r} = [r_1, r_2, \dots, r_n]$.
+* **Column Vector ($m \times 1$):** A matrix with a single column: $\mathbf{c} = [c_1, c_2, \dots, c_m]^T$.
 
 ### The Two Complementary Roles of a Matrix in ML
 
@@ -184,7 +184,13 @@ BA = \begin{bmatrix} 2 & 0 \\ 3 & 4 \end{bmatrix} \begin{bmatrix} 1 & 2 \\ 0 & 1
 \begin{bmatrix} 2 & 4 \\ 3 & 10 \end{bmatrix}
 $$
 
-Clearly, $\begin{bmatrix} 8 & 8 \\ 3 & 4 \end{bmatrix} \neq \begin{bmatrix} 2 & 4 \\ 3 & 10 \end{bmatrix}$. **Therefore, $AB \neq BA$.**
+Clearly:
+
+$$
+AB = \begin{bmatrix} 8 & 8 \\ 3 & 4 \end{bmatrix} \neq BA = \begin{bmatrix} 2 & 4 \\ 3 & 10 \end{bmatrix}
+$$
+
+**Therefore, matrix multiplication is non-commutative: $AB \neq BA$.**
 
 ---
 

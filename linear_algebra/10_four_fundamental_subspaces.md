@@ -163,7 +163,7 @@ $$
 C(A) = \mathbb{R}^2
 $$
 
-* **Basis:** Any two independent columns, such as standard basis vectors $\begin{bmatrix} 1 \\ 0 \end{bmatrix}$ and $\begin{bmatrix} 0 \\ 1 \end{bmatrix}$.
+* **Basis:** Any two independent columns, such as standard basis vectors $[1, 0]^T$ and $[0, 1]^T$.
 
 ---
 

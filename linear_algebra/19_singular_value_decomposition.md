@@ -172,7 +172,7 @@ $$
 \frac{1}{5} \begin{bmatrix} 9/5 + 16/5 \\ 0 \end{bmatrix} = \frac{1}{5} \begin{bmatrix} 5 \\ 0 \end{bmatrix} = \begin{bmatrix} 1 \\ 0 \end{bmatrix}
 $$
 
-Choose $\mathbf{u}_2$ to complete the orthonormal basis for $\mathbb{R}^2$: $\mathbf{u}_2 = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$.
+Choose $\mathbf{u}_2$ to complete the orthonormal basis for $\mathbb{R}^2$: $\mathbf{u}_2 = [0, 1]^T$.
 
 $$
 U = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}

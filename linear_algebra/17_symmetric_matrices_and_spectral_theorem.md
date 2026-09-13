@@ -105,8 +105,8 @@ The eigenvectors are strictly perpendicular!
 ---
 
 ### Step 3: Normalize to Unit Length to Form $Q$
-* $\|\mathbf{v}_1\|_2 = \sqrt{1^2 + 1^2} = \sqrt{2} \implies \mathbf{q}_1 = \begin{bmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \end{bmatrix}$
-* $\|\mathbf{v}_2\|_2 = \sqrt{(-1)^2 + 1^2} = \sqrt{2} \implies \mathbf{q}_2 = \begin{bmatrix} -1/\sqrt{2} \\ 1/\sqrt{2} \end{bmatrix}$
+* $\|\mathbf{v}_1\|_2 = \sqrt{1^2 + 1^2} = \sqrt{2} \implies \mathbf{q}_1 = [1/\sqrt{2}, 1/\sqrt{2}]^T$
+* $\|\mathbf{v}_2\|_2 = \sqrt{(-1)^2 + 1^2} = \sqrt{2} \implies \mathbf{q}_2 = [-1/\sqrt{2}, 1/\sqrt{2}]^T$
 
 $$
 Q = \frac{1}{\sqrt{2}} \begin{bmatrix} 1 & -1 \\ 1 & 1 \end{bmatrix}, \quad \Lambda = \begin{bmatrix} 4 & 0 \\ 0 & 2 \end{bmatrix}

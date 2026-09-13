@@ -95,17 +95,17 @@ An $n \times n$ matrix $A$ is diagonalizable **if and only if it has $n$ linearl
    * **Algebraic Multiplicity ($AM$):** The number of times $\lambda_i$ appears as a root of $\det(A - \lambda I) = 0$.
    * **Geometric Multiplicity ($GM$):** The number of independent eigenvectors for $\lambda_i$ ($\dim(N(A - \lambda_i I))$).
    * A matrix is diagonalizable if and only if **$GM = AM$ for every eigenvalue**.
-   * If $GM < AM$, the matrix is **defective** (lacks sufficient independent eigenvectors) and cannot be diagonalized. Example: shear matrix $\begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix}$ has $\lambda = 1$ with $AM = 2$ but $GM = 1$.
+   * If $GM < AM$, the matrix is **defective** (lacks sufficient independent eigenvectors) and cannot be diagonalized. Example: shear matrix $\begin{bmatrix} 1 & 1 \\\\ 0 & 1 \end{bmatrix}$ has $\lambda = 1$ with $AM = 2$ but $GM = 1$.
 
 ---
 
 ## 16.4 Complete Worked Numerical Example
 
-Diagonalize $A = \begin{bmatrix} 4 & 2 \\ 1 & 3 \end{bmatrix}$ and compute $A^4$.
+Diagonalize matrix $A = \begin{bmatrix} 4 & 2 \\\\ 1 & 3 \end{bmatrix}$ and compute $A^4$.
 
 ### Step 1: Eigenvalues and Eigenvectors (from Part 15)
-* $\lambda_1 = 5 \implies \mathbf{v}_1 = \begin{bmatrix} 2 \\ 1 \end{bmatrix}$
-* $\lambda_2 = 2 \implies \mathbf{v}_2 = \begin{bmatrix} -1 \\ 1 \end{bmatrix}$
+* $\lambda_1 = 5 \implies \mathbf{v}_1 = [2, 1]^T$
+* $\lambda_2 = 2 \implies \mathbf{v}_2 = [-1, 1]^T$
 
 ### Step 2: Assemble $P$ and $D$
 
@@ -137,9 +137,9 @@ $$
 ---
 
 ### Step 5: Compute $A^4$ via $P D^4 P^{-1}$
-* $D^4 = \begin{bmatrix} 5^4 & 0 \\ 0 & 2^4 \end{bmatrix} = \begin{bmatrix} 625 & 0 \\ 0 & 16 \end{bmatrix}$
-* $P D^4 = \begin{bmatrix} 2 & -1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} 625 & 0 \\ 0 & 16 \end{bmatrix} = \begin{bmatrix} 1250 & -16 \\ 625 & 16 \end{bmatrix}$
-* $A^4 = (P D^4) P^{-1} = \frac{1}{3} \begin{bmatrix} 1250 & -16 \\ 625 & 16 \end{bmatrix} \begin{bmatrix} 1 & 1 \\ -1 & 2 \end{bmatrix}$:
+* $D^4 = \begin{bmatrix} 5^4 & 0 \\\\ 0 & 2^4 \end{bmatrix} = \begin{bmatrix} 625 & 0 \\\\ 0 & 16 \end{bmatrix}$
+* $P D^4 = \begin{bmatrix} 2 & -1 \\\\ 1 & 1 \end{bmatrix} \begin{bmatrix} 625 & 0 \\\\ 0 & 16 \end{bmatrix} = \begin{bmatrix} 1250 & -16 \\\\ 625 & 16 \end{bmatrix}$
+* $A^4 = (P D^4) P^{-1} = \frac{1}{3} \begin{bmatrix} 1250 & -16 \\\\ 625 & 16 \end{bmatrix} \begin{bmatrix} 1 & 1 \\\\ -1 & 2 \end{bmatrix}$:
 
 $$
 A^4 = \frac{1}{3} \begin{bmatrix} 1250(1) - 16(-1) & 1250(1) - 16(2) \\ 625(1) + 16(-1) & 625(1) + 16(2) \end{bmatrix} =

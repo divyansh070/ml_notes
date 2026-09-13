@@ -111,7 +111,7 @@ $$
 
 ## 5. Determinants
 
-* **$2 \times 2$ Determinant:** $\det \begin{bmatrix} a & b \\ c & d \end{bmatrix} = ad - bc$.
+* **$2 \times 2$ Determinant:** $\det \begin{bmatrix} a & b \\\\ c & d \end{bmatrix} = ad - bc$.
 * **Laplace Expansion ($n \times n$):** $\det(A) = \sum_{j=1}^n A_{ij} C_{ij} = \sum_{i=1}^n A_{ij} C_{ij}$.
 * **Triangular Matrix:** $\det(A) = \prod_{i=1}^n A_{ii}$ (product of diagonal entries/pivots).
 * **Core Determinant Rules:**
