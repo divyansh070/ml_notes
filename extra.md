@@ -389,7 +389,7 @@ Sparse features that are **never non-zero at the same time** (for example, one-h
 **CatBoost's fix:** shuffle the rows into a random permutation, and encode each row using **only the rows before it** in that order:
 
 $$
-\text{TS}_i = \frac{\sum_{j<i,\; c_j = c_i} y_j \;+\; a \cdot P}{\#\{j<i : c_j = c_i\} \;+\; a}
+\text{TS}_i = \frac{\sum_{j<i,\; c_j = c_i} y_j \;+\; a \cdot P}{\\#\{j<i : c_j = c_i\} \;+\; a}
 $$
 
 where $P$ is a prior (here the global mean) and $a$ is the prior's weight (here 1).
