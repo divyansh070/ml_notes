@@ -110,17 +110,16 @@ The Next.js server is the brain (it talks to Gemini and acts as the MCP client);
 
 ```mermaid
 flowchart TD
-    B[Browser] -->|HTTPS| N[Next.js on Vercel<br/>UI + API routes]
-    N -->|NextAuth session| N
-    N <-->|prompt + tools| G[Gemini 2.5 Flash]
-    N -->|MCP over SSE| P[Express proxy server.js<br/>on Render]
-    P --> L[mcp-library]
-    P --> C[mcp-cafeteria]
-    P --> E[mcp-events]
-    P --> A[mcp-academics]
-    P --> M[mcp-memory]
-    N --> S[(Supabase Postgres<br/>chats)]
-    M --> S2[(Supabase Postgres<br/>memories)]
+    B["Browser"] -->|"HTTPS / NextAuth"| N["Next.js on Vercel<br>UI + API routes"]
+    N <-->|"prompt + tools"| G["Gemini 2.5 Flash"]
+    N -->|"MCP over SSE"| P["Express proxy server.js<br>on Render"]
+    P --> L["mcp-library"]
+    P --> C["mcp-cafeteria"]
+    P --> E["mcp-events"]
+    P --> A["mcp-academics"]
+    P --> M["mcp-memory"]
+    N --> S[("Supabase Postgres<br>chats")]
+    M --> S2[("Supabase Postgres<br>memories")]
 ```
 
 Why this reading: the `MCP_*_URL` variables live in `dashboard/.env.local`, so the Next.js server connects to the MCP servers and calls Gemini. The root `package.json` describes the Express app as a "consolidated launchpad" whose only libraries are `express`, `http-proxy-middleware`, `cors` and Supabase. *Verify in the code.*
@@ -132,16 +131,16 @@ sequenceDiagram
     participant U as Student
     participant N as Next.js API route
     participant G as Gemini
-    participant M as MCP servers (via proxy)
+    participant M as MCP servers via proxy
     participant DB as Supabase
-    U->>N: "Any vegan lunch today?"
+    U->>N: Any vegan lunch today?
     N->>DB: load chat history
     N->>M: listTools() (at startup / cached)
     N->>G: history + message + tool declarations
-    G-->>N: functionCall get_menu(diet="vegan")
-    N->>M: callTool(get_menu, {diet: "vegan"})
+    G-->>N: functionCall get_menu(diet='vegan')
+    N->>M: callTool(get_menu, diet='vegan')
     M-->>N: menu items (JSON)
-    N->>G: functionResponse(menu items)
+    N-->>G: functionResponse(menu items)
     G-->>N: final answer text
     N->>DB: save updated messages (JSONB)
     N-->>U: answer
@@ -153,24 +152,24 @@ The loop repeats if Gemini asks for more tools (e.g. Cafeteria, then Academics f
 
 ```mermaid
 flowchart LR
-    U["I'm vegan"] --> G[Gemini decides<br/>this is worth saving]
-    G --> T[Tool call:<br/>store memory]
-    T --> M[mcp-memory]
-    M --> DB[(memories table)]
-    DB --> R[Later chat:<br/>recall memories]
-    R --> G2[Gemini filters<br/>menu for vegan]
+    U["I am vegan"] --> G["Gemini decides<br>this is worth saving"]
+    G --> T["Tool call:<br>store memory"]
+    T --> M["mcp-memory"]
+    M --> DB[("memories table")]
+    DB --> R["Later chat:<br>recall memories"]
+    R --> G2["Gemini filters<br>menu for vegan"]
 ```
 
 ### Flow C — request routing through the proxy
 
 ```mermaid
 flowchart LR
-    R[Request to Render URL] --> P{Path prefix}
-    P -->|/library| L[Library :3001]
-    P -->|/cafeteria| C[Cafeteria :3002]
-    P -->|/events| E[Events :3003]
-    P -->|/academics| A[Academics :3004]
-    P -->|/memory| M[Memory :3005]
+    R["Request to Render URL"] --> P{"Path prefix"}
+    P -->|"/library"| L["Library :3001"]
+    P -->|"/cafeteria"| C["Cafeteria :3002"]
+    P -->|"/events"| E["Events :3003"]
+    P -->|"/academics"| A["Academics :3004"]
+    P -->|"/memory"| M["Memory :3005"]
 ```
 
 Ports are from the README's local setup; each service exposes an `/sse` endpoint.
@@ -818,12 +817,12 @@ Same project, two framings: lead with architecture for SDE, lead with the agent 
 
 ```mermaid
 flowchart LR
-    Q[Student question] --> G[Gemini plans]
-    G --> T[Tools via MCP]
-    T --> S[5 domain services]
-    S --> G2[Gemini writes answer]
-    M[(Memories)] --> G
-    G2 --> A[Answer]
+    Q["Student question"] --> G["Gemini plans"]
+    G --> T["Tools via MCP"]
+    T --> S["5 domain services"]
+    S --> G2["Gemini writes answer"]
+    M[("Memories")] --> G
+    G2 --> A["Answer"]
 ```
 
 **One-line recall:** OmniOS is a tool-calling Gemini agent over five self-describing MCP services behind one proxy — the LLM plans and writes, the services supply facts, and Postgres remembers.
