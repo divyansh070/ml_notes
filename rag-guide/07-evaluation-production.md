@@ -316,8 +316,8 @@ flowchart LR
     
     CACHE --> SIM{"Max Cosine Similarity<br>s = dot(v_Q, v_cached)"}
     
-    SIM -->|"s >= tau_cache (0.96)<br>(CACHE HIT)"| RET_CACHE["Return Cached Answer<br>(Latency: 8 ms, Cost: $0.00)"]
-    SIM -->|"s < tau_cache (0.96)<br>(CACHE MISS)"| FULL_RAG["Execute Full RAG Pipeline<br>(Latency: 1,200 ms, Cost: $0.03)"]
+    SIM -->|"s >= tau_cache (0.96)<br>(CACHE HIT)"| RET_CACHE["Return Cached Answer<br>(Latency: 8 ms, Cost: \$0.00)"]
+    SIM -->|"s < tau_cache (0.96)<br>(CACHE MISS)"| FULL_RAG["Execute Full RAG Pipeline<br>(Latency: 1,200 ms, Cost: \$0.03)"]
     FULL_RAG --> STORE["Store (v_Q, Answer) in Cache with TTL"]
 ```
 
