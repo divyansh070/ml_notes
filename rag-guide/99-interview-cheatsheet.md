@@ -69,32 +69,32 @@ When an interviewer asks: *"Explain [Concept] and why we use it"* — deliver th
 flowchart TD
     START{"What is the Query Archetype & Scale?"}
     
-    START -->|Exact Code Identifier / UUID / Error Symbol| PATH_KEYWORD["Lexical Inverted Index<br/>(BM25 with k1=1.2-1.5, b=0.75)"]
-    START -->|Broad Semantic Concept / Synonyms| PATH_DENSE["Dense ANN / Hybrid Retrieval<br/>(BM25 + Dense Vectors via RRF)"]
-    START -->|Multi-Hop / Compositional Cross-Document| PATH_MULTIHOP["Sub-Question Decomposition<br/>(DAG Execution -> Context Packing)"]
-    START -->|Global Thematic / Macro-Level Corpus Query| PATH_GLOBAL["GraphRAG<br/>(Hierarchical Leiden Community Summaries)"]
+    START -->|"Exact Code Identifier / UUID / Error Symbol"| PATH_KEYWORD["Lexical Inverted Index<br>(BM25 with k1=1.2-1.5, b=0.75)"]
+    START -->|"Broad Semantic Concept / Synonyms"| PATH_DENSE["Dense ANN / Hybrid Retrieval<br>(BM25 + Dense Vectors via RRF)"]
+    START -->|"Multi-Hop / Compositional Cross-Document"| PATH_MULTIHOP["Sub-Question Decomposition<br>(DAG Execution to Context Packing)"]
+    START -->|"Global Thematic / Macro-Level Corpus Query"| PATH_GLOBAL["GraphRAG<br>(Hierarchical Leiden Community Summaries)"]
     
     PATH_KEYWORD --> META_CHECK{"Metadata Filter Predicate?"}
     PATH_DENSE --> META_CHECK
     
-    META_CHECK -->|"High Selectivity (p < 0.01)"| EXACT_SCAN["Fallback to Inverted Postings<br/>Flat Dot-Product Scan"]
-    META_CHECK -->|"Moderate Selectivity (p >= 0.01)"| FILTERED_ANN["Single-Stage Filtered ANN<br/>(ACORN / Bridge-Node Routing)"]
+    META_CHECK -->|"High Selectivity (p under 0.01)"| EXACT_SCAN["Fallback to Inverted Postings<br>Flat Dot-Product Scan"]
+    META_CHECK -->|"Moderate Selectivity (p at least 0.01)"| FILTERED_ANN["Single-Stage Filtered ANN<br>(ACORN / Bridge-Node Routing)"]
     META_CHECK -->|"No Filter"| RAW_RET["Standard Top-K Retrieval Candidates"]
     
     EXACT_SCAN --> RERANK_CHECK{"Rerank Latency Budget?"}
     FILTERED_ANN --> RERANK_CHECK
     RAW_RET --> RERANK_CHECK
     
-    RERANK_CHECK -->|"Rerank budget >= ~50-150 ms (GPU)"| CROSS["Cross-Encoder Reranker<br/>(Top-100 Candidates -> Top-5)"]
-    RERANK_CHECK -->|"Tighter Budget / Strict SLA"| COLBERT_OR_NONE["ColBERTv2 Late Interaction<br/>or No Reranker (Direct Top-K)"]
+    RERANK_CHECK -->|"Rerank budget at least 50-150 ms (GPU)"| CROSS["Cross-Encoder Reranker<br>(Top-100 Candidates -> Top-5)"]
+    RERANK_CHECK -->|"Tighter Budget / Strict SLA"| COLBERT_OR_NONE["ColBERTv2 Late Interaction<br>or No Reranker (Direct Top-K)"]
     
-    CROSS --> PACK["Context Refinement:<br/>Edge-Packing (Lost-in-Middle) +<br/>LongLLMLingua (if Context > 4k tokens)"]
+    CROSS --> PACK["Context Refinement:<br>Edge-Packing (Lost-in-Middle) +<br>LongLLMLingua (if Context > 4k tokens)"]
     COLBERT_OR_NONE --> PACK
     PATH_MULTIHOP --> PACK
     
     PACK --> GROUND_CHECK{"Factual Grounding Strategy?"}
-    GROUND_CHECK -->|"Strict Grounding Required"| CRITIQUE["Strict Grounding Strategy:<br/>Self-RAG-Style Critique (needs fine-tuned model)<br/>and/or CRAG Fallback (Not mutually exclusive)"]
-    GROUND_CHECK -->|"Standard Generation"| DIRECT_GEN["Direct Prompt Synthesis<br/>with System Guardrails"]
+    GROUND_CHECK -->|"Strict Grounding Required"| CRITIQUE["Strict Grounding Strategy:<br>Self-RAG-Style Critique (needs fine-tuned model)<br>and/or CRAG Fallback (Not mutually exclusive)"]
+    GROUND_CHECK -->|"Standard Generation"| DIRECT_GEN["Direct Prompt Synthesis<br>with System Guardrails"]
 ```
 
 ---

@@ -15,64 +15,64 @@ Modern Retrieval-Augmented Generation is not a simple `retrieve -> stuff -> gene
 flowchart TD
     subgraph INGESTION ["Phase 1: Ingestion & Indexing Pipeline"]
         direction TB
-        RAW["Raw Corpus<br/>(Markdown, Docs, Code, PDF)"] --> PARSE["Structure-Aware<br/>Parsing"]
-        PARSE --> CHUNK["Chunking Strategy<br/>(Fixed / Semantic / Late Chunking)"]
-        CHUNK --> META["Metadata Enrichment<br/>(Parent-Child, Summaries, Graph Entities)"]
-        META --> SPARSE_BUILD["Build Sparse Index<br/>(BM25 Inverted Index)"]
-        META --> EMBED["Dense Vector Encoder<br/>(Bi-Encoder / Late-Interaction)"]
-        EMBED --> DENSE_BUILD["Build Vector Index<br/>(HNSW / IVF-PQ)"]
+        RAW["Raw Corpus<br>(Markdown, Docs, Code, PDF)"] --> PARSE["Structure-Aware<br>Parsing"]
+        PARSE --> CHUNK["Chunking Strategy<br>(Fixed / Semantic / Late Chunking)"]
+        CHUNK --> META["Metadata Enrichment<br>(Parent-Child, Summaries, Graph Entities)"]
+        META --> SPARSE_BUILD["Build Sparse Index<br>(BM25 Inverted Index)"]
+        META --> EMBED["Dense Vector Encoder<br>(Bi-Encoder / Late-Interaction)"]
+        EMBED --> DENSE_BUILD["Build Vector Index<br>(HNSW / IVF-PQ)"]
     end
 
     subgraph QUERY_PROCESSING ["Phase 4: Query Understanding & Transformation"]
         direction TB
-        USER_Q["User Query"] --> ROUTE{"Query Analyzer<br/>& Router"}
-        ROUTE -->|Ambiguous / Underspecified| REWRITE["Query Rewriter /<br/>Expansion"]
-        ROUTE -->|Vocabulary Mismatch| HYDE["HyDE<br/>(Hypothetical Doc Embeddings)"]
-        ROUTE -->|Complex / Multi-Hop| DECOMP["Sub-Question<br/>Decomposition"]
-        ROUTE -->|Too Specific / Edge Case| STEPBACK["Step-Back Prompting<br/>(High-Level Principles)"]
+        USER_Q["User Query"] --> ROUTE{"Query Analyzer<br>& Router"}
+        ROUTE -->|Ambiguous / Underspecified| REWRITE["Query Rewriter /<br>Expansion"]
+        ROUTE -->|Vocabulary Mismatch| HYDE["HyDE<br>(Hypothetical Doc Embeddings)"]
+        ROUTE -->|Complex / Multi-Hop| DECOMP["Sub-Question<br>Decomposition"]
+        ROUTE -->|Too Specific / Edge Case| STEPBACK["Step-Back Prompting<br>(High-Level Principles)"]
     end
 
     subgraph RETRIEVAL ["Phase 2 & 3: Multi-Stage Hybrid Retrieval & Reranking"]
         direction TB
-        Q_TRANS["Transformed<br/>Queries"] --> RET_SPARSE["Stage 1a: Sparse Retrieval<br/>(BM25 Lexical Search)"]
-        Q_TRANS --> RET_DENSE["Stage 1b: Dense Vector Search<br/>(ANN via HNSW / IVF-PQ)"]
-        RET_SPARSE --> FUSION["Rank Fusion<br/>(Reciprocal Rank Fusion - RRF)"]
+        Q_TRANS["Transformed<br>Queries"] --> RET_SPARSE["Stage 1a: Sparse Retrieval<br>(BM25 Lexical Search)"]
+        Q_TRANS --> RET_DENSE["Stage 1b: Dense Vector Search<br>(ANN via HNSW / IVF-PQ)"]
+        RET_SPARSE --> FUSION["Rank Fusion<br>(Reciprocal Rank Fusion - RRF)"]
         RET_DENSE --> FUSION
-        FUSION --> CANDIDATES["Candidate Pool<br/>(Top-K: 50 to 100 docs)"]
-        CANDIDATES --> RERANK["Stage 2: Precision Reranking<br/>(Cross-Encoder / ColBERT MaxSim)"]
-        RERANK --> TOP_N["Top-N Documents<br/>(N: 5 to 10 docs)"]
+        FUSION --> CANDIDATES["Candidate Pool<br>(Top-K: 50 to 100 docs)"]
+        CANDIDATES --> RERANK["Stage 2: Precision Reranking<br>(Cross-Encoder / ColBERT MaxSim)"]
+        RERANK --> TOP_N["Top-N Documents<br>(N: 5 to 10 docs)"]
     end
 
     subgraph REFINEMENT ["Phase 5: Context Refinement & Packing"]
         direction TB
-        TOP_N --> FILTER["Extractive Token Pruning<br/>(LongLLMLingua / Compression)"]
-        FILTER --> REORDER["Context Reordering<br/>(Lost-in-the-Middle Mitigation)"]
+        TOP_N --> FILTER["Extractive Token Pruning<br>(LongLLMLingua / Compression)"]
+        FILTER --> REORDER["Context Reordering<br>(Lost-in-the-Middle Mitigation)"]
         REORDER --> PACKED["Optimized Prompt Context"]
     end
 
     subgraph AGENTIC_LOOP ["Phase 6: Advanced & Agentic Self-Correction"]
         direction TB
-        PACKED --> EVAL_CRITIC{"Evaluator / Self-RAG<br/>Retrieval Necessary?<br/>Context Relevant?"}
-        EVAL_CRITIC -->|Ambiguous / Low Confidence| CRAG_WEB["Corrective Fallback<br/>(Web Search / Query Reformulation)"]
+        PACKED --> EVAL_CRITIC{"Evaluator / Self-RAG<br>Retrieval Necessary?<br>Context Relevant?"}
+        EVAL_CRITIC -->|Ambiguous / Low Confidence| CRAG_WEB["Corrective Fallback<br>(Web Search / Query Reformulation)"]
         CRAG_WEB --> RETRIEVAL
-        EVAL_CRITIC -->|Valid Context| GEN["LLM Generation<br/>(Synthesize Answer)"]
-        GEN --> VERIFY{"Hallucination / Faithfulness Check<br/>(IsSup / IsUse Tokens)"}
+        EVAL_CRITIC -->|Valid Context| GEN["LLM Generation<br>(Synthesize Answer)"]
+        GEN --> VERIFY{"Hallucination / Faithfulness Check<br>(IsSup / IsUse Tokens)"}
         VERIFY -->|Unsupported| GEN
-        VERIFY -->|Faithful & Complete| FINAL_ANS["Final Answer + Citations"]
+        VERIFY -->|"Faithful & Complete"| FINAL_ANS["Final Answer + Citations"]
     end
 
     subgraph EVAL_PROD ["Phase 7: Continuous Evaluation & Observability"]
         direction TB
-        METRICS["RAG Triad:<br/>1. Context Relevance<br/>2. Groundedness (Faithfulness)<br/>3. Answer Relevance"]
-        TELEMETRY["Latency Budgeting<br/>Semantic Caching<br/>Index Drift Monitoring"]
+        METRICS["RAG Triad:<br>1. Context Relevance<br>2. Groundedness (Faithfulness)<br>3. Answer Relevance"]
+        TELEMETRY["Latency Budgeting<br>Semantic Caching<br>Index Drift Monitoring"]
     end
 
-    DENSE_BUILD -. Indexed Chunks .-> RETRIEVAL
+    DENSE_BUILD -.->|"Indexed Chunks"| RETRIEVAL
     USER_Q --> QUERY_PROCESSING
     QUERY_PROCESSING --> RETRIEVAL
     RETRIEVAL --> REFINEMENT
     REFINEMENT --> AGENTIC_LOOP
-    AGENTIC_LOOP -. Logs & Traces .-> EVAL_PROD
+    AGENTIC_LOOP -.->|"Logs & Traces"| EVAL_PROD
 ```
 
 ---
@@ -221,14 +221,14 @@ We evaluate all retrieval and generation techniques against three specific query
 
 ```mermaid
 graph LR
-    P0["00-index.md<br/>(Corpus & Architecture)"] --> P1["01-ingestion.md<br/>(Chunking & Metadata)"]
-    P1 --> P2["02-retrieval-primitives.md<br/>(BM25, Bi-Encoders, HNSW, IVF-PQ)"]
-    P2 --> P3["03-hybrid-and-reranking.md<br/>(RRF, Cross-Encoders, ColBERT)"]
-    P3 --> P4["04-query-transformations.md<br/>(HyDE, Rewrite, Decomp, Step-Back)"]
-    P4 --> P5["05-context-refinement.md<br/>(Pruning, Lost-in-Middle, Synthesis)"]
-    P5 --> P6["06-advanced-agentic-rag.md<br/>(Self-RAG, CRAG, GraphRAG, Workflows)"]
-    P6 --> P7["07-evaluation-production.md<br/>(RAG Triad, Caching, Drift, Budgets)"]
-    P7 --> P99["99-interview-cheatsheet.md<br/>(30s Pitches & Q&A)"]
+    P0["00-index.md<br>(Corpus & Architecture)"] --> P1["01-ingestion.md<br>(Chunking & Metadata)"]
+    P1 --> P2["02-retrieval-primitives.md<br>(BM25, Bi-Encoders, HNSW, IVF-PQ)"]
+    P2 --> P3["03-hybrid-and-reranking.md<br>(RRF, Cross-Encoders, ColBERT)"]
+    P3 --> P4["04-query-transformations.md<br>(HyDE, Rewrite, Decomp, Step-Back)"]
+    P4 --> P5["05-context-refinement.md<br>(Pruning, Lost-in-Middle, Synthesis)"]
+    P5 --> P6["06-advanced-agentic-rag.md<br>(Self-RAG, CRAG, GraphRAG, Workflows)"]
+    P6 --> P7["07-evaluation-production.md<br>(RAG Triad, Caching, Drift, Budgets)"]
+    P7 --> P99["99-interview-cheatsheet.md<br>(30s Pitches & Q&A)"]
 ```
 
 ### Detailed File Plan

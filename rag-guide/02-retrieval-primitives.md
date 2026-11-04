@@ -60,14 +60,14 @@ Where:
 > **IDF Formulations (Lucene vs. `rank_bm25` / Robertson)**:
 > In academic literature and the `rank_bm25` Python package, Robertson's unsmoothed IDF is used:
 > $$\text{IDF}_{\text{Robertson}}(q_i) = \ln \left( \frac{N - n(q_i) + 0.5}{n(q_i) + 0.5} \right)$$
-> If a term appears in more than half of the corpus ($n(q_i) > N/2$), Robertson's IDF becomes negative. To avoid penalizing documents that contain common words, `rank_bm25` floors negative IDF values to an $\epsilon$-floor ($\epsilon \times \text{average\_idf}$). In contrast, Lucene's formulation adds $+1$ inside the logarithm, ensuring $\text{IDF} \ge 0$ for all terms.
+> If a term appears in more than half of the corpus ($n(q_i) > N/2$), Robertson's IDF becomes negative. To avoid penalizing documents that contain common words, `rank_bm25` floors negative IDF values to an $\epsilon$-floor ($\epsilon \times \text{avg-idf}$). In contrast, Lucene's formulation adds $+1$ inside the logarithm, ensuring $\text{IDF} \ge 0$ for all terms.
 
 ##### Why Each Hyperparameter Exists:
 1. **$k_1$ (Term Frequency Saturation Parameter, typically $k_1 \in [1.2, 2.0]$)**:
    - In naive TF-IDF, term frequency scales linearly: mentioning a keyword 50 times makes a document 50 times more relevant than mentioning it once, making it vulnerable to keyword stuffing.
    - BM25 introduces an asymptotic upper bound. At $b=0$, the term frequency component is:
-     $$\text{TF\_Comp}(f) = \frac{f \cdot (k_1 + 1)}{f + k_1}$$
-     As $f \to \infty$, $\text{TF\_Comp}(f) \to k_1 + 1$.
+     $$\text{TF}_{\text{comp}}(f) = \frac{f \cdot (k_1 + 1)}{f + k_1}$$
+     As $f \to \infty$, $\text{TF}_{\text{comp}}(f) \to k_1 + 1$.
    - A lower $k_1$ (e.g., $1.2$) saturates quickly (diminishing returns after 2–3 occurrences). A higher $k_1$ (e.g., $2.0$) allows repeated mentions to push scores higher.
 2. **$b$ (Document Length Normalization Parameter, typically $b \in [0.75, 0.85]$)**:
    - A 5,000-word document naturally mentions a term more times than a 100-word document purely by virtue of verbosity.
@@ -76,28 +76,36 @@ Where:
    - If $b = 0.0$: Zero length normalization. Document length is completely ignored.
    - The factor $1 - b + b \cdot \frac{|D|}{\text{avgdl}}$ smoothly scales between unnormalized ($1.0$) and normalized ($\frac{|D|}{\text{avgdl}}$).
 
+| Term Frequency ($f$) | TF Score ($k_1 = 1.2$, asymptotic ceiling $2.20$) | TF Score ($k_1 = 2.0$, asymptotic ceiling $3.00$) | Diminishing Return Trajectory |
+| :--- | :--- | :--- | :--- |
+| **1** | $1.00$ | $1.00$ | Linear baseline |
+| **2** | $1.38$ ($+38\%$) | $1.50$ ($+50\%$) | Steep initial rise |
+| **3** | $1.57$ ($+14\%$) | $1.80$ ($+20\%$) | Growth begins flattening |
+| **5** | $1.77$ ($+13\%$) | $2.14$ ($+19\%$) | Pronounced diminishing returns |
+| **10** | $1.96$ ($+11\%$) | $2.50$ ($+17\%$) | Heavy compression of repeats |
+| **20** | $2.08$ ($+6\%$) | $2.73$ ($+9\%$) | Approaching asymptotic ceiling |
+| **$f 	o \infty$** | $\mathbf{2.20}$ *(Saturation Limit)* | $\mathbf{3.00}$ *(Saturation Limit)* | Maximum bounded contribution |
+
 ```mermaid
-xychart-beta
-    title "BM25 Term Frequency Saturation Effect at b=0 [f*(k1+1)/(f+k1)]"
-    x-axis [1, 2, 3, 5, 10, 20]
-    y-axis "TF Component Score" 0 --> 3.0
-    line [1.0, 1.38, 1.57, 1.77, 1.96, 2.08]
-    line [1.0, 1.50, 1.80, 2.14, 2.50, 2.73]
-```
-*(Chart legend: First line corresponds to $k_1 = 1.2$, second line corresponds to $k_1 = 2.0$)*
+flowchart LR
+    RAW_F["Term Frequency (f)"] --> COMP{"Asymptotic TF Saturation<br>TF(f) = [f * (k1 + 1)] / [f + k1]"}
+    COMP -->|"f = 1"| S1["Score = 1.00 (Single occurrence baseline)"]
+    COMP -->|"f = 3"| S2["Score = 1.57 to 1.80 (Flattening curve)"]
+    COMP -->|"f -> infinity"| S3["Bounded Ceiling: k1 + 1<br>(2.20 for k1=1.2, 3.00 for k1=2.0)"]
+```*
 
 #### 5. Worked Example (Hand-Calculated)
 Let our corpus contain $N = 6$ documents ($D_1$ to $D_6$).
 Let $\text{avgdl} = 150$ tokens *(illustrative)*.
-We evaluate the single query term $q = \text{"retry_after_ms"}$ on two documents:
-- Document $A$ ($D_2$): $|D_A| = 100$ tokens *(illustrative)*, $f(\text{"retry_after_ms"}, D_A) = 1$.
-- Document $B$ ($D_5$, source code): $|D_B| = 300$ tokens *(illustrative)*, $f(\text{"retry_after_ms"}, D_B) = 3$.
+We evaluate the single query term $q$ (`retry_after_ms`) on two documents:
+- Document $A$ ($D_2$): $|D_A| = 100$ tokens *(illustrative)*, $f(q, D_A) = 1$.
+- Document $B$ ($D_5$, source code): $|D_B| = 300$ tokens *(illustrative)*, $f(q, D_B) = 3$.
 
 Suppose the term appears in $n(q) = 2$ documents ($D_2$ and $D_5$).
 Set standard hyperparameters: $k_1 = 1.5$, $b = 0.75$.
 
 **Step 1: Compute IDF (Lucene Smoothed)**:
-$$\text{IDF}(\text{"retry_after_ms"}) = \ln \left( 1 + \frac{6 - 2 + 0.5}{2 + 0.5} \right) = \ln \left( 1 + \frac{4.5}{2.5} \right) = \ln(1 + 1.8) = \ln(2.8) \approx 1.0296$$
+$$\text{IDF}(q) = \ln \left( 1 + \frac{6 - 2 + 0.5}{2 + 0.5} \right) = \ln \left( 1 + \frac{4.5}{2.5} \right) = \ln(1 + 1.8) = \ln(2.8) \approx 1.0296$$
 
 **Step 2: Compute Length Penalty Factor $K(D) = 1 - b + b \cdot \frac{|D|}{\text{avgdl}}$**:
 - For Doc $A$ ($|D_A| = 100$):
@@ -107,9 +115,9 @@ $$\text{IDF}(\text{"retry_after_ms"}) = \ln \left( 1 + \frac{6 - 2 + 0.5}{2 + 0.
 
 **Step 3: Compute TF Component $\frac{f \cdot (k_1 + 1)}{f + k_1 \cdot K(D)}$**:
 - For Doc $A$ ($f = 1$):
-  $$\text{TF\_Comp}(D_A) = \frac{1 \cdot (1.5 + 1)}{1 + 1.5 \cdot 0.75} = \frac{2.5}{1 + 1.125} = \frac{2.5}{2.125} \approx 1.1765$$
+  $$\text{TF}_{\text{comp}}(D_A) = \frac{1 \cdot (1.5 + 1)}{1 + 1.5 \cdot 0.75} = \frac{2.5}{1 + 1.125} = \frac{2.5}{2.125} \approx 1.1765$$
 - For Doc $B$ ($f = 3$):
-  $$\text{TF\_Comp}(D_B) = \frac{3 \cdot (1.5 + 1)}{3 + 1.5 \cdot 1.75} = \frac{7.5}{3 + 2.625} = \frac{7.5}{5.625} \approx 1.3333$$
+  $$\text{TF}_{\text{comp}}(D_B) = \frac{3 \cdot (1.5 + 1)}{3 + 1.5 \cdot 1.75} = \frac{7.5}{3 + 2.625} = \frac{7.5}{5.625} \approx 1.3333$$
 
 **Step 4: Final BM25 Scores**:
 - $\text{Score}(D_A) = 1.0296 \cdot 1.1765 \approx \mathbf{1.211}$
@@ -186,15 +194,15 @@ Imagine mapping every idea to a location on a giant multi-dimensional semantic g
 ```mermaid
 flowchart TD
     subgraph BI_ENCODER ["Bi-Encoder Architecture (Offline Indexing vs Online Query)"]
-        DOC["Document Passage D"] --> DOC_ENC["Document Encoder<br/>(Transformer Backbone)"]
-        DOC_ENC --> POOL_D["Pooling Layer<br/>(BGE: CLS | E5/SBERT: Mean)"]
-        POOL_D --> V_DOC["Dense Vector v_D in R^d<br/>(Pre-computed & Indexed)"]
+        DOC["Document Passage D"] --> DOC_ENC["Document Encoder<br>(Transformer Backbone)"]
+        DOC_ENC --> POOL_D["Pooling Layer<br>(BGE: CLS | E5/SBERT: Mean)"]
+        POOL_D --> V_DOC["Dense Vector v_D in R^d<br>(Pre-computed & Indexed)"]
         
-        QUERY["Query Q"] --> Q_ENC["Query Encoder<br/>(Transformer Backbone)"]
+        QUERY["Query Q"] --> Q_ENC["Query Encoder<br>(Transformer Backbone)"]
         Q_ENC --> POOL_Q["Pooling Layer"]
-        POOL_Q --> V_Q["Dense Vector v_Q in R^d<br/>(Computed at Runtime)"]
+        POOL_Q --> V_Q["Dense Vector v_Q in R^d<br>(Computed at Runtime)"]
         
-        V_Q --- DOT(("Dot Product / Cosine<br/><v_Q, v_D>"))
+        V_Q --- DOT(("Dot Product / Cosine<br><v_Q, v_D>"))
         V_DOC --- DOT
         DOT --> SIM["Scalar Relevance Score"]
     end
@@ -300,13 +308,13 @@ Contriever applies **Independent Random Cropping** to text: sample two independe
 
 ```mermaid
 flowchart TD
-    DOC["Single Long Document D6<br/>(HNSW OOM Incident Postmortem)"] --> CROP1["Span 1 (Pseudo-Query q)<br/>'high-throughput vector backfill 10M embeddings'"]
-    DOC --> CROP2["Span 2 (Positive Document d+)<br/>'HNSW parameters M=64 Layer-0 edge memory exhaustion'"]
+    DOC["Single Long Document D6<br>(HNSW OOM Incident Postmortem)"] --> CROP1["Span 1 (Pseudo-Query q)<br>'high-throughput vector backfill 10M embeddings'"]
+    DOC --> CROP2["Span 2 (Positive Document d+)<br>'HNSW parameters M=64 Layer-0 edge memory exhaustion'"]
     
     CROP1 --> ENC["Shared Transformer Encoder"] --> V_Q["Vector q"]
     CROP2 --> ENC --> V_POS["Vector d+"]
     
-    V_Q --- CONTRAST(("Contrastive InfoNCE Loss<br/>Maximize <q, d+><br/>Minimize <q, d_other>"))
+    V_Q --- CONTRAST(("Contrastive InfoNCE Loss<br>Maximize <q, d+><br>Minimize <q, d_other>"))
     V_POS --- CONTRAST
 ```
 
@@ -401,11 +409,11 @@ When all arrows are scaled to have a length of exactly 1 meter (unit normalizati
 
 ```mermaid
 graph LR
-    subgraph METRIC_SPACE ["Unit Hypersphere (||u|| = ||v|| = 1)"]
-        ORIGIN((0, 0)) -->|Unit Vector| U["u"]
-        ORIGIN -->|Unit Vector| V["v"]
-        U -.-|Euclidean Distance ||u - v||| V
-        U -. Angle theta .-> V
+    subgraph METRIC_SPACE ["Unit Hypersphere: norm(u) = norm(v) = 1"]
+        ORIGIN((0, 0)) -->|"Unit Vector"| U["u"]
+        ORIGIN -->|"Unit Vector"| V["v"]
+        U -.-|"Euclidean Distance L2(u, v)"| V
+        U -.->|"Angle theta"| V
     end
 ```
 
@@ -524,7 +532,7 @@ When combined with index overhead, hosting this collection in RAM requires expen
 ```mermaid
 flowchart TD
     subgraph IVF ["IVF: Coarse Voronoi Partitioning"]
-        VEC_SPACE["Vector Space"] --> KMEANS["k-Means Clustering<br/>(e.g., nlist = 4096 Centroids)"]
+        VEC_SPACE["Vector Space"] --> KMEANS["k-Means Clustering<br>(e.g., nlist = 4096 Centroids)"]
         KMEANS --> C1["Centroid 1"]
         KMEANS --> C2["Centroid 2 (Closest to Query)"]
         KMEANS --> C3["Centroid 3 (Closest to Query)"]
@@ -666,15 +674,15 @@ flowchart TD
     end
     
     subgraph LAYER_1 ["Layer 1: Medium-Range Regional Links"]
-        N2_1 -. Drop Down .-> N1_1["Node A"]
+        N2_1 -.->|"Drop Down"| N1_1["Node A"]
         N1_1 -->|Medium Hop| N1_2["Node B"]
         N1_2 -->|Medium Hop| N1_3["Node C"]
     end
     
     subgraph LAYER_0 ["Layer 0: Dense Local Neighborhood (All Vectors Present)"]
-        N1_3 -. Drop Down .-> N0_1["Node C"]
+        N1_3 -.->|"Drop Down"| N0_1["Node C"]
         N0_1 --> N0_2["Node D"]
-        N0_2 --> TARGET(("Nearest Neighbor<br/>Found!"))
+        N0_2 --> TARGET(("Nearest Neighbor<br>Found!"))
     end
 ```
 

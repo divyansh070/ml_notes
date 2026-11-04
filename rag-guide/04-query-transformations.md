@@ -25,13 +25,13 @@ Because no single document in the corpus contains all three topics at once, sing
 
 ```mermaid
 flowchart TD
-    RAW_Q["Raw User Query Q3<br/>(Complex Multi-Hop)"] --> ROUTER{"Query Complexity<br/>Classifier"}
-    ROUTER -->|Ambiguous / Multi-turn| REWRITE["1. Query Rewriter<br/>(Context Collapse)"]
-    ROUTER -->|Asymmetric / Conceptual| HYDE["2. HyDE<br/>(Hypothetical Answer)"]
-    ROUTER -->|Multi-Hop / Compositional| DECOMP["3. Sub-Question<br/>Decomposition (DAG)"]
-    ROUTER -->|Too Specific / High-Level| STEPBACK["4. Step-Back Prompting<br/>(High-Level Principle)"]
+    RAW_Q["Raw User Query Q3<br>(Complex Multi-Hop)"] --> ROUTER{"Query Complexity<br>Classifier"}
+    ROUTER -->|Ambiguous / Multi-turn| REWRITE["1. Query Rewriter<br>(Context Collapse)"]
+    ROUTER -->|Asymmetric / Conceptual| HYDE["2. HyDE<br>(Hypothetical Answer)"]
+    ROUTER -->|Multi-Hop / Compositional| DECOMP["3. Sub-Question<br>Decomposition (DAG)"]
+    ROUTER -->|Too Specific / High-Level| STEPBACK["4. Step-Back Prompting<br>(High-Level Principle)"]
 
-    REWRITE --> RETRIEVE[("Hybrid Retrieval<br/>Index")]
+    REWRITE --> RETRIEVE[("Hybrid Retrieval<br>Index")]
     HYDE --> RETRIEVE
     DECOMP --> RETRIEVE
     STEPBACK --> RETRIEVE
@@ -121,11 +121,11 @@ By searching with the *hypothetical answer* rather than the question, you search
 
 ```mermaid
 flowchart TD
-    QUERY["User Query Q2<br/>('Why did our servers crash while building...')"] --> LLM_GEN["Zero-Shot LLM<br/>(Prompt: 'Write a technical paragraph answering this')"]
-    LLM_GEN --> HYPO["Hypothetical Document H<br/>('During search index construction like HNSW, high-dimensional vectors and Layer-0 edge lists can exhaust RAM...')"]
-    HYPO --> EMBED["Dense Encoder<br/>(Encodes H into Vector v_H)"]
-    EMBED --> VEC_SEARCH[("Vector Database<br/>(Doc-to-Doc Nearest Neighbor Search)")]
-    VEC_SEARCH --> MATCH["Target Document D6<br/>Retrieved with Cosine Sim > 0.85!"]
+    QUERY["User Query Q2<br>('Why did our servers crash while building...')"] --> LLM_GEN["Zero-Shot LLM<br>(Prompt: 'Write a technical paragraph answering this')"]
+    LLM_GEN --> HYPO["Hypothetical Document H<br>('During search index construction like HNSW, high-dimensional vectors and Layer-0 edge lists can exhaust RAM...')"]
+    HYPO --> EMBED["Dense Encoder<br>(Encodes H into Vector v_H)"]
+    EMBED --> VEC_SEARCH[("Vector Database<br>(Doc-to-Doc Nearest Neighbor Search)")]
+    VEC_SEARCH --> MATCH["Target Document D6<br>Retrieved with Cosine Sim over 0.85!"]
 ```
 
 #### 3. Mechanics
@@ -234,28 +234,28 @@ Each question produces an intermediate fact that enables answering the next ques
 
 ```mermaid
 flowchart TD
-    Q3["Query Q3:<br/>'How do enterprise quota tier upgrades interact with client<br/>retry configuration to resolve ingestion batch failures?'"] --> DECOMP["LLM Sub-Question Decomposer"]
+    Q3["Query Q3:<br>'How do enterprise quota tier upgrades interact with client<br>retry configuration to resolve ingestion batch failures?'"] --> DECOMP["LLM Sub-Question Decomposer"]
     
     subgraph DAG ["Directed Acyclic Graph of Sub-Queries"]
         direction TB
-        SQ1["Sub-Query 1:<br/>'What causes batch ingestion failures and worker OOMs during vector backfills?'"]
-        SQ2["Sub-Query 2:<br/>'How does the OmniFlow client configure retry intervals and backoff on HTTP 429?'"]
-        SQ3["Sub-Query 3:<br/>'What are the request limits of the Enterprise tier and how fast do tier upgrades apply?'"]
+        SQ1["Sub-Query 1:<br>'What causes batch ingestion failures and worker OOMs during vector backfills?'"]
+        SQ2["Sub-Query 2:<br>'How does the OmniFlow client configure retry intervals and backoff on HTTP 429?'"]
+        SQ3["Sub-Query 3:<br>'What are the request limits of the Enterprise tier and how fast do tier upgrades apply?'"]
     end
     
     DECOMP --> SQ1
     DECOMP --> SQ2
     DECOMP --> SQ3
     
-    SQ1 --> RET1[("Retrieve against Corpus")] --> R1["Result 1: Doc D6<br/>(HNSW OOM caused by raw vectors + L0 edges)"]
-    SQ2 --> RET2[("Retrieve against Corpus")] --> R2["Result 2: Doc D3 & D5<br/>(Exponential backoff with jitter on 429)"]
-    SQ3 --> RET3[("Retrieve against Corpus")] --> R3["Result 3: Doc D2<br/>(Enterprise tier provides 20,000 RPM, upgrades in 15s)"]
+    SQ1 --> RET1[("Retrieve against Corpus")] --> R1["Result 1: Doc D6<br>(HNSW OOM caused by raw vectors + L0 edges)"]
+    SQ2 --> RET2[("Retrieve against Corpus")] --> R2["Result 2: Doc D3 & D5<br>(Exponential backoff with jitter on 429)"]
+    SQ3 --> RET3[("Retrieve against Corpus")] --> R3["Result 3: Doc D2<br>(Enterprise tier provides 20,000 RPM, upgrades in 15s)"]
     
     R1 --> SYNTH["Synthesis LLM"]
     R2 --> SYNTH
     R3 --> SYNTH
     
-    SYNTH --> FINAL["Final Grounded Multi-Hop Answer:<br/>Upgrading to Enterprise (target_tier=Enterprise, 20,000 RPM / 30,000 burst) reduces 429s for traffic under 20,000 RPM (30,000 burst), but does NOT resolve worker RAM exhaustion (raw vectors 61.44 GB + L0 edges); M=16 alone leaves 62.84 GB on 64 GB (insufficient headroom). Resolution in D6: shard collection (e.g. 2 x 5M vectors) and/or store compressed vectors in graph (HNSW+PQ/SQ, DiskANN-style). Note: D3 specifies retry codes (429,502,503,504), but D5 only catches 429."]
+    SYNTH --> FINAL["Final Grounded Multi-Hop Answer:<br>Upgrading to Enterprise (target_tier=Enterprise, 20,000 RPM / 30,000 burst) reduces 429s for traffic under 20,000 RPM (30,000 burst), but does NOT resolve worker RAM exhaustion (raw vectors 61.44 GB + L0 edges); M=16 alone leaves 62.84 GB on 64 GB (insufficient headroom). Resolution in D6: shard collection (e.g. 2 x 5M vectors) and/or store compressed vectors in graph (HNSW+PQ/SQ, DiskANN-style). Note: D3 specifies retry codes (429,502,503,504), but D5 only catches 429."]
 ```
 
 #### 3. Mechanics
@@ -355,10 +355,10 @@ By retrieving the **high-level governing principles first**, the model gains the
 
 ```mermaid
 flowchart TD
-    SPEC_Q["Hyper-Specific Query:<br/>'Why did worker 14 crash with exit code 137 when M=64<br/>and efConstruction=200 during the March 14 backfill?'"]
+    SPEC_Q["Hyper-Specific Query:<br>'Why did worker 14 crash with exit code 137 when M=64<br>and efConstruction=200 during the March 14 backfill?'"]
     
-    SPEC_Q --> STEPBACK_LLM["Step-Back Prompter<br/>(Generates high-level conceptual question)"]
-    STEPBACK_LLM --> HIGH_Q["High-Level Step-Back Query:<br/>'How do high-dimensional vectors and HNSW graph parameters M<br/>impact memory consumption during graph construction?'"]
+    SPEC_Q --> STEPBACK_LLM["Step-Back Prompter<br>(Generates high-level conceptual question)"]
+    STEPBACK_LLM --> HIGH_Q["High-Level Step-Back Query:<br>'How do high-dimensional vectors and HNSW graph parameters M<br>impact memory consumption during graph construction?'"]
     
     SPEC_Q --> RET1[("Retrieve Specific Context")] --> C1["Context 1: Incident 4092 Postmortem specifics"]
     HIGH_Q --> RET2[("Retrieve Principle Context")] --> C2["Context 2: OmniFlow Storage Tier & In-Memory HNSW Partitioning"]

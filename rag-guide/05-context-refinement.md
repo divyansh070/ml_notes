@@ -24,11 +24,11 @@ LongLLMLingua acts as an automated, mathematically rigorous highlighter: it eval
 
 ```mermaid
 flowchart LR
-    RAW_DOC["Raw Retrieved Passage D5<br/>(250 tokens with boilerplate docstrings<br/>and redundant prose)"] --> SMALL_LM["Lightweight Evaluator LM<br/>(e.g., LLaMA-3-8B / Qwen-1.5B)"]
-    SMALL_LM --> PPL["Compute Perplexity & Conditional<br/>Mutual Information per token"]
-    PPL --> FILTER{"Keep tokens with top ΔI<br/>within budget"}
-    FILTER --> PRUNED["Compressed Context D5'<br/>(75 tokens: retains '429', 'retry_after_ms',<br/>'backoff_factor', 'time.sleep')"]
-    PRUNED --> GENERATOR["Downstream Generator LLM<br/>(Fast, Cheap, Highly Focused)"]
+    RAW_DOC["Raw Retrieved Passage D5<br>(250 tokens with boilerplate docstrings<br>and redundant prose)"] --> SMALL_LM["Lightweight Evaluator LM<br>(e.g., LLaMA-3-8B / Qwen-1.5B)"]
+    SMALL_LM --> PPL["Compute Perplexity & Conditional<br>Mutual Information per token"]
+    PPL --> FILTER{"Keep tokens with top ΔI<br>within budget"}
+    FILTER --> PRUNED["Compressed Context D5'<br>(75 tokens: retains '429', 'retry_after_ms',<br>'backoff_factor', 'time.sleep')"]
+    PRUNED --> GENERATOR["Downstream Generator LLM<br>(Fast, Cheap, Highly Focused)"]
 ```
 
 #### 3. Mechanics

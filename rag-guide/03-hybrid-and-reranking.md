@@ -22,14 +22,14 @@ Relying solely on dense search or solely on sparse search guarantees that an ent
 
 ```mermaid
 flowchart TD
-    QUERY["User Query"] --> DENSE["Dense Vector Retriever<br/>(ANN / HNSW)"]
-    QUERY --> SPARSE["Sparse Lexical Retriever<br/>(BM25)"]
+    QUERY["User Query"] --> DENSE["Dense Vector Retriever<br>(ANN / HNSW)"]
+    QUERY --> SPARSE["Sparse Lexical Retriever<br>(BM25)"]
     
-    DENSE -->|High Semantic Recall<br/>Fails on exact keywords/IDs| FUSION{"Hybrid Rank Fusion<br/>(RRF)"}
-    SPARSE -->|High Lexical Precision<br/>Fails on vocabulary mismatch| FUSION
+    DENSE -->|"High Semantic Recall<br>Fails on exact keywords/IDs"| FUSION{"Hybrid Rank Fusion<br>(RRF)"}
+    SPARSE -->|"High Lexical Precision<br>Fails on vocabulary mismatch"| FUSION
     
     FUSION --> CANDIDATES["Candidate Pool (K=100)"]
-    CANDIDATES --> RERANKER["Cross-Encoder / ColBERT<br/>Precision Reranker"]
+    CANDIDATES --> RERANKER["Cross-Encoder / ColBERT<br>Precision Reranker"]
     RERANKER --> FINAL["Top-N Context (N=5)"]
 ```
 
@@ -108,9 +108,9 @@ flowchart LR
         S3["Rank 3: Doc D2 (score 1.07)"]
     end
     
-    DENSE_LIST --> RRF{"RRF Accumulator<br/>1 / (k + rank)"}
+    DENSE_LIST --> RRF{"RRF Accumulator<br>1 / (k + rank)"}
     SPARSE_LIST --> RRF
-    RRF --> FUSED["Fused Top-3:<br/>1. Doc D3 (0.03279) - Legitimate Winner!<br/>2. Doc D5 (0.03151) | 3. Doc D2 (0.03102)<br/>Hybrid lifts D5 & D2 from ranks 5-6 into top tier"]
+    RRF --> FUSED["Fused Top-3:<br>1. Doc D3 (0.03279) - Legitimate Winner!<br>2. Doc D5 (0.03151), 3. Doc D2 (0.03102)<br>Hybrid lifts D5 & D2 from ranks 5-6 into top tier"]
 ```
 
 #### 3. Mechanics
@@ -125,7 +125,7 @@ flowchart LR
 #### 4. Math: The RRF Formula and the Role of $k \approx 60$
 Given a set of ranking systems $\mathcal{M}$ and a document $d \in \mathcal{D}$:
 
-$$\text{RRF\_Score}(d) = \sum_{m \in \mathcal{M}} \frac{1}{k + r_m(d)}$$
+$$\text{RRF}(d) = \sum_{m \in \mathcal{M}} \frac{1}{k + r_m(d)}$$
 
 Where:
 - $r_m(d) \in \{1, 2, 3, \dots\}$: The 1-based rank position of document $d$ in system $m$.
@@ -253,7 +253,7 @@ flowchart TD
     end
 
     subgraph CROSS_ENCODER_ARCH ["Cross-Encoder (Precision Reranker)"]
-        QD["[CLS] + Query Tokens + [SEP] + Document Tokens + [SEP]"] --> TRANSFORMER["Full Transformer Backbone<br/>(All-to-All Self-Attention across ALL Query & Doc Tokens)"]
+        QD["[CLS] + Query Tokens + [SEP] + Document Tokens + [SEP]"] --> TRANSFORMER["Full Transformer Backbone<br>(All-to-All Self-Attention across ALL Query & Doc Tokens)"]
         TRANSFORMER --> CLS["[CLS] Representation"]
         CLS --> LINEAR["Linear Classifier Head"]
         LINEAR --> S2["Score: Exact Relevance in [0, 1]"]
@@ -375,8 +375,8 @@ flowchart TD
     Q1 -->|Max Dot Product| D2
     Q2 -->|Max Dot Product| D3
     
-    D2 -. Score = 0.94 .-> SUM(("Sum MaxSim<br/>0.94 + 0.82 = 1.76"))
-    D3 -. Score = 0.82 .-> SUM
+    D2 -.->|"Score = 0.94"| SUM(("Sum MaxSim<br>0.94 + 0.82 = 1.76"))
+    D3 -.->|"Score = 0.82"| SUM
 ```
 
 #### 3. Mechanics

@@ -24,18 +24,18 @@ Think of a student taking an open-book exam.
 
 ```mermaid
 flowchart TD
-    QUERY["User Query x"] --> ADAPT{"Adaptive Retrieval Gate<br/>Normalized p(Retrieve=Yes) > delta?"}
+    QUERY["User Query x"] --> ADAPT{"Adaptive Retrieval Gate<br>Normalized p(Retrieve=Yes) exceeds delta?"}
     
-    ADAPT -->|No| GEN_PARAM["Generate Segment Directly<br/>from Parametric Memory"]
-    ADAPT -->|Yes| RETRIEVE["Retrieve Top-K Passages<br/>(Processed in Parallel)"]
+    ADAPT -->|No| GEN_PARAM["Generate Segment Directly<br>from Parametric Memory"]
+    ADAPT -->|Yes| RETRIEVE["Retrieve Top-K Passages<br>(Processed in Parallel)"]
     
-    RETRIEVE --> PARALLEL["Parallel Candidate Segment Generation<br/>(One candidate segment y_t per passage d)"]
+    RETRIEVE --> PARALLEL["Parallel Candidate Segment Generation<br>(One candidate segment y_t per passage d)"]
     
-    PARALLEL --> CRITIQUE["Critique Candidate Segments via Reflection Tokens<br/>s_ISREL, s_ISSUP, s_ISUSE"]
+    PARALLEL --> CRITIQUE["Critique Candidate Segments via Reflection Tokens<br>s_ISREL, s_ISSUP, s_ISUSE"]
     
-    CRITIQUE --> SCORE["Score Each Candidate Segment:<br/>f(y_t, d) = log p(y_t) + w_rel * s_ISREL + w_sup * s_ISSUP + w_use * s_ISUSE"]
+    CRITIQUE --> SCORE["Score Each Candidate Segment:<br>f(y_t, d) = log p(y_t) + w_rel * s_ISREL + w_sup * s_ISSUP + w_use * s_ISUSE"]
     
-    SCORE --> BEAM["Segment-Level Beam Search<br/>(Retain Top-B Candidate Beams)"]
+    SCORE --> BEAM["Segment-Level Beam Search<br>(Retain Top-B Candidate Beams)"]
     
     BEAM --> NEXT{"All Segments Completed?"}
     GEN_PARAM --> NEXT
@@ -156,16 +156,16 @@ Think of a student who goes to their personal bookshelf to find a book on quantu
 
 ```mermaid
 flowchart TD
-    QUERY["User Query Q"] --> RETRIEVE["Internal Vector Retrieval<br/>(Top-K Chunks)"]
-    RETRIEVE --> EVAL["Lightweight Evaluator (T5-Large)<br/>Calculates Confidence Scores gamma_i"]
+    QUERY["User Query Q"] --> RETRIEVE["Internal Vector Retrieval<br>(Top-K Chunks)"]
+    RETRIEVE --> EVAL["Lightweight Evaluator (T5-Large)<br>Calculates Confidence Scores gamma_i"]
     
-    EVAL --> THRESHOLD{"Confidence Evaluation<br/>Gamma = max gamma_i"}
+    EVAL --> THRESHOLD{"Confidence Evaluation<br>Gamma = max gamma_i"}
     
-    THRESHOLD -->|"Gamma >= tau_upper (0.80)<br/>(CORRECT)"| PASS["Correct Path:<br/>Apply Decompose-then-Recompose<br/>(Extract Internal Knowledge Strips)"]
+    THRESHOLD -->|"High Confidence: gamma >= 0.80 (CORRECT)"| PASS["Correct Path:<br>Apply Decompose-then-Recompose<br>(Extract Internal Knowledge Strips)"]
     
-    THRESHOLD -->|"tau_lower < Gamma < tau_upper<br/>(AMBIGUOUS)"| HYBRID["Ambiguous Path:<br/>Extract Internal Knowledge Strips +<br/>Trigger Query Rewrite & Web Fallback"]
+    THRESHOLD -->|"Ambiguous Confidence: 0.40 to 0.80 (AMBIGUOUS)"| HYBRID["Ambiguous Path:<br>Extract Internal Knowledge Strips +<br>Trigger Query Rewrite & Web Fallback"]
     
-    THRESHOLD -->|"Gamma <= tau_lower (0.40)<br/>(INCORRECT)"| REWRITE["Incorrect Path:<br/>Discard Internal Documents!<br/>Trigger Query Rewrite & Web Fallback"]
+    THRESHOLD -->|"Low Confidence: gamma <= 0.40 (INCORRECT)"| REWRITE["Incorrect Path:<br>Discard Internal Documents!<br>Trigger Query Rewrite & Web Fallback"]
     
     PASS --> GENERATOR["Downstream Synthesis LLM"]
     HYBRID --> GENERATOR
@@ -295,7 +295,7 @@ Imagine exploring a country:
 
 ```mermaid
 flowchart TD
-    RAW_CORPUS["Raw Documents<br/>(D1, D2, D3, D5, D6)"] --> EXTRACT["LLM Entity & Relationship<br/>Extraction"]
+    RAW_CORPUS["Raw Documents<br>(D1, D2, D3, D5, D6)"] --> EXTRACT["LLM Entity & Relationship<br>Extraction"]
     
     subgraph GRAPH ["Knowledge Graph (Nodes & Directed Relationships)"]
         N_WORKER["Node: OmniFlow Ingestion Worker"] ---|E1: 'hosts'| N_HNSW["Node: HNSW Graph"]
@@ -321,7 +321,7 @@ flowchart TD
     end
     
     LEIDEN --> COMMUNITIES
-    COMMUNITIES --> MAP_REDUCE["Map-Reduce over Community Summaries<br/>(Global Query Answering)"]
+    COMMUNITIES --> MAP_REDUCE["Map-Reduce over Community Summaries<br>(Global Query Answering)"]
     MAP_REDUCE --> GLOBAL_ANS["Comprehensive Holistic System Synthesis"]
 ```
 
@@ -466,7 +466,7 @@ stateDiagram-v2
 #### 3. Mechanics: State Machines & Event-Driven Workflows
 1. **State Management**:
    In LangGraph, state is maintained across execution turns where nodes return partial updates merged into state (via reducers):
-   $$\mathcal{S} = \{\text{messages}, \, \text{retrieved\_docs}, \, \text{scratchpad}, \, \text{iteration\_count}, \, \text{status}\}$$
+   $$\mathcal{S} = \{\text{messages}, \, \text{retrieved-docs}, \, \text{scratchpad}, \, \text{iteration-count}, \, \text{status}\}$$
 2. **The Reasoner Node (LLM Controller)**:
    The LLM inspects current state $\mathcal{S}$ and emits a **Tool Call** $a_t \in \mathcal{A}$ or a **Final Answer**.
 3. **Tool Execution Node**:

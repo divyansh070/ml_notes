@@ -14,10 +14,10 @@ The fundamental dilemma of chunking is the **Granularity Trade-off**:
 ```mermaid
 flowchart TD
     RAW["Raw Document Stream"] --> DECISION{"Content Type & Structure"}
-    DECISION -->|Unstructured Prose / Articles| FIXED["Fixed-Length with Overlap<br/>(Token-based)"]
-    DECISION -->|Markdown / Code / HTML| STRUCT["Structure-Aware / AST<br/>(Hierarchical)"]
-    DECISION -->|Multi-topic Documents| SEMANTIC["Semantic Chunking<br/>(Distance Thresholds)"]
-    DECISION -->|Cross-referencing Long Docs| LATE["Late Chunking<br/>(Full-Doc Attention Pooling)"]
+    DECISION -->|"Unstructured Prose / Articles"| FIXED["Fixed-Length with Overlap<br>(Token-based)"]
+    DECISION -->|"Markdown / Code / HTML"| STRUCT["Structure-Aware / AST<br>(Hierarchical)"]
+    DECISION -->|"Multi-topic Documents"| SEMANTIC["Semantic Chunking<br>(Distance Thresholds)"]
+    DECISION -->|"Cross-referencing Long Docs"| LATE["Late Chunking<br>(Full-Doc Attention Pooling)"]
 
     FIXED --> ENRICH["Metadata Enrichment & Parent-Child Linking"]
     STRUCT --> ENRICH
@@ -145,9 +145,9 @@ A document is not an amorphous stream of words; it is an outline. Structure-awar
 
 ```mermaid
 graph TD
-    DOC["Markdown Document"] --> H1["# OmniFlow Architecture"]
-    H1 --> H2_1["## Hot Memory Tier"]
-    H1 --> H2_2["## Cold Persistent Tier"]
+    DOC["Markdown Document"] --> H1["Header 1: OmniFlow Architecture"]
+    H1 --> H2_1["Header 2: Hot Memory Tier"]
+    H1 --> H2_2["Header 2: Cold Persistent Tier"]
     H2_1 --> P1["In-memory HNSW index structures..."]
     H2_2 --> P2["Immutable Parquet-backed files..."]
     H2_2 --> P3["During data ingestion, WAL buffers..."]
@@ -221,9 +221,9 @@ Imagine reading an essay. You intuitively know when the author shifts to a new i
 
 ```mermaid
 flowchart LR
-    S1["Sentence 1<br/>(HNSW Params)"] --- S2["Sentence 2<br/>(Edge Memory)"] 
-    S2 -.-|Distance Spike > Threshold<br/>SPLIT HERE| S3["Sentence 3<br/>(Client Retries)"]
-    S3 --- S4["Sentence 4<br/>(Thundering Herd)"]
+    S1["Sentence 1<br>(HNSW Params)"] --- S2["Sentence 2<br>(Edge Memory)"] 
+    S2 -.-|"Distance Spike Exceeds Threshold<br>SPLIT HERE"| S3["Sentence 3<br>(Client Retries)"]
+    S3 --- S4["Sentence 4<br>(Thundering Herd)"]
 ```
 
 #### 3. Mechanics
@@ -338,16 +338,16 @@ The root cause: **Traditional chunking forces an information loss boundary befor
 flowchart TD
     subgraph NAIVE ["Traditional Chunk-Then-Embed"]
         DOC1["Full Document"] --> SPLIT1["Split into Chunks"]
-        SPLIT1 --> CH1["Chunk 1<br/>(Tenant Tier Specs)"]
-        SPLIT1 --> CH2["Chunk 2<br/>('Upgrades take effect in 15s...')"]
+        SPLIT1 --> CH1["Chunk 1<br>(Tenant Tier Specs)"]
+        SPLIT1 --> CH2["Chunk 2<br>('Upgrades take effect in 15s...')"]
         CH1 --> ENC1["Encoder (Self-Attention)"]
         CH2 --> ENC2["Encoder (Self-Attention)"]
         ENC2 -.-> V1["Vector lacks 'Tenant Quota' context!"]
     end
 
     subgraph LATE ["Late Chunking (Embed-Then-Chunk)"]
-        DOC2["Full Document"] --> ENC_FULL["Long-Context Encoder<br/>(Bidirectional Self-Attention across FULL doc)"]
-        ENC_FULL --> TOKENS["Contextualized Token Representations<br/>h_1, h_2, ..., h_N"]
+        DOC2["Full Document"] --> ENC_FULL["Long-Context Encoder<br>(Bidirectional Self-Attention across FULL doc)"]
+        ENC_FULL --> TOKENS["Contextualized Token Representations<br>h_1, h_2, ..., h_N"]
         TOKENS --> POOL1["Mean-Pool Chunk 1 span"]
         TOKENS --> POOL2["Mean-Pool Chunk 2 span"]
         POOL2 -.-> V2["Vector retains full document attention!"]
@@ -457,14 +457,14 @@ Think of a digital microscope. You use a small, high-magnification reticle (Chil
 ```mermaid
 flowchart TD
     subgraph INDEXING ["Ingestion Phase"]
-        PARENT["Parent Chunk (Big Context: 1024 tokens)<br/>Full Class Definition & Methods"]
-        PARENT --> C1["Child Chunk 1 (128 tok)<br/>__init__ params"]
-        PARENT --> C2["Child Chunk 2 (128 tok)<br/>429 Backoff Math"]
-        PARENT --> C3["Child Chunk 3 (128 tok)<br/>Timeout Exception"]
-        C1 -. Embed & Store .-> VEC_DB[("Vector Index<br/>(Child Vectors Only)")]
-        C2 -. Embed & Store .-> VEC_DB
-        C3 -. Embed & Store .-> VEC_DB
-        PARENT -. Store by ID .-> DOC_STORE[("Document Store<br/>(Parent Chunks)")]
+        PARENT["Parent Chunk (Big Context: 1024 tokens)<br>Full Class Definition & Methods"]
+        PARENT --> C1["Child Chunk 1 (128 tok)<br>Class Init Parameters"]
+        PARENT --> C2["Child Chunk 2 (128 tok)<br>429 Backoff Math"]
+        PARENT --> C3["Child Chunk 3 (128 tok)<br>Timeout Exception"]
+        C1 -.->|"Embed & Store"| VEC_DB[("Vector Index<br>(Child Vectors Only)")]
+        C2 -.->|"Embed & Store"| VEC_DB
+        C3 -.->|"Embed & Store"| VEC_DB
+        PARENT -.->|"Store by ID"| DOC_STORE[("Document Store<br>(Parent Chunks)")]
     end
 
     subgraph RETRIEVAL ["Query Phase"]
@@ -555,14 +555,14 @@ A book library doesn't just index every individual sentence; it publishes an ind
 ```mermaid
 graph TD
     DOC["Raw Document"] --> LLM_SUM["LLM Summarizer"]
-    LLM_SUM --> SUM_CHUNK["Document Summary Chunk<br/>(Captures global themes)"]
+    LLM_SUM --> SUM_CHUNK["Document Summary Chunk<br>(Captures global themes)"]
     DOC --> SPLIT["Standard Chunker"]
     SPLIT --> CH1["Leaf Chunk 1"]
     SPLIT --> CH2["Leaf Chunk 2"]
     
-    SUM_CHUNK -. Indexed with metadata tag: is_summary=True .-> VEC_DB[("Vector Index")]
-    CH1 -. Indexed with metadata tag: is_summary=False .-> VEC_DB
-    CH2 -. Indexed with metadata tag: is_summary=False .-> VEC_DB
+    SUM_CHUNK -.->|"Tag: is_summary=True"| VEC_DB[("Vector Index")]
+    CH1 -.->|"Tag: is_summary=False"| VEC_DB
+    CH2 -.->|"Tag: is_summary=False"| VEC_DB
 ```
 
 #### 3. Mechanics
@@ -594,7 +594,7 @@ Applying Summary Indexing to Document $D_6$:
 - Generated Summary: *"Incident 4092 Postmortem: Investigates P1 Linux OOM terminations during 10M vector backfills on 64 GB instances caused by raw vector memory and M=64 Layer-0 edge allocations, compounded by tenant retry storms."*
 - Query: *"Summarize past memory-related system crashes during vector backfills."*
 - Compare similarity:
-  - Granular chunk similarity to query: $\cos(\mathbf{q}, \mathbf{v}_{\text{edge\_math}}) = 0.46$ (illustrative)
+  - Granular chunk similarity to query: $\cos(\mathbf{q}, \mathbf{v}_{\text{edge}}) = 0.46$ (illustrative)
   - Summary chunk similarity to query: $\cos(\mathbf{q}, \mathbf{v}_{\text{summary}}) = 0.84$ (illustrative)
 - The summary vector immediately surfaces Document $D_6$ as the primary context source.
 
