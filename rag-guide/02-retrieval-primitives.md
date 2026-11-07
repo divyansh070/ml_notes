@@ -50,9 +50,9 @@ BM25 is the scoring formula that decides which of those pages is the most releva
 ```mermaid
 flowchart LR
     subgraph INVERTED_INDEX ["Inverted Index Postings Lists (Alphanumeric with Underscores)"]
-        T1["'omniflowclient'"] --> P1["Doc D3 (tf=1) -> Doc D5 (tf=1)"]
-        T2["'429'"] --> P2["Doc D2 (tf=1) -> Doc D3 (tf=2) -> Doc D5 (tf=2) -> Doc D6 (tf=1)"]
-        T3["'retry_after_ms'"] --> P3["Doc D2 (tf=1) -> Doc D5 (tf=3)"]
+        T1["'omniflowclient'"] --> P1["Doc D3 (tf=1) → Doc D5 (tf=1)"]
+        T2["'429'"] --> P2["Doc D2 (tf=1) → Doc D3 (tf=2) → Doc D5 (tf=2) → Doc D6 (tf=1)"]
+        T3["'retry_after_ms'"] --> P3["Doc D2 (tf=1) → Doc D5 (tf=3)"]
     end
     QUERY["Query: '429 retry_after_ms'"] --> LOOKUP["Union of Matching Postings"]
     LOOKUP --> SCORE["BM25 Score Accumulator"]
@@ -122,10 +122,10 @@ As $f \to \infty$, $\text{TF}_{\text{comp}}(f) \to k_1 + 1$.
 
 ```mermaid
 flowchart LR
-    RAW_F["Term Frequency f"] --> COMP{"Asymptotic TF Saturation<br/>TF(f) = [f * (k1 + 1)] / [f + k1]"}
+    RAW_F["Term Frequency f"] --> COMP{"Asymptotic TF Saturation<br/>TF(f) = (f * (k1 + 1)) / (f + k1)"}
     COMP -->|"f = 1"| S1["Score = 1.00 (Single occurrence baseline)"]
     COMP -->|"f = 3"| S2["Score = 1.57 to 1.80 (Flattening curve)"]
-    COMP -->|"f -> infinity"| S3["Bounded Ceiling: k1 + 1<br/>(2.20 for k1=1.2, 3.00 for k1=2.0)"]
+    COMP -->|"f to infinity"| S3["Bounded Ceiling: k1 + 1<br/>(2.20 for k1=1.2, 3.00 for k1=2.0)"]
 ```
 
 ##### Worked Example (Hand-Calculated):
@@ -538,7 +538,7 @@ When all arrows are scaled to have a length of exactly 1 meter (unit normalizati
 ```mermaid
 graph LR
     subgraph METRIC_SPACE ["Unit Hypersphere: norm(u) = norm(v) = 1"]
-        ORIGIN((0, 0)) -->|"Unit Vector"| U["u"]
+        ORIGIN["Origin (0, 0)"] -->|"Unit Vector"| U["u"]
         ORIGIN -->|"Unit Vector"| V["v"]
         U -.-|"Euclidean Distance L2(u, v)"| V
         U -.->|"Angle theta"| V
@@ -831,7 +831,7 @@ Think of a multi-layer transportation network:
 ```mermaid
 flowchart TD
     subgraph LAYER_2 ["Layer 2: Long-Range Highway Links (Sparse)"]
-        ENTRY(("Entry Point")) -->|Long Hop| N2_1["Node A"]
+        ENTRY["Entry Point"] -->|"Long Hop"| N2_1["Node A"]
     end
     
     subgraph LAYER_1 ["Layer 1: Medium-Range Regional Links"]
@@ -843,7 +843,7 @@ flowchart TD
     subgraph LAYER_0 ["Layer 0: Dense Local Neighborhood (All Vectors Present)"]
         N1_3 -.->|"Drop Down"| N0_1["Node C"]
         N0_1 --> N0_2["Node D"]
-        N0_2 --> TARGET(("Nearest Neighbor<br/>Found!"))
+        N0_2 --> TARGET["Nearest Neighbor<br/>Found!"]
     end
 ```
 
