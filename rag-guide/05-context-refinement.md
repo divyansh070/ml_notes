@@ -42,14 +42,14 @@ LongLLMLingua (Jiang et al., ACL 2024) introduces four structural mechanisms bey
 Let a retrieved passage be a sequence of tokens $\mathbf{x} = (x_1, x_2, \dots, x_N)$.
 Under the evaluator language model parameterized by $\theta$, the surprisal (information content) of token $x_i$ conditioned on previous tokens is:
 
-$$I(x_i \mid x_{<i}) = -\log_2 P_\theta(x_i \mid x_1, \dots, x_{i-1})$$
+$$I(x_i \mid x_{\lt i}) = -\log_2 P_\theta(x_i \mid x_1, \dots, x_{i-1})$$
 
 The perplexity of the token sequence is the exponentiated cross-entropy:
-$$\text{PPL}(\mathbf{x}) = \exp \left( -\frac{1}{N} \sum_{i=1}^N \ln P_\theta(x_i \mid x_{<i}) \right)$$
+$$\text{PPL}(\mathbf{x}) = \exp \left( -\frac{1}{N} \sum_{i=1}^N \ln P_\theta(x_i \mid x_{\lt i}) \right)$$
 
 In **LongLLMLingua**, token retention is conditioned on the **Query $Q$**. We measure the **Conditional Mutual Information (CMI) / Information Gain** between token $x_i$ and query $Q$:
 
-$$\Delta I(x_i) = \text{surprisal}(x_i \mid x_{<i}) - \text{surprisal}(x_i \mid Q, \, x_{<i}) = \log \frac{P_\theta(x_i \mid Q, \, x_{<i})}{P_\theta(x_i \mid x_{<i})}$$
+$$\Delta I(x_i) = \text{surprisal}(x_i \mid x_{\lt i}) - \text{surprisal}(x_i \mid Q, \, x_{\lt i}) = \log \frac{P_\theta(x_i \mid Q, \, x_{\lt i})}{P_\theta(x_i \mid x_{\lt i})}$$
 
 Where:
 - If token $x_i$ is completely irrelevant to question $Q$, conditioning on $Q$ does not change its likelihood: $\Delta I \approx 0 \implies$ **Prune token**.
@@ -62,20 +62,20 @@ $$\mathbf{x} = \big[ \text{"The"}, \, \text{"gateway"}, \, \text{"rejects"}, \, 
 Let our target compression ratio be $\gamma \approx 0.385 \implies$ Retain exactly $B = \lfloor 13 \times 0.385 \rfloor = 5$ tokens.
 Let query $Q = \text{"What HTTP error code does the gateway return when throttled?"}$
 
-The evaluator model evaluates unconditional surprisal $S(x_i \mid x_{<i}) = -\log P(x_i \mid x_{<i})$ versus query-conditioned surprisal $S(x_i \mid Q, x_{<i}) = -\log P(x_i \mid Q, x_{<i})$:
-- `"The"`: $S(x \mid x_<) = 0.15, \; S(x \mid Q, x_<) = 0.12 \implies \Delta I = 0.03$ (illustrative)
-- `"gateway"`: $S(x \mid x_<) = 3.20, \; S(x \mid Q, x_<) = 1.10 \implies \Delta I = 2.10$ (illustrative)
-- `"rejects"`: $S(x \mid x_<) = 2.80, \; S(x \mid Q, x_<) = 2.10 \implies \Delta I = 0.70$ (illustrative)
-- `"the"`: $S(x \mid x_<) = 0.10, \; S(x \mid Q, x_<) = 0.08 \implies \Delta I = 0.02$ (illustrative)
-- `"request"`: $S(x \mid x_<) = 1.80, \; S(x \mid Q, x_<) = 1.30 \implies \Delta I = 0.50$ (illustrative)
-- `"with"`: $S(x \mid x_<) = 0.25, \; S(x \mid Q, x_<) = 0.20 \implies \Delta I = 0.05$ (illustrative)
-- `"HTTP"`: $S(x \mid x_<) = 3.90, \; S(x \mid Q, x_<) = 0.85 \implies \Delta I = 3.05$ (illustrative)
-- `"status"`: $S(x \mid x_<) = 2.60, \; S(x \mid Q, x_<) = 1.20 \implies \Delta I = 1.40$ (illustrative)
-- `"code"`: $S(x \mid x_<) = 2.40, \; S(x \mid Q, x_<) = 1.15 \implies \Delta I = 1.25$ (illustrative)
-- `"429"`: $S(x \mid x_<) = 6.10, \; S(x \mid Q, x_<) = 1.40 \implies \Delta I = \mathbf{4.70}$ (illustrative, highest information gain)
-- `"Too"`: $S(x \mid x_<) = 2.70, \; S(x \mid Q, x_<) = 2.20 \implies \Delta I = 0.50$ (illustrative)
-- `"Many"`: $S(x \mid x_<) = 2.50, \; S(x \mid Q, x_<) = 2.10 \implies \Delta I = 0.40$ (illustrative)
-- `"Requests"`: $S(x \mid x_<) = 2.90, \; S(x \mid Q, x_<) = 2.30 \implies \Delta I = 0.60$ (illustrative)
+The evaluator model evaluates unconditional surprisal $S(x_i \mid x_{\lt i}) = -\log P(x_i \mid x_{\lt i})$ versus query-conditioned surprisal $S(x_i \mid Q, x_{\lt i}) = -\log P(x_i \mid Q, x_{\lt i})$:
+- `"The"`: $S(x \mid x_{\lt}) = 0.15, \; S(x \mid Q, x_{\lt}) = 0.12 \implies \Delta I = 0.03$ (illustrative)
+- `"gateway"`: $S(x \mid x_{\lt}) = 3.20, \; S(x \mid Q, x_{\lt}) = 1.10 \implies \Delta I = 2.10$ (illustrative)
+- `"rejects"`: $S(x \mid x_{\lt}) = 2.80, \; S(x \mid Q, x_{\lt}) = 2.10 \implies \Delta I = 0.70$ (illustrative)
+- `"the"`: $S(x \mid x_{\lt}) = 0.10, \; S(x \mid Q, x_{\lt}) = 0.08 \implies \Delta I = 0.02$ (illustrative)
+- `"request"`: $S(x \mid x_{\lt}) = 1.80, \; S(x \mid Q, x_{\lt}) = 1.30 \implies \Delta I = 0.50$ (illustrative)
+- `"with"`: $S(x \mid x_{\lt}) = 0.25, \; S(x \mid Q, x_{\lt}) = 0.20 \implies \Delta I = 0.05$ (illustrative)
+- `"HTTP"`: $S(x \mid x_{\lt}) = 3.90, \; S(x \mid Q, x_{\lt}) = 0.85 \implies \Delta I = 3.05$ (illustrative)
+- `"status"`: $S(x \mid x_{\lt}) = 2.60, \; S(x \mid Q, x_{\lt}) = 1.20 \implies \Delta I = 1.40$ (illustrative)
+- `"code"`: $S(x \mid x_{\lt}) = 2.40, \; S(x \mid Q, x_{\lt}) = 1.15 \implies \Delta I = 1.25$ (illustrative)
+- `"429"`: $S(x \mid x_{\lt}) = 6.10, \; S(x \mid Q, x_{\lt}) = 1.40 \implies \Delta I = \mathbf{4.70}$ (illustrative, highest information gain)
+- `"Too"`: $S(x \mid x_{\lt}) = 2.70, \; S(x \mid Q, x_{\lt}) = 2.20 \implies \Delta I = 0.50$ (illustrative)
+- `"Many"`: $S(x \mid x_{\lt}) = 2.50, \; S(x \mid Q, x_{\lt}) = 2.10 \implies \Delta I = 0.40$ (illustrative)
+- `"Requests"`: $S(x \mid x_{\lt}) = 2.90, \; S(x \mid Q, x_{\lt}) = 2.30 \implies \Delta I = 0.60$ (illustrative)
 
 Ranking by $\Delta I$, the top 5 preserved tokens are:
 1. `"429"` ($\Delta I = 4.70$)
@@ -405,7 +405,7 @@ In **Phase 6 (`06-advanced-agentic-rag.md`)**, we transition to **Autonomous, Dy
 > To mitigate this without retraining, community engineering practice (popularized by LangChain's `LongContextReorder`, inspired by Liu et al., 2024) employs **Edge-Packing**: reordering retrieved candidates alternating between the prompt's head and tail ($d_1 \to \text{Pos } 1$, $d_2 \to \text{Pos } K$, $d_3 \to \text{Pos } 2$, etc.). This reserves prime attention regions for the highest-confidence evidence while pushing distractors to the dead-center attention valley.
 
 #### Q2: How does LongLLMLingua use Conditional Mutual Information (CMI) to prune tokens without losing critical technical entities?
-> **Answer**: Standard perplexity pruning measures only token predictability given preceding context $P(x_i \mid x_{<i})$, which risks dropping words that are predictable in English prose but vital for answering the specific query. LongLLMLingua instead computes the Conditional Mutual Information between each token and the query: $\Delta I(x_i; Q) = \log [P(x_i \mid Q, x_{<i}) / P(x_i \mid x_{<i})]$. If conditioning on the query significantly increases a token's likelihood (such as a specific error code `429` or parameter `efConstruction`), the token receives a high score and is preserved. Tokens whose probabilities remain unchanged regardless of the query (such as conversational boilerplate) are pruned.
+> **Answer**: Standard perplexity pruning measures only token predictability given preceding context $P(x_i \mid x_{\lt i})$, which risks dropping words that are predictable in English prose but vital for answering the specific query. LongLLMLingua instead computes the Conditional Mutual Information between each token and the query: $\Delta I(x_i; Q) = \log [P(x_i \mid Q, x_{\lt i}) / P(x_i \mid x_{\lt i})]$. If conditioning on the query significantly increases a token's likelihood (such as a specific error code `429` or parameter `efConstruction`), the token receives a high score and is preserved. Tokens whose probabilities remain unchanged regardless of the query (such as conversational boilerplate) are pruned.
 
 #### Q3: Why does the Map-Reduce synthesis strategy systematically fail on multi-hop reasoning tasks, and what strategy should be used instead?
 > **Answer**: Map-Reduce isolates each document during the Map phase, asking an LLM to extract facts from that document alone. In a multi-hop query, no single document contains the complete fact; Document $A$ might contain a premise (e.g., an architectural configuration) while Document $B$ contains the consequence (e.g., an OOM postmortem). The Map worker evaluating Document $A$ discards the premise as irrelevant because it cannot see Document $B$. Context Stuffing (combined with Edge-Packing) should be used instead: because all documents share one context window, later tokens can attend to earlier documents and the model can connect premises across them to form grounded conclusions.

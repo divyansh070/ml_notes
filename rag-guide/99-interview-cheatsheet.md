@@ -218,7 +218,7 @@ flowchart TD
 
 #### Q5.3: How does LongLLMLingua differ from classic extractive sentence summarization?
 > **Answer**: Extractive sentence summarization operates at the granularity of complete sentences, retaining all filler and low-information grammatical words within those sentences. LongLLMLingua operates at the fine-grained **token level** using Query-Conditioned Conditional Mutual Information:
-> $$\Delta I(x_i; Q) = \log \frac{P(x_i \mid Q, x_{<i})}{P(x_i \mid x_{<i})}$$
+> $$\Delta I(x_i; Q) = \log \frac{P(x_i \mid Q, x_{\lt i})}{P(x_i \mid x_{\lt i})}$$
 > Using a small evaluator model, it prunes tokens whose conditional likelihood does not increase given the user query. This strips conversational boilerplate and syntax while strictly preserving rare identifiers, numbers, and technical terms.
 
 #### Q5.4: What is Subsequence Recovery in LongLLMLingua prompt compression, and why is it necessary?

@@ -66,10 +66,10 @@ The four reflection tokens operate as follows:
 When retrieval is triggered, $K$ candidate passages are retrieved and processed in parallel. For each passage $d$, the generator produces a candidate text segment $y_t$.
 Candidate segments across all $K$ passages are evaluated and ranked using the paper's segment scoring function:
 
-$$f(y_t, d) = \log p(y_t \mid x, d, y_{<t}) + \sum_{G \in \{\text{IsRel}, \text{IsSup}, \text{IsUse}\}} w_G \cdot s_G$$
+$$f(y_t, d) = \log p(y_t \mid x, d, y_{\lt t}) + \sum_{G \in \lbrace \text{IsRel}, \text{IsSup}, \text{IsUse} \rbrace} w_G \cdot s_G$$
 
 Where:
-- $\log p(y_t \mid x, d, y_{<t}) = \frac{1}{|y_t|} \sum_{i=1}^{|y_t|} \log p(w_i \mid x, d, y_{<t}, w_{<i})$ is the sequence-length-normalized token log-likelihood.
+- $\log p(y_t \mid x, d, y_{\lt t}) = \frac{1}{|y_t|} \sum_{i=1}^{|y_t|} \log p(w_i \mid x, d, y_{\lt t}, w_{\lt i})$ is the sequence-length-normalized token log-likelihood.
 - $s_{\text{ISREL}}$ is the normalized probability of passage relevance:
   $$s_{\text{ISREL}} = \frac{p(\text{[IsRel]}=\text{Relevant})}{\sum_{v \in \{\text{Relevant}, \text{Irrelevant}\}} p(\text{[IsRel]}=v)}$$
 - $s_{\text{ISSUP}}$ rewards fully supported segments and grants partial credit to partially supported ones:
@@ -181,7 +181,7 @@ flowchart TD
      The internal retriever succeeded. To eliminate distractor sentences within the retrieved documents, the system applies **decompose-then-recompose** (segmenting documents into fine-grained knowledge strips, filtering low-scoring sentences, and recomposing the clean context) before generation.
    - **Incorrect Band ($\Gamma \le \tau_{\text{lower}}$, e.g., $\le 0.40$, illustrative)**:
      The internal retriever failed; all retrieved chunks are distractors. **Discard all internal documents**. Trigger query rewriting to formulate a search-friendly query and route to an external **Web Search API**.
-   - **Ambiguous Band ($\tau_{\text{lower}} < \Gamma < \tau_{\text{upper}}$, illustrative)**:
+   - **Ambiguous Band ($\tau_{\text{lower}} \lt \Gamma \lt \tau_{\text{upper}}$, illustrative)**:
      The internal documents are partially relevant but incomplete. Apply decompose-then-recompose to retain relevant internal knowledge strips and combine them with external web search results.
    *(Note: The thresholds $\tau_{\text{upper}}$ and $\tau_{\text{lower}}$ are illustrative heuristics; in the original paper, Yan et al. tune them empirically per task and evaluation benchmark).*
 
