@@ -27,9 +27,9 @@ flowchart TD
         C["Retrieved Context C"]
         A["Generated Answer A"]
         
-        Q ---|"1. Context Relevance<br>Diagnoses Retriever"| C
-        C ---|"2. Groundedness and Faithfulness<br>Diagnoses Generator Hallucinations"| A
-        Q ---|"3. Answer Relevance<br>Diagnoses Generator Task Alignment"| A
+        Q ---|"1. Context Relevance<br/>Diagnoses Retriever"| C
+        C ---|"2. Groundedness and Faithfulness<br/>Diagnoses Generator Hallucinations"| A
+        Q ---|"3. Answer Relevance<br/>Diagnoses Generator Task Alignment"| A
     end
 ```
 
@@ -169,17 +169,17 @@ The **ARES (Automated RAG Evaluation System)** framework resolves this by establ
 
 ```mermaid
 flowchart TD
-    CORPUS["Corpus Documents"] --> SYNTH["Synthetic In-Domain Query &<br>Answer Generator"]
+    CORPUS["Corpus Documents"] --> SYNTH["Synthetic In-Domain Query &<br/>Answer Generator"]
     SYNTH --> TRAIN_DATA["Synthetic Positive & Negative Pairs"]
     
-    TRAIN_DATA --> TRAIN_JUDGE["Train Lightweight Classifier Judges<br>(Fine-Tuned DeBERTa-v3-Large)"]
+    TRAIN_DATA --> TRAIN_JUDGE["Train Lightweight Classifier Judges<br/>(Fine-Tuned DeBERTa-v3-Large)"]
     
-    PROD_LOGS["Unlabeled Production RAG Logs<br>(Millions of Traces)"] --> FAST_INFER["Fast Discriminative Inference<br>(DeBERTa Judges: Relevance / Faithfulness)"]
+    PROD_LOGS["Unlabeled Production RAG Logs<br/>(Millions of Traces)"] --> FAST_INFER["Fast Discriminative Inference<br/>(DeBERTa Judges: Relevance / Faithfulness)"]
     
-    HUMAN_SET["Small Curated Ground-Truth Set<br>(Hundreds of Annotated Traces)"] --> PPI["Prediction-Powered Inference (PPI)<br>Statistical Calibration Engine"]
+    HUMAN_SET["Small Curated Ground-Truth Set<br/>(Hundreds of Annotated Traces)"] --> PPI["Prediction-Powered Inference (PPI)<br/>Statistical Calibration Engine"]
     
     FAST_INFER --> PPI
-    PPI --> METRICS["Statistically Valid Metrics with<br>Rigorous 95% Confidence Intervals"]
+    PPI --> METRICS["Statistically Valid Metrics with<br/>Rigorous 95% Confidence Intervals"]
 ```
 
 1. **Synthetic Query and Answer Generation**: Generates synthetic in-domain queries and answers across corpus passages using foundation models with prompt templates.
@@ -233,7 +233,7 @@ flowchart TD
         Q1["Query"] --> ANN1["HNSW Search Top-50 Vectors globally"]
         ANN1 --> CAND1["50 Global Candidates Found"]
         CAND1 --> BOOL1["Filter: tenant_id == 'AcmeCorp' (Selectivity p = 0.02)"]
-        BOOL1 --> EMPTY["Result: High Probability of 0 Matches!<br>(P(Empty) = (1-p)^K ≈ 36.4%)"]
+        BOOL1 --> EMPTY["Result: High Probability of 0 Matches!<br/>(P(Empty) = (1-p)^K ≈ 36.4%)"]
     end
 
     subgraph PRE_FILTER_GRAPH ["2. Pre-Filtering on Naive HNSW (Graph Disconnection)"]
@@ -312,12 +312,12 @@ When a query arrives, check if you have already answered a question located with
 ```mermaid
 flowchart LR
     Q["Incoming User Query"] --> EMBED["Encode Query Vector v_Q"]
-    EMBED --> CACHE[("Semantic Cache Index<br>(Pre-computed Query Vectors)")]
+    EMBED --> CACHE[("Semantic Cache Index<br/>(Pre-computed Query Vectors)")]
     
-    CACHE --> SIM{"Max Cosine Similarity<br>s = dot(v_Q, v_cached)"}
+    CACHE --> SIM{"Max Cosine Similarity<br/>s = dot(v_Q, v_cached)"}
     
-    SIM -->|"s >= tau_cache (0.96)<br>(CACHE HIT)"| RET_CACHE["Return Cached Answer<br>(Latency: 8 ms, Cost: \$0.00)"]
-    SIM -->|"s < tau_cache (0.96)<br>(CACHE MISS)"| FULL_RAG["Execute Full RAG Pipeline<br>(Latency: 1,200 ms, Cost: \$0.03)"]
+    SIM -->|"s ≥ tau_cache (0.96)<br/>(CACHE HIT)"| RET_CACHE["Return Cached Answer<br/>(Latency: 8 ms, Cost: USD 0.00)"]
+    SIM -->|"s below tau_cache (0.96)<br/>(CACHE MISS)"| FULL_RAG["Execute Full RAG Pipeline<br/>(Latency: 1,200 ms, Cost: USD 0.03)"]
     FULL_RAG --> STORE["Store (v_Q, Answer) in Cache with TTL"]
 ```
 
@@ -365,15 +365,15 @@ Updating an embedding model or rebuilding an index across tens of millions of do
 ```mermaid
 flowchart TD
     subgraph BLUE ["Active Blue Cluster (Serving Live Traffic)"]
-        ROUTER{"API Gateway"} -->|Live Traffic (100%)| BLUE_INDEX[("Blue Vector Index<br>(Model: v1.0, HNSW)")]
+        ROUTER{"API Gateway"} -->|"Live Traffic (100%)"| BLUE_INDEX[("Blue Vector Index<br/>(Model: v1.0, HNSW)")]
     end
 
     subgraph GREEN ["Shadow Green Cluster (Re-indexing Offline)"]
-        DATA_STREAM["Document Updates"] --> SHADOW_WORKER["Background Ingestion Workers<br>(Model: v2.0)"]
-        SHADOW_WORKER --> GREEN_INDEX[("Green Vector Index<br>(Model: v2.0, IVF-PQ / HNSW)")]
+        DATA_STREAM["Document Updates"] --> SHADOW_WORKER["Background Ingestion Workers<br/>(Model: v2.0)"]
+        SHADOW_WORKER --> GREEN_INDEX[("Green Vector Index<br/>(Model: v2.0, IVF-PQ / HNSW)")]
     end
     
-    GREEN_INDEX -.->|"Backfill Complete & Recall Verified"| CUTOVER{"Atomic Route Switch<br>Cut traffic to Green<br>Decommission Blue"}
+    GREEN_INDEX -.->|"Backfill Complete & Recall Verified"| CUTOVER{"Atomic Route Switch<br/>Cut traffic to Green<br/>Decommission Blue"}
 ```
 
 1. **Blue Index Active**: All production queries route to the Blue Index running embedding model $v_1$.

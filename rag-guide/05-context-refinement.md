@@ -24,11 +24,11 @@ LongLLMLingua acts as an automated, mathematically rigorous highlighter: it eval
 
 ```mermaid
 flowchart LR
-    RAW_DOC["Raw Retrieved Passage D5<br>(250 tokens with boilerplate docstrings<br>and redundant prose)"] --> SMALL_LM["Lightweight Evaluator LM<br>(e.g., LLaMA-3-8B / Qwen-1.5B)"]
-    SMALL_LM --> PPL["Compute Perplexity & Conditional<br>Mutual Information per token"]
-    PPL --> FILTER{"Keep tokens with top ΔI<br>within budget"}
-    FILTER --> PRUNED["Compressed Context D5'<br>(75 tokens: retains '429', 'retry_after_ms',<br>'backoff_factor', 'time.sleep')"]
-    PRUNED --> GENERATOR["Downstream Generator LLM<br>(Fast, Cheap, Highly Focused)"]
+    RAW_DOC["Raw Retrieved Passage D5<br/>(250 tokens with boilerplate docstrings<br/>and redundant prose)"] --> SMALL_LM["Lightweight Evaluator LM<br/>(e.g., LLaMA-3-8B / Qwen-1.5B)"]
+    SMALL_LM --> PPL["Compute Perplexity & Conditional<br/>Mutual Information per token"]
+    PPL --> FILTER{"Keep tokens with top ΔI<br/>within budget"}
+    FILTER --> PRUNED["Compressed Context D5'<br/>(75 tokens: retains '429', 'retry_after_ms',<br/>'backoff_factor', 'time.sleep')"]
+    PRUNED --> GENERATOR["Downstream Generator LLM<br/>(Fast, Cheap, Highly Focused)"]
 ```
 
 #### 3. Mechanics
@@ -42,14 +42,21 @@ LongLLMLingua (Jiang et al., ACL 2024) introduces four structural mechanisms bey
 Let a retrieved passage be a sequence of tokens $\mathbf{x} = (x_1, x_2, \dots, x_N)$.
 Under the evaluator language model parameterized by $\theta$, the surprisal (information content) of token $x_i$ conditioned on previous tokens is:
 
-$$I(x_i \mid x_{\lt i}) = -\log_2 P_\theta(x_i \mid x_1, \dots, x_{i-1})$$
+$$
+I(x_i \mid x_{\lt i}) = -\log_2 P_\theta(x_i \mid x_1, \dots, x_{i-1})
+$$
 
 The perplexity of the token sequence is the exponentiated cross-entropy:
-$$\text{PPL}(\mathbf{x}) = \exp \left( -\frac{1}{N} \sum_{i=1}^N \ln P_\theta(x_i \mid x_{\lt i}) \right)$$
+
+$$
+\text{PPL}(\mathbf{x}) = \exp \left( -\frac{1}{N} \sum_{i=1}^N \ln P_\theta(x_i \mid x_{\lt i}) \right)
+$$
 
 In **LongLLMLingua**, token retention is conditioned on the **Query $Q$**. We measure the **Conditional Mutual Information (CMI) / Information Gain** between token $x_i$ and query $Q$:
 
-$$\Delta I(x_i) = \text{surprisal}(x_i \mid x_{\lt i}) - \text{surprisal}(x_i \mid Q, \, x_{\lt i}) = \log \frac{P_\theta(x_i \mid Q, \, x_{\lt i})}{P_\theta(x_i \mid x_{\lt i})}$$
+$$
+\Delta I(x_i) = \text{surprisal}(x_i \mid x_{\lt i}) - \text{surprisal}(x_i \mid Q, \, x_{\lt i}) = \log \frac{P_\theta(x_i \mid Q, \, x_{\lt i})}{P_\theta(x_i \mid x_{\lt i})}
+$$
 
 Where:
 - If token $x_i$ is completely irrelevant to question $Q$, conditioning on $Q$ does not change its likelihood: $\Delta I \approx 0 \implies$ **Prune token**.
@@ -183,10 +190,13 @@ We map $\mathbf{D}$ to an optimized prompt sequence $\mathbf{P} = (p_1, p_2, \do
 
 Initialize two pointers: $\text{left} = 1$, $\text{right} = K$.
 For step $i = 1$ to $K$:
-$$\begin{cases} 
-p_{\text{left}} = d_i, \quad \text{left} \leftarrow \text{left} + 1 & \text{if } i \text{ is odd} \\ 
-p_{\text{right}} = d_i, \quad \text{right} \leftarrow \text{right} - 1 & \text{if } i \text{ is even} 
-\end{cases}$$
+
+$$
+\begin{cases}
+p_{\text{left}} = d_i, \quad \text{left} \leftarrow \text{left} + 1 & \text{if } i \text{ is odd} \\
+p_{\text{right}} = d_i, \quad \text{right} \leftarrow \text{right} - 1 & \text{if } i \text{ is even}
+\end{cases}
+$$
 
 Under this mapping:
 - **Position 1 (Prompt Start)** receives $d_1$ (Rank 1).
@@ -245,7 +255,7 @@ output_order = reorder_lost_in_the_middle(input_docs)
 ```
 
 #### 7. Failure Modes & Trade-offs
-- **Zero Cost, Zero Latency**: Edge-packing is a pure $O(K)$ array re-indexing operation. It adds $0.00\text{ ms}$ of latency and $0\$$ in cost.
+- **Zero Cost, Zero Latency**: Edge-packing is a pure $O(K)$ array re-indexing operation. It adds $0.00\text{ ms}$ of latency and $\$0.00$ in cost.
 - **Limitation**: While it guarantees that the top 2 candidates escape the middle, if your query requires synthesizing 6 distinct documents equally, the middle documents will still suffer attention degradation. Reordering mitigates primacy/recency bias; it does not expand total attention capacity.
 
 #### 8. When to Use It

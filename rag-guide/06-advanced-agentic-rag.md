@@ -24,24 +24,24 @@ Think of a student taking an open-book exam.
 
 ```mermaid
 flowchart TD
-    QUERY["User Query x"] --> ADAPT{"Adaptive Retrieval Gate<br>Normalized p(Retrieve=Yes) exceeds delta?"}
+    QUERY["User Query x"] --> ADAPT{"Adaptive Retrieval Gate<br/>Normalized p(Retrieve=Yes) exceeds delta?"}
     
-    ADAPT -->|No| GEN_PARAM["Generate Segment Directly<br>from Parametric Memory"]
-    ADAPT -->|Yes| RETRIEVE["Retrieve Top-K Passages<br>(Processed in Parallel)"]
+    ADAPT -->|"No"| GEN_PARAM["Generate Segment Directly<br/>from Parametric Memory"]
+    ADAPT -->|"Yes"| RETRIEVE["Retrieve Top-K Passages<br/>(Processed in Parallel)"]
     
-    RETRIEVE --> PARALLEL["Parallel Candidate Segment Generation<br>(One candidate segment y_t per passage d)"]
+    RETRIEVE --> PARALLEL["Parallel Candidate Segment Generation<br/>(One candidate segment y_t per passage d)"]
     
-    PARALLEL --> CRITIQUE["Critique Candidate Segments via Reflection Tokens<br>s_ISREL, s_ISSUP, s_ISUSE"]
+    PARALLEL --> CRITIQUE["Critique Candidate Segments via Reflection Tokens<br/>s_ISREL, s_ISSUP, s_ISUSE"]
     
-    CRITIQUE --> SCORE["Score Each Candidate Segment:<br>f(y_t, d) = log p(y_t) + w_rel * s_ISREL + w_sup * s_ISSUP + w_use * s_ISUSE"]
+    CRITIQUE --> SCORE["Score Each Candidate Segment:<br/>f(y_t, d) = log p(y_t) + w_rel * s_ISREL + w_sup * s_ISSUP + w_use * s_ISUSE"]
     
-    SCORE --> BEAM["Segment-Level Beam Search<br>(Retain Top-B Candidate Beams)"]
+    SCORE --> BEAM["Segment-Level Beam Search<br/>(Retain Top-B Candidate Beams)"]
     
     BEAM --> NEXT{"All Segments Completed?"}
     GEN_PARAM --> NEXT
     
-    NEXT -->|No| ADAPT
-    NEXT -->|Yes| FINAL["Emit Final Synthesized Response"]
+    NEXT -->|"No"| ADAPT
+    NEXT -->|"Yes"| FINAL["Emit Final Synthesized Response"]
 ```
 
 #### 3. Mechanics: Training Pipeline & Reflection Tokens
@@ -54,7 +54,7 @@ The four reflection tokens operate as follows:
 1. **`[Retrieve]`**: Decides adaptively at segment boundaries whether external retrieval is required.
    - Output domain: `{[Retrieve]=Yes, [Retrieve]=No, [Retrieve]=Continue}`.
    - Retrieval triggers if the normalized probability exceeds an inference threshold $\delta$:
-     $$\frac{p(\text{[Retrieve]}=\text{Yes})}{\sum_{v \in \{\text{Yes}, \text{No}, \text{Continue}\}} p(\text{[Retrieve]}=v)} > \delta$$
+     $$\frac{p(\text{[Retrieve]}=\text{Yes})}{\sum_{v \in \lbrace \text{Yes}, \text{No}, \text{Continue} \rbrace} p(\text{[Retrieve]}=v)} \gt \delta$$
 2. **`[IsRel]` (Is Relevant)**: Evaluates whether retrieved passage $d$ is relevant to instruction/query $x$.
    - Output domain: `{[IsRel]=Relevant, [IsRel]=Irrelevant}`.
 3. **`[IsSup]` (Is Supported)**: Evaluates whether candidate generated segment $y_t$ is factually supported by passage $d$.
@@ -66,16 +66,18 @@ The four reflection tokens operate as follows:
 When retrieval is triggered, $K$ candidate passages are retrieved and processed in parallel. For each passage $d$, the generator produces a candidate text segment $y_t$.
 Candidate segments across all $K$ passages are evaluated and ranked using the paper's segment scoring function:
 
-$$f(y_t, d) = \log p(y_t \mid x, d, y_{\lt t}) + \sum_{G \in \lbrace \text{IsRel}, \text{IsSup}, \text{IsUse} \rbrace} w_G \cdot s_G$$
+$$
+f(y_t, d) = \log p(y_t \mid x, d, y_{\lt t}) + \sum_{G \in \lbrace \text{IsRel}, \text{IsSup}, \text{IsUse} \rbrace} w_G \cdot s_G
+$$
 
 Where:
 - $\log p(y_t \mid x, d, y_{\lt t}) = \frac{1}{|y_t|} \sum_{i=1}^{|y_t|} \log p(w_i \mid x, d, y_{\lt t}, w_{\lt i})$ is the sequence-length-normalized token log-likelihood.
 - $s_{\text{ISREL}}$ is the normalized probability of passage relevance:
-  $$s_{\text{ISREL}} = \frac{p(\text{[IsRel]}=\text{Relevant})}{\sum_{v \in \{\text{Relevant}, \text{Irrelevant}\}} p(\text{[IsRel]}=v)}$$
+  $$s_{\text{ISREL}} = \frac{p(\text{[IsRel]}=\text{Relevant})}{\sum_{v \in \lbrace \text{Relevant}, \text{Irrelevant} \rbrace} p(\text{[IsRel]}=v)}$$
 - $s_{\text{ISSUP}}$ rewards fully supported segments and grants partial credit to partially supported ones:
-  $$s_{\text{ISSUP}} = \frac{p(\text{[IsSup]}=\text{FullySupported}) + 0.5 \cdot p(\text{[IsSup]}=\text{PartiallySupported})}{\sum_{v \in \{\text{FullySupported}, \text{PartiallySupported}, \text{NoSupport}\}} p(\text{[IsSup]}=v)}$$
+  $$s_{\text{ISSUP}} = \frac{p(\text{[IsSup]}=\text{FullySupported}) + 0.5 \cdot p(\text{[IsSup]}=\text{PartiallySupported})}{\sum_{v \in \lbrace \text{FullySupported}, \text{PartiallySupported}, \text{NoSupport} \rbrace} p(\text{[IsSup]}=v)}$$
 - $s_{\text{ISUSE}}$ is the expected utility score computed via a weighted sum over ratings 1–5:
-  $$s_{\text{ISUSE}} = \sum_{r=1}^5 w_r \cdot p(\text{[IsUse]}=r) \quad \text{with } w_r \in \{-1.0, -0.5, 0.0, 0.5, 1.0\}$$
+  $$s_{\text{ISUSE}} = \sum_{r=1}^5 w_r \cdot p(\text{[IsUse]}=r) \quad \text{with } w_r \in \lbrace -1.0, -0.5, 0.0, 0.5, 1.0 \rbrace$$
 - $w_{\text{rel}}, w_{\text{sup}}, w_{\text{use}}$ are tunable inference-time weights. Segment-level beam search maintains the top $B$ segment candidates across passages, pruning unsupported or irrelevant paths naturally during decoding.
 
 #### 5. Worked Example (Trace on an Illustrative Technical Query)
@@ -156,16 +158,16 @@ Think of a student who goes to their personal bookshelf to find a book on quantu
 
 ```mermaid
 flowchart TD
-    QUERY["User Query Q"] --> RETRIEVE["Internal Vector Retrieval<br>(Top-K Chunks)"]
-    RETRIEVE --> EVAL["Lightweight Evaluator (T5-Large)<br>Calculates Confidence Scores gamma_i"]
+    QUERY["User Query Q"] --> RETRIEVE["Internal Vector Retrieval<br/>(Top-K Chunks)"]
+    RETRIEVE --> EVAL["Lightweight Evaluator (T5-Large)<br/>Calculates Confidence Scores gamma_i"]
     
-    EVAL --> THRESHOLD{"Confidence Evaluation<br>Gamma = max gamma_i"}
+    EVAL --> THRESHOLD{"Confidence Evaluation<br/>Gamma = max gamma_i"}
     
-    THRESHOLD -->|"High Confidence: gamma >= 0.80 (CORRECT)"| PASS["Correct Path:<br>Apply Decompose-then-Recompose<br>(Extract Internal Knowledge Strips)"]
+    THRESHOLD -->|"High Confidence: gamma ≥ 0.80 (CORRECT)"| PASS["Correct Path:<br/>Apply Decompose-then-Recompose<br/>(Extract Internal Knowledge Strips)"]
     
-    THRESHOLD -->|"Ambiguous Confidence: 0.40 to 0.80 (AMBIGUOUS)"| HYBRID["Ambiguous Path:<br>Extract Internal Knowledge Strips +<br>Trigger Query Rewrite & Web Fallback"]
+    THRESHOLD -->|"Ambiguous Confidence: 0.40 to 0.80 (AMBIGUOUS)"| HYBRID["Ambiguous Path:<br/>Extract Internal Knowledge Strips +<br/>Trigger Query Rewrite & Web Fallback"]
     
-    THRESHOLD -->|"Low Confidence: gamma <= 0.40 (INCORRECT)"| REWRITE["Incorrect Path:<br>Discard Internal Documents!<br>Trigger Query Rewrite & Web Fallback"]
+    THRESHOLD -->|"Low Confidence: gamma ≤ 0.40 (INCORRECT)"| REWRITE["Incorrect Path:<br/>Discard Internal Documents!<br/>Trigger Query Rewrite & Web Fallback"]
     
     PASS --> GENERATOR["Downstream Synthesis LLM"]
     HYBRID --> GENERATOR
@@ -188,15 +190,20 @@ flowchart TD
 #### 4. Math: Confidence Scoring & The Fallback Trigger
 Let retrieved candidate passages be $\mathcal{D} = \{d_1, d_2, \dots, d_K\}$.
 The fine-tuned evaluator computes relevance confidence scores:
-$$\gamma_i = P(\text{Relevant} \mid Q, d_i), \quad i \in \{1, \dots, K\}$$
+
+$$
+\gamma_i = P(\text{Relevant} \mid Q, d_i), \quad i \in \lbrace 1, \dots, K \rbrace
+$$
 
 With overall confidence $\Gamma = \max_i \gamma_i$, system routing $\mathcal{A}_{\text{CRAG}}$ is governed by:
 
-$$\mathcal{A}_{\text{CRAG}} = \begin{cases}
+$$
+\mathcal{A}_{\text{CRAG}} = \begin{cases}
 \text{Internal Direct (Decompose-then-Recompose)} & \text{if } \Gamma \ge \tau_{\text{upper}} \\
-\text{Hybrid (Internal Strips + Web Fallback)} & \text{if } \tau_{\text{lower}} < \Gamma < \tau_{\text{upper}} \\
+\text{Hybrid (Internal Strips + Web Fallback)} & \text{if } \tau_{\text{lower}} \lt \Gamma \lt \tau_{\text{upper}} \\
 \text{Web Fallback (Discard Internal + Rewrite Query)} & \text{if } \Gamma \le \tau_{\text{lower}}
-\end{cases}$$
+\end{cases}
+$$
 
 Where $\tau_{\text{upper}} = 0.80$ and $\tau_{\text{lower}} = 0.40$ (illustrative).
 
@@ -295,17 +302,17 @@ Imagine exploring a country:
 
 ```mermaid
 flowchart TD
-    RAW_CORPUS["Raw Documents<br>(D1, D2, D3, D5, D6)"] --> EXTRACT["LLM Entity & Relationship<br>Extraction"]
+    RAW_CORPUS["Raw Documents<br/>(D1, D2, D3, D5, D6)"] --> EXTRACT["LLM Entity & Relationship<br/>Extraction"]
     
     subgraph GRAPH ["Knowledge Graph (Nodes & Directed Relationships)"]
-        N_WORKER["Node: OmniFlow Ingestion Worker"] ---|E1: 'hosts'| N_HNSW["Node: HNSW Graph"]
-        N_HNSW ---|E2: 'requires 61.44 GB'| N_VEC["Node: Raw Vectors (61.44 GB)"]
-        N_HNSW ---|E3: 'requires 5.12 GB'| N_EDGES["Node: Layer-0 Edges (5.12 GB)"]
-        N_VEC ---|E4: 'exceed with edges'| N_RAM["Node: 64 GB Worker RAM Ceiling"]
-        N_WORKER ---|E5: 'slows down and times out'| N_GW["Node: API Gateway Token Bucket"]
-        N_GW ---|E6: 'exhausts and returns'| N_429["Node: HTTP 429 Rate Limit"]
-        N_429 ---|E7: 'triggers client'| N_STORM["Node: Client Retry Storm"]
-        N_STORM ---|E8: 'compounds memory via'| N_PART["Node: Partial Partition Graphs"]
+        N_WORKER["Node: OmniFlow Ingestion Worker"] ---|"E1: hosts"| N_HNSW["Node: HNSW Graph"]
+        N_HNSW ---|"E2: requires 61.44 GB"| N_VEC["Node: Raw Vectors (61.44 GB)"]
+        N_HNSW ---|"E3: requires 5.12 GB"| N_EDGES["Node: Layer-0 Edges (5.12 GB)"]
+        N_VEC ---|"E4: exceed with edges"| N_RAM["Node: 64 GB Worker RAM Ceiling"]
+        N_WORKER ---|"E5: slows down and times out"| N_GW["Node: API Gateway Token Bucket"]
+        N_GW ---|"E6: exhausts and returns"| N_429["Node: HTTP 429 Rate Limit"]
+        N_429 ---|"E7: triggers client"| N_STORM["Node: Client Retry Storm"]
+        N_STORM ---|"E8: compounds memory via"| N_PART["Node: Partial Partition Graphs"]
     end
     
     EXTRACT --> GRAPH
@@ -321,7 +328,7 @@ flowchart TD
     end
     
     LEIDEN --> COMMUNITIES
-    COMMUNITIES --> MAP_REDUCE["Map-Reduce over Community Summaries<br>(Global Query Answering)"]
+    COMMUNITIES --> MAP_REDUCE["Map-Reduce over Community Summaries<br/>(Global Query Answering)"]
     MAP_REDUCE --> GLOBAL_ANS["Comprehensive Holistic System Synthesis"]
 ```
 
@@ -455,8 +462,8 @@ stateDiagram-v2
     CallExternalAPI --> UpdateState: API Response Received
     
     UpdateState --> EvaluateStoppingCriteria: Evaluate State
-    EvaluateStoppingCriteria --> PlanAction: Goal Incomplete & Iterations < Max
-    EvaluateStoppingCriteria --> TerminateFailure: Iterations >= Max / Infinite Loop Detected
+    EvaluateStoppingCriteria --> PlanAction: Goal Incomplete and Iterations below Max
+    EvaluateStoppingCriteria --> TerminateFailure: Iterations at or above Max / Infinite Loop Detected
     EvaluateStoppingCriteria --> TerminateSuccess: Goal Satisfied
     
     TerminateSuccess --> [*]
@@ -466,7 +473,7 @@ stateDiagram-v2
 #### 3. Mechanics: State Machines & Event-Driven Workflows
 1. **State Management**:
    In LangGraph, state is maintained across execution turns where nodes return partial updates merged into state (via reducers):
-   $$\mathcal{S} = \{\text{messages}, \, \text{retrieved-docs}, \, \text{scratchpad}, \, \text{iteration-count}, \, \text{status}\}$$
+   $$\mathcal{S} = \lbrace \text{messages}, \, \text{retrieved-docs}, \, \text{scratchpad}, \, \text{iteration-count}, \, \text{status} \rbrace$$
 2. **The Reasoner Node (LLM Controller)**:
    The LLM inspects current state $\mathcal{S}$ and emits a **Tool Call** $a_t \in \mathcal{A}$ or a **Final Answer**.
 3. **Tool Execution Node**:
